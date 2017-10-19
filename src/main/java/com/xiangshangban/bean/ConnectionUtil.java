@@ -9,12 +9,11 @@ import java.io.Serializable;
  */
 public class ConnectionUtil implements Serializable {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = 1164785479321213848L;
-    CachingConnectionFactory connectionFactory;
-    String key;
+
+    private CachingConnectionFactory connectionFactory;
+    private String key;
+
     public CachingConnectionFactory getConnectionFactory() {
         return connectionFactory;
     }
@@ -27,6 +26,5 @@ public class ConnectionUtil implements Serializable {
     public void setKey(String key) {
         this.key = key;
     }
-
 
 }

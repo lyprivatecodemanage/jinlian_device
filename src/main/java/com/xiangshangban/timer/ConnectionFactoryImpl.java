@@ -16,10 +16,11 @@ public class ConnectionFactoryImpl implements ConnectionFactoryService {
 //    private static final Log LOG = LogFactory.getLog(ConnectionFactoryImpl.class);
     private static Map<String,CachingConnectionFactory> connection;//空闲的连接
     private static Map<String,CachingConnectionFactory> useConn; //使用中的连接
-    private static String host = "106.14.209.97";
-    private static String username = "admin";
-    private static String password = "CQ-123456";
+    private static String host = "localhost";
+    private static String username = "test";
+    private static String password = "123";
     private static int port = 5672;
+    private static String virtualHost= "/";
 
     public ConnectionFactoryImpl(){
         System.out.println("创建MQ连接");
@@ -33,6 +34,7 @@ public class ConnectionFactoryImpl implements ConnectionFactoryService {
             connectionFactory.setPort(port);
             connectionFactory.setUsername(username);
             connectionFactory.setPassword(password);
+            connectionFactory.setVirtualHost(virtualHost);
             connectionFactory.setRequestedHeartBeat(180);
             connectionFactory.setCloseTimeout(10);
             connection.put(FormatUtil.createUuid(), connectionFactory);

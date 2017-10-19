@@ -9,12 +9,10 @@ import java.io.Serializable;
  */
 public class RabbitTemplateUtil implements Serializable {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = 6980390931309342574L;
-    RabbitTemplate template ;
-    String key;
+    private RabbitTemplate template ;
+    private String key;
+
     public RabbitTemplate getTemplate() {
         return template;
     }
