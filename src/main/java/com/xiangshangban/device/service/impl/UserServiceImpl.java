@@ -1,8 +1,8 @@
-package com.xiangshangban.service.impl;
+package com.xiangshangban.device.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.xiangshangban.bean.Command;
-import com.xiangshangban.service.IUserService;
+import com.xiangshangban.device.bean.Command;
+import com.xiangshangban.device.service.IUserService;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -23,7 +23,7 @@ import java.util.List;
  */
 
 @Service
-public class UserServiceImpl implements IUserService{
+public class UserServiceImpl implements IUserService {
 
     //人员模块命令生成器
     @Override

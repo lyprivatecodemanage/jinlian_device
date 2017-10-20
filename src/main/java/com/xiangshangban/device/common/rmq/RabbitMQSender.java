@@ -1,10 +1,10 @@
-package com.xiangshangban.common.rmq;
+package com.xiangshangban.device.common.rmq;
 
 import com.alibaba.fastjson.JSON;
-import com.xiangshangban.bean.Connection;
-import com.xiangshangban.common.encode.DESEncode;
-import com.xiangshangban.common.utils.RabbitTemplateUtil;
-import com.xiangshangban.service.impl.ConnectionFactoryServiceImpl;
+import com.xiangshangban.device.bean.Connection;
+import com.xiangshangban.device.common.encode.DESEncode;
+import com.xiangshangban.device.common.utils.RabbitTemplateUtil;
+import com.xiangshangban.device.service.impl.ConnectionFactoryServiceImpl;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 

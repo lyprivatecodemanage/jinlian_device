@@ -1,4 +1,4 @@
-package com.xiangshangban.service;
+package com.xiangshangban.device.service;
 
 /**
  * Created by liuguanglong on 2017/10/18.

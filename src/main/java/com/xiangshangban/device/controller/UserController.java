@@ -1,7 +1,6 @@
-package com.xiangshangban.controller;
+package com.xiangshangban.device.controller;
 
-import com.xiangshangban.service.IUserService;
-import com.xiangshangban.service.impl.UserServiceImpl;
+import com.xiangshangban.device.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;

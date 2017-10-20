@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xiangshangban.device.dao.EmployeeMapper" >
+  <resultMap id="BaseResultMap" type="com.xiangshangban.device.bean.Employee" >
+    <id column="employee_id" property="employeeId" jdbcType="VARCHAR" />
+    <result column="employee_number" property="employeeNumber" jdbcType="VARCHAR" />
+    <result column="employee_name" property="employeeName" jdbcType="VARCHAR" />
+    <result column="employee_department_id" property="employeeDepartmentId" jdbcType="VARCHAR" />
+    <result column="employee_department_name" property="employeeDepartmentName" jdbcType="VARCHAR" />
+    <result column="employee_birthday" property="employeeBirthday" jdbcType="VARCHAR" />
+    <result column="employee_entry_time" property="employeeEntryTime" jdbcType="VARCHAR" />
+    <result column="employee_probationary_expired" property="employeeProbationaryExpired" jdbcType="VARCHAR" />
+    <result column="employee_contract_expired" property="employeeContractExpired" jdbcType="VARCHAR" />
+    <result column="admin_flag" property="adminFlag" jdbcType="VARCHAR" />
+    <result column="employee_img" property="employeeImg" jdbcType="VARCHAR" />
+    <result column="employee_photo" property="employeePhoto" jdbcType="VARCHAR" />
+    <result column="employee_finger1" property="employeeFinger1" jdbcType="VARCHAR" />
+    <result column="employee_finger2" property="employeeFinger2" jdbcType="VARCHAR" />
+    <result column="employee_face" property="employeeFace" jdbcType="VARCHAR" />
+    <result column="employee_phone" property="employeePhone" jdbcType="VARCHAR" />
+    <result column="employee_nfc" property="employeeNfc" jdbcType="VARCHAR" />
+    <result column="employee_status" property="employeeStatus" jdbcType="VARCHAR" />
+    <result column="transaction_state" property="transactionState" jdbcType="VARCHAR" />
+    <result column="update_time" property="updateTime" jdbcType="VARCHAR" />
+    <result column="employee_company_id" property="employeeCompanyId" jdbcType="VARCHAR" />
+    <result column="employee_company_name" property="employeeCompanyName" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    employee_id, employee_number, employee_name, employee_department_id, employee_department_name, 
+    employee_birthday, employee_entry_time, employee_probationary_expired, employee_contract_expired, 
+    admin_flag, employee_img, employee_photo, employee_finger1, employee_finger2, employee_face, 
+    employee_phone, employee_nfc, employee_status, transaction_state, update_time, employee_company_id, 
+    employee_company_name
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from employee_
+    where employee_id = #{employeeId,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from employee_
+    where employee_id = #{employeeId,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.xiangshangban.device.bean.Employee" >
+    insert into employee_ (employee_id, employee_number, employee_name, 
+      employee_department_id, employee_department_name, 
+      employee_birthday, employee_entry_time, employee_probationary_expired, 
+      employee_contract_expired, admin_flag, employee_img, 
+      employee_photo, employee_finger1, employee_finger2, 
+      employee_face, employee_phone, employee_nfc, 
+      employee_status, transaction_state, update_time, 
+      employee_company_id, employee_company_name)
+    values (#{employeeId,jdbcType=VARCHAR}, #{employeeNumber,jdbcType=VARCHAR}, #{employeeName,jdbcType=VARCHAR}, 
+      #{employeeDepartmentId,jdbcType=VARCHAR}, #{employeeDepartmentName,jdbcType=VARCHAR}, 
+      #{employeeBirthday,jdbcType=VARCHAR}, #{employeeEntryTime,jdbcType=VARCHAR}, #{employeeProbationaryExpired,jdbcType=VARCHAR}, 
+      #{employeeContractExpired,jdbcType=VARCHAR}, #{adminFlag,jdbcType=VARCHAR}, #{employeeImg,jdbcType=VARCHAR}, 
+      #{employeePhoto,jdbcType=VARCHAR}, #{employeeFinger1,jdbcType=VARCHAR}, #{employeeFinger2,jdbcType=VARCHAR}, 
+      #{employeeFace,jdbcType=VARCHAR}, #{employeePhone,jdbcType=VARCHAR}, #{employeeNfc,jdbcType=VARCHAR}, 
+      #{employeeStatus,jdbcType=VARCHAR}, #{transactionState,jdbcType=VARCHAR}, #{updateTime,jdbcType=VARCHAR}, 
+      #{employeeCompanyId,jdbcType=VARCHAR}, #{employeeCompanyName,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.xiangshangban.device.bean.Employee" >
+    insert into employee_
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="employeeId != null" >
+        employee_id,
+      </if>
+      <if test="employeeNumber != null" >
+        employee_number,
+      </if>
+      <if test="employeeName != null" >
+        employee_name,
+      </if>
+      <if test="employeeDepartmentId != null" >
+        employee_department_id,
+      </if>
+      <if test="employeeDepartmentName != null" >
+        employee_department_name,
+      </if>
+      <if test="employeeBirthday != null" >
+        employee_birthday,
+      </if>
+      <if test="employeeEntryTime != null" >
+        employee_entry_time,
+      </if>
+      <if test="employeeProbationaryExpired != null" >
+        employee_probationary_expired,
+      </if>
+      <if test="employeeContractExpired != null" >
+        employee_contract_expired,
+      </if>
+      <if test="adminFlag != null" >
+        admin_flag,
+      </if>
+      <if test="employeeImg != null" >
+        employee_img,
+      </if>
+      <if test="employeePhoto != null" >
+        employee_photo,
+      </if>
+      <if test="employeeFinger1 != null" >
+        employee_finger1,
+      </if>
+      <if test="employeeFinger2 != null" >
+        employee_finger2,
+      </if>
+      <if test="employeeFace != null" >
+        employee_face,
+      </if>
+      <if test="employeePhone != null" >
+        employee_phone,
+      </if>
+      <if test="employeeNfc != null" >
+        employee_nfc,
+      </if>
+      <if test="employeeStatus != null" >
+        employee_status,
+      </if>
+      <if test="transactionState != null" >
+        transaction_state,
+      </if>
+      <if test="updateTime != null" >
+        update_time,
+      </if>
+      <if test="employeeCompanyId != null" >
+        employee_company_id,
+      </if>
+      <if test="employeeCompanyName != null" >
+        employee_company_name,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="employeeId != null" >
+        #{employeeId,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeNumber != null" >
+        #{employeeNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeName != null" >
+        #{employeeName,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeDepartmentId != null" >
+        #{employeeDepartmentId,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeDepartmentName != null" >
+        #{employeeDepartmentName,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeBirthday != null" >
+        #{employeeBirthday,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeEntryTime != null" >
+        #{employeeEntryTime,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeProbationaryExpired != null" >
+        #{employeeProbationaryExpired,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeContractExpired != null" >
+        #{employeeContractExpired,jdbcType=VARCHAR},
+      </if>
+      <if test="adminFlag != null" >
+        #{adminFlag,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeImg != null" >
+        #{employeeImg,jdbcType=VARCHAR},
+      </if>
+      <if test="employeePhoto != null" >
+        #{employeePhoto,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeFinger1 != null" >
+        #{employeeFinger1,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeFinger2 != null" >
+        #{employeeFinger2,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeFace != null" >
+        #{employeeFace,jdbcType=VARCHAR},
+      </if>
+      <if test="employeePhone != null" >
+        #{employeePhone,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeNfc != null" >
+        #{employeeNfc,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeStatus != null" >
+        #{employeeStatus,jdbcType=VARCHAR},
+      </if>
+      <if test="transactionState != null" >
+        #{transactionState,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeCompanyId != null" >
+        #{employeeCompanyId,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeCompanyName != null" >
+        #{employeeCompanyName,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.xiangshangban.device.bean.Employee" >
+    update employee_
+    <set >
+      <if test="employeeNumber != null" >
+        employee_number = #{employeeNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeName != null" >
+        employee_name = #{employeeName,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeDepartmentId != null" >
+        employee_department_id = #{employeeDepartmentId,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeDepartmentName != null" >
+        employee_department_name = #{employeeDepartmentName,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeBirthday != null" >
+        employee_birthday = #{employeeBirthday,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeEntryTime != null" >
+        employee_entry_time = #{employeeEntryTime,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeProbationaryExpired != null" >
+        employee_probationary_expired = #{employeeProbationaryExpired,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeContractExpired != null" >
+        employee_contract_expired = #{employeeContractExpired,jdbcType=VARCHAR},
+      </if>
+      <if test="adminFlag != null" >
+        admin_flag = #{adminFlag,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeImg != null" >
+        employee_img = #{employeeImg,jdbcType=VARCHAR},
+      </if>
+      <if test="employeePhoto != null" >
+        employee_photo = #{employeePhoto,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeFinger1 != null" >
+        employee_finger1 = #{employeeFinger1,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeFinger2 != null" >
+        employee_finger2 = #{employeeFinger2,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeFace != null" >
+        employee_face = #{employeeFace,jdbcType=VARCHAR},
+      </if>
+      <if test="employeePhone != null" >
+        employee_phone = #{employeePhone,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeNfc != null" >
+        employee_nfc = #{employeeNfc,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeStatus != null" >
+        employee_status = #{employeeStatus,jdbcType=VARCHAR},
+      </if>
+      <if test="transactionState != null" >
+        transaction_state = #{transactionState,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null" >
+        update_time = #{updateTime,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeCompanyId != null" >
+        employee_company_id = #{employeeCompanyId,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeCompanyName != null" >
+        employee_company_name = #{employeeCompanyName,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where employee_id = #{employeeId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.xiangshangban.device.bean.Employee" >
+    update employee_
+    set employee_number = #{employeeNumber,jdbcType=VARCHAR},
+      employee_name = #{employeeName,jdbcType=VARCHAR},
+      employee_department_id = #{employeeDepartmentId,jdbcType=VARCHAR},
+      employee_department_name = #{employeeDepartmentName,jdbcType=VARCHAR},
+      employee_birthday = #{employeeBirthday,jdbcType=VARCHAR},
+      employee_entry_time = #{employeeEntryTime,jdbcType=VARCHAR},
+      employee_probationary_expired = #{employeeProbationaryExpired,jdbcType=VARCHAR},
+      employee_contract_expired = #{employeeContractExpired,jdbcType=VARCHAR},
+      admin_flag = #{adminFlag,jdbcType=VARCHAR},
+      employee_img = #{employeeImg,jdbcType=VARCHAR},
+      employee_photo = #{employeePhoto,jdbcType=VARCHAR},
+      employee_finger1 = #{employeeFinger1,jdbcType=VARCHAR},
+      employee_finger2 = #{employeeFinger2,jdbcType=VARCHAR},
+      employee_face = #{employeeFace,jdbcType=VARCHAR},
+      employee_phone = #{employeePhone,jdbcType=VARCHAR},
+      employee_nfc = #{employeeNfc,jdbcType=VARCHAR},
+      employee_status = #{employeeStatus,jdbcType=VARCHAR},
+      transaction_state = #{transactionState,jdbcType=VARCHAR},
+      update_time = #{updateTime,jdbcType=VARCHAR},
+      employee_company_id = #{employeeCompanyId,jdbcType=VARCHAR},
+      employee_company_name = #{employeeCompanyName,jdbcType=VARCHAR}
+    where employee_id = #{employeeId,jdbcType=VARCHAR}
+  </update>
+</mapper>

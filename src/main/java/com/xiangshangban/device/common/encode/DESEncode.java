@@ -1,4 +1,4 @@
-package com.xiangshangban.common.encode;
+package com.xiangshangban.device.common.encode;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKeyFactory;

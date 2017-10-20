@@ -1,8 +1,8 @@
-package com.xiangshangban.service.impl;
+package com.xiangshangban.device.service.impl;
 
-import com.xiangshangban.bean.Connection;
-import com.xiangshangban.common.utils.FormatUtil;
-import com.xiangshangban.service.IConnectionFactoryService;
+import com.xiangshangban.device.bean.Connection;
+import com.xiangshangban.device.common.utils.FormatUtil;
+import com.xiangshangban.device.service.IConnectionFactoryService;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 
 import java.util.HashMap;

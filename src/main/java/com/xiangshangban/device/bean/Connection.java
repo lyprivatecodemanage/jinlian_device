@@ -1,4 +1,4 @@
-package com.xiangshangban.bean;
+package com.xiangshangban.device.bean;
 
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 

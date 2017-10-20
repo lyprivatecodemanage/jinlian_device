@@ -1,4 +1,4 @@
-package com.xiangshangban.common.utils;
+package com.xiangshangban.device.common.utils;
 
 import com.alibaba.fastjson.JSON;
 

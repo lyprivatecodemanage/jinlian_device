@@ -1,7 +1,7 @@
-package com.xiangshangban.common.rmq;
+package com.xiangshangban.device.common.rmq;
 
 import com.rabbitmq.client.*;
-import com.xiangshangban.bean.MQMessage;
+import com.xiangshangban.device.bean.MQMessage;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;

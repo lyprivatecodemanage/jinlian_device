@@ -1,4 +1,4 @@
-package com.xiangshangban.bean;
+package com.xiangshangban.device.bean;
 
 /**
  * Created by liuguanglong on 2017/10/19.

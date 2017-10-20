@@ -1,4 +1,4 @@
-package com.xiangshangban.common.utils;
+package com.xiangshangban.device.common.utils;
 
 import java.beans.BeanInfo;
 import java.beans.Introspector;

@@ -1,4 +1,4 @@
-package com.xiangshangban.dao;
+package com.xiangshangban.device.dao;
 
 import org.apache.ibatis.annotations.Mapper;
 
