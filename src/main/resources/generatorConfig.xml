@@ -25,7 +25,7 @@
             targetProject="C:\Users\loogooloo\IdeaProjects\device\src\main\java"
             type="XMLMAPPER" />
         <!-- 要生成哪些表-->  
-        <table tableName="employee_" domainObjectName="Employee" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false"></table>
+        <table tableName="door_" domainObjectName="Door" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false"></table>
        
         <!-- <table schema="zpeng" tableName="stu" domainObjectName="Student"
             enableSelectByPrimaryKey="true" enableUpdateByPrimaryKey="true"

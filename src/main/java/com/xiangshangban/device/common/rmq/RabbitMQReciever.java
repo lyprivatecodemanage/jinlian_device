@@ -34,6 +34,7 @@ public class RabbitMQReciever {
     }
 
     //接收测试
+    //接收可自动创建交换器、队列并绑定，发生不能
     public static void main(String [] s) throws InterruptedException, IOException, TimeoutException {
 
         //交换器名称
@@ -72,9 +73,9 @@ public class RabbitMQReciever {
 
         //绑定路由关键字
         channel.queueBind(QUEUE_NAME, EXCHANGE_NAME, routingKey);
-        System.out.println(" [*] Bind exchange ["+EXCHANGE_NAME+"] with queue ["+QUEUE_NAME+"] and routingKey [" + routingKey + "]");
+        System.out.println(" [*] 绑定 交换器 ["+EXCHANGE_NAME+"] 到 ["+QUEUE_NAME+"] 队列通过 routingKey [" + routingKey + "]");
 
-        System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
+        System.out.println(" [*] 消息监听中... To exit press CTRL+C");
 
         Consumer consumer = new DefaultConsumer(channel) {
             @Override

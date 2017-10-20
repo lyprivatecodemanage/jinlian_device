@@ -21,13 +21,6 @@ public class UserController {
     @Autowired
     private IUserService iUserService;
 
-    @ResponseBody
-    @RequestMapping(value = "/abc", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
-    public void test(String action, List<String> userIdCollection){
-
-        iUserService.userCommandGenerate(action, userIdCollection);
-    }
-
     /**
      * 人员操作命令生成器
      * @param action
@@ -39,6 +32,16 @@ public class UserController {
     public void userCommandGenerate(String action, List<String> userIdCollection){
 
         iUserService.userCommandGenerate(action, userIdCollection);
+    }
+
+    /**
+     * 测试接口
+     */
+    @ResponseBody
+    @RequestMapping(value = "/abc", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    public void test(){
+
+        System.out.println("[*] 测试接口");
     }
 
 }

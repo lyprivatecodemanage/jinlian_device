@@ -1,7 +1,9 @@
 package com.xiangshangban.device.dao;
 
 import com.xiangshangban.device.bean.Employee;
+import org.apache.ibatis.annotations.Mapper;
 
+@Mapper
 public interface EmployeeMapper {
     int deleteByPrimaryKey(String employeeId);
 
