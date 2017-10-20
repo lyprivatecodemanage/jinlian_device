@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xiangshangban.device.dao.DoorEmployeeMapper" >
+  <resultMap id="BaseResultMap" type="com.xiangshangban.device.bean.DoorEmployee" >
+    <id column="employee_id" property="employeeId" jdbcType="VARCHAR" />
+    <result column="employee_name" property="employeeName" jdbcType="VARCHAR" />
+    <result column="door_id" property="doorId" jdbcType="VARCHAR" />
+    <result column="door_name" property="doorName" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    employee_id, employee_name, door_id, door_name
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from door_employee
+    where employee_id = #{employeeId,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from door_employee
+    where employee_id = #{employeeId,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.xiangshangban.device.bean.DoorEmployee" >
+    insert into door_employee (employee_id, employee_name, door_id, 
+      door_name)
+    values (#{employeeId,jdbcType=VARCHAR}, #{employeeName,jdbcType=VARCHAR}, #{doorId,jdbcType=VARCHAR}, 
+      #{doorName,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.xiangshangban.device.bean.DoorEmployee" >
+    insert into door_employee
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="employeeId != null" >
+        employee_id,
+      </if>
+      <if test="employeeName != null" >
+        employee_name,
+      </if>
+      <if test="doorId != null" >
+        door_id,
+      </if>
+      <if test="doorName != null" >
+        door_name,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="employeeId != null" >
+        #{employeeId,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeName != null" >
+        #{employeeName,jdbcType=VARCHAR},
+      </if>
+      <if test="doorId != null" >
+        #{doorId,jdbcType=VARCHAR},
+      </if>
+      <if test="doorName != null" >
+        #{doorName,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.xiangshangban.device.bean.DoorEmployee" >
+    update door_employee
+    <set >
+      <if test="employeeName != null" >
+        employee_name = #{employeeName,jdbcType=VARCHAR},
+      </if>
+      <if test="doorId != null" >
+        door_id = #{doorId,jdbcType=VARCHAR},
+      </if>
+      <if test="doorName != null" >
+        door_name = #{doorName,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where employee_id = #{employeeId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.xiangshangban.device.bean.DoorEmployee" >
+    update door_employee
+    set employee_name = #{employeeName,jdbcType=VARCHAR},
+      door_id = #{doorId,jdbcType=VARCHAR},
+      door_name = #{doorName,jdbcType=VARCHAR}
+    where employee_id = #{employeeId,jdbcType=VARCHAR}
+  </update>
+</mapper>

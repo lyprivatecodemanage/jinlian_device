@@ -41,7 +41,7 @@ public class UserServiceImpl implements IUserService {
                 System.out.println("[*] send: 已发出请求");
                 System.out.println(userInfo);
 
-                //获取人员和设备关联的信息
+                //获取人员和设备关联的信
 
 
                 command.setServerId("null");
