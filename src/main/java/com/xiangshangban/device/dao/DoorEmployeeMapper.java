@@ -1,9 +1,9 @@
 package com.xiangshangban.device.dao;
 
 import com.xiangshangban.device.bean.DoorEmployee;
-import org.apache.ibatis.annotations.Mapper;
+import org.springframework.stereotype.Component;
 
-@Mapper
+@Component
 public interface DoorEmployeeMapper {
     int deleteByPrimaryKey(String employeeId);
 

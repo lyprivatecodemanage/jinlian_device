@@ -1,4 +1,4 @@
-package com.xiangshangban.controller;
+package com.xiangshangban.device.controller;
 
 /**
  * 控制层：设备操作

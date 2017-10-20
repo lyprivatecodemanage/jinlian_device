@@ -1,7 +1,9 @@
 package com.xiangshangban.device.dao;
 
 import com.xiangshangban.device.bean.Door;
+import org.springframework.stereotype.Component;
 
+@Component
 public interface DoorMapper {
     int deleteByPrimaryKey(String doorId);
 

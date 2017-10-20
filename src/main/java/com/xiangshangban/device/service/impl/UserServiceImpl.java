@@ -2,6 +2,10 @@ package com.xiangshangban.device.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.xiangshangban.device.bean.Command;
+import com.xiangshangban.device.common.utils.CalendarUtil;
+import com.xiangshangban.device.common.utils.DateUtils;
+import com.xiangshangban.device.dao.DoorEmployeeMapper;
+import com.xiangshangban.device.dao.DoorMapper;
 import com.xiangshangban.device.service.IUserService;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.ClientProtocolException;
@@ -12,9 +16,11 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 
 /**d
@@ -25,27 +31,45 @@ import java.util.List;
 @Service
 public class UserServiceImpl implements IUserService {
 
+    @Autowired
+    private DoorEmployeeMapper doorEmployeeMapper;
+
+    @Autowired
+    private DoorMapper doorMapper;
+
     //人员模块命令生成器
     @Override
-    public void userCommandGenerate(String action, List<String> userIdCollection) {
+    public void userCommandGenerate(String action, List<String> employeeIdCollection) {
 
         if (action.equals("UPDATE_USER_INFO")){
 
-            for (String userId : userIdCollection) {
+            for (String employeeId : employeeIdCollection) {
 
                 //生成一条人员修改命令
                 Command command = new Command();
 
                 //根据人员id请求单个人员信息
-                String userInfo = UserServiceImpl.sendRequet("http://192.168.0.108:8072/EmployeeController/selectByEmployee", userId);
+                String userInfo = UserServiceImpl.sendRequet("http://192.168.0.108:8072/EmployeeController/selectByEmployee", employeeId);
                 System.out.println("[*] send: 已发出请求");
                 System.out.println(userInfo);
 
-                //获取人员和设备关联的信
-
+                //获取人员和设备关联的信息
+                String doorId = doorEmployeeMapper.selectByPrimaryKey(employeeId).getDoorId();
+                String deviceId = doorMapper.selectByPrimaryKey(doorId).getDeviceId();
 
                 command.setServerId("null");
-                command.setDeviceId("");
+                command.setDeviceId(deviceId);
+                command.setFileEdition("v1.3");
+                command.setCommandMode("C");
+                command.setCommandType("single");
+                command.setCommandTotal("1");
+                command.setCommandIndex("1");
+                command.setSendTime(CalendarUtil.getCurrentTime());
+                command.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(),3));
+                command.setSuperCmdId("49641B5A57474BE2B5E4BE126AC63C49");
+                command.setSubCmdId("49641B5A57474BE2B5E4BE126AC63C49");
+                command.setAction(action);
+                command.setActionCode("21");
 
             }
 
