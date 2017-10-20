@@ -1,17 +1,12 @@
 package com.xiangshangban.common.rmq;
 
 import com.alibaba.fastjson.JSON;
-import com.xiangshangban.bean.ConnectionUtil;
+import com.xiangshangban.bean.Connection;
 import com.xiangshangban.common.encode.DESEncode;
 import com.xiangshangban.common.utils.RabbitTemplateUtil;
-import com.xiangshangban.timer.ConnectionFactoryImpl;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.core.TopicExchange;
+import com.xiangshangban.service.impl.ConnectionFactoryServiceImpl;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-
-import static org.springframework.boot.Banner.Mode.LOG;
 
 /**
  * Created by liuguanglong on 2017/10/18.
@@ -22,7 +17,7 @@ public class RabbitMQSender {
 
     private static String SUCCESS = "success";
     private static String ERROR = "error";
-    private ConnectionFactoryImpl connectionFactoryImpl = new ConnectionFactoryImpl();
+    private ConnectionFactoryServiceImpl connectionFactoryImpl = new ConnectionFactoryServiceImpl();
 
     /**
      * 发送消息
@@ -46,7 +41,7 @@ public class RabbitMQSender {
             }
             template.convertAndSend(encry);
             template.convertAndSend(json);
-            ConnectionFactoryImpl.destoryConnection(templateutil.getKey());
+            ConnectionFactoryServiceImpl.destoryConnection(templateutil.getKey());
         }else{
             System.out.println("RABBITMQ'S ERROR: can not intalialize the template.");
             return RabbitMQSender.ERROR;
@@ -75,7 +70,7 @@ public class RabbitMQSender {
 
         String exchange = "download";
 
-        ConnectionUtil conn = connectionFactoryImpl.getConnectionFactory();
+        Connection conn = connectionFactoryImpl.getConnectionFactory();
         ConnectionFactory connectionFactory = conn.getConnectionFactory();
 
         if( null == connectionFactory) {

@@ -31,11 +31,23 @@ public class UserServiceImpl implements IUserService{
 
         if (action.equals("UPDATE_USER_INFO")){
 
-            Command command = new Command();
+            for (String userId : userIdCollection) {
 
-            command.setServerId("null");
-            command.setDeviceId("");
+                //生成一条人员修改命令
+                Command command = new Command();
 
+                //根据人员id请求单个人员信息
+                String userInfo = UserServiceImpl.sendRequet("http://192.168.0.108:8072/EmployeeController/selectByEmployee", userId);
+                System.out.println("[*] send: 已发出请求");
+                System.out.println(userInfo);
+
+                //获取人员和设备关联的信息
+
+
+                command.setServerId("null");
+                command.setDeviceId("");
+
+            }
 
         }else if (action.equals("DELETE_USER_INFO")){
 
@@ -43,7 +55,7 @@ public class UserServiceImpl implements IUserService{
     }
 
     /**
-     * 请求
+     * 项目间的http请求通信
      * @param sendurl
      * @param data
      * @return

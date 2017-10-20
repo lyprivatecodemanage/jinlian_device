@@ -1,7 +1,8 @@
-package com.xiangshangban.timer;
+package com.xiangshangban.service.impl;
 
-import com.xiangshangban.bean.ConnectionUtil;
+import com.xiangshangban.bean.Connection;
 import com.xiangshangban.common.utils.FormatUtil;
+import com.xiangshangban.service.IConnectionFactoryService;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 
 import java.util.HashMap;
@@ -11,9 +12,9 @@ import java.util.Map;
  * Created by liuguanglong on 2017/10/18.
  */
 
-public class ConnectionFactoryImpl implements ConnectionFactoryService {
+public class ConnectionFactoryServiceImpl implements IConnectionFactoryService {
 
-//    private static final Log LOG = LogFactory.getLog(ConnectionFactoryImpl.class);
+//    private static final Log LOG = LogFactory.getLog(ConnectionFactoryServiceImpl.class);
     private static Map<String,CachingConnectionFactory> connection;//空闲的连接
     private static Map<String,CachingConnectionFactory> useConn; //使用中的连接
     private static String host = "localhost";
@@ -22,7 +23,7 @@ public class ConnectionFactoryImpl implements ConnectionFactoryService {
     private static int port = 5672;
     private static String virtualHost= "/";
 
-    public ConnectionFactoryImpl(){
+    public ConnectionFactoryServiceImpl(){
         System.out.println("创建MQ连接");
         int i = 0;
         connection = new HashMap<String, CachingConnectionFactory>();
@@ -48,9 +49,9 @@ public class ConnectionFactoryImpl implements ConnectionFactoryService {
      * 获取链接工厂
      * @return
      */
-    public ConnectionUtil getConnectionFactory(){
+    public Connection getConnectionFactory(){
         CachingConnectionFactory connectionFactory = new CachingConnectionFactory() ;
-        ConnectionUtil conn = new ConnectionUtil();
+        Connection conn = new Connection();
         for (Map.Entry<String,CachingConnectionFactory> entry : connection.entrySet()) {
             conn.setConnectionFactory(entry.getValue());
             conn.setKey(entry.getKey());

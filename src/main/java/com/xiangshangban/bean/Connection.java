@@ -7,7 +7,7 @@ import java.io.Serializable;
 /**
  * Created by liuguanglong on 2017/10/18.
  */
-public class ConnectionUtil implements Serializable {
+public class Connection implements Serializable {
 
     private static final long serialVersionUID = 1164785479321213848L;
 
