@@ -36,6 +36,11 @@
 			<scope>test</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+
 
 		<!--新添加的maven依赖-->
 		<dependency>
@@ -67,6 +72,13 @@
 			<version>2.4</version>
 			<classifier>jdk15</classifier>
 		</dependency>
+
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>42.1.3</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
