@@ -1,7 +1,5 @@
 package com.xiangshangban.device.service;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-
 import java.util.List;
 
 /**

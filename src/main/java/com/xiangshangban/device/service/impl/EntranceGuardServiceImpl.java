@@ -1,6 +1,6 @@
-package com.xiangshangban.service.impl;
+package com.xiangshangban.device.service.impl;
 
-import com.xiangshangban.service.IEntranceGuardService;
+import com.xiangshangban.device.service.IEntranceGuardService;
 
 /**
  * author : Administrator

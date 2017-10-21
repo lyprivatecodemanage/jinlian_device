@@ -1,28 +1,41 @@
 package com.xiangshangban.device.bean;
 
-/**
- * Created by liuguanglong on 2017/10/19.
- */
-
-public class Command {
-
+public class DoorCmd {
     private String serverId;
+
     private String deviceId;
+
     private String fileEdition;
+
     private String commandMode;
+
     private String commandType;
+
     private String commandTotal;
+
     private String commandIndex;
+
     private String sendTime;
+
     private String outOfTime;
+
     private String md5Check;
+
     private String superCmdId;
+
     private String subCmdId;
+
     private String action;
+
     private String actionCode;
+
     private String resultCode;
+
     private String resultMessage;
+
     private String data;
+
+    private String status;
 
     public String getServerId() {
         return serverId;
@@ -160,26 +173,11 @@ public class Command {
         this.data = data;
     }
 
-    @Override
-    public String toString() {
-        return "Command{" +
-                "serverId='" + serverId + '\'' +
-                ", deviceId='" + deviceId + '\'' +
-                ", fileEdition='" + fileEdition + '\'' +
-                ", commandMode='" + commandMode + '\'' +
-                ", commandType='" + commandType + '\'' +
-                ", commandTotal='" + commandTotal + '\'' +
-                ", commandIndex='" + commandIndex + '\'' +
-                ", sendTime='" + sendTime + '\'' +
-                ", outOfTime='" + outOfTime + '\'' +
-                ", md5Check='" + md5Check + '\'' +
-                ", superCmdId='" + superCmdId + '\'' +
-                ", subCmdId='" + subCmdId + '\'' +
-                ", action='" + action + '\'' +
-                ", actionCode='" + actionCode + '\'' +
-                ", resultCode='" + resultCode + '\'' +
-                ", resultMessage='" + resultMessage + '\'' +
-                ", data='" + data + '\'' +
-                '}';
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

@@ -1,4 +1,4 @@
-package com.xiangshangban.service;
+package com.xiangshangban.device.service;
 
 /**
  * author : Administrator

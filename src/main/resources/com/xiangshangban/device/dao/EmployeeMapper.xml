@@ -5,8 +5,6 @@
     <id column="employee_id" property="employeeId" jdbcType="VARCHAR" />
     <result column="employee_number" property="employeeNumber" jdbcType="VARCHAR" />
     <result column="employee_name" property="employeeName" jdbcType="VARCHAR" />
-    <result column="employee_department_id" property="employeeDepartmentId" jdbcType="VARCHAR" />
-    <result column="employee_department_name" property="employeeDepartmentName" jdbcType="VARCHAR" />
     <result column="employee_birthday" property="employeeBirthday" jdbcType="VARCHAR" />
     <result column="employee_entry_time" property="employeeEntryTime" jdbcType="VARCHAR" />
     <result column="employee_probationary_expired" property="employeeProbationaryExpired" jdbcType="VARCHAR" />
@@ -24,13 +22,15 @@
     <result column="update_time" property="updateTime" jdbcType="VARCHAR" />
     <result column="employee_company_id" property="employeeCompanyId" jdbcType="VARCHAR" />
     <result column="employee_company_name" property="employeeCompanyName" jdbcType="VARCHAR" />
+    <result column="employee_department_id" property="employeeDepartmentId" jdbcType="VARCHAR" />
+    <result column="employee_department_name" property="employeeDepartmentName" jdbcType="VARCHAR" />
   </resultMap>
   <sql id="Base_Column_List" >
-    employee_id, employee_number, employee_name, employee_department_id, employee_department_name, 
-    employee_birthday, employee_entry_time, employee_probationary_expired, employee_contract_expired, 
-    admin_flag, employee_img, employee_photo, employee_finger1, employee_finger2, employee_face, 
-    employee_phone, employee_nfc, employee_status, transaction_state, update_time, employee_company_id, 
-    employee_company_name
+    employee_id, employee_number, employee_name, employee_birthday, employee_entry_time, 
+    employee_probationary_expired, employee_contract_expired, admin_flag, employee_img, 
+    employee_photo, employee_finger1, employee_finger2, employee_face, employee_phone, 
+    employee_nfc, employee_status, transaction_state, update_time, employee_company_id, 
+    employee_company_name, employee_department_id, employee_department_name
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
     select 
@@ -44,21 +44,23 @@
   </delete>
   <insert id="insert" parameterType="com.xiangshangban.device.bean.Employee" >
     insert into employee_ (employee_id, employee_number, employee_name, 
-      employee_department_id, employee_department_name, 
       employee_birthday, employee_entry_time, employee_probationary_expired, 
       employee_contract_expired, admin_flag, employee_img, 
       employee_photo, employee_finger1, employee_finger2, 
       employee_face, employee_phone, employee_nfc, 
       employee_status, transaction_state, update_time, 
-      employee_company_id, employee_company_name)
+      employee_company_id, employee_company_name, 
+      employee_department_id, employee_department_name
+      )
     values (#{employeeId,jdbcType=VARCHAR}, #{employeeNumber,jdbcType=VARCHAR}, #{employeeName,jdbcType=VARCHAR}, 
-      #{employeeDepartmentId,jdbcType=VARCHAR}, #{employeeDepartmentName,jdbcType=VARCHAR}, 
       #{employeeBirthday,jdbcType=VARCHAR}, #{employeeEntryTime,jdbcType=VARCHAR}, #{employeeProbationaryExpired,jdbcType=VARCHAR}, 
       #{employeeContractExpired,jdbcType=VARCHAR}, #{adminFlag,jdbcType=VARCHAR}, #{employeeImg,jdbcType=VARCHAR}, 
       #{employeePhoto,jdbcType=VARCHAR}, #{employeeFinger1,jdbcType=VARCHAR}, #{employeeFinger2,jdbcType=VARCHAR}, 
       #{employeeFace,jdbcType=VARCHAR}, #{employeePhone,jdbcType=VARCHAR}, #{employeeNfc,jdbcType=VARCHAR}, 
       #{employeeStatus,jdbcType=VARCHAR}, #{transactionState,jdbcType=VARCHAR}, #{updateTime,jdbcType=VARCHAR}, 
-      #{employeeCompanyId,jdbcType=VARCHAR}, #{employeeCompanyName,jdbcType=VARCHAR})
+      #{employeeCompanyId,jdbcType=VARCHAR}, #{employeeCompanyName,jdbcType=VARCHAR}, 
+      #{employeeDepartmentId,jdbcType=VARCHAR}, #{employeeDepartmentName,jdbcType=VARCHAR}
+      )
   </insert>
   <insert id="insertSelective" parameterType="com.xiangshangban.device.bean.Employee" >
     insert into employee_
@@ -71,12 +73,6 @@
       </if>
       <if test="employeeName != null" >
         employee_name,
-      </if>
-      <if test="employeeDepartmentId != null" >
-        employee_department_id,
-      </if>
-      <if test="employeeDepartmentName != null" >
-        employee_department_name,
       </if>
       <if test="employeeBirthday != null" >
         employee_birthday,
@@ -129,6 +125,12 @@
       <if test="employeeCompanyName != null" >
         employee_company_name,
       </if>
+      <if test="employeeDepartmentId != null" >
+        employee_department_id,
+      </if>
+      <if test="employeeDepartmentName != null" >
+        employee_department_name,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="employeeId != null" >
@@ -139,12 +141,6 @@
       </if>
       <if test="employeeName != null" >
         #{employeeName,jdbcType=VARCHAR},
-      </if>
-      <if test="employeeDepartmentId != null" >
-        #{employeeDepartmentId,jdbcType=VARCHAR},
-      </if>
-      <if test="employeeDepartmentName != null" >
-        #{employeeDepartmentName,jdbcType=VARCHAR},
       </if>
       <if test="employeeBirthday != null" >
         #{employeeBirthday,jdbcType=VARCHAR},
@@ -197,6 +193,12 @@
       <if test="employeeCompanyName != null" >
         #{employeeCompanyName,jdbcType=VARCHAR},
       </if>
+      <if test="employeeDepartmentId != null" >
+        #{employeeDepartmentId,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeDepartmentName != null" >
+        #{employeeDepartmentName,jdbcType=VARCHAR},
+      </if>
     </trim>
   </insert>
   <update id="updateByPrimaryKeySelective" parameterType="com.xiangshangban.device.bean.Employee" >
@@ -207,12 +209,6 @@
       </if>
       <if test="employeeName != null" >
         employee_name = #{employeeName,jdbcType=VARCHAR},
-      </if>
-      <if test="employeeDepartmentId != null" >
-        employee_department_id = #{employeeDepartmentId,jdbcType=VARCHAR},
-      </if>
-      <if test="employeeDepartmentName != null" >
-        employee_department_name = #{employeeDepartmentName,jdbcType=VARCHAR},
       </if>
       <if test="employeeBirthday != null" >
         employee_birthday = #{employeeBirthday,jdbcType=VARCHAR},
@@ -265,6 +261,12 @@
       <if test="employeeCompanyName != null" >
         employee_company_name = #{employeeCompanyName,jdbcType=VARCHAR},
       </if>
+      <if test="employeeDepartmentId != null" >
+        employee_department_id = #{employeeDepartmentId,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeDepartmentName != null" >
+        employee_department_name = #{employeeDepartmentName,jdbcType=VARCHAR},
+      </if>
     </set>
     where employee_id = #{employeeId,jdbcType=VARCHAR}
   </update>
@@ -272,8 +274,6 @@
     update employee_
     set employee_number = #{employeeNumber,jdbcType=VARCHAR},
       employee_name = #{employeeName,jdbcType=VARCHAR},
-      employee_department_id = #{employeeDepartmentId,jdbcType=VARCHAR},
-      employee_department_name = #{employeeDepartmentName,jdbcType=VARCHAR},
       employee_birthday = #{employeeBirthday,jdbcType=VARCHAR},
       employee_entry_time = #{employeeEntryTime,jdbcType=VARCHAR},
       employee_probationary_expired = #{employeeProbationaryExpired,jdbcType=VARCHAR},
@@ -290,7 +290,9 @@
       transaction_state = #{transactionState,jdbcType=VARCHAR},
       update_time = #{updateTime,jdbcType=VARCHAR},
       employee_company_id = #{employeeCompanyId,jdbcType=VARCHAR},
-      employee_company_name = #{employeeCompanyName,jdbcType=VARCHAR}
+      employee_company_name = #{employeeCompanyName,jdbcType=VARCHAR},
+      employee_department_id = #{employeeDepartmentId,jdbcType=VARCHAR},
+      employee_department_name = #{employeeDepartmentName,jdbcType=VARCHAR}
     where employee_id = #{employeeId,jdbcType=VARCHAR}
   </update>
 </mapper>

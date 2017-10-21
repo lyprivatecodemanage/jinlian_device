@@ -17,7 +17,7 @@
         <javaModelGenerator targetPackage="com.xiangshangban.device.bean"
             targetProject="C:\Users\loogooloo\IdeaProjects\device\src\main\java" />
         <!-- 生成映射文件的包名和位置--> 
-        <sqlMapGenerator targetPackage="com.xiangshangban.device.mapper"
+        <sqlMapGenerator targetPackage="com.xiangshangban.device.dao"
             targetProject="C:\Users\loogooloo\IdeaProjects\device\src\main\resources" />
         <!-- 生成DAO的包名和位置-->
         <javaClientGenerator
@@ -25,7 +25,7 @@
             targetProject="C:\Users\loogooloo\IdeaProjects\device\src\main\java"
             type="XMLMAPPER" />
         <!-- 要生成哪些表-->  
-        <table tableName="door_" domainObjectName="Door" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false"></table>
+        <table tableName="employee_" domainObjectName="Employee" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false"></table>
        
         <!-- <table schema="zpeng" tableName="stu" domainObjectName="Student"
             enableSelectByPrimaryKey="true" enableUpdateByPrimaryKey="true"

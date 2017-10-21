@@ -1,27 +1,20 @@
 package com.xiangshangban.device.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.xiangshangban.device.bean.Command;
+import com.xiangshangban.device.bean.DoorCmd;
+import com.xiangshangban.device.bean.Employee;
 import com.xiangshangban.device.common.utils.CalendarUtil;
 import com.xiangshangban.device.common.utils.DateUtils;
+import com.xiangshangban.device.common.utils.HttpRequestFactory;
+import com.xiangshangban.device.dao.DoorCmdMapper;
 import com.xiangshangban.device.dao.DoorEmployeeMapper;
 import com.xiangshangban.device.dao.DoorMapper;
 import com.xiangshangban.device.service.IUserService;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
+import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**d
  * date: 2017/10/19 10:38
@@ -37,6 +30,9 @@ public class UserServiceImpl implements IUserService {
     @Autowired
     private DoorMapper doorMapper;
 
+    @Autowired
+    private DoorCmdMapper doorCmdMapper;
+
     //人员模块命令生成器
     @Override
     public void userCommandGenerate(String action, List<String> employeeIdCollection) {
@@ -45,79 +41,98 @@ public class UserServiceImpl implements IUserService {
 
             for (String employeeId : employeeIdCollection) {
 
-                //生成一条人员修改命令
-                Command command = new Command();
-
                 //根据人员id请求单个人员信息
-                String userInfo = UserServiceImpl.sendRequet("http://192.168.0.108:8072/EmployeeController/selectByEmployee", employeeId);
+                String employeeInfo = HttpRequestFactory.sendRequet("http://192.168.0.108:8072/EmployeeController/selectByEmployee", employeeId);
                 System.out.println("[*] send: 已发出请求");
-                System.out.println(userInfo);
+                System.out.println("[*] employeeInfo: " + employeeInfo);
+
+                //取出需要的人员信息
+                Employee employee = new Employee();
+                Map<String, String> employeeInfoMap = (Map<String, String>)JSONObject.fromObject(employeeInfo);
+                employee.setEmployeeId(employeeInfoMap.get("employeeId"));
+                employee.setEmployeeNumber(employeeInfoMap.get("employeeNo"));
+                employee.setEmployeeName(employeeInfoMap.get("employeeName"));
+                employee.setEmployeeDepartmentId(employeeInfoMap.get("departmentId"));
+                employee.setEmployeeDepartmentName(employeeInfoMap.get("departmentName"));
+                employee.setEmployeeBirthday("");
+                employee.setEmployeeEntryTime(employeeInfoMap.get("entryTime"));
+                employee.setEmployeeProbationaryExpired(employeeInfoMap.get("probationaryExpired"));
+                employee.setEmployeeContractExpired("");
+                employee.setAdminFlag("");
+                employee.setEmployeePhone(employeeInfoMap.get("employeePhone"));
+
+                //DATA JSON字符串
+                String dataJsonString = JSON.toJSONString(employee);
 
                 //获取人员和设备关联的信息
                 String doorId = doorEmployeeMapper.selectByPrimaryKey(employeeId).getDoorId();
                 String deviceId = doorMapper.selectByPrimaryKey(doorId).getDeviceId();
 
-                command.setServerId("null");
-                command.setDeviceId(deviceId);
-                command.setFileEdition("v1.3");
-                command.setCommandMode("C");
-                command.setCommandType("single");
-                command.setCommandTotal("1");
-                command.setCommandIndex("1");
-                command.setSendTime(CalendarUtil.getCurrentTime());
-                command.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(),3));
-                command.setSuperCmdId("49641B5A57474BE2B5E4BE126AC63C49");
-                command.setSubCmdId("49641B5A57474BE2B5E4BE126AC63C49");
-                command.setAction(action);
-                command.setActionCode("21");
+                //生成一条人员修改命令
+                DoorCmd doorCmd = new DoorCmd();
+                //协议格式
+                doorCmd.setServerId("");
+                doorCmd.setDeviceId(deviceId);
+                doorCmd.setFileEdition("v1.3");
+                doorCmd.setCommandMode("C");
+                doorCmd.setCommandType("single");
+                doorCmd.setCommandTotal("1");
+                doorCmd.setCommandIndex("1");
+                doorCmd.setSendTime(CalendarUtil.getCurrentTime());
+                doorCmd.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(),3));
+                doorCmd.setSuperCmdId("");
+                doorCmd.setSubCmdId("");
+                doorCmd.setAction(action);
+                doorCmd.setActionCode("2001");
+                doorCmd.setData(dataJsonString);
+                doorCmd.setStatus("0");
+
+                System.out.println("[*] CMD: " + JSON.toJSONString(doorCmd));
+
+                //储存人员修改命令到命令表里
+                doorCmdMapper.insert(doorCmd);
 
             }
 
         }else if (action.equals("DELETE_USER_INFO")){
 
+            //DATA JSON字符串
+            String dataJsonString = JSON.toJSONString(employeeIdCollection);
+
+            //获取人员和设备关联的信息
+            String doorId = doorEmployeeMapper.selectByPrimaryKey(employeeIdCollection.get(0)).getDoorId();
+            String deviceId = doorMapper.selectByPrimaryKey(doorId).getDeviceId();
+
+            //生成一条人员删除命令
+            DoorCmd doorCmd = new DoorCmd();
+            //协议格式
+            doorCmd.setServerId("");
+            doorCmd.setDeviceId(deviceId);
+            doorCmd.setFileEdition("v1.3");
+            doorCmd.setCommandMode("C");
+            doorCmd.setCommandType("single");
+            doorCmd.setCommandTotal("1");
+            doorCmd.setCommandIndex("1");
+            doorCmd.setSendTime(CalendarUtil.getCurrentTime());
+            doorCmd.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(), 3));
+            doorCmd.setSuperCmdId("");
+            doorCmd.setSubCmdId("");
+            doorCmd.setAction(action);
+            doorCmd.setActionCode("2002");
+            doorCmd.setData(dataJsonString);
+            doorCmd.setStatus("0");
+
+            System.out.println("[*] CMD: " + JSON.toJSONString(doorCmd));
+
+            //储存人员修改命令到命令表里
+            doorCmdMapper.insert(doorCmd);
+
         }
     }
 
-    /**
-     * 项目间的http请求通信
-     * @param sendurl
-     * @param data
-     * @return
-     */
-    public static String sendRequet(String sendurl, Object data) {
-        CloseableHttpClient client = HttpClients.createDefault();
-        HttpPost post = new HttpPost(sendurl);
-        StringEntity myEntity = new StringEntity( JSON.toJSONString(data,false),
-                ContentType.APPLICATION_JSON);// 构造请求数据
-        post.setEntity(myEntity);// 设置请求体
-        String responseContent = null; // 响应内容
-        CloseableHttpResponse response = null;
-        try {
-            response = client.execute(post);
-            if (response.getStatusLine().getStatusCode() == 200) {
-                HttpEntity entity = response.getEntity();
-                responseContent = EntityUtils.toString(entity, "UTF-8");
-            }
-        } catch (ClientProtocolException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (response != null)
-                    response.close();
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                try {
-                    if (client != null)
-                        client.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return responseContent;
+    public static void main(String[] args) {
+        String employeeInfo = HttpRequestFactory.sendRequet("http://192.168.0.108:8072/EmployeeController/selectByEmployee", "13DFF865799A42C785F33AAFDC2FDD2D");
+        System.out.println("[*] send: 已发出请求");
+        System.out.println(employeeInfo);
     }
 }

@@ -8,7 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * 应用程序入口
  */
 @SpringBootApplication
-@MapperScan("com.xiangshangban.device.mapper.*.xml")
+@MapperScan("com.xiangshangban.device.dao")
 public class DeviceApplication {
 
 	public static void main(String[] args) {

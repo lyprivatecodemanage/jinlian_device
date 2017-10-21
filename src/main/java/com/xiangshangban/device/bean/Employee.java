@@ -1,29 +1,49 @@
 package com.xiangshangban.device.bean;
 
 public class Employee {
-
     private String employeeId;
+
     private String employeeNumber;
+
     private String employeeName;
-    private String employeeDepartmentId;
-    private String employeeDepartmentName;
+
     private String employeeBirthday;
+
     private String employeeEntryTime;
+
     private String employeeProbationaryExpired;
+
     private String employeeContractExpired;
+
     private String adminFlag;
+
     private String employeeImg;
+
     private String employeePhoto;
+
     private String employeeFinger1;
+
     private String employeeFinger2;
+
     private String employeeFace;
+
     private String employeePhone;
+
     private String employeeNfc;
+
     private String employeeStatus;
+
     private String transactionState;
+
     private String updateTime;
+
     private String employeeCompanyId;
+
     private String employeeCompanyName;
+
+    private String employeeDepartmentId;
+
+    private String employeeDepartmentName;
 
     public String getEmployeeId() {
         return employeeId;
@@ -47,22 +67,6 @@ public class Employee {
 
     public void setEmployeeName(String employeeName) {
         this.employeeName = employeeName;
-    }
-
-    public String getEmployeeDepartmentId() {
-        return employeeDepartmentId;
-    }
-
-    public void setEmployeeDepartmentId(String employeeDepartmentId) {
-        this.employeeDepartmentId = employeeDepartmentId;
-    }
-
-    public String getEmployeeDepartmentName() {
-        return employeeDepartmentName;
-    }
-
-    public void setEmployeeDepartmentName(String employeeDepartmentName) {
-        this.employeeDepartmentName = employeeDepartmentName;
     }
 
     public String getEmployeeBirthday() {
@@ -199,5 +203,21 @@ public class Employee {
 
     public void setEmployeeCompanyName(String employeeCompanyName) {
         this.employeeCompanyName = employeeCompanyName;
+    }
+
+    public String getEmployeeDepartmentId() {
+        return employeeDepartmentId;
+    }
+
+    public void setEmployeeDepartmentId(String employeeDepartmentId) {
+        this.employeeDepartmentId = employeeDepartmentId;
+    }
+
+    public String getEmployeeDepartmentName() {
+        return employeeDepartmentName;
+    }
+
+    public void setEmployeeDepartmentName(String employeeDepartmentName) {
+        this.employeeDepartmentName = employeeDepartmentName;
     }
 }

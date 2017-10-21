@@ -1,6 +1,6 @@
-package com.xiangshangban.service.impl;
+package com.xiangshangban.device.service.impl;
 
-import com.xiangshangban.service.IDeviceService;
+import com.xiangshangban.device.service.IDeviceService;
 
 /**
  * author : Administrator
