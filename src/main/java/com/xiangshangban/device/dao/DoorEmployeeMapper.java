@@ -16,4 +16,6 @@ public interface DoorEmployeeMapper {
     int updateByPrimaryKeySelective(DoorEmployee record);
 
     int updateByPrimaryKey(DoorEmployee record);
+
+    DoorEmployee findIfExist(DoorEmployee doorEmployee);
 }

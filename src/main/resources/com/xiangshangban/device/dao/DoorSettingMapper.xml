@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xiangshangban.device.dao.DoorSettingMapper" >
+  <resultMap id="BaseResultMap" type="com.xiangshangban.device.bean.DoorSetting" >
+    <id column="door_id" property="doorId" jdbcType="VARCHAR" />
+    <result column="door_open_limit_time" property="doorOpenLimitTime" jdbcType="VARCHAR" />
+    <result column="lock_open_limit_time" property="lockOpenLimitTime" jdbcType="VARCHAR" />
+    <result column="enable_door_event_record" property="enableDoorEventRecord" jdbcType="VARCHAR" />
+    <result column="fault_count_authentication" property="faultCountAuthentication" jdbcType="VARCHAR" />
+    <result column="alarm_time_length_trespass" property="alarmTimeLengthTrespass" jdbcType="VARCHAR" />
+    <result column="first_publish_password" property="firstPublishPassword" jdbcType="VARCHAR" />
+    <result column="second_publish_password" property="secondPublishPassword" jdbcType="VARCHAR" />
+    <result column="threaten_publish_passwrod" property="threatenPublishPasswrod" jdbcType="VARCHAR" />
+    <result column="manager_password" property="managerPassword" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    door_id, door_open_limit_time, lock_open_limit_time, enable_door_event_record, fault_count_authentication, 
+    alarm_time_length_trespass, first_publish_password, second_publish_password, threaten_publish_passwrod, 
+    manager_password
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from door_setting
+    where door_id = #{doorId,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from door_setting
+    where door_id = #{doorId,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.xiangshangban.device.bean.DoorSetting" >
+    insert into door_setting (door_id, door_open_limit_time, lock_open_limit_time, 
+      enable_door_event_record, fault_count_authentication, 
+      alarm_time_length_trespass, first_publish_password, 
+      second_publish_password, threaten_publish_passwrod, 
+      manager_password)
+    values (#{doorId,jdbcType=VARCHAR}, #{doorOpenLimitTime,jdbcType=VARCHAR}, #{lockOpenLimitTime,jdbcType=VARCHAR}, 
+      #{enableDoorEventRecord,jdbcType=VARCHAR}, #{faultCountAuthentication,jdbcType=VARCHAR}, 
+      #{alarmTimeLengthTrespass,jdbcType=VARCHAR}, #{firstPublishPassword,jdbcType=VARCHAR}, 
+      #{secondPublishPassword,jdbcType=VARCHAR}, #{threatenPublishPasswrod,jdbcType=VARCHAR}, 
+      #{managerPassword,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.xiangshangban.device.bean.DoorSetting" >
+    insert into door_setting
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="doorId != null" >
+        door_id,
+      </if>
+      <if test="doorOpenLimitTime != null" >
+        door_open_limit_time,
+      </if>
+      <if test="lockOpenLimitTime != null" >
+        lock_open_limit_time,
+      </if>
+      <if test="enableDoorEventRecord != null" >
+        enable_door_event_record,
+      </if>
+      <if test="faultCountAuthentication != null" >
+        fault_count_authentication,
+      </if>
+      <if test="alarmTimeLengthTrespass != null" >
+        alarm_time_length_trespass,
+      </if>
+      <if test="firstPublishPassword != null" >
+        first_publish_password,
+      </if>
+      <if test="secondPublishPassword != null" >
+        second_publish_password,
+      </if>
+      <if test="threatenPublishPasswrod != null" >
+        threaten_publish_passwrod,
+      </if>
+      <if test="managerPassword != null" >
+        manager_password,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="doorId != null" >
+        #{doorId,jdbcType=VARCHAR},
+      </if>
+      <if test="doorOpenLimitTime != null" >
+        #{doorOpenLimitTime,jdbcType=VARCHAR},
+      </if>
+      <if test="lockOpenLimitTime != null" >
+        #{lockOpenLimitTime,jdbcType=VARCHAR},
+      </if>
+      <if test="enableDoorEventRecord != null" >
+        #{enableDoorEventRecord,jdbcType=VARCHAR},
+      </if>
+      <if test="faultCountAuthentication != null" >
+        #{faultCountAuthentication,jdbcType=VARCHAR},
+      </if>
+      <if test="alarmTimeLengthTrespass != null" >
+        #{alarmTimeLengthTrespass,jdbcType=VARCHAR},
+      </if>
+      <if test="firstPublishPassword != null" >
+        #{firstPublishPassword,jdbcType=VARCHAR},
+      </if>
+      <if test="secondPublishPassword != null" >
+        #{secondPublishPassword,jdbcType=VARCHAR},
+      </if>
+      <if test="threatenPublishPasswrod != null" >
+        #{threatenPublishPasswrod,jdbcType=VARCHAR},
+      </if>
+      <if test="managerPassword != null" >
+        #{managerPassword,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.xiangshangban.device.bean.DoorSetting" >
+    update door_setting
+    <set >
+      <if test="doorOpenLimitTime != null" >
+        door_open_limit_time = #{doorOpenLimitTime,jdbcType=VARCHAR},
+      </if>
+      <if test="lockOpenLimitTime != null" >
+        lock_open_limit_time = #{lockOpenLimitTime,jdbcType=VARCHAR},
+      </if>
+      <if test="enableDoorEventRecord != null" >
+        enable_door_event_record = #{enableDoorEventRecord,jdbcType=VARCHAR},
+      </if>
+      <if test="faultCountAuthentication != null" >
+        fault_count_authentication = #{faultCountAuthentication,jdbcType=VARCHAR},
+      </if>
+      <if test="alarmTimeLengthTrespass != null" >
+        alarm_time_length_trespass = #{alarmTimeLengthTrespass,jdbcType=VARCHAR},
+      </if>
+      <if test="firstPublishPassword != null" >
+        first_publish_password = #{firstPublishPassword,jdbcType=VARCHAR},
+      </if>
+      <if test="secondPublishPassword != null" >
+        second_publish_password = #{secondPublishPassword,jdbcType=VARCHAR},
+      </if>
+      <if test="threatenPublishPasswrod != null" >
+        threaten_publish_passwrod = #{threatenPublishPasswrod,jdbcType=VARCHAR},
+      </if>
+      <if test="managerPassword != null" >
+        manager_password = #{managerPassword,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where door_id = #{doorId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.xiangshangban.device.bean.DoorSetting" >
+    update door_setting
+    set door_open_limit_time = #{doorOpenLimitTime,jdbcType=VARCHAR},
+      lock_open_limit_time = #{lockOpenLimitTime,jdbcType=VARCHAR},
+      enable_door_event_record = #{enableDoorEventRecord,jdbcType=VARCHAR},
+      fault_count_authentication = #{faultCountAuthentication,jdbcType=VARCHAR},
+      alarm_time_length_trespass = #{alarmTimeLengthTrespass,jdbcType=VARCHAR},
+      first_publish_password = #{firstPublishPassword,jdbcType=VARCHAR},
+      second_publish_password = #{secondPublishPassword,jdbcType=VARCHAR},
+      threaten_publish_passwrod = #{threatenPublishPasswrod,jdbcType=VARCHAR},
+      manager_password = #{managerPassword,jdbcType=VARCHAR}
+    where door_id = #{doorId,jdbcType=VARCHAR}
+  </update>
+</mapper>

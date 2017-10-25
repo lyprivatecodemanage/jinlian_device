@@ -30,7 +30,6 @@
     select 
     <include refid="Base_Column_List" />
     from door_cmd
-    where server_id = #{serverId,jdbcType=VARCHAR}
   </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
     delete from door_cmd
@@ -245,4 +244,34 @@
       status = #{status,jdbcType=VARCHAR}
     where server_id = #{serverId,jdbcType=VARCHAR}
   </update>
+
+  <select id="selectBySubCmdId" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from door_cmd
+    WHERE sub_cmd_id = #{subCmdId,jdbcType=VARCHAR}
+  </select>
+
+  <update id="updateBySubCmdId" parameterType="com.xiangshangban.device.bean.DoorCmd" >
+    update door_cmd
+    set device_id = #{deviceId,jdbcType=VARCHAR},
+    file_edition = #{fileEdition,jdbcType=VARCHAR},
+    command_mode = #{commandMode,jdbcType=VARCHAR},
+    command_type = #{commandType,jdbcType=VARCHAR},
+    command_total = #{commandTotal,jdbcType=VARCHAR},
+    command_index = #{commandIndex,jdbcType=VARCHAR},
+    send_time = #{sendTime,jdbcType=VARCHAR},
+    out_of_time = #{outOfTime,jdbcType=VARCHAR},
+    md5_check = #{md5Check,jdbcType=VARCHAR},
+    super_cmd_id = #{superCmdId,jdbcType=VARCHAR},
+    sub_cmd_id = #{subCmdId,jdbcType=VARCHAR},
+    action = #{action,jdbcType=VARCHAR},
+    action_code = #{actionCode,jdbcType=VARCHAR},
+    result_code = #{resultCode,jdbcType=VARCHAR},
+    result_message = #{resultMessage,jdbcType=VARCHAR},
+    data = #{data,jdbcType=VARCHAR},
+    status = #{status,jdbcType=VARCHAR}
+    where sub_cmd_id = #{subCmdId,jdbcType=VARCHAR}
+  </update>
+
 </mapper>

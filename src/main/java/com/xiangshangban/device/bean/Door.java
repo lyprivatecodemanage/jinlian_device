@@ -1,14 +1,11 @@
 package com.xiangshangban.device.bean;
 
 public class Door {
+
     private String doorId;
-
     private String doorName;
-
     private String deviceId;
-
     private String operateTime;
-
     private String operateEmployee;
 
     public String getDoorId() {

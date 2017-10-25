@@ -38,11 +38,11 @@ public class RabbitMQReciever {
     public static void main(String [] s) throws InterruptedException, IOException, TimeoutException {
 
         //交换器名称
-        String EXCHANGE_NAME = "download";
+        String EXCHANGE_NAME = "upload";
         //队列名称
-        String QUEUE_NAME = "hello";
+        String QUEUE_NAME = "haha";
         //路由关键字
-        String routingKey = "hello";
+        String routingKey = "haha";
         //主机ip
         String host = "localhost";
         //rabbitMQ端口号
@@ -69,7 +69,7 @@ public class RabbitMQReciever {
         channel.queueDeclare(QUEUE_NAME, true, false, false, null);
 
         //声明一个匹配模式的交换器
-        channel.exchangeDeclare(EXCHANGE_NAME, "topic");
+        channel.exchangeDeclare(EXCHANGE_NAME, "direct", true);
 
         //绑定路由关键字
         channel.queueBind(QUEUE_NAME, EXCHANGE_NAME, routingKey);
@@ -82,6 +82,22 @@ public class RabbitMQReciever {
             public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
                 String message = new String(body, "UTF-8");
                 System.out.println(" [x] Received '" + envelope.getRoutingKey() + "':'" + message + "'");
+
+//                //md5校验
+//                JSONObject jsonObject = JSONObject.fromObject(message);
+//                Map<String, Object> mapResult = (Map<String, Object>) jsonObject;
+//                //获取对方的md5
+//                String otherMd5 = (String) mapResult.get("MD5Check");
+//                mapResult.remove("MD5Check");
+//                String messageCheck = JSON.toJSONString(mapResult);
+//                //生成我的md5
+//                String myMd5 = MD5Encode.encode("XC9EO5GKOIVRMBQ2YE8X", messageCheck);
+//                //双方的md5比较判断
+//                if (myMd5.equals(otherMd5)){
+//                    System.out.println("数据未被修改");
+//                }else {
+//                    System.out.println("数据已被修改");
+//                }
             }
         };
         channel.basicConsume(QUEUE_NAME, true, consumer);

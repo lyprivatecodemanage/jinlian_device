@@ -90,4 +90,8 @@
       operate_employee = #{operateEmployee,jdbcType=VARCHAR}
     where door_id = #{doorId,jdbcType=VARCHAR}
   </update>
+
+  <select id="findDoorIdByDeviceId" resultMap="BaseResultMap" parameterType="java.lang.String">
+    SELECT door_id,door_name FROM door_ WHERE device_id = #{deviceId,jdbcType=VARCHAR}
+  </select>
 </mapper>

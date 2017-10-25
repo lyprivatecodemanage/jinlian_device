@@ -3,6 +3,8 @@ package com.xiangshangban.device.dao;
 import com.xiangshangban.device.bean.Door;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 public interface DoorMapper {
     int deleteByPrimaryKey(String doorId);
@@ -16,4 +18,6 @@ public interface DoorMapper {
     int updateByPrimaryKeySelective(Door record);
 
     int updateByPrimaryKey(Door record);
+
+    Door findDoorIdByDeviceId(String deviceId);
 }

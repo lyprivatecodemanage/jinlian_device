@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xiangshangban.device.dao.DeviceMapper" >
+
+  <resultMap id="BaseResultMap" type="com.xiangshangban.device.bean.Device" >
+    <id column="device_id" property="deviceId" jdbcType="VARCHAR" />
+    <result column="device_name" property="deviceName" jdbcType="VARCHAR" />
+    <result column="company_id" property="companyId" jdbcType="VARCHAR" />
+    <result column="company_name" property="companyName" jdbcType="VARCHAR" />
+    <result column="device_number" property="deviceNumber" jdbcType="VARCHAR" />
+    <result column="mac_address" property="macAddress" jdbcType="VARCHAR" />
+    <result column="is_online" property="isOnline" jdbcType="VARCHAR" />
+    <result column="active_status" property="activeStatus" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    device_id, device_name, company_id, company_name, device_number, mac_address, is_online, 
+    active_status
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from device_
+    where device_id = #{deviceId,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from device_
+    where device_id = #{deviceId,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.xiangshangban.device.bean.Device" >
+    insert into device_ (device_id, device_name, company_id, 
+      company_name, device_number, mac_address, 
+      is_online, active_status)
+    values (#{deviceId,jdbcType=VARCHAR}, #{deviceName,jdbcType=VARCHAR}, #{companyId,jdbcType=VARCHAR}, 
+      #{companyName,jdbcType=VARCHAR}, #{deviceNumber,jdbcType=VARCHAR}, #{macAddress,jdbcType=VARCHAR}, 
+      #{isOnline,jdbcType=VARCHAR}, #{activeStatus,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.xiangshangban.device.bean.Device" >
+    insert into device_
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="deviceId != null" >
+        device_id,
+      </if>
+      <if test="deviceName != null" >
+        device_name,
+      </if>
+      <if test="companyId != null" >
+        company_id,
+      </if>
+      <if test="companyName != null" >
+        company_name,
+      </if>
+      <if test="deviceNumber != null" >
+        device_number,
+      </if>
+      <if test="macAddress != null" >
+        mac_address,
+      </if>
+      <if test="isOnline != null" >
+        is_online,
+      </if>
+      <if test="activeStatus != null" >
+        active_status,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="deviceId != null" >
+        #{deviceId,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceName != null" >
+        #{deviceName,jdbcType=VARCHAR},
+      </if>
+      <if test="companyId != null" >
+        #{companyId,jdbcType=VARCHAR},
+      </if>
+      <if test="companyName != null" >
+        #{companyName,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceNumber != null" >
+        #{deviceNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="macAddress != null" >
+        #{macAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="isOnline != null" >
+        #{isOnline,jdbcType=VARCHAR},
+      </if>
+      <if test="activeStatus != null" >
+        #{activeStatus,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.xiangshangban.device.bean.Device" >
+    update device_
+    <set >
+      <if test="deviceName != null" >
+        device_name = #{deviceName,jdbcType=VARCHAR},
+      </if>
+      <if test="companyId != null" >
+        company_id = #{companyId,jdbcType=VARCHAR},
+      </if>
+      <if test="companyName != null" >
+        company_name = #{companyName,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceNumber != null" >
+        device_number = #{deviceNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="macAddress != null" >
+        mac_address = #{macAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="isOnline != null" >
+        is_online = #{isOnline,jdbcType=VARCHAR},
+      </if>
+      <if test="activeStatus != null" >
+        active_status = #{activeStatus,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where device_id = #{deviceId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.xiangshangban.device.bean.Device" >
+    update device_
+    set device_name = #{deviceName,jdbcType=VARCHAR},
+      company_id = #{companyId,jdbcType=VARCHAR},
+      company_name = #{companyName,jdbcType=VARCHAR},
+      device_number = #{deviceNumber,jdbcType=VARCHAR},
+      mac_address = #{macAddress,jdbcType=VARCHAR},
+      is_online = #{isOnline,jdbcType=VARCHAR},
+      active_status = #{activeStatus,jdbcType=VARCHAR}
+    where device_id = #{deviceId,jdbcType=VARCHAR}
+  </update>
+
+  <select id="findByCondition" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select * from device_ where 1=1
+    <if test="company_name != null and company_name != ''" >
+      AND company_name LIKE '%${companyName,jdbcType=VARCHAR}'
+    </if>
+    <if test="device_name != null and device_name != ''" >
+      AND device_name LIKE '%${deviceName,jdbcType=VARCHAR}'
+    </if>
+    <if test="device_number != null and device_number != ''" >
+      AND device_number LIKE '%${deviceNumber,jdbcType=VARCHAR}'
+    </if>
+    <if test="is_online != null and is_online != ''" >
+      AND is_online = #{isOnline,jdbcType=VARCHAR}
+    </if>
+    <if test="active_status != null and active_status != ''" >
+      AND active_status = #{activeStatus,jdbcType=VARCHAR}
+    </if>
+
+  </select>
+
+  <select id="findDeviceIdByCompanyId" resultType="java.lang.String" parameterType="java.lang.String">
+    SELECT device_id FROM device_ WHERE company_id = #{companyId,jdbcType=VARCHAR}
+  </select>
+</mapper>

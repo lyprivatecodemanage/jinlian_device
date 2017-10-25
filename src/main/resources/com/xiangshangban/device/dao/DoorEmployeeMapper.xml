@@ -79,4 +79,21 @@
       door_name = #{doorName,jdbcType=VARCHAR}
     where employee_id = #{employeeId,jdbcType=VARCHAR}
   </update>
+
+  <select id="findIfExist" resultMap="BaseResultMap" parameterType="com.xiangshangban.device.bean.DoorEmployee">
+    SELECT * FROM door_employee
+    WHERE 1=1
+    <if test="doorId != null and doorId != ''" >
+      AND door_id = #{doorId,jdbcType=VARCHAR}
+    </if>
+    <if test="doorName != null and doorName != ''" >
+      AND door_name = #{doorName,jdbcType=VARCHAR}
+    </if>
+    <if test="employeeId != null and employeeId != ''" >
+      AND employee_id = #{employeeId,jdbcType=VARCHAR}
+    </if>
+    <if test="employeeName != null and employeeName != ''" >
+      AND employee_name = #{employeeName,jdbcType=VARCHAR}
+    </if>
+  </select>
 </mapper>

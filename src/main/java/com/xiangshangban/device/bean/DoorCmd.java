@@ -1,40 +1,24 @@
 package com.xiangshangban.device.bean;
 
 public class DoorCmd {
+
     private String serverId;
-
     private String deviceId;
-
     private String fileEdition;
-
     private String commandMode;
-
     private String commandType;
-
     private String commandTotal;
-
     private String commandIndex;
-
     private String sendTime;
-
     private String outOfTime;
-
     private String md5Check;
-
     private String superCmdId;
-
     private String subCmdId;
-
     private String action;
-
     private String actionCode;
-
     private String resultCode;
-
     private String resultMessage;
-
     private String data;
-
     private String status;
 
     public String getServerId() {

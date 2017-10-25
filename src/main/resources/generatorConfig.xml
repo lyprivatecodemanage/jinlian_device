@@ -2,7 +2,7 @@
 <!DOCTYPE generatorConfiguration PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN" "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd" >
 <generatorConfiguration>
     <classPathEntry
-        location="C:/Users/loogooloo/IdeaProjects/device/src/main/resources/config/postgresql-9.1-901.jdbc4.jar" />
+        location="C:/Users/loogooloo/IdeaProjects/device/src/main/resources/postgresql-9.1-901.jdbc4.jar" />
     <context id="context1">
 
         <!--去除注释 -->
@@ -25,7 +25,7 @@
             targetProject="C:\Users\loogooloo\IdeaProjects\device\src\main\java"
             type="XMLMAPPER" />
         <!-- 要生成哪些表-->  
-        <table tableName="employee_" domainObjectName="Employee" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false"></table>
+        <table tableName="door_setting" domainObjectName="DoorSetting" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false"></table>
        
         <!-- <table schema="zpeng" tableName="stu" domainObjectName="Student"
             enableSelectByPrimaryKey="true" enableUpdateByPrimaryKey="true"

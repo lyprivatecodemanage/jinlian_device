@@ -16,4 +16,8 @@ public interface DoorCmdMapper {
     int updateByPrimaryKeySelective(DoorCmd record);
 
     int updateByPrimaryKey(DoorCmd record);
+
+    DoorCmd selectBySubCmdId(DoorCmd doorCmd);
+
+    int updateBySubCmdId(DoorCmd doorCmd);
 }
