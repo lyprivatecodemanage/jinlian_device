@@ -6,6 +6,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import com.alibaba.fastjson.JSONArray;
+import com.xiangshangban.device.bean.Device;
+
+import java.util.List;
 
 /**
  * 控制层：设备操作
@@ -16,7 +20,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class DeviceController {
 
     @Autowired
-    private IDeviceService iDeviceService;
+    private IDeviceService deviceService;
 
     /**
      * 新增设备
@@ -28,7 +32,7 @@ public class DeviceController {
     @RequestMapping(value = "/addDevice", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     public void addDevice(String companyId, String deviceNumber, String macAddress){
 
-        iDeviceService.addDevice(companyId, deviceNumber, macAddress);
+        deviceService.addDevice(companyId, deviceNumber, macAddress);
 
     }
 
@@ -45,7 +49,7 @@ public class DeviceController {
     public void findDeviceInformation(String companyName, String deviceName, String deviceNumber,
                                       String  isOnline, String activeStatus){
 
-        iDeviceService.findDeviceInformation(companyName, deviceName, deviceNumber, isOnline, activeStatus);
+        deviceService.findDeviceInformation(companyName, deviceName, deviceNumber, isOnline, activeStatus);
 
     }
 
@@ -57,6 +61,16 @@ public class DeviceController {
     @RequestMapping(value = "/rebootDevice", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     public void rebootDevice(String deviceId){
 
+    }
+
+    /**
+     * 查询所有的设备信息
+     */
+    @ResponseBody
+    @RequestMapping("/getAllDevice.do")
+    public String getAllDeviceInfo(){
+        List<Device> devices = deviceService.queryAllDeviceInfo();
+        return JSONArray.toJSONString(devices);
     }
 
 }

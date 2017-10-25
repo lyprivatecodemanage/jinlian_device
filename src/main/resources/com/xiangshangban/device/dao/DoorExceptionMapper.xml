@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xiangshangban.device.dao.DoorExceptionMapper" >
+  <resultMap id="BaseResultMap" type="com.xiangshangban.device.bean.DoorException" >
+    <id column="door_exception_id" property="doorExceptionId" jdbcType="VARCHAR" />
+    <result column="alarm_type" property="alarmType" jdbcType="VARCHAR" />
+    <result column="alarm_date" property="alarmDate" jdbcType="VARCHAR" />
+    <result column="employee_id" property="employeeId" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    door_exception_id, alarm_type, alarm_date, employee_id
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from door_exception
+    where door_exception_id = #{doorExceptionId,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from door_exception
+    where door_exception_id = #{doorExceptionId,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.xiangshangban.device.bean.DoorException" >
+    insert into door_exception (door_exception_id, alarm_type, alarm_date, 
+      employee_id)
+    values (#{doorExceptionId,jdbcType=VARCHAR}, #{alarmType,jdbcType=VARCHAR}, #{alarmDate,jdbcType=VARCHAR}, 
+      #{employeeId,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.xiangshangban.device.bean.DoorException" >
+    insert into door_exception
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="doorExceptionId != null" >
+        door_exception_id,
+      </if>
+      <if test="alarmType != null" >
+        alarm_type,
+      </if>
+      <if test="alarmDate != null" >
+        alarm_date,
+      </if>
+      <if test="employeeId != null" >
+        employee_id,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="doorExceptionId != null" >
+        #{doorExceptionId,jdbcType=VARCHAR},
+      </if>
+      <if test="alarmType != null" >
+        #{alarmType,jdbcType=VARCHAR},
+      </if>
+      <if test="alarmDate != null" >
+        #{alarmDate,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeId != null" >
+        #{employeeId,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.xiangshangban.device.bean.DoorException" >
+    update door_exception
+    <set >
+      <if test="alarmType != null" >
+        alarm_type = #{alarmType,jdbcType=VARCHAR},
+      </if>
+      <if test="alarmDate != null" >
+        alarm_date = #{alarmDate,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeId != null" >
+        employee_id = #{employeeId,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where door_exception_id = #{doorExceptionId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.xiangshangban.device.bean.DoorException" >
+    update door_exception
+    set alarm_type = #{alarmType,jdbcType=VARCHAR},
+      alarm_date = #{alarmDate,jdbcType=VARCHAR},
+      employee_id = #{employeeId,jdbcType=VARCHAR}
+    where door_exception_id = #{doorExceptionId,jdbcType=VARCHAR}
+  </update>
+
+  <!--###############《新添加部分》##############-->
+  <!--分条件查询门禁异常记录-->
+  <select id="selectDoorExceptionRecord" parameterType="com.xiangshangban.device.bean.DoorExceptionCondition" resultType="map">
+    select A.alarm_type,alarm_date,B.employee_name,employee_department_name from door_exception A
+    inner join employee_ B on A.employee_id = B.employee_id and
+    A.employee_id in (select employee_id from employee_
+    <where>
+      <if test="doorExceptionCondition.name!=null and doorExceptionCondition.name!=''">
+        employee_name like #{doorExceptionCondition.name}
+      </if>
+      <if test="doorExceptionCondition.department!=null and doorExceptionCondition.department!=''">
+        and employee_department_name like #{doorExceptionCondition.department}
+      </if>
+    </where>
+    )
+    <if test="doorExceptionCondition.alarmType!=null and doorExceptionCondition.alarmType!=''">
+      and A.alarm_type like #{doorExceptionCondition.alarmType}
+    </if>
+    <if test="doorExceptionCondition.alarmTime!=null and doorExceptionCondition.alarmTime!=''">
+      and A.alarm_date = #{doorExceptionCondition.alarmTime}
+    </if>
+  </select>
+</mapper>

@@ -151,4 +151,10 @@
   <select id="findDeviceIdByCompanyId" resultType="java.lang.String" parameterType="java.lang.String">
     SELECT device_id FROM device_ WHERE company_id = #{companyId,jdbcType=VARCHAR}
   </select>
+
+  <!--查询所有的设备信息-->
+  <select id="selectAllDeviceInfo" resultType="com.xiangshangban.device.bean.Device">
+    select device_id as deviceId,device_name as deviceName from device_
+  </select>
+
 </mapper>

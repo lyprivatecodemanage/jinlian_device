@@ -6,6 +6,8 @@ import com.xiangshangban.device.service.IDeviceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * author : Administrator
  * date: 2017/10/19 10:38
@@ -13,7 +15,7 @@ import org.springframework.stereotype.Service;
  */
 
 @Service
-public class DeviceServiceImpl implements IDeviceService{
+public class DeviceServiceImpl implements IDeviceService {
 
     @Autowired
     private DeviceMapper deviceMapper;
@@ -47,6 +49,11 @@ public class DeviceServiceImpl implements IDeviceService{
 
         deviceMapper.findByCondition(device);
 
+    }
+
+    public List<Device> queryAllDeviceInfo() {
+        List<Device> devices = deviceMapper.selectAllDeviceInfo();
+        return devices;
     }
 
 }

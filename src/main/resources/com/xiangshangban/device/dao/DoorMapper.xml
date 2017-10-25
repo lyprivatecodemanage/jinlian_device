@@ -94,4 +94,23 @@
   <select id="findDoorIdByDeviceId" resultMap="BaseResultMap" parameterType="java.lang.String">
     SELECT door_id,door_name FROM door_ WHERE device_id = #{deviceId,jdbcType=VARCHAR}
   </select>
+
+    <!--################新添加部分#################-->
+  <!--根据门名称查询门信息-->
+  <select id="getDoorInfo" parameterType="com.xiangshangban.device.bean.Door" resultType="map">
+      select A.door_id,door_name,operate_time,B.device_id,device_name,C.employee_id,employee_name
+      from door_  A,device_ B,employee_ C where A.device_id=B.device_id and A.operate_employee = C.employee_id
+      <if test="door!=null">
+        <if test="door.doorName!=null and door.doorName!=''">
+          and A.door_name like #{door.doorName}
+        </if>
+      </if>
+  </select>
+  <!--批量删除门信息-->
+  <delete id="delDoorBatch" parameterType="List">
+      delete from door_ where door_id in
+    <foreach collection="list" item="doorId" index="index" open="(" separator="," close=")">
+      #{doorId}
+    </foreach>
+  </delete>
 </mapper>

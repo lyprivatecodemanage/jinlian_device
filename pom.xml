@@ -110,11 +110,19 @@
 			<version>1.0</version>
 		</dependency>
 
+		<!--添加Mybatis分页查询依赖-->
+		<dependency>
+			<groupId>com.github.pagehelper</groupId>
+			<artifactId>pagehelper</artifactId>
+			<version>4.0.3</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
 		<plugins>
 			<!--打包项目为jar可运行文件需要的jar包-->
+
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
@@ -130,8 +138,8 @@
 					<overwrite>true</overwrite>
 				</configuration>
 			</plugin>
+
 		</plugins>
 	</build>
-
 
 </project>

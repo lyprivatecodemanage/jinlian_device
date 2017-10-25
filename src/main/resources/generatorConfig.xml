@@ -2,7 +2,7 @@
 <!DOCTYPE generatorConfiguration PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN" "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd" >
 <generatorConfiguration>
     <classPathEntry
-        location="C:/Users/loogooloo/IdeaProjects/device/src/main/resources/postgresql-9.1-901.jdbc4.jar" />
+            location="C:/Users/loogooloo/IdeaProjects/device/src/main/resources/postgresql-9.1-901.jdbc4.jar" />
     <context id="context1">
 
         <!--去除注释 -->
@@ -11,22 +11,22 @@
         </commentGenerator>
 
         <jdbcConnection driverClass="org.postgresql.Driver"
-            connectionURL="jdbc:postgresql://192.168.0.242:5432/device" userId="postgres"
-            password="jinnian-123abc" />
-        <!-- 生成模型的包名和位置--> 
+                        connectionURL="jdbc:postgresql://192.168.0.242:5432/device" userId="postgres"
+                        password="jinnian-123abc" />
+        <!-- 生成模型的包名和位置-->
         <javaModelGenerator targetPackage="com.xiangshangban.device.bean"
-            targetProject="C:\Users\loogooloo\IdeaProjects\device\src\main\java" />
-        <!-- 生成映射文件的包名和位置--> 
+                            targetProject="C:\Users\loogooloo\IdeaProjects\device\src\main\java" />
+        <!-- 生成映射文件的包名和位置-->
         <sqlMapGenerator targetPackage="com.xiangshangban.device.dao"
-            targetProject="C:\Users\loogooloo\IdeaProjects\device\src\main\resources" />
+                         targetProject="C:\Users\loogooloo\IdeaProjects\device\src\main\resources" />
         <!-- 生成DAO的包名和位置-->
         <javaClientGenerator
-            targetPackage="com.xiangshangban.device.dao"
-            targetProject="C:\Users\loogooloo\IdeaProjects\device\src\main\java"
-            type="XMLMAPPER" />
-        <!-- 要生成哪些表-->  
+                targetPackage="com.xiangshangban.device.dao"
+                targetProject="C:\Users\loogooloo\IdeaProjects\device\src\main\java"
+                type="XMLMAPPER" />
+        <!-- 要生成哪些表-->
         <table tableName="door_setting" domainObjectName="DoorSetting" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false"></table>
-       
+
         <!-- <table schema="zpeng" tableName="stu" domainObjectName="Student"
             enableSelectByPrimaryKey="true" enableUpdateByPrimaryKey="true"
             enableDeleteByPrimaryKey="true" enableSelectByExample="false"

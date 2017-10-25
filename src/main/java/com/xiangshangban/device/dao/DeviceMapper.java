@@ -1,9 +1,11 @@
 package com.xiangshangban.device.dao;
 
 import com.xiangshangban.device.bean.Device;
+import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+
 
 @Component
 public interface DeviceMapper {
@@ -22,4 +24,10 @@ public interface DeviceMapper {
     List<Device> findByCondition(Device device);
 
     List<String> findDeviceIdByCompanyId(String companyId);
+
+    /**
+     * 查询所有的设备信息
+     */
+    List<Device> selectAllDeviceInfo();
+
 }
