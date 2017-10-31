@@ -13,8 +13,8 @@ import java.util.List;
 
 public interface IEmployeeService {
 
-    //人员模块命令生成器
-    void employeeCommandGenerate(String action, List<String> userIdCollection);
+//    //人员模块命令生成器
+//    void employeeCommandGenerate(String action, List<String> userIdCollection);
 
     //关联门和人员（同一个人传入的数据不一样时执行更新操作）
     void relateEmployeeAndDoor(String doorId, String doorName, String employeeId, String employeeName);
@@ -26,9 +26,10 @@ public interface IEmployeeService {
     void relateEmployeeAndPermission(String employeeId, String dayOfWeek, String isAllDay,
                                      String rangeStartTime, String rangeEndTime, String rangeDoorOpenType);
 
-    //添加or更新命令表（同一个人传入的数据不一样时执行更新操作）
-    void insertEmployeeCommand(DoorCmd doorCmd);
+    //人员人脸、指纹、卡号信息上传存储
+    void saveEmployeeInputInfo(String employeeInputInfo);
 
-    //添加人员信息
+    //门禁记录上传存储
+    void doorRecordSave(String doorRecordMap);
 
 }

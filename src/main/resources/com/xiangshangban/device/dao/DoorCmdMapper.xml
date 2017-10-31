@@ -166,7 +166,7 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="com.xiangshangban.device.bean.DoorCmd" >
+  <update id="updateBySubCmdIdSelective" parameterType="com.xiangshangban.device.bean.DoorCmd" >
     update door_cmd
     <set >
       <if test="deviceId != null" >
@@ -199,9 +199,6 @@
       <if test="superCmdId != null" >
         super_cmd_id = #{superCmdId,jdbcType=VARCHAR},
       </if>
-      <if test="subCmdId != null" >
-        sub_cmd_id = #{subCmdId,jdbcType=VARCHAR},
-      </if>
       <if test="action != null" >
         action = #{action,jdbcType=VARCHAR},
       </if>
@@ -221,7 +218,7 @@
         status = #{status,jdbcType=VARCHAR},
       </if>
     </set>
-    where server_id = #{serverId,jdbcType=VARCHAR}
+    where sub_cmd_id = #{subCmdId,jdbcType=VARCHAR}
   </update>
   <update id="updateByPrimaryKey" parameterType="com.xiangshangban.device.bean.DoorCmd" >
     update door_cmd
@@ -273,5 +270,12 @@
     status = #{status,jdbcType=VARCHAR}
     where sub_cmd_id = #{subCmdId,jdbcType=VARCHAR}
   </update>
+
+  <select id="selectByStatus" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from door_cmd
+    WHERE status = #{status,jdbcType=VARCHAR}
+  </select>
 
 </mapper>

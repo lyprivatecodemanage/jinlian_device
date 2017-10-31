@@ -1,14 +1,11 @@
 package com.xiangshangban.device.bean;
 
 public class DoorEmployeePermission {
+
     private String employeeId;
-
     private String isManager;
-
     private String haveFirstCardPermission;
-
     private String doorOpenStartTime;
-
     private String doorOpenEndTime;
 
     public String getEmployeeId() {

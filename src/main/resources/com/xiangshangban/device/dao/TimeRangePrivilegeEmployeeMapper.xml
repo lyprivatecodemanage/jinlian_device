@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xiangshangban.device.dao.TimeRangePrivilegeEmployeeMapper" >
+  <resultMap id="BaseResultMap" type="com.xiangshangban.device.bean.TimeRangePrivilegeEmployee" >
+    <id column="employee_id" property="employeeId" jdbcType="VARCHAR" />
+    <result column="day_of_week" property="dayOfWeek" jdbcType="VARCHAR" />
+    <result column="range_start_time" property="rangeStartTime" jdbcType="VARCHAR" />
+    <result column="range_end_time" property="rangeEndTime" jdbcType="VARCHAR" />
+    <result column="range_door_open_type" property="rangeDoorOpenType" jdbcType="VARCHAR" />
+    <result column="range_flag_id" property="rangeFlagId" jdbcType="VARCHAR" />
+    <result column="door_id" property="doorId" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    employee_id, day_of_week, range_start_time, range_end_time, range_door_open_type, 
+    range_flag_id, door_id
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from time_range_privilege_employee
+    where employee_id = #{employeeId,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from time_range_privilege_employee
+    where employee_id = #{employeeId,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.xiangshangban.device.bean.TimeRangePrivilegeEmployee" >
+    insert into time_range_privilege_employee (employee_id, day_of_week, range_start_time, 
+      range_end_time, range_door_open_type, range_flag_id, 
+      door_id)
+    values (#{employeeId,jdbcType=VARCHAR}, #{dayOfWeek,jdbcType=VARCHAR}, #{rangeStartTime,jdbcType=VARCHAR}, 
+      #{rangeEndTime,jdbcType=VARCHAR}, #{rangeDoorOpenType,jdbcType=VARCHAR}, #{rangeFlagId,jdbcType=VARCHAR}, 
+      #{doorId,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.xiangshangban.device.bean.TimeRangePrivilegeEmployee" >
+    insert into time_range_privilege_employee
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="employeeId != null" >
+        employee_id,
+      </if>
+      <if test="dayOfWeek != null" >
+        day_of_week,
+      </if>
+      <if test="rangeStartTime != null" >
+        range_start_time,
+      </if>
+      <if test="rangeEndTime != null" >
+        range_end_time,
+      </if>
+      <if test="rangeDoorOpenType != null" >
+        range_door_open_type,
+      </if>
+      <if test="rangeFlagId != null" >
+        range_flag_id,
+      </if>
+      <if test="doorId != null" >
+        door_id,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="employeeId != null" >
+        #{employeeId,jdbcType=VARCHAR},
+      </if>
+      <if test="dayOfWeek != null" >
+        #{dayOfWeek,jdbcType=VARCHAR},
+      </if>
+      <if test="rangeStartTime != null" >
+        #{rangeStartTime,jdbcType=VARCHAR},
+      </if>
+      <if test="rangeEndTime != null" >
+        #{rangeEndTime,jdbcType=VARCHAR},
+      </if>
+      <if test="rangeDoorOpenType != null" >
+        #{rangeDoorOpenType,jdbcType=VARCHAR},
+      </if>
+      <if test="rangeFlagId != null" >
+        #{rangeFlagId,jdbcType=VARCHAR},
+      </if>
+      <if test="doorId != null" >
+        #{doorId,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.xiangshangban.device.bean.TimeRangePrivilegeEmployee" >
+    update time_range_privilege_employee
+    <set >
+      <if test="dayOfWeek != null" >
+        day_of_week = #{dayOfWeek,jdbcType=VARCHAR},
+      </if>
+      <if test="rangeStartTime != null" >
+        range_start_time = #{rangeStartTime,jdbcType=VARCHAR},
+      </if>
+      <if test="rangeEndTime != null" >
+        range_end_time = #{rangeEndTime,jdbcType=VARCHAR},
+      </if>
+      <if test="rangeDoorOpenType != null" >
+        range_door_open_type = #{rangeDoorOpenType,jdbcType=VARCHAR},
+      </if>
+      <if test="rangeFlagId != null" >
+        range_flag_id = #{rangeFlagId,jdbcType=VARCHAR},
+      </if>
+      <if test="doorId != null" >
+        door_id = #{doorId,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where employee_id = #{employeeId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.xiangshangban.device.bean.TimeRangePrivilegeEmployee" >
+    update time_range_privilege_employee
+    set day_of_week = #{dayOfWeek,jdbcType=VARCHAR},
+      range_start_time = #{rangeStartTime,jdbcType=VARCHAR},
+      range_end_time = #{rangeEndTime,jdbcType=VARCHAR},
+      range_door_open_type = #{rangeDoorOpenType,jdbcType=VARCHAR},
+      range_flag_id = #{rangeFlagId,jdbcType=VARCHAR},
+      door_id = #{doorId,jdbcType=VARCHAR}
+    where employee_id = #{employeeId,jdbcType=VARCHAR}
+  </update>
+
+  <select id="selectExitByEmployeeId" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from time_range_privilege_employee
+    where employee_id = #{employeeId,jdbcType=VARCHAR}
+  </select>
+
+  <delete id="deleteByEmployeeId" parameterType="java.lang.String" >
+    delete from time_range_privilege_employee
+    where employee_id = #{employeeId,jdbcType=VARCHAR}
+  </delete>
+
+</mapper>

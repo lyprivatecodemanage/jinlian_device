@@ -6,6 +6,7 @@ package com.xiangshangban.device.bean;
  * describe: TODO 门关联人员权限信息的查询条件封装类
  */
 public class RelateEmpPermissionCondition {
+
     private String doorId;
     private String empName;
     private String deptName;

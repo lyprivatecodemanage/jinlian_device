@@ -12,11 +12,14 @@
     <result column="second_publish_password" property="secondPublishPassword" jdbcType="VARCHAR" />
     <result column="threaten_publish_passwrod" property="threatenPublishPasswrod" jdbcType="VARCHAR" />
     <result column="manager_password" property="managerPassword" jdbcType="VARCHAR" />
+    <result column="enable_door_keep_open" property="enableDoorKeepOpen" jdbcType="VARCHAR" />
+    <result column="enable_first_card_keep_open" property="enableFirstCardKeepOpen" jdbcType="VARCHAR" />
+    <result column="enable_door_calendar" property="enableDoorCalendar" jdbcType="VARCHAR" />
   </resultMap>
   <sql id="Base_Column_List" >
     door_id, door_open_limit_time, lock_open_limit_time, enable_door_event_record, fault_count_authentication, 
     alarm_time_length_trespass, first_publish_password, second_publish_password, threaten_publish_passwrod, 
-    manager_password
+    manager_password, enable_door_keep_open, enable_first_card_keep_open, enable_door_calendar
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
     select 
@@ -33,12 +36,14 @@
       enable_door_event_record, fault_count_authentication, 
       alarm_time_length_trespass, first_publish_password, 
       second_publish_password, threaten_publish_passwrod, 
-      manager_password)
+      manager_password, enable_door_keep_open, enable_first_card_keep_open, 
+      enable_door_calendar)
     values (#{doorId,jdbcType=VARCHAR}, #{doorOpenLimitTime,jdbcType=VARCHAR}, #{lockOpenLimitTime,jdbcType=VARCHAR}, 
       #{enableDoorEventRecord,jdbcType=VARCHAR}, #{faultCountAuthentication,jdbcType=VARCHAR}, 
       #{alarmTimeLengthTrespass,jdbcType=VARCHAR}, #{firstPublishPassword,jdbcType=VARCHAR}, 
       #{secondPublishPassword,jdbcType=VARCHAR}, #{threatenPublishPasswrod,jdbcType=VARCHAR}, 
-      #{managerPassword,jdbcType=VARCHAR})
+      #{managerPassword,jdbcType=VARCHAR}, #{enableDoorKeepOpen,jdbcType=VARCHAR}, #{enableFirstCardKeepOpen,jdbcType=VARCHAR}, 
+      #{enableDoorCalendar,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="com.xiangshangban.device.bean.DoorSetting" >
     insert into door_setting
@@ -73,6 +78,15 @@
       <if test="managerPassword != null" >
         manager_password,
       </if>
+      <if test="enableDoorKeepOpen != null" >
+        enable_door_keep_open,
+      </if>
+      <if test="enableFirstCardKeepOpen != null" >
+        enable_first_card_keep_open,
+      </if>
+      <if test="enableDoorCalendar != null" >
+        enable_door_calendar,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="doorId != null" >
@@ -104,6 +118,15 @@
       </if>
       <if test="managerPassword != null" >
         #{managerPassword,jdbcType=VARCHAR},
+      </if>
+      <if test="enableDoorKeepOpen != null" >
+        #{enableDoorKeepOpen,jdbcType=VARCHAR},
+      </if>
+      <if test="enableFirstCardKeepOpen != null" >
+        #{enableFirstCardKeepOpen,jdbcType=VARCHAR},
+      </if>
+      <if test="enableDoorCalendar != null" >
+        #{enableDoorCalendar,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
@@ -137,6 +160,15 @@
       <if test="managerPassword != null" >
         manager_password = #{managerPassword,jdbcType=VARCHAR},
       </if>
+      <if test="enableDoorKeepOpen != null" >
+        enable_door_keep_open = #{enableDoorKeepOpen,jdbcType=VARCHAR},
+      </if>
+      <if test="enableFirstCardKeepOpen != null" >
+        enable_first_card_keep_open = #{enableFirstCardKeepOpen,jdbcType=VARCHAR},
+      </if>
+      <if test="enableDoorCalendar != null" >
+        enable_door_calendar = #{enableDoorCalendar,jdbcType=VARCHAR},
+      </if>
     </set>
     where door_id = #{doorId,jdbcType=VARCHAR}
   </update>
@@ -150,7 +182,10 @@
       first_publish_password = #{firstPublishPassword,jdbcType=VARCHAR},
       second_publish_password = #{secondPublishPassword,jdbcType=VARCHAR},
       threaten_publish_passwrod = #{threatenPublishPasswrod,jdbcType=VARCHAR},
-      manager_password = #{managerPassword,jdbcType=VARCHAR}
+      manager_password = #{managerPassword,jdbcType=VARCHAR},
+      enable_door_keep_open = #{enableDoorKeepOpen,jdbcType=VARCHAR},
+      enable_first_card_keep_open = #{enableFirstCardKeepOpen,jdbcType=VARCHAR},
+      enable_door_calendar = #{enableDoorCalendar,jdbcType=VARCHAR}
     where door_id = #{doorId,jdbcType=VARCHAR}
   </update>
 </mapper>

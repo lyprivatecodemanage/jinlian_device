@@ -1,12 +1,10 @@
 package com.xiangshangban.device.bean;
 
 public class DoorException {
+
     private String doorExceptionId;
-
     private String alarmType;
-
     private String alarmDate;
-
     private String employeeId;
 
     public String getDoorExceptionId() {

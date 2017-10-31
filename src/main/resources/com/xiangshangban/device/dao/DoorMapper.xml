@@ -95,6 +95,10 @@
     SELECT door_id,door_name FROM door_ WHERE device_id = #{deviceId,jdbcType=VARCHAR}
   </select>
 
+  <select id="findAllByDoorId" resultMap="BaseResultMap" parameterType="java.lang.String">
+    SELECT * FROM door_ WHERE door_id = #{doorId,jdbcType=VARCHAR}
+  </select>
+
     <!--################新添加部分#################-->
   <!--根据门名称查询门信息-->
   <select id="getDoorInfo" parameterType="com.xiangshangban.device.bean.Door" resultType="map">

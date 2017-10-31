@@ -97,7 +97,7 @@ public class RabbitMQSender {
      * @param dataObject
      * @return
      */
-    public static Map<String, Object> messagePackaging(DoorCmd doorCmd, String dataName, Object dataObject){
+    public static Map<String, Object> messagePackaging(DoorCmd doorCmd, String dataName, Object dataObject, String commandMode){
 
         //最外层协议格式
         Map protocolMap = new LinkedHashMap();
@@ -111,9 +111,14 @@ public class RabbitMQSender {
         protocolMap.put("commandTotal", doorCmd.getCommandTotal());
         protocolMap.put("commandType", doorCmd.getCommandType());
 
-        mapData.put(dataName, dataObject);
+        //判断是回复还是主动下发
+        if (commandMode.equals("C")){
+            mapData.put(dataName, dataObject);
+            protocolMap.put("data", mapData);
+        }else if (commandMode.equals("R")){
+            protocolMap.put("result", dataObject);
+        }
 
-        protocolMap.put("data", mapData);
         protocolMap.put("deviceId", doorCmd.getDeviceId());
         protocolMap.put("fileEdition", doorCmd.getFileEdition());
         protocolMap.put("outOfTime", doorCmd.getOutOfTime());

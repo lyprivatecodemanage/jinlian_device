@@ -1,22 +1,19 @@
 package com.xiangshangban.device.bean;
 
-public class TimeRangeCommonEmployee {
+public class TimeRangePrivilegeEmployee {
+    private String employeeId;
+
+    private String dayOfWeek;
+
+    private String rangeStartTime;
+
+    private String rangeEndTime;
+
+    private String rangeDoorOpenType;
 
     private String rangeFlagId;
-    private String employeeId;
-    private String dayOfWeek;
-    private String rangeStartTime;
-    private String rangeEndTime;
-    private String rangeDoorOpenType;
-    private String isAllDay;
 
-    public String getRangeFlagId() {
-        return rangeFlagId;
-    }
-
-    public void setRangeFlagId(String rangeFlagId) {
-        this.rangeFlagId = rangeFlagId;
-    }
+    private String doorId;
 
     public String getEmployeeId() {
         return employeeId;
@@ -58,11 +55,19 @@ public class TimeRangeCommonEmployee {
         this.rangeDoorOpenType = rangeDoorOpenType;
     }
 
-    public String getIsAllDay() {
-        return isAllDay;
+    public String getRangeFlagId() {
+        return rangeFlagId;
     }
 
-    public void setIsAllDay(String isAllDay) {
-        this.isAllDay = isAllDay;
+    public void setRangeFlagId(String rangeFlagId) {
+        this.rangeFlagId = rangeFlagId;
+    }
+
+    public String getDoorId() {
+        return doorId;
+    }
+
+    public void setDoorId(String doorId) {
+        this.doorId = doorId;
     }
 }

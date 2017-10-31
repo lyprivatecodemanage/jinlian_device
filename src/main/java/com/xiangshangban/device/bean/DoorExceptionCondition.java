@@ -6,6 +6,7 @@ package com.xiangshangban.device.bean;
  * describe: TODO 门禁异常记录查询条件封装类
  */
 public class DoorExceptionCondition {
+
     private String name;
     private String department;
     private String alarmType;

@@ -6,6 +6,7 @@ import com.xiangshangban.device.common.rmq.RabbitMQSender;
 import com.xiangshangban.device.common.utils.*;
 import com.xiangshangban.device.dao.*;
 import com.xiangshangban.device.service.IEmployeeService;
+import com.xiangshangban.device.service.IEntranceGuardService;
 import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -32,6 +33,9 @@ public class EmployeeController {
     private DoorMapper doorMapper;
 
     @Autowired
+    private EmployeeMapper employeeMapper;
+
+    @Autowired
     private DoorCmdMapper doorCmdMapper;
 
     @Autowired
@@ -43,25 +47,28 @@ public class EmployeeController {
     @Autowired
     private TimeRangeCommonEmployeeMapper timeRangeCommonEmployeeMapper;
 
-    /**
-     * 人员操作命令生成器（暂未使用）
-     * @param userInformation
-     */
-    @ResponseBody
-    @Transactional
-    @RequestMapping(value = "/commandGenerate", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
-    public void employeeCommandGenerate(@RequestBody String userInformation){
+    @Autowired
+    private IEntranceGuardService entranceGuardService;
 
-        System.out.println("[*] userInformation: " + userInformation);
-
-        //JSON字符串解析
-        Map<String, Object> userInformationMap = (Map<String, Object>)JSONObject.fromObject(userInformation);
-        String action = (String) userInformationMap.get("action");
-        List<String> userIdCollection = (List<String>) userInformationMap.get("employeeIdCollection");
-
-        iEmployeeService.employeeCommandGenerate(action, userIdCollection);
-
-    }
+//    /**
+//     * 人员模块命令生成器
+//     * @param userInformation
+//     */
+//    @ResponseBody
+//    @Transactional
+//    @RequestMapping(value = "/commandGenerate", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+//    public void employeeCommandGenerate(@RequestBody String userInformation){
+//
+//        System.out.println("[*] userInformation: " + userInformation);
+//
+//        //JSON字符串解析
+//        Map<String, Object> userInformationMap = (Map<String, Object>)JSONObject.fromObject(userInformation);
+//        String action = (String) userInformationMap.get("action");
+//        List<String> userIdCollection = (List<String>) userInformationMap.get("employeeIdCollection");
+//
+//        iEmployeeService.employeeCommandGenerate(action, userIdCollection);
+//
+//    }
 
     /**
      * 下发人员信息及门禁权限
@@ -170,22 +177,59 @@ public class EmployeeController {
                 System.out.println("[*] HTTP send: 已发出请求");
                 System.out.println("[*] employeeInfo: " + employeeInfo);
 
+                Map<String, String> employeeInfoMap = new HashMap<String, String>();
+
                 //取出需要的人员信息
-                Map<String, String> employeeInfoMap = (Map<String, String>)JSONObject.fromObject(employeeInfo).get("emp");
+                try {
+                    employeeInfoMap = (Map<String, String>)JSONObject.fromObject(employeeInfo).get("emp");
+                }catch (Exception e){
+                    System.out.println("无法获取人员模块的人员信息!");
+                }
+                String employeeId = employeeInfoMap.get("employeeId");
+                String employeeNo = employeeInfoMap.get("employeeNo");
+                String employeeName = employeeInfoMap.get("employeeName");
+                String departmentId = employeeInfoMap.get("departmentId");
+                String departmentName = employeeInfoMap.get("departmentName");
+                String entryTime = employeeInfoMap.get("entryTime");
+                String probationaryExpired = employeeInfoMap.get("probationaryExpired");
+                String employeePhone = employeeInfoMap.get("employeePhone");
+                String employeeStatus = employeeInfoMap.get("employeeStatus");
+                String companyId = employeeInfoMap.get("companyId");
+                String companyName = employeeInfoMap.get("companyName");
 
                 //增加人员信息到本地人员表
-                //以后补
+                Employee employee = new Employee();
+                employee.setEmployeeId(employeeId);
+                employee.setEmployeeNumber(employeeNo);
+                employee.setEmployeeName(employeeName);
+                employee.setEmployeeDepartmentId(departmentId);
+                employee.setEmployeeDepartmentName(departmentName);
+                employee.setEmployeeEntryTime(entryTime);
+                employee.setEmployeeProbationaryExpired(probationaryExpired);
+                employee.setEmployeePhone(employeePhone);
+                employee.setEmployeeStatus(employeeStatus);
+                employee.setUpdateTime(DateUtils.getDateTime());
+                employee.setEmployeeCompanyId(companyId);
+                employee.setEmployeeCompanyName(companyName);
+
+                //查询人员信息是否存在
+                Employee employeeExit = employeeMapper.selectByPrimaryKey(employeeId);
+                if (employeeExit == null){
+                    employeeMapper.insertSelective(employee);
+                }else {
+                    employeeMapper.updateByPrimaryKeySelective(employee);
+                }
 
                 //组装人员数据DATA
                 Map<String, Object> userInformation = new LinkedHashMap<String, Object>();
-                userInformation.put("userId", employeeInfoMap.get("employeeId"));
-                userInformation.put("userCode", employeeInfoMap.get("employeeNo"));
-                userInformation.put("userName", employeeInfoMap.get("employeeName"));
-                userInformation.put("userDeptId", employeeInfoMap.get("departmentId"));
-                userInformation.put("userDeptName", employeeInfoMap.get("departmentName"));
+                userInformation.put("userId", employeeId);
+                userInformation.put("userCode", employeeNo);
+                userInformation.put("userName", employeeName);
+                userInformation.put("userDeptId", departmentId);
+                userInformation.put("userDeptName", departmentName);
                 userInformation.put("birthday", "");
-                userInformation.put("entryTime", employeeInfoMap.get("entryTime"));
-                userInformation.put("probationaryExpired", employeeInfoMap.get("probationaryExpired"));
+                userInformation.put("entryTime", entryTime);
+                userInformation.put("probationaryExpired", probationaryExpired);
                 userInformation.put("contractExpired", "");
                 userInformation.put("adminFlag", "");
                 userInformation.put("userImg", "");
@@ -193,7 +237,7 @@ public class EmployeeController {
                 userInformation.put("userFinger1", "");
                 userInformation.put("userFinger2", "");
                 userInformation.put("userFace", "");
-                userInformation.put("userPhone", employeeInfoMap.get("employeePhone"));
+                userInformation.put("userPhone", employeePhone);
                 userInformation.put("userNFC", "");
 
 
@@ -201,8 +245,8 @@ public class EmployeeController {
                  * 下发人员开门的门禁权限
                  */
                 //关联人员和门禁
-                String employeeId = employeeMap.get("employeeId");
-                String employeeName = employeeMap.get("employeeName");
+//                String employeeId = employeeMap.get("employeeId");
+//                String employeeName = employeeMap.get("employeeName");
                 iEmployeeService.relateEmployeeAndDoor(doorId, doorName, employeeId, employeeName);
 
                 List<Map<String, Object>> oneWeekTimeList = new ArrayList<Map<String, Object>>();
@@ -275,7 +319,7 @@ public class EmployeeController {
                      * 人员基本信息
                      */
                     //获取完整的数据加协议封装格式
-                    Map<String, Object> userInformationAll =  RabbitMQSender.messagePackaging(doorCmdEmployeeInformation, "userInfo", userInformation);
+                    Map<String, Object> userInformationAll =  RabbitMQSender.messagePackaging(doorCmdEmployeeInformation, "userInfo", userInformation, "C");
                     //命令状态设置为: 待发送
                     doorCmdEmployeeInformation.setStatus("0");
                     //设置md5校验值
@@ -283,13 +327,13 @@ public class EmployeeController {
                     //设置数据库的data字段
                     doorCmdEmployeeInformation.setData(JSON.toJSONString(userInformationAll.get("data")));
                     //命令数据存入数据库
-                    iEmployeeService.insertEmployeeCommand(doorCmdEmployeeInformation);
+                    entranceGuardService.insertCommand(doorCmdEmployeeInformation);
 
                     /**
                      * 人员开门权限
                      */
                     //获取完整的数据加协议封装格式
-                    Map<String, Object> userPermissionAll =  RabbitMQSender.messagePackaging(doorCmdEmployeePermission, "userPermission", userPermission);
+                    Map<String, Object> userPermissionAll =  RabbitMQSender.messagePackaging(doorCmdEmployeePermission, "userPermission", userPermission, "C");
                     //命令状态设置为: 待发送
                     doorCmdEmployeePermission.setStatus("0");
                     //设置md5校验值
@@ -297,7 +341,7 @@ public class EmployeeController {
                     //设置数据库的data字段
                     doorCmdEmployeePermission.setData(JSON.toJSONString(userPermissionAll.get("data")));
                     //命令数据存入数据库
-                    iEmployeeService.insertEmployeeCommand(doorCmdEmployeePermission);
+                    entranceGuardService.insertCommand(doorCmdEmployeePermission);
 
                 }else if (immediatelyDownload.equals("1")){
 
@@ -306,7 +350,7 @@ public class EmployeeController {
                      */
                     //获取完整的数据加协议封装格式
                     RabbitMQSender rabbitMQSender = new RabbitMQSender();
-                    Map<String, Object> userInformationAll =  rabbitMQSender.messagePackaging(doorCmdEmployeeInformation, "userInfo", userInformation);
+                    Map<String, Object> userInformationAll =  rabbitMQSender.messagePackaging(doorCmdEmployeeInformation, "userInfo", userInformation, "C");
                     //命令状态设置为: 发送中
                     doorCmdEmployeeInformation.setStatus("1");
                     //设置md5校验值
@@ -314,7 +358,7 @@ public class EmployeeController {
                     //设置数据库的data字段
                     doorCmdEmployeeInformation.setData(JSON.toJSONString(userInformationAll.get("data")));
                     //命令数据存入数据库
-                    iEmployeeService.insertEmployeeCommand(doorCmdEmployeeInformation);
+                    entranceGuardService.insertCommand(doorCmdEmployeeInformation);
                     //立即下发数据到MQ
                     rabbitMQSender.sendMessage("hello", userInformationAll);
 
@@ -322,7 +366,7 @@ public class EmployeeController {
                      * 人员开门权限
                      */
                     //获取完整的数据加协议封装格式
-                    Map<String, Object> userPermissionAll =  rabbitMQSender.messagePackaging(doorCmdEmployeePermission, "userPermission", userPermission);
+                    Map<String, Object> userPermissionAll =  rabbitMQSender.messagePackaging(doorCmdEmployeePermission, "userPermission", userPermission, "C");
                     //命令状态设置为: 发送中
                     doorCmdEmployeePermission.setStatus("1");
                     //设置md5校验值
@@ -330,7 +374,7 @@ public class EmployeeController {
                     //设置数据库的data字段
                     doorCmdEmployeePermission.setData(JSON.toJSONString(userPermissionAll.get("data")));
                     //命令数据存入数据库
-                    iEmployeeService.insertEmployeeCommand(doorCmdEmployeePermission);
+                    entranceGuardService.insertCommand(doorCmdEmployeePermission);
                     //立即下发数据到MQ
                     rabbitMQSender.sendMessage("hello", userPermissionAll);
 
@@ -386,7 +430,7 @@ public class EmployeeController {
         doorCmdDeleteEmployee.setData(JSON.toJSONString(employeeIdList));
 
         //获取完整的数据加协议封装格式
-        Map<String, Object> userDeleteInformation =  RabbitMQSender.messagePackaging(doorCmdDeleteEmployee, "employeeIdList", employeeIdList);
+        Map<String, Object> userDeleteInformation =  RabbitMQSender.messagePackaging(doorCmdDeleteEmployee, "employeeIdList", employeeIdList, "C");
         //命令状态设置为: 发送中
         doorCmdDeleteEmployee.setStatus("1");
         //设置md5校验值
@@ -394,7 +438,7 @@ public class EmployeeController {
         //设置数据库的data字段
         doorCmdDeleteEmployee.setData(JSON.toJSONString(userDeleteInformation.get("data")));
         //命令数据存入数据库
-        iEmployeeService.insertEmployeeCommand(doorCmdDeleteEmployee);
+        entranceGuardService.insertCommand(doorCmdDeleteEmployee);
         //立即下发数据到MQ
         RabbitMQSender rabbitMQSender = new RabbitMQSender();
         rabbitMQSender.sendMessage("hello", userDeleteInformation);
@@ -444,7 +488,7 @@ public class EmployeeController {
         doorCmdDeleteEmployee.setData(JSON.toJSONString(employeeIdList));
 
         //获取完整的数据加协议封装格式
-        Map<String, Object> userDeleteInformation =  RabbitMQSender.messagePackaging(doorCmdDeleteEmployee, "employeeIdList", employeeIdList);
+        Map<String, Object> userDeleteInformation =  RabbitMQSender.messagePackaging(doorCmdDeleteEmployee, "employeeIdList", employeeIdList, "C");
         //命令状态设置为: 发送中
         doorCmdDeleteEmployee.setStatus("1");
         //设置md5校验值
@@ -452,7 +496,7 @@ public class EmployeeController {
         //设置数据库的data字段
         doorCmdDeleteEmployee.setData(JSON.toJSONString(userDeleteInformation.get("data")));
         //命令数据存入数据库
-        iEmployeeService.insertEmployeeCommand(doorCmdDeleteEmployee);
+        entranceGuardService.insertCommand(doorCmdDeleteEmployee);
         //立即下发数据到MQ
         RabbitMQSender rabbitMQSender = new RabbitMQSender();
         rabbitMQSender.sendMessage("hello", userDeleteInformation);

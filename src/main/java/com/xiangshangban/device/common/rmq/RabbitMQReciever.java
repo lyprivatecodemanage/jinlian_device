@@ -1,48 +1,54 @@
 package com.xiangshangban.device.common.rmq;
 
+import com.alibaba.fastjson.JSON;
 import com.rabbitmq.client.*;
+import com.xiangshangban.device.bean.DoorCmd;
 import com.xiangshangban.device.bean.MQMessage;
+import com.xiangshangban.device.common.encode.MD5Util;
+import com.xiangshangban.device.dao.DoorCmdMapper;
+import com.xiangshangban.device.service.IEmployeeService;
+import net.sf.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.rabbit.annotation.RabbitHandler;
+import org.springframework.context.annotation.Bean;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.amqp.core.Binding;
+import org.springframework.amqp.core.BindingBuilder;
+import org.springframework.amqp.core.DirectExchange;
+import org.springframework.stereotype.Component;
+//import com.rabbitmq.config.AmqpConfig;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 /**
  * Created by liuguanglong on 2017/10/18.
  */
+
+@Component
 public class RabbitMQReciever {
 
-//    private static final Log LOG = LogFactory.getLog(RabbitMQReciever.class);
+    @Autowired
+    private IEmployeeService employeeService;
 
-//    @Resource
-//    DeviceService deviceService;
-//    @Resource
-//    MessageService messageService;
-
-    public void handleMessage(Object message) throws IOException {
-        MQMessage rmqMessage = (MQMessage)message;
-        if( null != rmqMessage && StringUtils.isNotEmpty(rmqMessage.getFileContent())){
-            String SN = rmqMessage.getDeviceId();
-            //设备有效
-            if(StringUtils.isNotEmpty(SN)){
-            }else{
-                System.out.println("RABBITMQ'S ERROR:can not get a valid device:" + rmqMessage.getDeviceId());
-            }
-        }else{
-            System.out.println("RABBITMQ'S ERROR:the message is null.");
-        }
-    }
+    @Autowired
+    private DoorCmdMapper doorCmdMapper;
 
     //接收测试
-    //接收可自动创建交换器、队列并绑定，发生不能
-    public static void main(String [] s) throws InterruptedException, IOException, TimeoutException {
+    //接收可自动创建交换器、队列并绑定，发出不能
+    public void startRabbitMqReceiver() throws InterruptedException, IOException, TimeoutException {
 
         //交换器名称
         String EXCHANGE_NAME = "upload";
         //队列名称
-        String QUEUE_NAME = "haha";
+        String QUEUE_NAME = "welcome";
         //路由关键字
-        String routingKey = "haha";
+        String routingKey = "welcome";
         //主机ip
         String host = "localhost";
         //rabbitMQ端口号
@@ -83,21 +89,54 @@ public class RabbitMQReciever {
                 String message = new String(body, "UTF-8");
                 System.out.println(" [x] Received '" + envelope.getRoutingKey() + "':'" + message + "'");
 
-//                //md5校验
-//                JSONObject jsonObject = JSONObject.fromObject(message);
-//                Map<String, Object> mapResult = (Map<String, Object>) jsonObject;
-//                //获取对方的md5
-//                String otherMd5 = (String) mapResult.get("MD5Check");
-//                mapResult.remove("MD5Check");
-//                String messageCheck = JSON.toJSONString(mapResult);
-//                //生成我的md5
-//                String myMd5 = MD5Encode.encode("XC9EO5GKOIVRMBQ2YE8X", messageCheck);
-//                //双方的md5比较判断
-//                if (myMd5.equals(otherMd5)){
-//                    System.out.println("数据未被修改");
-//                }else {
-//                    System.out.println("数据已被修改");
-//                }
+                JSONObject jsonObject = new JSONObject();
+
+                try {
+                    jsonObject = JSONObject.fromObject(message);
+                }catch (Exception e){
+//                    e.printStackTrace();
+                    System.out.println("RabbitMQ收到非法JSON数据！！！");
+                    return;
+                }
+
+                Map<String, Object> mapResult = (Map<String, Object>) jsonObject;
+                //判断是设备主动上传还是消息回复
+                if (mapResult.get("commandMode").equals("C")){
+                    //md5校验
+                    //获取对方的md5
+                    String otherMd5 = (String) mapResult.get("MD5Check");
+                    mapResult.remove("MD5Check");
+                    String messageCheck = JSON.toJSONString(mapResult);
+                    //生成我的md5
+                    String myMd5 = MD5Util.encryptPassword(messageCheck, "XC9EO5GKOIVRMBQ2YE8X");
+                    //双方的md5比较判断
+                    if (myMd5.equals(otherMd5)){
+                        System.out.println("设备上传的数据未被修改");
+                    }else {
+                        System.out.println("设备上传的数据已被修改");
+                    }
+
+                    //命令类型判断
+                    Map<String, String> commandMap = (Map<String, String>)mapResult.get("command");
+                    if (commandMap.get("ACTION").equals("UPDATE_USER_LABEL")){
+                        //人员人脸、指纹、卡号信息上传存储
+                        employeeService.saveEmployeeInputInfo((String) mapResult.get("data"));
+                    }else if (commandMap.get("ACTION").equals("UPLOAD_ACCESS_RECORD")){
+                        //门禁记录上传存储
+                        System.out.println("[#] message: " + message);
+                        employeeService.doorRecordSave(message);
+                    }
+
+                }else if (mapResult.get("commandMode").equals("R")){
+                    //回复的数据获取subCMDID
+                    Map<String, String> commandMap = (Map<String, String>)mapResult.get("command");
+                    String subCmdId = commandMap.get("subCMDID");
+                    DoorCmd doorCmd = new DoorCmd();
+                    doorCmd.setSubCmdId(subCmdId);
+                    doorCmd.setStatus("2");
+                    //改变该这条命令的状态
+                    doorCmdMapper.updateBySubCmdIdSelective(doorCmd);
+                }
             }
         };
         channel.basicConsume(QUEUE_NAME, true, consumer);
@@ -110,7 +149,5 @@ public class RabbitMQReciever {
 //            String message = new String(delivery.getBody());
 //            System.out.println(" [x] Received '" + message + "'");
 //        }
-
     }
-
 }

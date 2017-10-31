@@ -12,6 +12,7 @@ public class MQMessage implements Serializable {
     private String fileEdition;
     private String fileMd5;
     private String fileContent;
+
     public String getDeviceId() {
         return deviceId;
     }

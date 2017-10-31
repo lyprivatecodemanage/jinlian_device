@@ -12,6 +12,9 @@ import java.util.Map;
  */
 public interface IEntranceGuardService {
 
+    //添加or更新门禁命令表（同一个人传入的数据不一样时执行更新操作）
+    void insertCommand(DoorCmd doorCmd);
+
     //TODO 基础信息部分
     /**
      * 添加门信息
@@ -81,4 +84,17 @@ public interface IEntranceGuardService {
 
     //2）门禁异常
     public List<DoorException> queryDoorExceptionRecord(DoorExceptionCondition doorExceptionCondition);
+
+    //门禁配置---功能配置（身份验证失败次数、非法入侵、报警时长、密码、开门事件记录）
+    void doorCommonSetupAdditional(String doorId, String countLimitAuthenticationFailed, String enableAlarm,
+                                   String alarmTimeLength, String publicPassword1, String publicPassword2, String threatenPassword,
+                                   String deviceManagePassword, String enableDoorOpenRecord, List oneWeekTimeDoorKeepList,
+                                   String enableDoorKeepOpen, String enableFirstCardKeepOpen, String enableDoorCalendar);
+
+    //门禁配置---功能配置（首卡权限配置）
+    void handOutFirstCard(String doorId, String enableFirstCardKeepOpen, List<String> employeeIdList, List oneWeekTimeFirstCardList);
+
+    //门禁配置---功能配置（门禁日历）
+    void handOutDoorCalendar(String doorId, String enableDoorCalendar, List accessCalendar);
+
 }

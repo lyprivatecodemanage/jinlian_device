@@ -22,4 +22,14 @@ public interface IDeviceService {
      */
     List<Device> queryAllDeviceInfo();
 
+    /**
+     * 绑定设备
+     */
+    void bindDevice();
+
+    /**
+     * 解绑设备
+     */
+    void unBindDevice();
+
 }

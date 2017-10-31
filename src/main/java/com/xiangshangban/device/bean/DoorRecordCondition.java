@@ -6,6 +6,7 @@ package com.xiangshangban.device.bean;
  * describe: TODO 门禁记录查询条件封装类
  */
 public class DoorRecordCondition {
+
     private String name;
     private String department;
     private String punchCardType;

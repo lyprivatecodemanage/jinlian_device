@@ -3,6 +3,8 @@ package com.xiangshangban.device.dao;
 import com.xiangshangban.device.bean.DoorCmd;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 public interface DoorCmdMapper {
     int deleteByPrimaryKey(String serverId);
@@ -13,11 +15,13 @@ public interface DoorCmdMapper {
 
     DoorCmd selectByPrimaryKey(String serverId);
 
-    int updateByPrimaryKeySelective(DoorCmd record);
+    int updateBySubCmdIdSelective(DoorCmd record);
 
     int updateByPrimaryKey(DoorCmd record);
 
     DoorCmd selectBySubCmdId(DoorCmd doorCmd);
 
     int updateBySubCmdId(DoorCmd doorCmd);
+
+    List<DoorCmd> selectByStatus(String status);
 }

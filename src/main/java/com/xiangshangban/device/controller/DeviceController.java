@@ -73,4 +73,22 @@ public class DeviceController {
         return JSONArray.toJSONString(devices);
     }
 
+    /**
+     * 绑定设备
+     */
+    public void bindDevice(){
+
+        deviceService.bindDevice();
+
+    }
+
+    /**
+     * 解绑设备
+     */
+    public void unBindDevice(){
+
+        deviceService.unBindDevice();
+
+    }
+
 }

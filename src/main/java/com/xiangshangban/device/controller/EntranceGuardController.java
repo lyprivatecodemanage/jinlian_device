@@ -3,6 +3,7 @@ package com.xiangshangban.device.controller;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.xiangshangban.device.bean.*;
+import com.xiangshangban.device.dao.DoorMapper;
 import com.xiangshangban.device.service.IEntranceGuardService;
 import org.apache.commons.collections.map.HashedMap;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,9 @@ public class EntranceGuardController {
 
     @Autowired
     private IEntranceGuardService iegs;
+
+    @Autowired
+    private DoorMapper doorMapper;
 
     //TODO 门禁管理------“基础信息”
 
@@ -248,11 +252,6 @@ public class EntranceGuardController {
             }
         }
 
-
-
-
-
-
         //去除重复的key
         List<String> newKeyList = new ArrayList<String>(new TreeSet<>(allEmpCMDKey));
 
@@ -323,4 +322,127 @@ public class EntranceGuardController {
         List<DoorException> doorExceptions = iegs.queryDoorExceptionRecord(doorExceptionCondition);
         return JSONArray.toJSONString(doorExceptions);
     }
+
+    //TODO 门禁管理------------门禁系统设置下发
+
+    /**
+     * 门禁高级设置
+     * @param doorFeaturesSetup
+     */
+    @PostMapping("/doorFeaturesSetup")
+    public void doorFeaturesSetup(@RequestBody String doorFeaturesSetup){
+
+        /**测试数据
+         *
+         {
+         "doorId": "001",
+         "countLimitAuthenticationFailed": "5",
+         "enableAlarm": "0",
+         "alarmTimeLength": "60",
+         "publicPassword1": "110",
+         "publicPassword2": "120",
+         "threatenPassword": "130",
+         "deviceManagePassword": "18649866",
+         "enableDoorOpenRecord": "0",
+         "enableDoorKeepOpen": "1",
+         "enableFirstCardKeepOpen": "1",
+         "enableDoorCalendar": "1",
+         "employeeIdList": [
+         "897020EA96214392B28369F2B421E319",
+         "9C305EC5587745FF9F0D8198512264D6"
+         ],
+         "oneWeekTimeDoorKeepList": [
+         {
+         "weekType": "3",
+         "startTime": "08:00",
+         "endTime": "12:02"
+         },
+         {
+         "weekType": "3",
+         "startTime": "14:00",
+         "endTime": "18:10"
+         }
+         ],
+         "oneWeekTimeFirstCardList": [
+         {
+         "weekType": "4",
+         "startTime": "08:00",
+         "endTime": "12:02",
+         "doorOpenType": "234"
+         },
+         {
+         "weekType": "4",
+         "startTime": "14:00",
+         "endTime": "18:10",
+         "doorOpenType": "234"
+         }
+         ],
+         "accessCalendar": [
+         {
+         "deviceCalendarDate": "2017-10-10",
+         "enableDoorOpenGlobal": "0"
+         },
+         {
+         "deviceCalendarDate": "2017-10-12",
+         "enableDoorOpenGlobal": "1"
+         }
+         ]
+         }
+         */
+
+        //解析数据
+        Map<String, Object> setupMap = (Map<String, Object>)net.sf.json.JSONObject.fromObject(doorFeaturesSetup);
+        String doorId = (String) setupMap.get("doorId");
+        String countLimitAuthenticationFailed = (String)setupMap.get("countLimitAuthenticationFailed");
+        String enableAlarm = (String)setupMap.get("enableAlarm");
+        String alarmTimeLength = (String)setupMap.get("alarmTimeLength");
+        String publicPassword1 = (String)setupMap.get("publicPassword1");
+        String publicPassword2 = (String)setupMap.get("publicPassword2");
+        String threatenPassword = (String)setupMap.get("threatenPassword");
+        String deviceManagePassword = (String)setupMap.get("deviceManagePassword");
+        String enableDoorOpenRecord = (String)setupMap.get("enableDoorOpenRecord");
+        String enableDoorKeepOpen = (String)setupMap.get("enableDoorKeepOpen");
+        String enableFirstCardKeepOpen = (String)setupMap.get("enableFirstCardKeepOpen");
+        String enableDoorCalendar = (String)setupMap.get("enableDoorCalendar");
+        List oneWeekTimeDoorKeepList = new ArrayList();
+        List oneWeekTimeFirstCardList = new ArrayList();
+        List accessCalendar = new ArrayList();
+        List<String> employeeIdList = (List<String>) setupMap.get("employeeIdList");
+
+        //判断门定时常开是否开启
+        if (enableDoorKeepOpen.equals("1")){
+            oneWeekTimeDoorKeepList = (List)setupMap.get("oneWeekTimeDoorKeepList");
+        }else {
+            oneWeekTimeDoorKeepList = new ArrayList<>();
+        }
+
+        //判断门定时常开是否开启
+        if (enableFirstCardKeepOpen.equals("1")){
+            oneWeekTimeFirstCardList = (List)setupMap.get("oneWeekTimeFirstCardList");
+        }else {
+            oneWeekTimeFirstCardList = new ArrayList<>();
+        }
+
+        //判断门定时常开是否开启
+        if (enableDoorCalendar.equals("1")){
+            accessCalendar = (List)setupMap.get("accessCalendar");
+        }else {
+            accessCalendar = new ArrayList<>();
+        }
+
+        //下发门禁配置---功能配置（密码、开门事件记录）
+        iegs.doorCommonSetupAdditional(doorId, countLimitAuthenticationFailed, enableAlarm,
+                alarmTimeLength, publicPassword1, publicPassword2, threatenPassword,
+                deviceManagePassword, enableDoorOpenRecord, oneWeekTimeDoorKeepList,
+                enableDoorKeepOpen, enableFirstCardKeepOpen, enableDoorCalendar);
+
+        //下发门禁配置---功能配置（首卡常开权限）
+        iegs.handOutFirstCard(doorId, enableFirstCardKeepOpen, employeeIdList, oneWeekTimeFirstCardList);
+
+        //下发门禁配置---功能配置（门禁日历）
+        iegs.handOutDoorCalendar(doorId, enableDoorCalendar, accessCalendar);
+
+    }
+
+    //TODO 门禁记录上传存储
 }

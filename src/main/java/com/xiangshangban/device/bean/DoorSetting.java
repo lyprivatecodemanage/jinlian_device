@@ -21,6 +21,12 @@ public class DoorSetting {
 
     private String managerPassword;
 
+    private String enableDoorKeepOpen;
+
+    private String enableFirstCardKeepOpen;
+
+    private String enableDoorCalendar;
+
     public String getDoorId() {
         return doorId;
     }
@@ -99,5 +105,29 @@ public class DoorSetting {
 
     public void setManagerPassword(String managerPassword) {
         this.managerPassword = managerPassword;
+    }
+
+    public String getEnableDoorKeepOpen() {
+        return enableDoorKeepOpen;
+    }
+
+    public void setEnableDoorKeepOpen(String enableDoorKeepOpen) {
+        this.enableDoorKeepOpen = enableDoorKeepOpen;
+    }
+
+    public String getEnableFirstCardKeepOpen() {
+        return enableFirstCardKeepOpen;
+    }
+
+    public void setEnableFirstCardKeepOpen(String enableFirstCardKeepOpen) {
+        this.enableFirstCardKeepOpen = enableFirstCardKeepOpen;
+    }
+
+    public String getEnableDoorCalendar() {
+        return enableDoorCalendar;
+    }
+
+    public void setEnableDoorCalendar(String enableDoorCalendar) {
+        this.enableDoorCalendar = enableDoorCalendar;
     }
 }

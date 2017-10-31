@@ -1,34 +1,21 @@
 package com.xiangshangban.device.bean;
 
 public class DoorRecord {
+
     private String doorPermissionRecordId;
-
     private String employeeId;
-
     private String doorId;
-
     private String recordType;
-
     private String upperState;
-
     private String upperEdition;
-
     private String employeeGroupName;
-
     private String openDoorPhotoName;
-
     private String backKey;
-
     private String deviceGroupName;
-
     private String realWeek;
-
     private String eventResult;
-
     private String eventResultReason;
-
     private String eventPhotoGroupId;
-
     private String recordDate;
 
     public String getDoorPermissionRecordId() {
