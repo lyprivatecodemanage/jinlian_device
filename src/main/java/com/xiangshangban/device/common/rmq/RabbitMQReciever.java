@@ -137,21 +137,27 @@ public class RabbitMQReciever {
 
                 }else if (mapResult.get("commandMode").equals("R")){
 
-                    //设备回复的命令获取superCMDID
-                    Map<String, String> commandMap = (Map<String, String>)mapResult.get("command");
-                    String superCmdId = commandMap.get("superCMDID");
-                    DoorCmd doorCmd = new DoorCmd();
-                    doorCmd.setSuperCmdId(superCmdId);
+                    //返回值为0代表执行成功
+                    if (((Map<String, String>)mapResult.get("resultData")).get("resultCode").equals("0")){
 
-                    //删除人员的命令收到回复时将命令状态置为4：已删除，而不是2：下发成功，其它都置为下发成功
-                    if (commandMap.get("ACTION").equals("DELETE_USER_INFO")){
-                        doorCmd.setStatus("4");
-                    }else {
-                        doorCmd.setStatus("2");
+                        //设备回复的命令获取superCMDID
+                        Map<String, String> commandMap = (Map<String, String>)mapResult.get("command");
+                        String superCmdId = commandMap.get("superCMDID");
+                        DoorCmd doorCmd = new DoorCmd();
+                        doorCmd.setSuperCmdId(superCmdId);
+
+                        //删除人员的命令收到回复时将命令状态置为4：已删除，而不是2：下发成功，其它都置为下发成功
+                        DoorCmd doorCmdTemp = doorCmdMapper.selectBySuperCmdId(superCmdId);
+                        if (doorCmdTemp.getAction().equals("DELETE_USER_INFO")){
+                            doorCmd.setStatus("4");
+                        }else {
+                            doorCmd.setStatus("2");
+                        }
+
+                        //改变该这条命令的状态
+                        doorCmdMapper.updateBySuperCmdIdSelective(doorCmd);
+
                     }
-
-                    //改变该这条命令的状态
-                    doorCmdMapper.updateBySuperCmdIdSelective(doorCmd);
                 }
             }
         };

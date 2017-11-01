@@ -19,7 +19,7 @@ public interface DoorCmdMapper {
 
     int updateByPrimaryKey(DoorCmd record);
 
-    DoorCmd selectBySuperCmdId(DoorCmd doorCmd);
+    DoorCmd selectBySuperCmdId(String superCmdId);
 
     int updateBySuperCmdId(DoorCmd doorCmd);
 
