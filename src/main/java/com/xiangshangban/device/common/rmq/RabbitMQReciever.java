@@ -3,25 +3,13 @@ package com.xiangshangban.device.common.rmq;
 import com.alibaba.fastjson.JSON;
 import com.rabbitmq.client.*;
 import com.xiangshangban.device.bean.DoorCmd;
-//import com.xiangshangban.device.bean.MQMessage;
 import com.xiangshangban.device.common.encode.MD5Util;
 import com.xiangshangban.device.dao.DoorCmdMapper;
 import com.xiangshangban.device.service.IEmployeeService;
 import net.sf.json.JSONObject;
-//import org.apache.commons.lang3.StringUtils;
-//import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.context.annotation.Configuration;
-//import org.springframework.amqp.core.Queue;
-//import org.springframework.amqp.rabbit.annotation.RabbitHandler;
-//import org.springframework.context.annotation.Bean;
-//import org.springframework.messaging.handler.annotation.Payload;
-//import org.springframework.amqp.core.Binding;
-//import org.springframework.amqp.core.BindingBuilder;
-//import org.springframework.amqp.core.DirectExchange;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-//import com.rabbitmq.config.AmqpConfig;
 
 import java.io.IOException;
 import java.util.Map;
@@ -148,12 +136,20 @@ public class RabbitMQReciever {
                     }
 
                 }else if (mapResult.get("commandMode").equals("R")){
-                    //回复的数据获取superCMDID
+
+                    //设备回复的命令获取superCMDID
                     Map<String, String> commandMap = (Map<String, String>)mapResult.get("command");
                     String superCmdId = commandMap.get("superCMDID");
                     DoorCmd doorCmd = new DoorCmd();
                     doorCmd.setSuperCmdId(superCmdId);
-                    doorCmd.setStatus("2");
+
+                    //删除人员的命令收到回复时将命令状态置为4：已删除，而不是2：下发成功，其它都置为下发成功
+                    if (commandMap.get("ACTION").equals("DELETE_USER_INFO")){
+                        doorCmd.setStatus("4");
+                    }else {
+                        doorCmd.setStatus("2");
+                    }
+
                     //改变该这条命令的状态
                     doorCmdMapper.updateBySuperCmdIdSelective(doorCmd);
                 }

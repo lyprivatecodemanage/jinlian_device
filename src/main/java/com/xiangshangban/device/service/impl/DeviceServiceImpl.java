@@ -13,9 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import com.xiangshangban.device.dao.DoorMapper;
-import org.apache.commons.collections.map.HashedMap;
 import com.xiangshangban.device.service.IEntranceGuardService;
-import com.xiangshangban.device.bean.Door;
 
 import java.util.*;
 

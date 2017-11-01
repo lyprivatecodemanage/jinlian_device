@@ -4,7 +4,6 @@ import com.xiangshangban.device.bean.Connection;
 import com.xiangshangban.device.common.utils.FormatUtil;
 import com.xiangshangban.device.service.IConnectionFactoryService;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.util.HashMap;
 import java.util.Map;
