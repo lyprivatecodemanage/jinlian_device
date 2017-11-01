@@ -15,13 +15,13 @@ public interface DoorCmdMapper {
 
     DoorCmd selectByPrimaryKey(String serverId);
 
-    int updateBySubCmdIdSelective(DoorCmd record);
+    int updateBySuperCmdIdSelective(DoorCmd record);
 
     int updateByPrimaryKey(DoorCmd record);
 
-    DoorCmd selectBySubCmdId(DoorCmd doorCmd);
+    DoorCmd selectBySuperCmdId(DoorCmd doorCmd);
 
-    int updateBySubCmdId(DoorCmd doorCmd);
+    int updateBySuperCmdId(DoorCmd doorCmd);
 
     List<DoorCmd> selectByStatus(String status);
 }

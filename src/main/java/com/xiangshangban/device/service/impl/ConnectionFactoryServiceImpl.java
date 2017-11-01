@@ -4,6 +4,7 @@ import com.xiangshangban.device.bean.Connection;
 import com.xiangshangban.device.common.utils.FormatUtil;
 import com.xiangshangban.device.service.IConnectionFactoryService;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,6 +16,7 @@ import java.util.Map;
 public class ConnectionFactoryServiceImpl implements IConnectionFactoryService {
 
 //    private static final Log LOG = LogFactory.getLog(ConnectionFactoryServiceImpl.class);
+
     private static Map<String,CachingConnectionFactory> connection;//空闲的连接
     private static Map<String,CachingConnectionFactory> useConn; //使用中的连接
     private static String host = "localhost";

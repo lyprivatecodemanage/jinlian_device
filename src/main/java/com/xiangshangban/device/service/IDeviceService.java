@@ -25,11 +25,11 @@ public interface IDeviceService {
     /**
      * 绑定设备
      */
-    void bindDevice();
+    void bindDevice(String companyId, String companyName, String deviceId);
 
     /**
      * 解绑设备
      */
-    void unBindDevice();
+    void unBindDevice(String deviceId);
 
 }

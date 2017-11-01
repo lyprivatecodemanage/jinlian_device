@@ -13,8 +13,8 @@ import java.util.List;
 
 public interface IEmployeeService {
 
-//    //人员模块命令生成器
-//    void employeeCommandGenerate(String action, List<String> userIdCollection);
+    //人员模块人员信息同步
+    void employeeCommandGenerate(String action, List<String> userIdCollection);
 
     //关联门和人员（同一个人传入的数据不一样时执行更新操作）
     void relateEmployeeAndDoor(String doorId, String doorName, String employeeId, String employeeName);
@@ -31,5 +31,8 @@ public interface IEmployeeService {
 
     //门禁记录上传存储
     void doorRecordSave(String doorRecordMap);
+
+    //删除设备上的人员的所有关联信息
+    void deleteEmployeeInformation(String employeeIdCollection);
 
 }

@@ -9,6 +9,7 @@ import com.xiangshangban.device.dao.*;
 import com.xiangshangban.device.service.IEntranceGuardService;
 import com.xiangshangban.device.bean.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
@@ -22,6 +23,8 @@ import java.util.*;
 @Service
 public class EntranceGuardServiceImpl implements IEntranceGuardService {
 
+    @Value("${rabbitmq.download.queue.name}")
+    String downloadQueueName;
 
     @Autowired
     private DoorMapper doorMapper;
@@ -51,7 +54,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
     private DoorCalendarMapper doorCalendarMapper;
 
     /**
-     * 添加or更新命令表
+     * 添加命令到命令表
      * @param doorCmd
      */
     @Override
@@ -356,13 +359,13 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         doorCmdEmployeeInformation.setCommandType("single");
         doorCmdEmployeeInformation.setCommandTotal("1");
         doorCmdEmployeeInformation.setCommandIndex("1");
-        doorCmdEmployeeInformation.setSuperCmdId("");
+        doorCmdEmployeeInformation.setSubCmdId("");
         doorCmdEmployeeInformation.setAction("UPDATE_ACCESS_CONTROL_SETTING");
         doorCmdEmployeeInformation.setActionCode("3003");
 
         doorCmdEmployeeInformation.setSendTime(CalendarUtil.getCurrentTime());
         doorCmdEmployeeInformation.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(),3));
-        doorCmdEmployeeInformation.setSubCmdId(FormatUtil.createUuid());
+        doorCmdEmployeeInformation.setSuperCmdId(FormatUtil.createUuid());
         doorCmdEmployeeInformation.setData(JSON.toJSONString(doorSetting));
 
         //获取完整的数据加协议封装格式
@@ -377,7 +380,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         //命令数据存入数据库
         insertCommand(doorCmdEmployeeInformation);
         //立即下发数据到MQ
-        rabbitMQSender.sendMessage("hello", userInformationAll);
+        rabbitMQSender.sendMessage(downloadQueueName, userInformationAll);
     }
 
     //门禁配置---功能配置（首卡常开权限）
@@ -454,13 +457,13 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         doorCmdEmployeeInformation.setCommandType("single");
         doorCmdEmployeeInformation.setCommandTotal("1");
         doorCmdEmployeeInformation.setCommandIndex("1");
-        doorCmdEmployeeInformation.setSuperCmdId("");
+        doorCmdEmployeeInformation.setSubCmdId("");
         doorCmdEmployeeInformation.setAction("UPDATE_FIRST_CARD_NORMAL_OPENED");
         doorCmdEmployeeInformation.setActionCode("3004");
 
         doorCmdEmployeeInformation.setSendTime(CalendarUtil.getCurrentTime());
         doorCmdEmployeeInformation.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(),3));
-        doorCmdEmployeeInformation.setSubCmdId(FormatUtil.createUuid());
+        doorCmdEmployeeInformation.setSuperCmdId(FormatUtil.createUuid());
         doorCmdEmployeeInformation.setData(JSON.toJSONString(doorSetting));
 
         //获取完整的数据加协议封装格式
@@ -475,7 +478,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         //命令数据存入数据库
         insertCommand(doorCmdEmployeeInformation);
         //立即下发数据到MQ
-        rabbitMQSender.sendMessage("hello", userInformationAll);
+        rabbitMQSender.sendMessage(downloadQueueName, userInformationAll);
     }
 
     //门禁配置---功能配置（门禁日历）
@@ -536,13 +539,13 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         doorCmdEmployeeInformation.setCommandType("single");
         doorCmdEmployeeInformation.setCommandTotal("1");
         doorCmdEmployeeInformation.setCommandIndex("1");
-        doorCmdEmployeeInformation.setSuperCmdId("");
+        doorCmdEmployeeInformation.setSubCmdId("");
         doorCmdEmployeeInformation.setAction("UPDATE_ACCESS_CALENDER");
         doorCmdEmployeeInformation.setActionCode("3005");
 
         doorCmdEmployeeInformation.setSendTime(CalendarUtil.getCurrentTime());
         doorCmdEmployeeInformation.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(),3));
-        doorCmdEmployeeInformation.setSubCmdId(FormatUtil.createUuid());
+        doorCmdEmployeeInformation.setSuperCmdId(FormatUtil.createUuid());
         doorCmdEmployeeInformation.setData(JSON.toJSONString(accessCalendar));
 
         //获取完整的数据加协议封装格式
@@ -557,7 +560,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         //命令数据存入数据库
         insertCommand(doorCmdEmployeeInformation);
         //立即下发数据到MQ
-        rabbitMQSender.sendMessage("hello", userInformationAll);
+        rabbitMQSender.sendMessage(downloadQueueName, userInformationAll);
 
     }
 }

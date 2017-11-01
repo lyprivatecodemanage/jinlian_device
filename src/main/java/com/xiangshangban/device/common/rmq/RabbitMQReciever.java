@@ -3,22 +3,23 @@ package com.xiangshangban.device.common.rmq;
 import com.alibaba.fastjson.JSON;
 import com.rabbitmq.client.*;
 import com.xiangshangban.device.bean.DoorCmd;
-import com.xiangshangban.device.bean.MQMessage;
+//import com.xiangshangban.device.bean.MQMessage;
 import com.xiangshangban.device.common.encode.MD5Util;
 import com.xiangshangban.device.dao.DoorCmdMapper;
 import com.xiangshangban.device.service.IEmployeeService;
 import net.sf.json.JSONObject;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
+//import org.apache.commons.lang3.StringUtils;
+//import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.rabbit.annotation.RabbitHandler;
-import org.springframework.context.annotation.Bean;
-import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.DirectExchange;
+//import org.springframework.context.annotation.Configuration;
+//import org.springframework.amqp.core.Queue;
+//import org.springframework.amqp.rabbit.annotation.RabbitHandler;
+//import org.springframework.context.annotation.Bean;
+//import org.springframework.messaging.handler.annotation.Payload;
+//import org.springframework.amqp.core.Binding;
+//import org.springframework.amqp.core.BindingBuilder;
+//import org.springframework.amqp.core.DirectExchange;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 //import com.rabbitmq.config.AmqpConfig;
 
@@ -33,6 +34,25 @@ import java.util.concurrent.TimeoutException;
 @Component
 public class RabbitMQReciever {
 
+    //application.properties属性配置引入
+    @Value("${rabbitmq.common.host.name}")
+    String commonHostName;
+
+    @Value("${rabbitmq.common.port.name}")
+    String commonPortName;
+
+    @Value("${rabbitmq.common.user.name}")
+    String commonUserName;
+
+    @Value("${rabbitmq.common.user.password}")
+    String commonUserPassword;
+
+    @Value("${rabbitmq.upload.exchange.name}")
+    String uploadExchangeName;
+
+    @Value("${rabbitmq.upload.queue.name}")
+    String uploadQueueName;
+
     @Autowired
     private IEmployeeService employeeService;
 
@@ -44,19 +64,19 @@ public class RabbitMQReciever {
     public void startRabbitMqReceiver() throws InterruptedException, IOException, TimeoutException {
 
         //交换器名称
-        String EXCHANGE_NAME = "upload";
+        String EXCHANGE_NAME = uploadExchangeName;
         //队列名称
-        String QUEUE_NAME = "welcome";
+        String QUEUE_NAME = uploadQueueName;
         //路由关键字
-        String routingKey = "welcome";
+        String routingKey = uploadQueueName;
         //主机ip
-        String host = "localhost";
+        String host = commonHostName;
         //rabbitMQ端口号
-        int port = 5672;
+        int port = Integer.parseInt(commonPortName);
         //rabbitMQ用户名
-        String userName = "test";
+        String userName = commonUserName;
         //rabbitMQ密码
-        String userPassword = "123";
+        String userPassword = commonUserPassword;
 
         ConnectionFactory connectionFactory = new ConnectionFactory();
 
@@ -128,14 +148,14 @@ public class RabbitMQReciever {
                     }
 
                 }else if (mapResult.get("commandMode").equals("R")){
-                    //回复的数据获取subCMDID
+                    //回复的数据获取superCMDID
                     Map<String, String> commandMap = (Map<String, String>)mapResult.get("command");
-                    String subCmdId = commandMap.get("subCMDID");
+                    String superCmdId = commandMap.get("superCMDID");
                     DoorCmd doorCmd = new DoorCmd();
-                    doorCmd.setSubCmdId(subCmdId);
+                    doorCmd.setSuperCmdId(superCmdId);
                     doorCmd.setStatus("2");
                     //改变该这条命令的状态
-                    doorCmdMapper.updateBySubCmdIdSelective(doorCmd);
+                    doorCmdMapper.updateBySuperCmdIdSelective(doorCmd);
                 }
             }
         };

@@ -12,6 +12,7 @@ import com.xiangshangban.device.service.IEmployeeService;
 import com.xiangshangban.device.service.IEntranceGuardService;
 import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -23,6 +24,9 @@ import java.util.*;
 
 @Service
 public class EmployeeServiceImpl implements IEmployeeService {
+
+    @Value("${rabbitmq.download.queue.name}")
+    String downloadQueueName;
 
     @Autowired
     private EmployeeMapper employeeMapper;
@@ -48,43 +52,66 @@ public class EmployeeServiceImpl implements IEmployeeService {
     @Autowired
     private IEntranceGuardService entranceGuardService;
 
-//    //人员模块命令生成器（暂未使用）
-//    @Override
-//    public void employeeCommandGenerate(String action, List<String> employeeIdCollection) {
-//
+    //人员模块人员信息同步
+    @Override
+    public void employeeCommandGenerate(String action, List<String> employeeIdCollection) {
+
 //        if (action.equals("UPDATE_USER_INFO")){
-//
-//            for (String employeeId : employeeIdCollection) {
-//
-//                //根据人员id请求单个人员信息
-//                String employeeInfo = HttpRequestFactory.sendRequet("http://192.168.0.108:8072/EmployeeController/selectByEmployee", employeeId);
-//                System.out.println("[*] send: 已发出请求");
-//                System.out.println("[*] employeeInfo: " + employeeInfo);
-//
-//                //取出需要的人员信息
-//                Employee employee = new Employee();
-//                Map<String, String> employeeInfoMap = (Map<String, String>)JSONObject.fromObject(employeeInfo);
-//                employee.setEmployeeId(employeeInfoMap.get("employeeId"));
-//                employee.setEmployeeNumber(employeeInfoMap.get("employeeNo"));
-//                employee.setEmployeeName(employeeInfoMap.get("employeeName"));
-//                employee.setEmployeeDepartmentId(employeeInfoMap.get("departmentId"));
-//                employee.setEmployeeDepartmentName(employeeInfoMap.get("departmentName"));
-//                employee.setEmployeeBirthday("");
-//                employee.setEmployeeEntryTime(employeeInfoMap.get("entryTime"));
-//                employee.setEmployeeProbationaryExpired(employeeInfoMap.get("probationaryExpired"));
-//                employee.setEmployeeContractExpired("");
-//                employee.setAdminFlag("");
-//                employee.setEmployeePhone(employeeInfoMap.get("employeePhone"));
-//
-//                //人员信息存储到本地
-//                //查询人员信息是否存在
-//                Employee employeeExit = employeeMapper.selectByPrimaryKey(employeeId);
-//                if (employeeExit == null){
-//                    employeeMapper.insertSelective(employee);
-//                }else {
-//                    employeeMapper.updateByPrimaryKeySelective(employee);
-//                }
-//
+
+            for (String employeeIdTemp : employeeIdCollection) {
+
+                Map<String, Object> httpData = new HashMap<String, Object>();
+                httpData.put("employeeId", employeeIdTemp);
+
+                //根据人员id请求单个人员信息
+                String employeeInfo = HttpRequestFactory.sendRequet("http://192.168.0.108:8085/EmployeeController/selectByEmployee", httpData);
+                System.out.println("[*] send: 已发出请求");
+                System.out.println("[*] employeeInfo: " + employeeInfo);
+
+                Map<String, String> employeeInfoMap = new HashMap<String, String>();
+
+                //取出需要的人员信息
+                try {
+                    employeeInfoMap = (Map<String, String>)JSONObject.fromObject(employeeInfo).get("emp");
+                }catch (Exception e){
+                    System.out.println("人员模块不在线!");
+                }
+
+                String employeeId = employeeInfoMap.get("employeeId");
+                String employeeNo = employeeInfoMap.get("employeeNo");
+                String employeeName = employeeInfoMap.get("employeeName");
+                String departmentId = employeeInfoMap.get("departmentId");
+                String departmentName = employeeInfoMap.get("departmentName");
+                String entryTime = employeeInfoMap.get("entryTime");
+                String probationaryExpired = employeeInfoMap.get("probationaryExpired");
+                String employeePhone = employeeInfoMap.get("employeePhone");
+                String employeeStatus = employeeInfoMap.get("employeeStatus");
+                String companyId = employeeInfoMap.get("companyId");
+                String companyName = employeeInfoMap.get("companyName");
+
+                //增加人员信息到本地人员表
+                Employee employee = new Employee();
+                employee.setEmployeeId(employeeId);
+                employee.setEmployeeNumber(employeeNo);
+                employee.setEmployeeName(employeeName);
+                employee.setEmployeeDepartmentId(departmentId);
+                employee.setEmployeeDepartmentName(departmentName);
+                employee.setEmployeeEntryTime(entryTime);
+                employee.setEmployeeProbationaryExpired(probationaryExpired);
+                employee.setEmployeePhone(employeePhone);
+                employee.setEmployeeStatus(employeeStatus);
+                employee.setUpdateTime(DateUtils.getDateTime());
+                employee.setEmployeeCompanyId(companyId);
+                employee.setEmployeeCompanyName(companyName);
+
+                //查询人员信息是否存在
+                Employee employeeExit = employeeMapper.selectByPrimaryKey(employeeId);
+                if (employeeExit == null){
+                    employeeMapper.insertSelective(employee);
+                }else {
+                    employeeMapper.updateByPrimaryKeySelective(employee);
+                }
+
 //                //DATA JSON字符串
 //                String dataJsonString = JSON.toJSONString(employee);
 //
@@ -112,18 +139,18 @@ public class EmployeeServiceImpl implements IEmployeeService {
 //                doorCmd.setStatus("0");
 //
 //                System.out.println("[*] CMD: " + JSON.toJSONString(doorCmd));
-//
-////                //发送命令到MQ
-////                RabbitMQSender rabbitMQSender = new RabbitMQSender();
-////                rabbitMQSender.sendMessage("hello", JSON.toJSONString(doorCmd));
-//
-//                //储存人员修改命令到命令表里
+
+//                //发送命令到MQ
+//                RabbitMQSender rabbitMQSender = new RabbitMQSender();
+//                rabbitMQSender.sendMessage(downloadQueueName, JSON.toJSONString(doorCmd));
+
+                //储存人员修改命令到命令表里
 //                doorCmdMapper.insert(doorCmd);
-//
-//            }
-//
+
+            }
+
 //        }else if (action.equals("DELETE_USER_INFO")){
-//
+
 //            //DATA JSON字符串
 //            String dataJsonString = JSON.toJSONString(employeeIdCollection);
 //
@@ -154,9 +181,9 @@ public class EmployeeServiceImpl implements IEmployeeService {
 //
 //            //储存人员修改命令到命令表里
 //            doorCmdMapper.insert(doorCmd);
-//
+
 //        }
-//    }
+    }
 
     /**
      * 关联门和人员（同一个人传入的数据不一样时执行更新操作）
@@ -319,12 +346,12 @@ public class EmployeeServiceImpl implements IEmployeeService {
         doorCmdRecord.setCommandType("single");
         doorCmdRecord.setCommandTotal("1");
         doorCmdRecord.setCommandIndex("1");
-        doorCmdRecord.setSuperCmdId("");
+        doorCmdRecord.setSubCmdId("");
         doorCmdRecord.setAction("UPLOAD_ACCESS_RECORD");
         doorCmdRecord.setActionCode("3006");
         doorCmdRecord.setSendTime(CalendarUtil.getCurrentTime());
         doorCmdRecord.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(),3));
-        doorCmdRecord.setSubCmdId(FormatUtil.createUuid());
+        doorCmdRecord.setSuperCmdId(FormatUtil.createUuid());
         doorCmdRecord.setData(JSON.toJSONString(resultMap));
 
         //获取完整的数据加协议封装格式
@@ -339,7 +366,48 @@ public class EmployeeServiceImpl implements IEmployeeService {
         //命令数据存入数据库
         entranceGuardService.insertCommand(doorCmdRecord);
         //立即下发数据到MQ
-        rabbitMQSender.sendMessage("hello", doorRecordAll);
+        rabbitMQSender.sendMessage(downloadQueueName, doorRecordAll);
+    }
+
+    @Override
+    public void deleteEmployeeInformation(String employeeIdCollection) {
+
+        Map<String, Object> employeeIdMap = (Map<String, Object>)JSONObject.fromObject(employeeIdCollection);
+        List<String> employeeIdList = (List<String>)employeeIdMap.get("employeeIdList");
+        String deviceId = (String)employeeIdMap.get("deviceId");
+
+        //构造删除人员的命令格式
+        DoorCmd doorCmdDeleteEmployee = new DoorCmd();
+        doorCmdDeleteEmployee.setServerId("001");
+        doorCmdDeleteEmployee.setDeviceId(deviceId);
+        doorCmdDeleteEmployee.setFileEdition("v1.3");
+        doorCmdDeleteEmployee.setCommandMode("C");
+        doorCmdDeleteEmployee.setCommandType("single");
+        doorCmdDeleteEmployee.setCommandTotal("1");
+        doorCmdDeleteEmployee.setCommandIndex("1");
+        doorCmdDeleteEmployee.setSubCmdId("");
+        doorCmdDeleteEmployee.setAction("DELETE_USER_INFO");
+        doorCmdDeleteEmployee.setActionCode("2002");
+
+        doorCmdDeleteEmployee.setSendTime(CalendarUtil.getCurrentTime());
+        doorCmdDeleteEmployee.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(),3));
+        doorCmdDeleteEmployee.setSuperCmdId(FormatUtil.createUuid());
+        doorCmdDeleteEmployee.setData(JSON.toJSONString(employeeIdList));
+
+        //获取完整的数据加协议封装格式
+        Map<String, Object> userDeleteInformation =  RabbitMQSender.messagePackaging(doorCmdDeleteEmployee, "employeeIdList", employeeIdList, "C");
+        //命令状态设置为: 发送中
+        doorCmdDeleteEmployee.setStatus("1");
+        //设置md5校验值
+        doorCmdDeleteEmployee.setMd5Check((String) userDeleteInformation.get("MD5Check"));
+        //设置数据库的data字段
+        doorCmdDeleteEmployee.setData(JSON.toJSONString(userDeleteInformation.get("data")));
+        //命令数据存入数据库
+        entranceGuardService.insertCommand(doorCmdDeleteEmployee);
+        //立即下发数据到MQ
+        RabbitMQSender rabbitMQSender = new RabbitMQSender();
+        rabbitMQSender.sendMessage(downloadQueueName, userDeleteInformation);
+
     }
 
     public static void main(String[] args) {

@@ -9,6 +9,7 @@ import com.xiangshangban.device.service.IEmployeeService;
 import com.xiangshangban.device.service.IEntranceGuardService;
 import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,6 +26,9 @@ import java.util.*;
 @Controller
 @RequestMapping(value = "/employee")
 public class EmployeeController {
+
+    @Value("${rabbitmq.download.queue.name}")
+    String downloadQueueName;
 
     @Autowired
     private IEmployeeService iEmployeeService;
@@ -50,25 +54,25 @@ public class EmployeeController {
     @Autowired
     private IEntranceGuardService entranceGuardService;
 
-//    /**
-//     * 人员模块命令生成器
-//     * @param userInformation
-//     */
-//    @ResponseBody
-//    @Transactional
-//    @RequestMapping(value = "/commandGenerate", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
-//    public void employeeCommandGenerate(@RequestBody String userInformation){
-//
-//        System.out.println("[*] userInformation: " + userInformation);
-//
-//        //JSON字符串解析
-//        Map<String, Object> userInformationMap = (Map<String, Object>)JSONObject.fromObject(userInformation);
-//        String action = (String) userInformationMap.get("action");
-//        List<String> userIdCollection = (List<String>) userInformationMap.get("employeeIdCollection");
-//
-//        iEmployeeService.employeeCommandGenerate(action, userIdCollection);
-//
-//    }
+    /**
+     * 人员模块人员信息同步
+     * @param userInformation
+     */
+    @ResponseBody
+    @Transactional
+    @RequestMapping(value = "/commandGenerate", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    public void employeeCommandGenerate(@RequestBody String userInformation){
+
+        System.out.println("[*] userInformation: " + userInformation);
+
+        //JSON字符串解析
+        Map<String, Object> userInformationMap = (Map<String, Object>)JSONObject.fromObject(userInformation);
+        String action = (String) userInformationMap.get("action");
+        List<String> userIdCollection = (List<String>) userInformationMap.get("employeeIdCollection");
+
+        iEmployeeService.employeeCommandGenerate(action, userIdCollection);
+
+    }
 
     /**
      * 下发人员信息及门禁权限
@@ -143,7 +147,7 @@ public class EmployeeController {
             doorCmdEmployeeInformation.setCommandType("single");
             doorCmdEmployeeInformation.setCommandTotal("1");
             doorCmdEmployeeInformation.setCommandIndex("1");
-            doorCmdEmployeeInformation.setSuperCmdId("");
+            doorCmdEmployeeInformation.setSubCmdId("");
             doorCmdEmployeeInformation.setAction("UPDATE_USER_INFO");
             doorCmdEmployeeInformation.setActionCode("2001");
 
@@ -157,7 +161,7 @@ public class EmployeeController {
             doorCmdEmployeePermission.setCommandType("single");
             doorCmdEmployeePermission.setCommandTotal("1");
             doorCmdEmployeePermission.setCommandIndex("1");
-            doorCmdEmployeePermission.setSuperCmdId("");
+            doorCmdEmployeePermission.setSubCmdId("");
             doorCmdEmployeePermission.setAction("UPDATE_USER_ACCESS_CONTROL");
             doorCmdEmployeePermission.setActionCode("3001");
 
@@ -183,7 +187,7 @@ public class EmployeeController {
                 try {
                     employeeInfoMap = (Map<String, String>)JSONObject.fromObject(employeeInfo).get("emp");
                 }catch (Exception e){
-                    System.out.println("无法获取人员模块的人员信息!");
+                    System.out.println("人员模块不在线!");
                 }
                 String employeeId = employeeInfoMap.get("employeeId");
                 String employeeNo = employeeInfoMap.get("employeeNo");
@@ -295,7 +299,11 @@ public class EmployeeController {
                 //组装更新人员门禁权限业务数据DATA
                 Map<String, Object> userPermission = new LinkedHashMap<String, Object>();
                 userPermission.put("employeeId", employeeId);
-                userPermission.put("permissionValidityBeginTime", doorEmployeePermission.getDoorOpenStartTime());
+                try {
+                    userPermission.put("permissionValidityBeginTime", doorEmployeePermission.getDoorOpenStartTime());
+                }catch (NullPointerException e){
+                    System.out.println("【"+employeeName+"】的开门权限有效时间未设置");
+                }
                 userPermission.put("permissionValidityEndTime", doorEmployeePermission.getDoorOpenEndTime());
                 userPermission.put("employeeDoorPassword", doorSetting.getFirstPublishPassword());
                 userPermission.put("oneWeekTimeList", oneWeekTimeList);
@@ -304,12 +312,12 @@ public class EmployeeController {
                 //人员基本信息
                 doorCmdEmployeeInformation.setSendTime(CalendarUtil.getCurrentTime());
                 doorCmdEmployeeInformation.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(),3));
-                doorCmdEmployeeInformation.setSubCmdId(FormatUtil.createUuid());
+                doorCmdEmployeeInformation.setSuperCmdId(FormatUtil.createUuid());
                 doorCmdEmployeeInformation.setData(JSON.toJSONString(userInformation));
                 //人员基本开门门禁权限信息
                 doorCmdEmployeePermission.setSendTime(CalendarUtil.getCurrentTime());
                 doorCmdEmployeePermission.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(),3));
-                doorCmdEmployeePermission.setSubCmdId(FormatUtil.createUuid());
+                doorCmdEmployeePermission.setSuperCmdId(FormatUtil.createUuid());
                 doorCmdEmployeePermission.setData(JSON.toJSONString(userPermission));
 
                 //判断是否立即下发数据到设备
@@ -360,7 +368,7 @@ public class EmployeeController {
                     //命令数据存入数据库
                     entranceGuardService.insertCommand(doorCmdEmployeeInformation);
                     //立即下发数据到MQ
-                    rabbitMQSender.sendMessage("hello", userInformationAll);
+                    rabbitMQSender.sendMessage(downloadQueueName, userInformationAll);
 
                     /**
                      * 人员开门权限
@@ -376,7 +384,7 @@ public class EmployeeController {
                     //命令数据存入数据库
                     entranceGuardService.insertCommand(doorCmdEmployeePermission);
                     //立即下发数据到MQ
-                    rabbitMQSender.sendMessage("hello", userPermissionAll);
+                    rabbitMQSender.sendMessage(downloadQueueName, userPermissionAll);
 
                 }
             }
@@ -384,7 +392,7 @@ public class EmployeeController {
     }
 
     /**
-     * 删除设备上的人员基本信息
+     * 删除设备上的人员基本信息（包括所有关联的权限所有的这个人的信息）
      * @param employeeIdCollection
      * @return
      */
@@ -403,105 +411,69 @@ public class EmployeeController {
          }
          */
 
-        Map<String, Object> employeeIdMap = (Map<String, Object>)JSONObject.fromObject(employeeIdCollection);
-        List<String> employeeIdList = (List<String>)employeeIdMap.get("employeeIdList");
-        String deviceId = (String)employeeIdMap.get("deviceId");
-
-        //更新本地指定的人员状态为删除状态
-        //以后补全
-
-
-        //构造删除人员的命令格式
-        DoorCmd doorCmdDeleteEmployee = new DoorCmd();
-        doorCmdDeleteEmployee.setServerId("001");
-        doorCmdDeleteEmployee.setDeviceId(deviceId);
-        doorCmdDeleteEmployee.setFileEdition("v1.3");
-        doorCmdDeleteEmployee.setCommandMode("C");
-        doorCmdDeleteEmployee.setCommandType("single");
-        doorCmdDeleteEmployee.setCommandTotal("1");
-        doorCmdDeleteEmployee.setCommandIndex("1");
-        doorCmdDeleteEmployee.setSuperCmdId("");
-        doorCmdDeleteEmployee.setAction("DELETE_USER_INFO");
-        doorCmdDeleteEmployee.setActionCode("2002");
-
-        doorCmdDeleteEmployee.setSendTime(CalendarUtil.getCurrentTime());
-        doorCmdDeleteEmployee.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(),3));
-        doorCmdDeleteEmployee.setSubCmdId(FormatUtil.createUuid());
-        doorCmdDeleteEmployee.setData(JSON.toJSONString(employeeIdList));
-
-        //获取完整的数据加协议封装格式
-        Map<String, Object> userDeleteInformation =  RabbitMQSender.messagePackaging(doorCmdDeleteEmployee, "employeeIdList", employeeIdList, "C");
-        //命令状态设置为: 发送中
-        doorCmdDeleteEmployee.setStatus("1");
-        //设置md5校验值
-        doorCmdDeleteEmployee.setMd5Check((String) userDeleteInformation.get("MD5Check"));
-        //设置数据库的data字段
-        doorCmdDeleteEmployee.setData(JSON.toJSONString(userDeleteInformation.get("data")));
-        //命令数据存入数据库
-        entranceGuardService.insertCommand(doorCmdDeleteEmployee);
-        //立即下发数据到MQ
-        RabbitMQSender rabbitMQSender = new RabbitMQSender();
-        rabbitMQSender.sendMessage("hello", userDeleteInformation);
+        iEmployeeService.deleteEmployeeInformation(employeeIdCollection);
 
     }
 
-    /**
-     * 删除设备上的人员开门时间
-     * @param employeeIdCollection
-     * @return
-     */
-    @ResponseBody
-    @Transactional
-    @RequestMapping(value = "/deleteEmployeePermission", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
-    public void deleteEmployeePermission(@RequestBody String employeeIdCollection){
-
-        /**测试数据
-         *
-         {
-         "deviceId": "1",
-         "employeeIdList": [
-         "897020EA96214392B28369F2B421E319"
-         ]
-         }
-         */
-
-        Map<String, Object> employeeIdMap = (Map<String, Object>)JSONObject.fromObject(employeeIdCollection);
-        List<String> employeeIdList = (List<String>)employeeIdMap.get("employeeIdList");
-        String deviceId = (String)employeeIdMap.get("deviceId");
-
-        //构造删除人员开门时间的命令格式
-        DoorCmd doorCmdDeleteEmployee = new DoorCmd();
-        doorCmdDeleteEmployee.setServerId("001");
-        doorCmdDeleteEmployee.setDeviceId(deviceId);
-        doorCmdDeleteEmployee.setFileEdition("v1.3");
-        doorCmdDeleteEmployee.setCommandMode("C");
-        doorCmdDeleteEmployee.setCommandType("single");
-        doorCmdDeleteEmployee.setCommandTotal("1");
-        doorCmdDeleteEmployee.setCommandIndex("1");
-        doorCmdDeleteEmployee.setSuperCmdId("");
-        doorCmdDeleteEmployee.setAction("DELETE_USER_ACCESS_CONTROL");
-        doorCmdDeleteEmployee.setActionCode("3002");
-
-        doorCmdDeleteEmployee.setSendTime(CalendarUtil.getCurrentTime());
-        doorCmdDeleteEmployee.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(),3));
-        doorCmdDeleteEmployee.setSubCmdId(FormatUtil.createUuid());
-        doorCmdDeleteEmployee.setData(JSON.toJSONString(employeeIdList));
-
-        //获取完整的数据加协议封装格式
-        Map<String, Object> userDeleteInformation =  RabbitMQSender.messagePackaging(doorCmdDeleteEmployee, "employeeIdList", employeeIdList, "C");
-        //命令状态设置为: 发送中
-        doorCmdDeleteEmployee.setStatus("1");
-        //设置md5校验值
-        doorCmdDeleteEmployee.setMd5Check((String) userDeleteInformation.get("MD5Check"));
-        //设置数据库的data字段
-        doorCmdDeleteEmployee.setData(JSON.toJSONString(userDeleteInformation.get("data")));
-        //命令数据存入数据库
-        entranceGuardService.insertCommand(doorCmdDeleteEmployee);
-        //立即下发数据到MQ
-        RabbitMQSender rabbitMQSender = new RabbitMQSender();
-        rabbitMQSender.sendMessage("hello", userDeleteInformation);
-
-    }
+//    /**
+//     * 删除设备上的人员开门时间（废弃不用）
+//     * @param employeeIdCollection
+//     * @return
+//     */
+//    @Value("${rabbitmq.download.queue.name}")
+//    String downloadQueueName;
+//    @ResponseBody
+//    @Transactional
+//    @RequestMapping(value = "/deleteEmployeePermission", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+//    public void deleteEmployeePermission(@RequestBody String employeeIdCollection){
+//
+//        /**测试数据
+//         *
+//         {
+//         "deviceId": "1",
+//         "employeeIdList": [
+//         "897020EA96214392B28369F2B421E319"
+//         ]
+//         }
+//         */
+//
+//        Map<String, Object> employeeIdMap = (Map<String, Object>)JSONObject.fromObject(employeeIdCollection);
+//        List<String> employeeIdList = (List<String>)employeeIdMap.get("employeeIdList");
+//        String deviceId = (String)employeeIdMap.get("deviceId");
+//
+//        //构造删除人员开门时间的命令格式
+//        DoorCmd doorCmdDeleteEmployee = new DoorCmd();
+//        doorCmdDeleteEmployee.setServerId("001");
+//        doorCmdDeleteEmployee.setDeviceId(deviceId);
+//        doorCmdDeleteEmployee.setFileEdition("v1.3");
+//        doorCmdDeleteEmployee.setCommandMode("C");
+//        doorCmdDeleteEmployee.setCommandType("single");
+//        doorCmdDeleteEmployee.setCommandTotal("1");
+//        doorCmdDeleteEmployee.setCommandIndex("1");
+//        doorCmdDeleteEmployee.setSubCmdId("");
+//        doorCmdDeleteEmployee.setAction("DELETE_USER_ACCESS_CONTROL");
+//        doorCmdDeleteEmployee.setActionCode("3002");
+//
+//        doorCmdDeleteEmployee.setSendTime(CalendarUtil.getCurrentTime());
+//        doorCmdDeleteEmployee.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(),3));
+//        doorCmdDeleteEmployee.setSuperCmdId(FormatUtil.createUuid());
+//        doorCmdDeleteEmployee.setData(JSON.toJSONString(employeeIdList));
+//
+//        //获取完整的数据加协议封装格式
+//        Map<String, Object> userDeleteInformation =  RabbitMQSender.messagePackaging(doorCmdDeleteEmployee, "employeeIdList", employeeIdList, "C");
+//        //命令状态设置为: 发送中
+//        doorCmdDeleteEmployee.setStatus("1");
+//        //设置md5校验值
+//        doorCmdDeleteEmployee.setMd5Check((String) userDeleteInformation.get("MD5Check"));
+//        //设置数据库的data字段
+//        doorCmdDeleteEmployee.setData(JSON.toJSONString(userDeleteInformation.get("data")));
+//        //命令数据存入数据库
+//        entranceGuardService.insertCommand(doorCmdDeleteEmployee);
+//        //立即下发数据到MQ
+//        RabbitMQSender rabbitMQSender = new RabbitMQSender();
+//        rabbitMQSender.sendMessage(downloadQueueName, userDeleteInformation);
+//
+//    }
 
     /**
      * 根据公司id查询门列表
@@ -533,6 +505,7 @@ public class EmployeeController {
 //        System.out.println(JSON.toJSONString(doorCmd.getData()));
 
         System.out.println(JSONObject.fromObject(doorCmd.getData()));
+
     }
 
 }

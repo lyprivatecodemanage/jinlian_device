@@ -39,9 +39,9 @@ public class DoorCmdStatusTimer {
 //                System.out.println(doorCmd.getSubCmdId());
                 //判断超时则将命令状态从发送中改为发送失败
                 DoorCmd doorCmdTemp = new DoorCmd();
-                doorCmdTemp.setSubCmdId(doorCmd.getSubCmdId());
+                doorCmdTemp.setSuperCmdId(doorCmd.getSuperCmdId());
                 doorCmdTemp.setStatus("3");
-                doorCmdMapper.updateBySubCmdIdSelective(doorCmdTemp);
+                doorCmdMapper.updateBySuperCmdIdSelective(doorCmdTemp);
 
             }
         }

@@ -166,7 +166,7 @@
       </if>
     </trim>
   </insert>
-  <update id="updateBySubCmdIdSelective" parameterType="com.xiangshangban.device.bean.DoorCmd" >
+  <update id="updateBySuperCmdIdSelective" parameterType="com.xiangshangban.device.bean.DoorCmd" >
     update door_cmd
     <set >
       <if test="deviceId != null" >
@@ -196,8 +196,8 @@
       <if test="md5Check != null" >
         md5_check = #{md5Check,jdbcType=VARCHAR},
       </if>
-      <if test="superCmdId != null" >
-        super_cmd_id = #{superCmdId,jdbcType=VARCHAR},
+      <if test="subCmdId != null" >
+        sub_cmd_id = #{subCmdId,jdbcType=VARCHAR},
       </if>
       <if test="action != null" >
         action = #{action,jdbcType=VARCHAR},
@@ -218,7 +218,7 @@
         status = #{status,jdbcType=VARCHAR},
       </if>
     </set>
-    where sub_cmd_id = #{subCmdId,jdbcType=VARCHAR}
+    where super_cmd_id = #{superCmdId,jdbcType=VARCHAR}
   </update>
   <update id="updateByPrimaryKey" parameterType="com.xiangshangban.device.bean.DoorCmd" >
     update door_cmd
@@ -242,14 +242,14 @@
     where server_id = #{serverId,jdbcType=VARCHAR}
   </update>
 
-  <select id="selectBySubCmdId" resultMap="BaseResultMap" parameterType="java.lang.String" >
+  <select id="selectBySuperCmdId" resultMap="BaseResultMap" parameterType="java.lang.String" >
     select
     <include refid="Base_Column_List" />
     from door_cmd
-    WHERE sub_cmd_id = #{subCmdId,jdbcType=VARCHAR}
+    WHERE super_cmd_id = #{superCmdId,jdbcType=VARCHAR}
   </select>
 
-  <update id="updateBySubCmdId" parameterType="com.xiangshangban.device.bean.DoorCmd" >
+  <update id="updateBySuperCmdId" parameterType="com.xiangshangban.device.bean.DoorCmd" >
     update door_cmd
     set device_id = #{deviceId,jdbcType=VARCHAR},
     file_edition = #{fileEdition,jdbcType=VARCHAR},
@@ -268,7 +268,7 @@
     result_message = #{resultMessage,jdbcType=VARCHAR},
     data = #{data,jdbcType=VARCHAR},
     status = #{status,jdbcType=VARCHAR}
-    where sub_cmd_id = #{subCmdId,jdbcType=VARCHAR}
+    where super_cmd_id = #{superCmdId,jdbcType=VARCHAR}
   </update>
 
   <select id="selectByStatus" resultMap="BaseResultMap" parameterType="java.lang.String" >

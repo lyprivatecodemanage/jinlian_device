@@ -117,4 +117,8 @@
       #{doorId}
     </foreach>
   </delete>
+
+  <select id="findAllByDeviceId" resultMap="BaseResultMap" parameterType="java.lang.String">
+    SELECT * FROM door_ WHERE device_id = #{deviceId,jdbcType=VARCHAR}
+  </select>
 </mapper>

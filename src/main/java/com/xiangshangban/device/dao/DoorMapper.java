@@ -24,6 +24,9 @@ public interface DoorMapper {
     //通过doorId查询所有的信息
     Door findAllByDoorId(String doorId);
 
+    //通过deviceId查询所有的信息
+    Door findAllByDeviceId(String deviceId);
+
     //TODO 基础信息部分
     /**
      * 删除门信息

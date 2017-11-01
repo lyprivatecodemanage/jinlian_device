@@ -3,11 +3,13 @@ package com.xiangshangban.device.controller;
 import com.xiangshangban.device.service.IDeviceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.alibaba.fastjson.JSONArray;
 import com.xiangshangban.device.bean.Device;
+import com.xiangshangban.device.dao.DoorMapper;
 
 import java.util.List;
 
@@ -22,8 +24,11 @@ public class DeviceController {
     @Autowired
     private IDeviceService deviceService;
 
+    @Autowired
+    private DoorMapper doorMapper;
+
     /**
-     * 新增设备
+     * 平台新增设备，无绑定的设备
      * @param companyId
      * @param deviceNumber
      * @param macAddress
@@ -76,18 +81,25 @@ public class DeviceController {
     /**
      * 绑定设备
      */
-    public void bindDevice(){
+    @ResponseBody
+    @RequestMapping("/bindDevice")
+    public void bindDevice(String companyId, String companyName, String deviceId){
 
-        deviceService.bindDevice();
+        deviceService.bindDevice(companyId, companyName, deviceId);
 
     }
 
     /**
      * 解绑设备
      */
-    public void unBindDevice(){
+    @ResponseBody
+    @RequestMapping("/unBindDevice")
+    public void unBindDevice(String doorId){
 
-        deviceService.unBindDevice();
+        //查找设备id
+        String deviceId = doorMapper.findAllByDoorId(doorId).getDeviceId();
+
+        deviceService.unBindDevice(deviceId);
 
     }
 
