@@ -1,9 +1,12 @@
 package com.xiangshangban.device.dao;
 
 import com.xiangshangban.device.bean.TimeRangePrivilegeEmployee;
-
 import java.util.List;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
+import java.util.Map;
+@Mapper
 public interface TimeRangePrivilegeEmployeeMapper {
     int deleteByPrimaryKey(String employeeId);
 
@@ -22,4 +25,8 @@ public interface TimeRangePrivilegeEmployeeMapper {
 
     //根据人员id删除查到的数据
     int deleteByEmployeeId(String employeeId);
+    /**
+     * 根据门的id查询首卡常开信息
+     */
+    List<Map> selectFirstCardKeepOpenInfo(@Param("doorId") String doorId);
 }

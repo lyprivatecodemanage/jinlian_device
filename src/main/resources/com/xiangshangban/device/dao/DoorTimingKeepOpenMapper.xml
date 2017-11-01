@@ -20,43 +20,45 @@
     delete from door_timing_keep_open
     where door_id = #{doorId,jdbcType=VARCHAR}
   </delete>
-  <insert id="insert" parameterType="com.xiangshangban.device.bean.DoorTimingKeepOpen" >
-    insert into door_timing_keep_open (door_id, day_of_week, timing_open_start_time, 
+  <insert id="insert" parameterType="com.xiangshangban.device.bean.DoorTimingKeepOpen">
+    insert into door_timing_keep_open (door_id, day_of_week, timing_open_start_time,
       timing_open_end_time)
     values (#{doorId,jdbcType=VARCHAR}, #{dayOfWeek,jdbcType=VARCHAR}, #{timingOpenStartTime,jdbcType=VARCHAR}, 
       #{timingOpenEndTime,jdbcType=VARCHAR})
   </insert>
-  <insert id="insertSelective" parameterType="com.xiangshangban.device.bean.DoorTimingKeepOpen" >
+
+  <insert id="insertSelective" parameterType="com.xiangshangban.device.bean.DoorTimingKeepOpen">
     insert into door_timing_keep_open
-    <trim prefix="(" suffix=")" suffixOverrides="," >
-      <if test="doorId != null" >
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="doorId != null">
         door_id,
       </if>
-      <if test="dayOfWeek != null" >
+      <if test="dayOfWeek != null">
         day_of_week,
       </if>
-      <if test="timingOpenStartTime != null" >
+      <if test="timingOpenStartTime != null">
         timing_open_start_time,
       </if>
-      <if test="timingOpenEndTime != null" >
+      <if test="timingOpenEndTime != null">
         timing_open_end_time,
       </if>
     </trim>
-    <trim prefix="values (" suffix=")" suffixOverrides="," >
-      <if test="doorId != null" >
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="doorId != null">
         #{doorId,jdbcType=VARCHAR},
       </if>
-      <if test="dayOfWeek != null" >
+      <if test="dayOfWeek != null">
         #{dayOfWeek,jdbcType=VARCHAR},
       </if>
-      <if test="timingOpenStartTime != null" >
+      <if test="timingOpenStartTime != null">
         #{timingOpenStartTime,jdbcType=VARCHAR},
       </if>
-      <if test="timingOpenEndTime != null" >
+      <if test="timingOpenEndTime != null">
         #{timingOpenEndTime,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
+
   <update id="updateByPrimaryKeySelective" parameterType="com.xiangshangban.device.bean.DoorTimingKeepOpen" >
     update door_timing_keep_open
     <set >
@@ -87,4 +89,8 @@
     where door_id = #{doorId,jdbcType=VARCHAR}
   </select>
 
+  <!--根据门的id查询门的定时常开信息-->
+  <select id="selectKeepOpenInfo" parameterType="String" resultMap="BaseResultMap">
+    select * from door_timing_keep_open where door_id = #{doorId}
+  </select>
 </mapper>

@@ -232,4 +232,12 @@
          and A.record_date = #{doorRecordCondition.punchCardTime}
       </if>
   </select>
+
+  <!--查询一个员工在某段时间内的最早和最晚打卡时间-->
+  <select id="selectPunchCardTime" parameterType="map" resultType="String">
+    select record_date from door_record where employee_id = #{map.empId} and door_id
+    in(select door_id from door_ where device_id in
+    (select device_id from device_ where company_id = #{map.companyId})) and record_date between #{map.startTime} and #{map.endTime}
+    order by record_date desc
+  </select>
 </mapper>

@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 @Component
 public interface DoorRecordMapper {
@@ -25,5 +26,10 @@ public interface DoorRecordMapper {
     /**
      * 分条件，查询所有的打卡记录
      */
-    List<DoorRecord> selectPunchCardRecord(@Param("doorRecordCondition") DoorRecordCondition doorRecordCondition);
+    List<Map> selectPunchCardRecord(@Param("doorRecordCondition") DoorRecordCondition doorRecordCondition);
+
+    /**
+     * 查询一段时间内，一个人的最早最晚打卡时间
+     */
+    List<String> selectPunchCardTime(@Param("map")Map map);
 }

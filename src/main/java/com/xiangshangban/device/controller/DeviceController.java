@@ -71,7 +71,7 @@ public class DeviceController {
      * 查询所有的设备信息
      */
     @ResponseBody
-    @RequestMapping("/getAllDevice.do")
+    @RequestMapping("/getAllDevice")
     public String getAllDeviceInfo(){
         List<Device> devices = deviceService.queryAllDeviceInfo();
         return JSONArray.toJSONString(devices);

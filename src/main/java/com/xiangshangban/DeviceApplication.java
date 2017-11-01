@@ -4,13 +4,14 @@ import com.github.pagehelper.PageHelper;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.util.Properties;
 
 /**
- * 应用程序入口
+ * 应用程序入口(开启事务)
  */
 @SpringBootApplication
 @EnableScheduling
@@ -19,8 +20,8 @@ public class DeviceApplication {
 
 	public static void main(String[] args) {
 
-		SpringApplication.run(DeviceApplication.class, args);
-}
+		ConfigurableApplicationContext run = SpringApplication.run(DeviceApplication.class, args);
+	}
 
     @Bean
 	public PageHelper pageHelper(){

@@ -77,13 +77,43 @@ public interface IEntranceGuardService {
    List<Map> queryCMDInfo(RelateEmpPermissionCondition relateEmpPermissionCondition);
 
 
+    /**
+     * 根据门的id查询门的定时常开信息
+     * @param doorId
+     * @return
+     */
+   List<DoorTimingKeepOpen> queryKeepOpenInfo(String doorId);
+
+    /**
+     * 根据门的id查询门的首卡常开信息
+     * @param doorId
+     * @return
+     */
+    List<Map> queryFirstCardKeepOpenInfo(String doorId);
+
+    /**
+     * 根据门的id查询门禁日历信息
+     * @return
+     */
+   List<DoorCalendar> queryDoorCalendarInfo(String doorId);
+
+    /**
+     * 根据门的id查询门的设置信息
+     * @param doorId
+     * @return
+     */
+   List<Map> queryDoorSettingInfo(String doorId);
+
     //TODO 门禁记录
 
     //1）出入记录
-    public List<DoorRecord> queryPunchCardRecord(DoorRecordCondition doorRecordCondition);
+    public List<Map> queryPunchCardRecord(DoorRecordCondition doorRecordCondition);
 
     //2）门禁异常
-    public List<DoorException> queryDoorExceptionRecord(DoorExceptionCondition doorExceptionCondition);
+    public List<Map> queryDoorExceptionRecord(DoorExceptionCondition doorExceptionCondition);
+
+    //3）查询一个人在某段时间内的最早和最晚的打卡时间
+    public List<String> queryPunchCardTime(String empId,String companyId,String startTime,String endTime);
 
     //门禁配置---功能配置（身份验证失败次数、非法入侵、报警时长、密码、开门事件记录）
     void doorCommonSetupAdditional(String doorId, String countLimitAuthenticationFailed, String enableAlarm,

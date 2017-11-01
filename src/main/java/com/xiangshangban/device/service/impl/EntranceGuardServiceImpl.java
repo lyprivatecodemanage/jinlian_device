@@ -220,12 +220,55 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         return maps;
     }
 
+    /**
+     * 根据门的id查询门的定时常开信息
+     * @param doorId
+     * @return
+     */
+    @Override
+    public List<DoorTimingKeepOpen> queryKeepOpenInfo(String doorId) {
+        List<DoorTimingKeepOpen> doorTimingKeepOpens = doorTimingKeepOpenMapper.selectKeepOpenInfo(doorId);
+        return doorTimingKeepOpens;
+    }
+
+    /**
+     *根据门的id查询门的首卡常开信息
+     * @param doorId
+     * @return
+     */
+    @Override
+    public List<Map> queryFirstCardKeepOpenInfo(String doorId) {
+        List<Map> maps = timeRangePrivilegeEmployeeMapper.selectFirstCardKeepOpenInfo(doorId);
+        return maps;
+    }
+
+    /**
+     * 根据门的id查询门禁信息
+     * @return
+     */
+    @Override
+    public List <DoorCalendar> queryDoorCalendarInfo(String doorId) {
+        List<DoorCalendar> doorCalendars = doorCalendarMapper.selectDoorCalendarInfo(doorId);
+        return doorCalendars;
+    }
+
+    /**
+     * 根据门的id查询门的设置信息
+     * @param doorId
+     * @return
+     */
+    @Override
+    public List<Map> queryDoorSettingInfo(String doorId) {
+        List<Map> doorSetting = doorSettingMapper.selectDoorSettingInfo(doorId);
+        return doorSetting;
+    }
+
 
     //TODO ################《门禁记录》################
 
     //查询打卡记录
     @Override
-    public List<DoorRecord> queryPunchCardRecord(DoorRecordCondition doorRecordCondition) {
+    public List<Map> queryPunchCardRecord(DoorRecordCondition doorRecordCondition) {
         //验证数据的合法性
         if(doorRecordCondition!=null){
             if(doorRecordCondition.getName()!=null&&!doorRecordCondition.getName().isEmpty()){
@@ -237,7 +280,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
             if(doorRecordCondition.getPunchCardType()!=null&&!doorRecordCondition.getPunchCardType().isEmpty()){
                 doorRecordCondition.setPunchCardType("%"+doorRecordCondition.getPunchCardType()+"%");
             }
-            List<DoorRecord> doorRecords = doorRecordMapper.selectPunchCardRecord(doorRecordCondition);
+            List<Map> doorRecords = doorRecordMapper.selectPunchCardRecord(doorRecordCondition);
             return doorRecords;
         }else{
             return null;
@@ -246,7 +289,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
 
     //查询门禁异常记录
     @Override
-    public List<DoorException> queryDoorExceptionRecord(DoorExceptionCondition doorExceptionCondition) {
+    public List<Map> queryDoorExceptionRecord(DoorExceptionCondition doorExceptionCondition) {
         //验证数据的合法性
         if(doorExceptionCondition!=null){
             if(doorExceptionCondition.getName()!=null&&!doorExceptionCondition.getName().isEmpty()){
@@ -258,7 +301,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
             if(doorExceptionCondition.getAlarmType()!=null&&!doorExceptionCondition.getAlarmType().isEmpty()){
                 doorExceptionCondition.setAlarmType("%"+doorExceptionCondition.getAlarmType()+"%");
             }
-            List<DoorException> doorExceptionRecords = doorExceptionMapper.selectDoorExceptionRecord(doorExceptionCondition);
+            List<Map> doorExceptionRecords = doorExceptionMapper.selectDoorExceptionRecord(doorExceptionCondition);
             return doorExceptionRecords;
         }else{
             return null;
@@ -495,23 +538,23 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
 
         //判断门禁配置表里有没有这个门的配置信息，有则更新，无则增加
         DoorSetting doorSettingExist = doorSettingMapper.selectByPrimaryKey(doorId);
-        if (doorSettingExist == null){
+        if (doorSettingExist == null) {
             //存储门禁配置到门禁配置表
             doorSettingMapper.insertSelective(doorSetting);
-        }else {
+        } else {
             //更新门禁配置到门禁配置表
             doorSettingMapper.updateByPrimaryKeySelective(doorSetting);
         }
 
         //判断某个门的门禁日历信息是否存在
         List<DoorCalendar> doorCalendarList = doorCalendarMapper.selectByPrimaryKey(doorId);
-        if (doorCalendarList != null){
+        if (doorCalendarList != null) {
             //有信息存在则删除该门的所有门禁日历信息然后后面的时候重新添加
             doorCalendarMapper.deleteByPrimaryKey(doorId);
         }
 
         //首卡常开时间判断及存入数据库
-        if (accessCalendar.size() > 0){
+        if (accessCalendar.size() > 0) {
 
             List<Map<String, String>> accessCalendarCollection = (List<Map<String, String>>) accessCalendar;
             for (Map<String, String> accessCalendarMap : accessCalendarCollection) {
@@ -544,13 +587,13 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         doorCmdEmployeeInformation.setActionCode("3005");
 
         doorCmdEmployeeInformation.setSendTime(CalendarUtil.getCurrentTime());
-        doorCmdEmployeeInformation.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(),3));
+        doorCmdEmployeeInformation.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(), 3));
         doorCmdEmployeeInformation.setSuperCmdId(FormatUtil.createUuid());
         doorCmdEmployeeInformation.setData(JSON.toJSONString(accessCalendar));
 
         //获取完整的数据加协议封装格式
         RabbitMQSender rabbitMQSender = new RabbitMQSender();
-        Map<String, Object> userInformationAll =  rabbitMQSender.messagePackaging(doorCmdEmployeeInformation, "accessCalendar", accessCalendar, "C");
+        Map<String, Object> userInformationAll = rabbitMQSender.messagePackaging(doorCmdEmployeeInformation, "accessCalendar", accessCalendar, "C");
         //命令状态设置为: 发送中
         doorCmdEmployeeInformation.setStatus("1");
         //设置md5校验值
@@ -561,6 +604,16 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         insertCommand(doorCmdEmployeeInformation);
         //立即下发数据到MQ
         rabbitMQSender.sendMessage(downloadQueueName, userInformationAll);
-
+    }
+    //查询一个人在一段时间之内的最早最晚打卡时间
+    @Override
+    public List<String> queryPunchCardTime (String empId, String companyId, String startTime, String endTime){
+        Map map = new HashMap();
+        map.put("empId", empId);
+        map.put("companyId", companyId);
+        map.put("startTime", startTime);
+        map.put("endTime", endTime);
+        List<String> strings = doorRecordMapper.selectPunchCardTime(map);
+        return strings;
     }
 }

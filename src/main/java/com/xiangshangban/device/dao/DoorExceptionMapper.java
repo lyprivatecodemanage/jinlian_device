@@ -26,5 +26,5 @@ public interface DoorExceptionMapper {
     /**
      * 多条件查询所有的门禁异常信息
      */
-    List<DoorException> selectDoorExceptionRecord(@Param("doorExceptionCondition") DoorExceptionCondition doorExceptionCondition);
+    List<Map> selectDoorExceptionRecord(@Param("doorExceptionCondition") DoorExceptionCondition doorExceptionCondition);
 }
