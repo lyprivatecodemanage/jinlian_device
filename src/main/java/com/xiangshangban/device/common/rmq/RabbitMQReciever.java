@@ -120,8 +120,10 @@ public class RabbitMQReciever {
                     String otherMd5 = (String) mapResult.get("MD5Check");
                     mapResult.remove("MD5Check");
                     String messageCheck = JSON.toJSONString(mapResult);
+//                    System.out.println("去MD5后的数据 : " + messageCheck);
                     //生成我的md5
                     String myMd5 = MD5Util.encryptPassword(messageCheck, "XC9EO5GKOIVRMBQ2YE8X");
+//                    System.out.println("我的MD5 = " + myMd5);
                     //双方的md5比较判断
                     if (myMd5.equals(otherMd5)){
                         System.out.println("设备上传的数据未被修改");
@@ -139,7 +141,10 @@ public class RabbitMQReciever {
                         employeeService.doorRecordSave(message, "RabbitMQ-Request");
                     }else if (commandMap.get("ACTION").equals("UPLOAD_DEVICE_REBOOT_RECORD")){
                         //设备重启记录上传存储
-                        deviceService.deviceRebootRecordSave((String) mapResult.get("data"));
+                        deviceService.deviceRebootRecordSave((String) mapResult.get("data"), (String) mapResult.get("deviceId"));
+                    }else if (commandMap.get("ACTION").equals("UPLOAD_DEVICE_RUNNING_LOG")){
+                        //设备运行日志上传存储
+                        deviceService.deviceRunningLogSave((String) mapResult.get("data"), (String) mapResult.get("deviceId"));
                     }
 
                 }else if (mapResult.get("commandMode").equals("R")){

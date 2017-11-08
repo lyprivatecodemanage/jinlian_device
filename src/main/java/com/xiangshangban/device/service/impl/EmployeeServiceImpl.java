@@ -348,7 +348,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
         doorCmdRecord.setDeviceId(doorRecordList.get(0).get("deviceId"));
         doorCmdRecord.setFileEdition("v1.3");
         doorCmdRecord.setCommandMode("R");
-        doorCmdRecord.setCommandType("single");
+        doorCmdRecord.setCommandType("S");
         doorCmdRecord.setCommandTotal("1");
         doorCmdRecord.setCommandIndex("1");
         doorCmdRecord.setSubCmdId("");

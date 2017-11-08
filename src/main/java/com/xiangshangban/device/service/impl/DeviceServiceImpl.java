@@ -1,15 +1,12 @@
 package com.xiangshangban.device.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.xiangshangban.device.bean.Device;
-import com.xiangshangban.device.bean.Door;
-import com.xiangshangban.device.bean.DoorCmd;
+import com.xiangshangban.device.bean.*;
 import com.xiangshangban.device.common.rmq.RabbitMQSender;
 import com.xiangshangban.device.common.utils.CalendarUtil;
 import com.xiangshangban.device.common.utils.DateUtils;
 import com.xiangshangban.device.common.utils.FormatUtil;
-import com.xiangshangban.device.dao.DeviceMapper;
-import com.xiangshangban.device.dao.DoorMapper;
+import com.xiangshangban.device.dao.*;
 import com.xiangshangban.device.service.IDeviceService;
 import com.xiangshangban.device.service.IEntranceGuardService;
 import net.sf.json.JSONObject;
@@ -17,10 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * author : Administrator
@@ -42,6 +36,15 @@ public class DeviceServiceImpl implements IDeviceService {
 
     @Autowired
     private IEntranceGuardService entranceGuardService;
+
+    @Autowired
+    private DeviceRebootRecordMapper deviceRebootRecordMapper;
+
+    @Autowired
+    private DeviceRebootRecordVersionMapper deviceRebootRecordVersionMapper;
+
+    @Autowired
+    private DeviceRunningLogMapper deviceRunningLogMapper;
 
     @Override
     public void addDevice(String companyId, String deviceId, String macAddress) {
@@ -239,13 +242,156 @@ public class DeviceServiceImpl implements IDeviceService {
     }
 
     @Override
-    public void deviceRebootRecordSave(String jsonString) {
+    public void deviceRebootRecordSave(String jsonString, String deviceId) {
 
         //解析json数据
         Map<String, Object> mapJson = JSONObject.fromObject(jsonString);
+        List<Map<String, Object>> rebootRecordList = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> rebootRecordVersionList = new ArrayList<Map<String, Object>>();
+        String rebootId;
+        List<String> rebootIdList = new ArrayList<>();
 
+        rebootRecordList = (List<Map<String, Object>>) mapJson.get("record");
+        for (Map<String, Object> singleRecordMap : rebootRecordList) {
 
+            rebootId = (String) singleRecordMap.get("rebootId");
+            rebootIdList.add(rebootId);
 
+            DeviceRebootRecord deviceRebootRecord = new DeviceRebootRecord();
+            deviceRebootRecord.setRebootId(rebootId);
+            deviceRebootRecord.setDeviceId((String) singleRecordMap.get("deviceId"));
+            deviceRebootRecord.setRebootNumber((String) singleRecordMap.get("rebootNumber"));
+            deviceRebootRecord.setRebootTime((String) singleRecordMap.get("rebootTime"));
+
+            DeviceRebootRecord deviceRebootRecordExist = deviceRebootRecordMapper.selectByPrimaryKey(rebootId);
+            if (deviceRebootRecordExist == null){
+                deviceRebootRecordMapper.insertSelective(deviceRebootRecord);
+            }else {
+                deviceRebootRecordMapper.updateByPrimaryKeySelective(deviceRebootRecord);
+            }
+
+            //删除该记录对应的所有硬件版本记录信息
+            List<DeviceRebootRecordVersion> deviceRebootRecordVersionExist = deviceRebootRecordVersionMapper.selectByPrimaryKey(rebootId);
+            if (deviceRebootRecordVersionExist.size() > 0){
+                deviceRebootRecordVersionMapper.deleteByPrimaryKey(rebootId);
+            }
+            rebootRecordVersionList = (List<Map<String, Object>>) singleRecordMap.get("version");
+            for (Map<String, Object> singleRecordVersionMap : rebootRecordVersionList) {
+
+                DeviceRebootRecordVersion deviceRebootRecordVersion = new DeviceRebootRecordVersion();
+                deviceRebootRecordVersion.setRebootId(rebootId);
+                deviceRebootRecordVersion.setName((String) singleRecordVersionMap.get("name"));
+                deviceRebootRecordVersion.setValue((String) singleRecordVersionMap.get("value"));
+
+                //重新插入该记录对应的所有硬件版本记录信息
+                deviceRebootRecordVersionMapper.insertSelective(deviceRebootRecordVersion);
+            }
+        }
+
+        //回复设备重启记录上传
+        Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
+        Map<String, Object> resultData = new LinkedHashMap<String, Object>();
+        resultData.put("resultCode", "0");
+        resultData.put("resultMessage", "执行成功");
+        resultData.put("returnObj", rebootIdList);
+        resultMap.put("result", resultData);
+
+        //构造命令格式
+        DoorCmd doorCmdRecord = new DoorCmd();
+        doorCmdRecord.setServerId("001");
+        doorCmdRecord.setDeviceId(deviceId);
+        doorCmdRecord.setFileEdition("v1.3");
+        doorCmdRecord.setCommandMode("R");
+        doorCmdRecord.setCommandType("S");
+        doorCmdRecord.setCommandTotal("1");
+        doorCmdRecord.setCommandIndex("1");
+        doorCmdRecord.setSubCmdId("");
+        doorCmdRecord.setAction("UPLOAD_DEVICE_REBOOT_RECORD");
+        doorCmdRecord.setActionCode("1004");
+        doorCmdRecord.setSendTime(CalendarUtil.getCurrentTime());
+        doorCmdRecord.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(),3));
+        doorCmdRecord.setSuperCmdId(FormatUtil.createUuid());
+        doorCmdRecord.setData(JSON.toJSONString(resultMap));
+
+        //获取完整的数据加协议封装格式
+        RabbitMQSender rabbitMQSender = new RabbitMQSender();
+        Map<String, Object> doorRecordAll =  rabbitMQSender.messagePackaging(doorCmdRecord, "", resultData, "R");
+        //命令状态设置为: 已回复
+        doorCmdRecord.setStatus("5");
+        //设置md5校验值
+        doorCmdRecord.setMd5Check((String) doorRecordAll.get("MD5Check"));
+        //设置数据库的data字段
+        doorCmdRecord.setData(JSON.toJSONString(doorRecordAll.get("result")));
+        //命令数据存入数据库
+        entranceGuardService.insertCommand(doorCmdRecord);
+        //立即下发回复数据到MQ
+        rabbitMQSender.sendMessage(downloadQueueName, doorRecordAll);
+        System.out.println("重启记录已回复");
     }
 
+    @Override
+    public void deviceRunningLogSave(String jsonString, String deviceId) {
+
+        //解析json数据
+        Map<String, Object> mapJson = JSONObject.fromObject(jsonString);
+        List<Map<String, String>> deviceRunningLogList = (List<Map<String, String>>) mapJson.get("log");
+        List<String> logIdList = new ArrayList<String>();
+
+        for (Map<String, String> deviceRunningLogMap : deviceRunningLogList) {
+
+            DeviceRunningLog deviceRunningLog = new DeviceRunningLog();
+            deviceRunningLog.setLogId(deviceRunningLogMap.get("logId"));
+            deviceRunningLog.setLogLevel(deviceRunningLogMap.get("logLevel"));
+            deviceRunningLog.setLogType(deviceRunningLogMap.get("logType"));
+            deviceRunningLog.setLogContent(deviceRunningLogMap.get("logContent"));
+            deviceRunningLog.setLogTime(deviceRunningLogMap.get("logTime"));
+
+            DeviceRunningLog deviceRunningLogExist = new DeviceRunningLog();
+            if (deviceRunningLogExist == null){
+                deviceRunningLogMapper.insertSelective(deviceRunningLog);
+            }else {
+                deviceRunningLogMapper.updateByPrimaryKeySelective(deviceRunningLog);
+            }
+        }
+
+        //回复设备重启记录上传
+        Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
+        Map<String, Object> resultData = new LinkedHashMap<String, Object>();
+        resultData.put("resultCode", "0");
+        resultData.put("resultMessage", "执行成功");
+        resultData.put("returnObj", logIdList);
+        resultMap.put("result", resultData);
+
+        //构造命令格式
+        DoorCmd doorCmdRecord = new DoorCmd();
+        doorCmdRecord.setServerId("001");
+        doorCmdRecord.setDeviceId(deviceId);
+        doorCmdRecord.setFileEdition("v1.3");
+        doorCmdRecord.setCommandMode("R");
+        doorCmdRecord.setCommandType("S");
+        doorCmdRecord.setCommandTotal("1");
+        doorCmdRecord.setCommandIndex("1");
+        doorCmdRecord.setSubCmdId("");
+        doorCmdRecord.setAction("UPLOAD_DEVICE_RUNNING_LOG");
+        doorCmdRecord.setActionCode("1006");
+        doorCmdRecord.setSendTime(CalendarUtil.getCurrentTime());
+        doorCmdRecord.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(),3));
+        doorCmdRecord.setSuperCmdId(FormatUtil.createUuid());
+        doorCmdRecord.setData(JSON.toJSONString(resultMap));
+
+        //获取完整的数据加协议封装格式
+        RabbitMQSender rabbitMQSender = new RabbitMQSender();
+        Map<String, Object> doorRecordAll =  rabbitMQSender.messagePackaging(doorCmdRecord, "", resultData, "R");
+        //命令状态设置为: 已回复
+        doorCmdRecord.setStatus("5");
+        //设置md5校验值
+        doorCmdRecord.setMd5Check((String) doorRecordAll.get("MD5Check"));
+        //设置数据库的data字段
+        doorCmdRecord.setData(JSON.toJSONString(doorRecordAll.get("result")));
+        //命令数据存入数据库
+        entranceGuardService.insertCommand(doorCmdRecord);
+        //立即下发回复数据到MQ
+        rabbitMQSender.sendMessage(downloadQueueName, doorRecordAll);
+        System.out.println("运行日志上传已回复");
+    }
 }

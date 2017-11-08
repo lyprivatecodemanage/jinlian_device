@@ -70,6 +70,11 @@ public interface IDeviceService {
     /**
      * 上传设备重启记录
      */
-    void deviceRebootRecordSave(String jsonString);
+    void deviceRebootRecordSave(String jsonString, String deviceId);
+
+    /**
+     * 上传设备运行日志
+     */
+    void deviceRunningLogSave(String jsonString, String deviceId);
 
 }

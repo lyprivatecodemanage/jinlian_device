@@ -3,6 +3,8 @@ package com.xiangshangban.device.bean;
 public class DeviceHeartbeat {
     private String deviceId;
 
+    private String lockState;
+
     private String wifiOpne;
 
     private String ip;
@@ -31,6 +33,8 @@ public class DeviceHeartbeat {
 
     private String romAvailableSize;
 
+    private String cpuFreq;
+
     private String cpuTemper;
 
     private String cpuUnilization;
@@ -49,6 +53,14 @@ public class DeviceHeartbeat {
 
     public void setDeviceId(String deviceId) {
         this.deviceId = deviceId;
+    }
+
+    public String getLockState() {
+        return lockState;
+    }
+
+    public void setLockState(String lockState) {
+        this.lockState = lockState;
     }
 
     public String getWifiOpne() {
@@ -161,6 +173,14 @@ public class DeviceHeartbeat {
 
     public void setRomAvailableSize(String romAvailableSize) {
         this.romAvailableSize = romAvailableSize;
+    }
+
+    public String getCpuFreq() {
+        return cpuFreq;
+    }
+
+    public void setCpuFreq(String cpuFreq) {
+        this.cpuFreq = cpuFreq;
     }
 
     public String getCpuTemper() {

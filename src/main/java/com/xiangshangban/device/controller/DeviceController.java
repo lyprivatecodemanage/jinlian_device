@@ -261,6 +261,7 @@ public class DeviceController {
          "data": {
          "heartbeat": {
          "deviceId": "111",
+         "lockState": "0",
          "wifiOpne": "0",
          "ip": "192.168.0.20",
          "mask": "255.255.255.0",
@@ -275,6 +276,7 @@ public class DeviceController {
          "companyName": "0",
          "dataUploadstate": "0",
          "romAvailableSize": "70.8",
+         "cpuFreq": "996000",
          "cpuTemper": "56.8",
          "cpuUnilization": "70.8",
          "cpuUserUnilization": "70.8",
@@ -327,6 +329,7 @@ public class DeviceController {
                 DeviceHeartbeat deviceHeartbeat = new DeviceHeartbeat();
 
                 deviceHeartbeat.setDeviceId((String) mapJson.get("deviceId"));
+                deviceHeartbeat.setLockState(heartbeatMap.get("lockState"));
                 deviceHeartbeat.setWifiOpne(heartbeatMap.get("wifiOpne"));
                 deviceHeartbeat.setIp(heartbeatMap.get("ip"));
                 deviceHeartbeat.setMask(heartbeatMap.get("mask"));
@@ -341,6 +344,7 @@ public class DeviceController {
                 deviceHeartbeat.setCompanyName(heartbeatMap.get("companyName"));
                 deviceHeartbeat.setDataUploadstate(heartbeatMap.get("dataUploadstate"));
                 deviceHeartbeat.setRomAvailableSize(heartbeatMap.get("romAvailableSize"));
+                deviceHeartbeat.setCpuFreq(heartbeatMap.get("cpuFreq"));
                 deviceHeartbeat.setCpuTemper(heartbeatMap.get("cpuTemper"));
                 deviceHeartbeat.setCpuUnilization(heartbeatMap.get("cpuUnilization"));
                 deviceHeartbeat.setCpuUserUnilization(heartbeatMap.get("cpuUserUnilization"));
@@ -350,6 +354,7 @@ public class DeviceController {
                 deviceHeartbeat.setTime(DateUtils.getDateTime());
 
                 deviceHeartbeatMapper.insertSelective(deviceHeartbeat);
+                System.out.println("心跳数据已存储");
 
             }
 
@@ -377,7 +382,7 @@ public class DeviceController {
         doorCmdRecord.setDeviceId((String) mapJson.get("deviceId"));
         doorCmdRecord.setFileEdition("v1.3");
         doorCmdRecord.setCommandMode("R");
-        doorCmdRecord.setCommandType("single");
+        doorCmdRecord.setCommandType("S");
         doorCmdRecord.setCommandTotal("1");
         doorCmdRecord.setCommandIndex("1");
         doorCmdRecord.setSubCmdId("");
