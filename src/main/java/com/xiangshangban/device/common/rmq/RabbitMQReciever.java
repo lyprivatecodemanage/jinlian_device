@@ -95,6 +95,7 @@ public class RabbitMQReciever {
 
         //绑定路由关键字
         channel.queueBind(QUEUE_NAME, EXCHANGE_NAME, routingKey);
+
         System.out.println(" [*] 绑定 交换器 ["+EXCHANGE_NAME+"] 到 ["+QUEUE_NAME+"] 队列通过 routingKey [" + routingKey + "]");
 
         System.out.println(" [*] 消息监听中... To exit press CTRL+C");
@@ -173,7 +174,6 @@ public class RabbitMQReciever {
 
                             //改变该这条命令的状态
                             doorCmdMapper.updateBySuperCmdIdSelective(doorCmd);
-
                         }
                     }
                 }catch (Exception e){
@@ -183,6 +183,7 @@ public class RabbitMQReciever {
                 }
             }
         };
+
         channel.basicConsume(QUEUE_NAME, true, consumer);
 
 //        QueueingConsumer consumer = new QueueingConsumer(channel);

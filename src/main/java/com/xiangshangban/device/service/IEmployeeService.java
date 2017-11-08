@@ -1,6 +1,7 @@
 package com.xiangshangban.device.service;
 
 import com.xiangshangban.device.bean.Door;
+import com.xiangshangban.device.bean.Employee;
 
 import java.util.List;
 import java.util.Map;
@@ -34,5 +35,8 @@ public interface IEmployeeService {
 
     //批量下发存为草稿的人员信息和人员权限信息
     void multipleHandOutEmployeePermission(String doorId);
+
+    //根据人员id查找人的信息
+    Employee findEmployeeById(String empId);
 
 }

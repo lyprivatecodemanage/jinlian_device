@@ -396,7 +396,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
         List<DoorCmd> doorCmdLatestList = new ArrayList<DoorCmd>();
 
         Door door = doorMapper.selectByPrimaryKey(doorId);
-        if (door != null){
+        if (door != null) {
             deviceId = door.getDeviceId();
             //查找当前设备存为草稿的所有人员信息和人员开门权限的下发命令
             List<DoorCmd> doorCmdList = doorCmdMapper.selectEmployeeDraftByDeviceId(deviceId);
@@ -414,12 +414,12 @@ public class EmployeeServiceImpl implements IEmployeeService {
 //                System.out.println(employeeId);
                 List<DoorCmd> doorCmdListUserInfo = doorCmdMapper.selectCmdByEmployeeIdSendTimeDesc(employeeId, "UPDATE_USER_INFO");
                 List<DoorCmd> doorCmdListUserAccessControlInfo = doorCmdMapper.selectCmdByEmployeeIdSendTimeDesc(employeeId, "UPDATE_USER_ACCESS_CONTROL");
-                if (doorCmdListUserInfo.size() > 0){
+                if (doorCmdListUserInfo.size() > 0) {
                     DoorCmd doorCmdLatestUser = doorCmdListUserInfo.get(0);
                     doorCmdLatestList.add(doorCmdLatestUser);
                 }
 
-                if (doorCmdListUserAccessControlInfo.size() > 0){
+                if (doorCmdListUserAccessControlInfo.size() > 0) {
                     DoorCmd doorCmdLatestAccessControl = doorCmdListUserAccessControlInfo.get(0);
                     doorCmdLatestList.add(doorCmdLatestAccessControl);
                 }
@@ -427,7 +427,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
 
 //            System.out.println(JSON.toJSONString(doorCmdLatestList));
 
-            if (doorCmdLatestList.size() > 0){
+            if (doorCmdLatestList.size() > 0) {
                 //遍历所有最新的草稿命令批量下发
                 for (DoorCmd doorCmd : doorCmdLatestList) {
                     //获取完整的数据加协议封装格式
@@ -440,10 +440,18 @@ public class EmployeeServiceImpl implements IEmployeeService {
                     rabbitMQSender.sendMessage(downloadQueueName, JSON.toJSONString(doorCmd));
 //                    System.out.println(JSON.toJSONString(doorCmd));
                 }
-            }else {
+            } else {
                 System.out.println("没有可以批量下发的人员");
             }
         }
+    }
+
+    //根据人员Id查找人的信息
+    @Override
+    public Employee findEmployeeById(String empId) {
+        Employee employee = employeeMapper.selectByPrimaryKey(empId);
+        return employee;
+
     }
 
     public static void main(String[] args) {

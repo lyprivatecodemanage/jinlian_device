@@ -693,11 +693,16 @@ public class EntranceGuardController {
     public String getPunchCardRecord(@RequestBody String requestParam){
         JSONObject jsonObject = JSONObject.parseObject(requestParam);
         List<String> strings = iegs.queryPunchCardTime(jsonObject.get("empId").toString(),jsonObject.get("companyId").toString(),jsonObject.get("startTime").toString(),jsonObject.get("endTime").toString());
-        //获取最早和最晚的时间
-        List<String> info = new ArrayList<String>();
-        info.add(strings.get(strings.size()-1));
-        info.add(strings.get(0));
-        return JSONArray.toJSONString(info);
+        String result = "";
+        if(strings!=null&&strings.size()>0){
+            if(strings.size()<2){
+                result = strings.get(0);
+            }
+            if(strings.size()>1){
+                result = strings.get(strings.size()-1)+","+strings.get(0);
+            }
+        }
+        return result;
     }
 }
 

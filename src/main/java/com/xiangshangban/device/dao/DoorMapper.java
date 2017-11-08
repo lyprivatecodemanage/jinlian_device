@@ -11,8 +11,6 @@ import java.util.Map;
 @Component
 public interface DoorMapper {
 
-    int delDoorBatch(List<String> doorList);
-
     int insertSelective(Door record);
 
     Door selectByPrimaryKey(@Param("doorId") String doorId);
@@ -59,5 +57,5 @@ public interface DoorMapper {
      * @param doorList
      * @return
      */
-
+    int delDoorBatch(List<String> doorList);
 }

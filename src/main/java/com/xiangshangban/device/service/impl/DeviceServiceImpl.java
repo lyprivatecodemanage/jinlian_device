@@ -253,7 +253,6 @@ public class DeviceServiceImpl implements IDeviceService {
         entranceGuardService.insertCommand(doorCmdBindDevice);
         //立即下发数据到MQ
         rabbitMQSender.sendMessage(downloadQueueName, doorCmdPackageAll);
-
     }
 
     @Override
@@ -289,7 +288,6 @@ public class DeviceServiceImpl implements IDeviceService {
         entranceGuardService.insertCommand(doorCmdUnBindDevice);
         //立即下发数据到MQ
         rabbitMQSender.sendMessage(downloadQueueName, doorCmdPackageAll);
-
     }
 
     @Override

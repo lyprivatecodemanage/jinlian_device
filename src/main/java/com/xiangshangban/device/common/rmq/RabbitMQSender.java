@@ -49,7 +49,7 @@ public class RabbitMQSender {
 //                System.out.println("数据加密出错:"+e.getMessage());
 //            }
 //            template.convertAndSend(encry);
-            template.convertAndSend(json);
+               template.convertAndSend(json);
 //            ConnectionFactoryServiceImpl.destoryConnection(templateutil.getKey());
         }else{
             System.out.println("RABBITMQ'S ERROR: can not intalialize the template.");
