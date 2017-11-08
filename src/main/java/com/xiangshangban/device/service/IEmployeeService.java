@@ -1,9 +1,9 @@
 package com.xiangshangban.device.service;
 
 import com.xiangshangban.device.bean.Door;
-import com.xiangshangban.device.bean.DoorCmd;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * author : Administrator
@@ -30,9 +30,12 @@ public interface IEmployeeService {
     void saveEmployeeInputInfo(String employeeInputInfo);
 
     //门禁记录上传存储
-    void doorRecordSave(String doorRecordMap);
+    Map<String, Object> doorRecordSave(String doorRecordMap, String requestType);
 
     //删除设备上的人员的所有关联信息
     void deleteEmployeeInformation(String employeeIdCollection);
+
+    //批量下发存为草稿的人员信息和人员权限信息
+    void multipleHandOutEmployeePermission(String doorId);
 
 }

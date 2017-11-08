@@ -5,6 +5,7 @@ import com.rabbitmq.client.*;
 import com.xiangshangban.device.bean.DoorCmd;
 import com.xiangshangban.device.common.encode.MD5Util;
 import com.xiangshangban.device.dao.DoorCmdMapper;
+import com.xiangshangban.device.service.IDeviceService;
 import com.xiangshangban.device.service.IEmployeeService;
 import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,9 @@ public class RabbitMQReciever {
 
     @Autowired
     private DoorCmdMapper doorCmdMapper;
+
+    @Autowired
+    private IDeviceService deviceService;
 
     //接收测试
     //接收可自动创建交换器、队列并绑定，发出不能
@@ -94,6 +98,7 @@ public class RabbitMQReciever {
         Consumer consumer = new DefaultConsumer(channel) {
             @Override
             public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+
                 String message = new String(body, "UTF-8");
                 System.out.println(" [x] Received '" + envelope.getRoutingKey() + "':'" + message + "'");
 
@@ -131,8 +136,10 @@ public class RabbitMQReciever {
                         employeeService.saveEmployeeInputInfo((String) mapResult.get("data"));
                     }else if (commandMap.get("ACTION").equals("UPLOAD_ACCESS_RECORD")){
                         //门禁记录上传存储
-                        System.out.println("[#] message: " + message);
-                        employeeService.doorRecordSave(message);
+                        employeeService.doorRecordSave(message, "RabbitMQ-Request");
+                    }else if (commandMap.get("ACTION").equals("UPLOAD_DEVICE_REBOOT_RECORD")){
+                        //设备重启记录上传存储
+                        deviceService.deviceRebootRecordSave((String) mapResult.get("data"));
                     }
 
                 }else if (mapResult.get("commandMode").equals("R")){

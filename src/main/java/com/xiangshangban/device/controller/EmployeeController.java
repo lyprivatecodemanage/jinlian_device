@@ -2,8 +2,12 @@ package com.xiangshangban.device.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.xiangshangban.device.bean.*;
+import com.xiangshangban.device.common.encode.MD5Util;
 import com.xiangshangban.device.common.rmq.RabbitMQSender;
-import com.xiangshangban.device.common.utils.*;
+import com.xiangshangban.device.common.utils.CalendarUtil;
+import com.xiangshangban.device.common.utils.DateUtils;
+import com.xiangshangban.device.common.utils.FormatUtil;
+import com.xiangshangban.device.common.utils.HttpRequestFactory;
 import com.xiangshangban.device.dao.*;
 import com.xiangshangban.device.service.IEmployeeService;
 import com.xiangshangban.device.service.IEntranceGuardService;
@@ -29,6 +33,9 @@ public class EmployeeController {
 
     @Value("${rabbitmq.download.queue.name}")
     String downloadQueueName;
+
+    @Value("${employee.interface.address}")
+    String employeeInterfaceAddress;
 
     @Autowired
     private IEmployeeService iEmployeeService;
@@ -177,7 +184,7 @@ public class EmployeeController {
                  * 下发选定的人员的基本信息
                  */
                 //根据人员id请求单个人员信息
-                String employeeInfo = HttpRequestFactory.sendRequet("http://192.168.0.108:8085/EmployeeController/selectByEmployee", httpData);
+                String employeeInfo = HttpRequestFactory.sendRequet(employeeInterfaceAddress, httpData);
                 System.out.println("[*] HTTP send: 已发出请求");
                 System.out.println("[*] employeeInfo: " + employeeInfo);
 
@@ -314,11 +321,13 @@ public class EmployeeController {
                 doorCmdEmployeeInformation.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(),3));
                 doorCmdEmployeeInformation.setSuperCmdId(FormatUtil.createUuid());
                 doorCmdEmployeeInformation.setData(JSON.toJSONString(userInformation));
+                doorCmdEmployeeInformation.setEmployeeId(employeeId);
                 //人员基本开门门禁权限信息
                 doorCmdEmployeePermission.setSendTime(CalendarUtil.getCurrentTime());
                 doorCmdEmployeePermission.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(),3));
                 doorCmdEmployeePermission.setSuperCmdId(FormatUtil.createUuid());
                 doorCmdEmployeePermission.setData(JSON.toJSONString(userPermission));
+                doorCmdEmployeePermission.setEmployeeId(employeeId);
 
                 //判断是否立即下发数据到设备
                 if (immediatelyDownload.equals("0")){
@@ -389,6 +398,32 @@ public class EmployeeController {
                 }
             }
         }
+    }
+
+    /**
+     * 批量下发存为草稿的人员信息和人员权限信息
+     * @param jsonString
+     * @return
+     */
+    @ResponseBody
+    @Transactional
+    @RequestMapping(value = "/multipleHandOutEmployeePermission", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    public void multipleHandOutEmployeePermission(@RequestBody String jsonString){
+
+        /**
+         * 测试数据
+         {
+         "doorId":"001"
+         }
+         */
+
+        Map<String, String> jsonMap = (Map<String, String>)JSONObject.fromObject(jsonString);
+        String doorId = jsonMap.get("doorId");
+
+        iEmployeeService.multipleHandOutEmployeePermission(doorId);
+
+        return ;
+
     }
 
     /**
@@ -489,6 +524,35 @@ public class EmployeeController {
         String companyId = companyIdMap.get("companyId");
 
         return iEmployeeService.findDoorIdByCompanyId(companyId);
+
+    }
+
+    @ResponseBody
+    @Transactional
+    @RequestMapping(value = "/doorRecordSave", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    public Map<String, Object> doorRecordSave(@RequestBody String message){
+
+        JSONObject jsonObject = new JSONObject();
+
+        jsonObject = JSONObject.fromObject(message);
+
+        Map<String, Object> mapResult = (Map<String, Object>) jsonObject;
+
+        //md5校验
+        //获取对方的md5
+        String otherMd5 = (String) mapResult.get("MD5Check");
+        mapResult.remove("MD5Check");
+        String messageCheck = JSON.toJSONString(mapResult);
+        //生成我的md5
+        String myMd5 = MD5Util.encryptPassword(messageCheck, "XC9EO5GKOIVRMBQ2YE8X");
+        //双方的md5比较判断
+        if (myMd5.equals(otherMd5)){
+            System.out.println("设备上传的数据未被修改");
+        }else {
+            System.out.println("设备上传的数据已被修改");
+        }
+
+        return iEmployeeService.doorRecordSave(message, "Http-Request");
 
     }
 

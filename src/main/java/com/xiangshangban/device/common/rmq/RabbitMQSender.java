@@ -8,8 +8,6 @@ import com.xiangshangban.device.common.utils.RabbitTemplateUtil;
 import com.xiangshangban.device.service.impl.ConnectionFactoryServiceImpl;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -17,6 +15,7 @@ import java.util.Map;
 /**
  * Created by liuguanglong on 2017/10/18.
  */
+
 public class RabbitMQSender {
 
 //    private static final Log LOG = LogFactory.getLog(RabbitMQSender.class);
@@ -24,10 +23,9 @@ public class RabbitMQSender {
     private static String SUCCESS = "success";
     private static String ERROR = "error";
 
-    @Value("${rabbitmq.download.exchange.name}")
-    String downloadExchangeName;
+//    @Value("${rabbitmq.download.exchange.name}")
+//    private String downloadExchangeName;
 
-    @Autowired
     private ConnectionFactoryServiceImpl connectionFactoryImpl = new ConnectionFactoryServiceImpl();
 
     /**
@@ -67,7 +65,9 @@ public class RabbitMQSender {
      */
     private  RabbitTemplateUtil getRabbitMQTemplate(String queueName) {
 
-        String exchange = downloadExchangeName;
+//        String exchange = downloadExchangeName;
+
+        String exchange = "download";
 
         Connection conn = connectionFactoryImpl.getConnectionFactory();
         ConnectionFactory connectionFactory = conn.getConnectionFactory();
@@ -84,6 +84,7 @@ public class RabbitMQSender {
         template.setReceiveTimeout(100);
         template.getUnconfirmed(100);
         template.setReplyTimeout(100);
+//        System.out.println("------------"+exchange);
         template.setExchange(exchange);
         template.setRoutingKey(queueName);
         template.setQueue(queueName);
@@ -133,7 +134,7 @@ public class RabbitMQSender {
         protocolMap.put("outOfTime", doorCmd.getOutOfTime());
         protocolMap.put("sendTime", doorCmd.getSendTime());
         protocolMap.put("serverId", doorCmd.getServerId());
-        protocolMap.put("status", doorCmd.getStatus());
+//        protocolMap.put("status", doorCmd.getStatus());
 
         commandMap.put("ACTION", doorCmd.getAction());
         commandMap.put("ACTIONCode", doorCmd.getActionCode());

@@ -3,6 +3,7 @@ package com.xiangshangban.device.service;
 import com.xiangshangban.device.bean.Device;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * author : Administrator
@@ -12,10 +13,44 @@ import java.util.List;
 
 public interface IDeviceService {
 
-    void addDevice(String companyId, String deviceNumber, String macAddress);
+    /**
+     * 平台新增设备
+     * @param companyId
+     * @param deviceId
+     * @param macAddress
+     */
+    void addDevice(String companyId, String deviceId, String macAddress);
 
-    void findDeviceInformation(String companyName, String deviceName, String deviceNumber,
-                               String  isOnline, String activeStatus);
+    /**
+     * 查找当前公司的设备信息(包括筛选功能，无参传入查询全部设备)
+     * @param companyName
+     * @param deviceName
+     * @param deviceNumber
+     * @param isOnline
+     * @param activeStatus
+     * @return
+     */
+    List<Map<String, Object>> findDeviceInformation(String companyName, String deviceName, String deviceNumber,
+                                                    String  isOnline, String activeStatus);
+
+    /**
+     * 平台管理员编辑当前设备的信息
+     * @param deviceId
+     * @param deviceName
+     * @param doorName
+     * @param companyName
+     * @param devicePlace
+     * @param deviceUsages
+     * @return
+     */
+    int editorDeviceInformation(String deviceId, String deviceName, String doorName, String companyName,
+                                String devicePlace, String deviceUsages);
+
+    /**
+     * 下发重启命令，重启指定的设备
+     * @param deviceId
+     */
+    void rebootDevice(String deviceId);
 
     /**
      * 查询所有的设备信息
@@ -31,5 +66,10 @@ public interface IDeviceService {
      * 解绑设备
      */
     void unBindDevice(String deviceId);
+
+    /**
+     * 上传设备重启记录
+     */
+    void deviceRebootRecordSave(String jsonString);
 
 }

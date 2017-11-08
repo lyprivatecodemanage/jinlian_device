@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xiangshangban.device.dao.DeviceHeartbeatMapper" >
+  <resultMap id="BaseResultMap" type="com.xiangshangban.device.bean.DeviceHeartbeat" >
+    <result column="device_id" property="deviceId" jdbcType="VARCHAR" />
+    <result column="wifi_opne" property="wifiOpne" jdbcType="VARCHAR" />
+    <result column="ip" property="ip" jdbcType="VARCHAR" />
+    <result column="mask" property="mask" jdbcType="VARCHAR" />
+    <result column="gate" property="gate" jdbcType="VARCHAR" />
+    <result column="time_limit_door_open" property="timeLimitDoorOpen" jdbcType="VARCHAR" />
+    <result column="time_limit_lock_open" property="timeLimitLockOpen" jdbcType="VARCHAR" />
+    <result column="door_alarm" property="doorAlarm" jdbcType="VARCHAR" />
+    <result column="fire_alarm" property="fireAlarm" jdbcType="VARCHAR" />
+    <result column="user_number" property="userNumber" jdbcType="VARCHAR" />
+    <result column="key_switch" property="keySwitch" jdbcType="VARCHAR" />
+    <result column="company_id" property="companyId" jdbcType="VARCHAR" />
+    <result column="company_name" property="companyName" jdbcType="VARCHAR" />
+    <result column="data_uploadstate" property="dataUploadstate" jdbcType="VARCHAR" />
+    <result column="rom_available_size" property="romAvailableSize" jdbcType="VARCHAR" />
+    <result column="cpu_temper" property="cpuTemper" jdbcType="VARCHAR" />
+    <result column="cpu_unilization" property="cpuUnilization" jdbcType="VARCHAR" />
+    <result column="cpu_user_unilization" property="cpuUserUnilization" jdbcType="VARCHAR" />
+    <result column="internal_unilization " property="internalUnilization" jdbcType="VARCHAR" />
+    <result column="app_used" property="appUsed" jdbcType="VARCHAR" />
+    <result column="time" property="time" jdbcType="VARCHAR" />
+  </resultMap>
+  <insert id="insert" parameterType="com.xiangshangban.device.bean.DeviceHeartbeat" >
+    insert into device_heartbeat (device_id, wifi_opne, ip, 
+      mask, gate, time_limit_door_open, 
+      time_limit_lock_open, door_alarm, fire_alarm, 
+      user_number, key_switch, company_id, 
+      company_name, data_uploadstate, rom_available_size, 
+      cpu_temper, cpu_unilization, cpu_user_unilization, 
+      "internal_unilization ", app_used, time
+      )
+    values (#{deviceId,jdbcType=VARCHAR}, #{wifiOpne,jdbcType=VARCHAR}, #{ip,jdbcType=VARCHAR}, 
+      #{mask,jdbcType=VARCHAR}, #{gate,jdbcType=VARCHAR}, #{timeLimitDoorOpen,jdbcType=VARCHAR}, 
+      #{timeLimitLockOpen,jdbcType=VARCHAR}, #{doorAlarm,jdbcType=VARCHAR}, #{fireAlarm,jdbcType=VARCHAR}, 
+      #{userNumber,jdbcType=VARCHAR}, #{keySwitch,jdbcType=VARCHAR}, #{companyId,jdbcType=VARCHAR}, 
+      #{companyName,jdbcType=VARCHAR}, #{dataUploadstate,jdbcType=VARCHAR}, #{romAvailableSize,jdbcType=VARCHAR}, 
+      #{cpuTemper,jdbcType=VARCHAR}, #{cpuUnilization,jdbcType=VARCHAR}, #{cpuUserUnilization,jdbcType=VARCHAR}, 
+      #{internalUnilization,jdbcType=VARCHAR}, #{appUsed,jdbcType=VARCHAR}, #{time,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.xiangshangban.device.bean.DeviceHeartbeat" >
+    insert into device_heartbeat
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="deviceId != null" >
+        device_id,
+      </if>
+      <if test="wifiOpne != null" >
+        wifi_opne,
+      </if>
+      <if test="ip != null" >
+        ip,
+      </if>
+      <if test="mask != null" >
+        mask,
+      </if>
+      <if test="gate != null" >
+        gate,
+      </if>
+      <if test="timeLimitDoorOpen != null" >
+        time_limit_door_open,
+      </if>
+      <if test="timeLimitLockOpen != null" >
+        time_limit_lock_open,
+      </if>
+      <if test="doorAlarm != null" >
+        door_alarm,
+      </if>
+      <if test="fireAlarm != null" >
+        fire_alarm,
+      </if>
+      <if test="userNumber != null" >
+        user_number,
+      </if>
+      <if test="keySwitch != null" >
+        key_switch,
+      </if>
+      <if test="companyId != null" >
+        company_id,
+      </if>
+      <if test="companyName != null" >
+        company_name,
+      </if>
+      <if test="dataUploadstate != null" >
+        data_uploadstate,
+      </if>
+      <if test="romAvailableSize != null" >
+        rom_available_size,
+      </if>
+      <if test="cpuTemper != null" >
+        cpu_temper,
+      </if>
+      <if test="cpuUnilization != null" >
+        cpu_unilization,
+      </if>
+      <if test="cpuUserUnilization != null" >
+        cpu_user_unilization,
+      </if>
+      <if test="internalUnilization != null" >
+        "internal_unilization ",
+      </if>
+      <if test="appUsed != null" >
+        app_used,
+      </if>
+      <if test="time != null" >
+        time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="deviceId != null" >
+        #{deviceId,jdbcType=VARCHAR},
+      </if>
+      <if test="wifiOpne != null" >
+        #{wifiOpne,jdbcType=VARCHAR},
+      </if>
+      <if test="ip != null" >
+        #{ip,jdbcType=VARCHAR},
+      </if>
+      <if test="mask != null" >
+        #{mask,jdbcType=VARCHAR},
+      </if>
+      <if test="gate != null" >
+        #{gate,jdbcType=VARCHAR},
+      </if>
+      <if test="timeLimitDoorOpen != null" >
+        #{timeLimitDoorOpen,jdbcType=VARCHAR},
+      </if>
+      <if test="timeLimitLockOpen != null" >
+        #{timeLimitLockOpen,jdbcType=VARCHAR},
+      </if>
+      <if test="doorAlarm != null" >
+        #{doorAlarm,jdbcType=VARCHAR},
+      </if>
+      <if test="fireAlarm != null" >
+        #{fireAlarm,jdbcType=VARCHAR},
+      </if>
+      <if test="userNumber != null" >
+        #{userNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="keySwitch != null" >
+        #{keySwitch,jdbcType=VARCHAR},
+      </if>
+      <if test="companyId != null" >
+        #{companyId,jdbcType=VARCHAR},
+      </if>
+      <if test="companyName != null" >
+        #{companyName,jdbcType=VARCHAR},
+      </if>
+      <if test="dataUploadstate != null" >
+        #{dataUploadstate,jdbcType=VARCHAR},
+      </if>
+      <if test="romAvailableSize != null" >
+        #{romAvailableSize,jdbcType=VARCHAR},
+      </if>
+      <if test="cpuTemper != null" >
+        #{cpuTemper,jdbcType=VARCHAR},
+      </if>
+      <if test="cpuUnilization != null" >
+        #{cpuUnilization,jdbcType=VARCHAR},
+      </if>
+      <if test="cpuUserUnilization != null" >
+        #{cpuUserUnilization,jdbcType=VARCHAR},
+      </if>
+      <if test="internalUnilization != null" >
+        #{internalUnilization,jdbcType=VARCHAR},
+      </if>
+      <if test="appUsed != null" >
+        #{appUsed,jdbcType=VARCHAR},
+      </if>
+      <if test="time != null" >
+        #{time,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+</mapper>

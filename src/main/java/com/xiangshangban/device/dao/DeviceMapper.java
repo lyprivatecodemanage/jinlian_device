@@ -1,13 +1,10 @@
 package com.xiangshangban.device.dao;
 
 import com.xiangshangban.device.bean.Device;
-import org.apache.ibatis.annotations.Mapper;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
-
-@Component
 public interface DeviceMapper {
     int deleteByPrimaryKey(String deviceId);
 
@@ -21,7 +18,7 @@ public interface DeviceMapper {
 
     int updateByPrimaryKey(Device record);
 
-    List<Device> findByCondition(Device device);
+    List<Map<String, Object>> findByCondition(Device device);
 
     List<String> findDeviceIdByCompanyId(String companyId);
 
@@ -29,5 +26,4 @@ public interface DeviceMapper {
      * 查询所有的设备信息
      */
     List<Device> selectAllDeviceInfo();
-
 }

@@ -1,13 +1,13 @@
 package com.xiangshangban.device.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.xiangshangban.device.bean.*;
 import com.xiangshangban.device.common.rmq.RabbitMQSender;
 import com.xiangshangban.device.common.utils.CalendarUtil;
 import com.xiangshangban.device.common.utils.DateUtils;
 import com.xiangshangban.device.common.utils.FormatUtil;
 import com.xiangshangban.device.dao.*;
 import com.xiangshangban.device.service.IEntranceGuardService;
-import com.xiangshangban.device.bean.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -63,7 +63,11 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
 //        DoorCmd doorCmdExist = doorCmdMapper.selectBySubCmdId(doorCmd);
 
 //        if (doorCmdExist == null){
-        doorCmdMapper.insert(doorCmd);
+        try {
+            doorCmdMapper.insert(doorCmd);
+        }catch (Exception e){
+            System.out.println("该命令superCmdId字段重复！");
+        }
 //            System.out.println("命令["+doorCmd.getSubCmdId()+"]的信息不存在");
 //        }else {
 //            doorCmdMapper.updateBySubCmdId(doorCmd);

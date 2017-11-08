@@ -10,6 +10,11 @@ public class Device {
     private String macAddress;
     private String isOnline;
     private String activeStatus;
+    private String devicePlace;
+    private String deviceUsages;
+    private String totalServerTime;
+    private String haveUsedTime;
+    private String remainServerTime;
 
     public String getDeviceId() {
         return deviceId;
@@ -73,5 +78,45 @@ public class Device {
 
     public void setActiveStatus(String activeStatus) {
         this.activeStatus = activeStatus;
+    }
+
+    public String getDevicePlace() {
+        return devicePlace;
+    }
+
+    public void setDevicePlace(String devicePlace) {
+        this.devicePlace = devicePlace;
+    }
+
+    public String getDeviceUsages() {
+        return deviceUsages;
+    }
+
+    public void setDeviceUsages(String deviceUsages) {
+        this.deviceUsages = deviceUsages;
+    }
+
+    public String getTotalServerTime() {
+        return totalServerTime;
+    }
+
+    public void setTotalServerTime(String totalServerTime) {
+        this.totalServerTime = totalServerTime;
+    }
+
+    public String getHaveUsedTime() {
+        return haveUsedTime;
+    }
+
+    public void setHaveUsedTime(String haveUsedTime) {
+        this.haveUsedTime = haveUsedTime;
+    }
+
+    public String getRemainServerTime() {
+        return remainServerTime;
+    }
+
+    public void setRemainServerTime(String remainServerTime) {
+        this.remainServerTime = remainServerTime;
     }
 }

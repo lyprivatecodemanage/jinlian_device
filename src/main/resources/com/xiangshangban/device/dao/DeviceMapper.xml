@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.xiangshangban.device.dao.DeviceMapper" >
-
   <resultMap id="BaseResultMap" type="com.xiangshangban.device.bean.Device" >
     <id column="device_id" property="deviceId" jdbcType="VARCHAR" />
     <result column="device_name" property="deviceName" jdbcType="VARCHAR" />
@@ -11,10 +10,15 @@
     <result column="mac_address" property="macAddress" jdbcType="VARCHAR" />
     <result column="is_online" property="isOnline" jdbcType="VARCHAR" />
     <result column="active_status" property="activeStatus" jdbcType="VARCHAR" />
+    <result column="device_place" property="devicePlace" jdbcType="VARCHAR" />
+    <result column="device_usages" property="deviceUsages" jdbcType="VARCHAR" />
+    <result column="total_server_time" property="totalServerTime" jdbcType="VARCHAR" />
+    <result column="have_used_time" property="haveUsedTime" jdbcType="VARCHAR" />
+    <result column="remain_server_time" property="remainServerTime" jdbcType="VARCHAR" />
   </resultMap>
   <sql id="Base_Column_List" >
     device_id, device_name, company_id, company_name, device_number, mac_address, is_online, 
-    active_status
+    active_status, device_place, device_usages, total_server_time, have_used_time, remain_server_time
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
     select 
@@ -29,10 +33,14 @@
   <insert id="insert" parameterType="com.xiangshangban.device.bean.Device" >
     insert into device_ (device_id, device_name, company_id, 
       company_name, device_number, mac_address, 
-      is_online, active_status)
+      is_online, active_status, device_place, 
+      device_usages, total_server_time, have_used_time, 
+      remain_server_time)
     values (#{deviceId,jdbcType=VARCHAR}, #{deviceName,jdbcType=VARCHAR}, #{companyId,jdbcType=VARCHAR}, 
       #{companyName,jdbcType=VARCHAR}, #{deviceNumber,jdbcType=VARCHAR}, #{macAddress,jdbcType=VARCHAR}, 
-      #{isOnline,jdbcType=VARCHAR}, #{activeStatus,jdbcType=VARCHAR})
+      #{isOnline,jdbcType=VARCHAR}, #{activeStatus,jdbcType=VARCHAR}, #{devicePlace,jdbcType=VARCHAR}, 
+      #{deviceUsages,jdbcType=VARCHAR}, #{totalServerTime,jdbcType=VARCHAR}, #{haveUsedTime,jdbcType=VARCHAR}, 
+      #{remainServerTime,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="com.xiangshangban.device.bean.Device" >
     insert into device_
@@ -61,6 +69,21 @@
       <if test="activeStatus != null" >
         active_status,
       </if>
+      <if test="devicePlace != null" >
+        device_place,
+      </if>
+      <if test="deviceUsages != null" >
+        device_usages,
+      </if>
+      <if test="totalServerTime != null" >
+        total_server_time,
+      </if>
+      <if test="haveUsedTime != null" >
+        have_used_time,
+      </if>
+      <if test="remainServerTime != null" >
+        remain_server_time,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="deviceId != null" >
@@ -86,6 +109,21 @@
       </if>
       <if test="activeStatus != null" >
         #{activeStatus,jdbcType=VARCHAR},
+      </if>
+      <if test="devicePlace != null" >
+        #{devicePlace,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceUsages != null" >
+        #{deviceUsages,jdbcType=VARCHAR},
+      </if>
+      <if test="totalServerTime != null" >
+        #{totalServerTime,jdbcType=VARCHAR},
+      </if>
+      <if test="haveUsedTime != null" >
+        #{haveUsedTime,jdbcType=VARCHAR},
+      </if>
+      <if test="remainServerTime != null" >
+        #{remainServerTime,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
@@ -113,6 +151,21 @@
       <if test="activeStatus != null" >
         active_status = #{activeStatus,jdbcType=VARCHAR},
       </if>
+      <if test="devicePlace != null" >
+        device_place = #{devicePlace,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceUsages != null" >
+        device_usages = #{deviceUsages,jdbcType=VARCHAR},
+      </if>
+      <if test="totalServerTime != null" >
+        total_server_time = #{totalServerTime,jdbcType=VARCHAR},
+      </if>
+      <if test="haveUsedTime != null" >
+        have_used_time = #{haveUsedTime,jdbcType=VARCHAR},
+      </if>
+      <if test="remainServerTime != null" >
+        remain_server_time = #{remainServerTime,jdbcType=VARCHAR},
+      </if>
     </set>
     where device_id = #{deviceId,jdbcType=VARCHAR}
   </update>
@@ -124,25 +177,30 @@
       device_number = #{deviceNumber,jdbcType=VARCHAR},
       mac_address = #{macAddress,jdbcType=VARCHAR},
       is_online = #{isOnline,jdbcType=VARCHAR},
-      active_status = #{activeStatus,jdbcType=VARCHAR}
+      active_status = #{activeStatus,jdbcType=VARCHAR},
+      device_place = #{devicePlace,jdbcType=VARCHAR},
+      device_usages = #{deviceUsages,jdbcType=VARCHAR},
+      total_server_time = #{totalServerTime,jdbcType=VARCHAR},
+      have_used_time = #{haveUsedTime,jdbcType=VARCHAR},
+      remain_server_time = #{remainServerTime,jdbcType=VARCHAR}
     where device_id = #{deviceId,jdbcType=VARCHAR}
   </update>
 
-  <select id="findByCondition" resultMap="BaseResultMap" parameterType="java.lang.String" >
-    select * from device_ where 1=1
-    <if test="company_name != null and company_name != ''" >
+  <select id="findByCondition" resultType="java.util.Map" parameterType="com.xiangshangban.device.bean.Device" >
+    select * from device_ a LEFT JOIN door_ b ON (a.device_id = b.device_id) where 1=1
+    <if test="companyName != null and companyName != ''" >
       AND company_name LIKE '%${companyName,jdbcType=VARCHAR}'
     </if>
-    <if test="device_name != null and device_name != ''" >
+    <if test="deviceName != null and deviceName != ''" >
       AND device_name LIKE '%${deviceName,jdbcType=VARCHAR}'
     </if>
-    <if test="device_number != null and device_number != ''" >
+    <if test="deviceNumber != null and deviceNumber != ''" >
       AND device_number LIKE '%${deviceNumber,jdbcType=VARCHAR}'
     </if>
-    <if test="is_online != null and is_online != ''" >
+    <if test="isOnline != null and isOnline != ''" >
       AND is_online = #{isOnline,jdbcType=VARCHAR}
     </if>
-    <if test="active_status != null and active_status != ''" >
+    <if test="activeStatus != null and activeStatus != ''" >
       AND active_status = #{activeStatus,jdbcType=VARCHAR}
     </if>
 
