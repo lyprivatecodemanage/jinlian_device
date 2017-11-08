@@ -188,7 +188,7 @@ public class TemplateServiceImpl implements ITemplateService{
         templateMapper.updateDeviceTemplate(templateMap);
 
         //查询当前模板的详细信息，下发到设备中
-     /*   List<Map> currTemplateInfo = templateMapper.selectTemplateDetailInfo(templateId);
+        List<Map> currTemplateInfo = templateMapper.selectTemplateDetailInfo(templateId);
         //查询模板的items信息
         List<Map> itemsInfoForCommand = templateMapper.selectTemplateItemsDetail(templateId);
         //查询模板关联的图片
@@ -289,7 +289,7 @@ public class TemplateServiceImpl implements ITemplateService{
         //命令数据存入数据库
         entranceGuardService.insertCommand(doorCmdUpdateDeviceTemplate);
         //立即下发数据到MQ
-        rabbitMQSender.sendMessage(downloadQueueName, doorCmdPackageAll);*/
+        rabbitMQSender.sendMessage(downloadQueueName, doorCmdPackageAll);
 
         return 0;
     }
