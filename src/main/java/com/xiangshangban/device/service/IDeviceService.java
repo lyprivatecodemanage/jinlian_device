@@ -77,4 +77,9 @@ public interface IDeviceService {
      */
     void deviceRunningLogSave(String jsonString, String deviceId);
 
+    /**
+     * CRC16校验设备id
+     */
+    boolean checkCrc16DeviceId(String deviceId);
+
 }

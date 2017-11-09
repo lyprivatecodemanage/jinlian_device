@@ -27,7 +27,7 @@ public interface IEmployeeService {
                                      String rangeStartTime, String rangeEndTime, String rangeDoorOpenType);
 
     //人员人脸、指纹、卡号信息上传存储
-    void saveEmployeeInputInfo(String employeeInputInfo);
+    Map<String, Object> saveEmployeeInputInfo(String employeeInputInfo, String deviceId);
 
     //门禁记录上传存储
     Map<String, Object> doorRecordSave(String doorRecordMap, String requestType);

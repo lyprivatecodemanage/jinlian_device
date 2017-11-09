@@ -295,4 +295,12 @@
       employee_department_name = #{employeeDepartmentName,jdbcType=VARCHAR}
     where employee_id = #{employeeId,jdbcType=VARCHAR}
   </update>
+
+  <!--非自动生成-->
+  <select id="selectByEmployeeNfc" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from employee_
+    where employee_nfc = #{employeeNfc,jdbcType=VARCHAR}
+  </select>
 </mapper>

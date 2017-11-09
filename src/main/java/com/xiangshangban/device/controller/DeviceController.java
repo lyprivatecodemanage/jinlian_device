@@ -55,7 +55,7 @@ public class DeviceController {
     private TimeRangeLcdOffMapper timeRangeLcdOffMapper;
 
     /**
-     * 平台新增设备，无绑定的设备
+     * 平台新增设备，未绑定公司的设备
      * @param jsonString
      */
     @ResponseBody
@@ -165,8 +165,16 @@ public class DeviceController {
 
         //提取数据
         Map<String, String> mapJson = (Map<String, String>)net.sf.json.JSONObject.fromObject(jsonString);
+        String deviceId = mapJson.get("deviceId");
 
-        deviceService.rebootDevice(mapJson.get("deviceId"));
+        //CRC16校验deviceId
+        if (deviceService.checkCrc16DeviceId(deviceId)){
+
+            //截取真实的deviceId
+            deviceId = deviceId.substring(0, deviceId.length()-5);
+
+            deviceService.rebootDevice(deviceId);
+        }
 
     }
 
@@ -293,121 +301,127 @@ public class DeviceController {
          }
          */
 
-//        System.out.println("------------"+jsonString);
+        System.out.println("------------"+jsonString);
         String jsonUrlDecoderString = UrlUtil.getURLDecoderString(jsonString);
-//        System.out.println(jsonUrlDecoderString);
+        System.out.println(jsonUrlDecoderString);
+        //去除数据的前缀名称
         jsonUrlDecoderString = jsonUrlDecoderString.replace("heartbeatData=", "");
         System.out.println(jsonUrlDecoderString);
 
-        //解析JSON数据
-        Map<String, Object> mapJson = (Map<String, Object>)net.sf.json.JSONObject.fromObject(jsonUrlDecoderString);
-        Map<String, String> heartbeatMap = new HashMap<>();
+        if (jsonUrlDecoderString.equals(null) || jsonUrlDecoderString.equals("")){
+            System.out.println("收到空的心跳数据");
+            return new HashMap<>();
+        }else {
+            //解析JSON数据
+            Map<String, Object> mapJson = (Map<String, Object>)net.sf.json.JSONObject.fromObject(jsonUrlDecoderString);
+            Map<String, String> heartbeatMap = new HashMap<>();
 
-        //回复设备
-        Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
-        Map<String, Object> resultData = new LinkedHashMap<String, Object>();
-        String resultCode;
-        String resultMessage;
+            //回复设备
+            Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
+            Map<String, Object> resultData = new LinkedHashMap<String, Object>();
+            String resultCode;
+            String resultMessage;
 
-        //校验MD5
-        //获取对方的md5
-        String otherMd5 = (String) mapJson.get("MD5Check");
-        mapJson.remove("MD5Check");
-        String messageCheck = JSON.toJSONString(mapJson);
-        //生成我的md5
-        String myMd5 = MD5Util.encryptPassword(messageCheck, "XC9EO5GKOIVRMBQ2YE8X");
+            //校验MD5
+            //获取对方的md5
+            String otherMd5 = (String) mapJson.get("MD5Check");
+            mapJson.remove("MD5Check");
+            String messageCheck = JSON.toJSONString(mapJson);
+            //生成我的md5
+            String myMd5 = MD5Util.encryptPassword(messageCheck, "XC9EO5GKOIVRMBQ2YE8X");
 //        System.out.println("MD5 = " + myMd5);
-        //双方的md5比较判断
-        if (myMd5.equals(otherMd5)){
+            //双方的md5比较判断
+            if (myMd5.equals(otherMd5)){
 
-            System.out.println("设备上传的数据未被修改");
+                System.out.println("设备上传的数据未被修改");
 
-            if (((Map<String, String>) mapJson.get("command")).get("ACTION").equals("UPLOAD_DEVICE_HEARTBEAT")){
-                //获取心跳map
-                heartbeatMap = ((Map<String, Map<String, String>>)mapJson.get("data")).get("heartbeat");
+                if (((Map<String, String>) mapJson.get("command")).get("ACTION").equals("UPLOAD_DEVICE_HEARTBEAT")){
+                    //获取心跳map
+                    heartbeatMap = ((Map<String, Map<String, String>>)mapJson.get("data")).get("heartbeat");
 
-                DeviceHeartbeat deviceHeartbeat = new DeviceHeartbeat();
+                    DeviceHeartbeat deviceHeartbeat = new DeviceHeartbeat();
 
-                deviceHeartbeat.setDeviceId((String) mapJson.get("deviceId"));
-                deviceHeartbeat.setLockState(heartbeatMap.get("lockState"));
-                deviceHeartbeat.setWifiOpne(heartbeatMap.get("wifiOpne"));
-                deviceHeartbeat.setIp(heartbeatMap.get("ip"));
-                deviceHeartbeat.setMask(heartbeatMap.get("mask"));
-                deviceHeartbeat.setGate(heartbeatMap.get("gate"));
-                deviceHeartbeat.setTimeLimitDoorOpen(heartbeatMap.get("timeLimitDoorOpen"));
-                deviceHeartbeat.setTimeLimitLockOpen(heartbeatMap.get("timeLimitLockOpen"));
-                deviceHeartbeat.setDoorAlarm(heartbeatMap.get("doorAlarm"));
-                deviceHeartbeat.setFireAlarm(heartbeatMap.get("fireAlarm"));
-                deviceHeartbeat.setUserNumber(heartbeatMap.get("userNumber"));
-                deviceHeartbeat.setKeySwitch(heartbeatMap.get("keySwitch"));
-                deviceHeartbeat.setCompanyId(heartbeatMap.get("companyId"));
-                deviceHeartbeat.setCompanyName(heartbeatMap.get("companyName"));
-                deviceHeartbeat.setDataUploadstate(heartbeatMap.get("dataUploadstate"));
-                deviceHeartbeat.setRomAvailableSize(heartbeatMap.get("romAvailableSize"));
-                deviceHeartbeat.setCpuFreq(heartbeatMap.get("cpuFreq"));
-                deviceHeartbeat.setCpuTemper(heartbeatMap.get("cpuTemper"));
-                deviceHeartbeat.setCpuUnilization(heartbeatMap.get("cpuUnilization"));
-                deviceHeartbeat.setCpuUserUnilization(heartbeatMap.get("cpuUserUnilization"));
-                deviceHeartbeat.setInternalUnilization(heartbeatMap.get("internalUnilization"));
-                deviceHeartbeat.setAppUsed(JSON.toJSONString(((Map<String, Map<String, Map<String, Object>>>) mapJson.get("data"))
-                        .get("heartbeat").get("appUsed")));
-                deviceHeartbeat.setTime(DateUtils.getDateTime());
+                    deviceHeartbeat.setDeviceId((String) mapJson.get("deviceId"));
+                    deviceHeartbeat.setLockState(heartbeatMap.get("lockState"));
+                    deviceHeartbeat.setWifiOpne(heartbeatMap.get("wifiOpne"));
+                    deviceHeartbeat.setIp(heartbeatMap.get("ip"));
+                    deviceHeartbeat.setMask(heartbeatMap.get("mask"));
+                    deviceHeartbeat.setGate(heartbeatMap.get("gate"));
+                    deviceHeartbeat.setTimeLimitDoorOpen(heartbeatMap.get("timeLimitDoorOpen"));
+                    deviceHeartbeat.setTimeLimitLockOpen(heartbeatMap.get("timeLimitLockOpen"));
+                    deviceHeartbeat.setDoorAlarm(heartbeatMap.get("doorAlarm"));
+                    deviceHeartbeat.setFireAlarm(heartbeatMap.get("fireAlarm"));
+                    deviceHeartbeat.setUserNumber(heartbeatMap.get("userNumber"));
+                    deviceHeartbeat.setKeySwitch(heartbeatMap.get("keySwitch"));
+                    deviceHeartbeat.setCompanyId(heartbeatMap.get("companyId"));
+                    deviceHeartbeat.setCompanyName(heartbeatMap.get("companyName"));
+                    deviceHeartbeat.setDataUploadstate(heartbeatMap.get("dataUploadstate"));
+                    deviceHeartbeat.setRomAvailableSize(heartbeatMap.get("romAvailableSize"));
+                    deviceHeartbeat.setCpuFreq(heartbeatMap.get("cpuFreq"));
+                    deviceHeartbeat.setCpuTemper(heartbeatMap.get("cpuTemper"));
+                    deviceHeartbeat.setCpuUnilization(heartbeatMap.get("cpuUnilization"));
+                    deviceHeartbeat.setCpuUserUnilization(heartbeatMap.get("cpuUserUnilization"));
+                    deviceHeartbeat.setInternalUnilization(heartbeatMap.get("internalUnilization"));
+                    deviceHeartbeat.setAppUsed(JSON.toJSONString(((Map<String, Map<String, Map<String, Object>>>) mapJson.get("data"))
+                            .get("heartbeat").get("appUsed")));
+                    deviceHeartbeat.setTime(DateUtils.getDateTime());
 
-                deviceHeartbeatMapper.insertSelective(deviceHeartbeat);
-                System.out.println("心跳数据已存储");
+                    deviceHeartbeatMapper.insertSelective(deviceHeartbeat);
+                    System.out.println("心跳数据已存储");
 
+                }
+
+                //回复设备
+                resultCode = "0";
+                resultMessage = "执行成功";
+                resultData.put("resultCode", resultCode);
+                resultData.put("resultMessage", resultMessage);
+                resultMap.put("result", resultData);
+
+            }else {
+                System.out.println("设备上传的数据已被修改");
+
+                //回复设备
+                resultCode = "6";
+                resultMessage = "MD5校验失败";
+                resultData.put("resultCode", resultCode);
+                resultData.put("resultMessage", resultMessage);
+                resultMap.put("result", resultData);
             }
 
-            //回复设备
-            resultCode = "0";
-            resultMessage = "执行成功";
-            resultData.put("resultCode", resultCode);
-            resultData.put("resultMessage", resultMessage);
-            resultMap.put("result", resultData);
+            //构造命令格式
+            DoorCmd doorCmdRecord = new DoorCmd();
+            doorCmdRecord.setServerId("001");
+            doorCmdRecord.setDeviceId((String) mapJson.get("deviceId"));
+            doorCmdRecord.setFileEdition("v1.3");
+            doorCmdRecord.setCommandMode("R");
+            doorCmdRecord.setCommandType("S");
+            doorCmdRecord.setCommandTotal("1");
+            doorCmdRecord.setCommandIndex("1");
+            doorCmdRecord.setSubCmdId("");
+            doorCmdRecord.setAction("UPLOAD_DEVICE_HEARTBEAT");
+            doorCmdRecord.setActionCode("1005");
+            doorCmdRecord.setSendTime(CalendarUtil.getCurrentTime());
+            doorCmdRecord.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(),3));
+            doorCmdRecord.setSuperCmdId(FormatUtil.createUuid());
+            doorCmdRecord.setData(JSON.toJSONString(resultMap));
 
-        }else {
-            System.out.println("设备上传的数据已被修改");
+            //获取完整的数据加协议封装格式
+            RabbitMQSender rabbitMQSender = new RabbitMQSender();
+            Map<String, Object> doorRecordAll =  rabbitMQSender.messagePackaging(doorCmdRecord, "", resultData, "R");
+            //命令状态设置为: 已回复
+            doorCmdRecord.setStatus("5");
+            doorCmdRecord.setResultCode(resultCode);
+            doorCmdRecord.setResultMessage(resultMessage);
+            //设置md5校验值
+            doorCmdRecord.setMd5Check((String) doorRecordAll.get("MD5Check"));
+            //设置数据库的data字段
+            doorCmdRecord.setData(JSON.toJSONString(doorRecordAll.get("result")));
+            //命令数据存入数据库
+            entranceGuardService.insertCommand(doorCmdRecord);
 
-            //回复设备
-            resultCode = "6";
-            resultMessage = "MD5校验失败";
-            resultData.put("resultCode", resultCode);
-            resultData.put("resultMessage", resultMessage);
-            resultMap.put("result", resultData);
+            return doorRecordAll;
         }
-
-        //构造命令格式
-        DoorCmd doorCmdRecord = new DoorCmd();
-        doorCmdRecord.setServerId("001");
-        doorCmdRecord.setDeviceId((String) mapJson.get("deviceId"));
-        doorCmdRecord.setFileEdition("v1.3");
-        doorCmdRecord.setCommandMode("R");
-        doorCmdRecord.setCommandType("S");
-        doorCmdRecord.setCommandTotal("1");
-        doorCmdRecord.setCommandIndex("1");
-        doorCmdRecord.setSubCmdId("");
-        doorCmdRecord.setAction("UPLOAD_DEVICE_HEARTBEAT");
-        doorCmdRecord.setActionCode("1005");
-        doorCmdRecord.setSendTime(CalendarUtil.getCurrentTime());
-        doorCmdRecord.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(),3));
-        doorCmdRecord.setSuperCmdId(FormatUtil.createUuid());
-        doorCmdRecord.setData(JSON.toJSONString(resultMap));
-
-        //获取完整的数据加协议封装格式
-        RabbitMQSender rabbitMQSender = new RabbitMQSender();
-        Map<String, Object> doorRecordAll =  rabbitMQSender.messagePackaging(doorCmdRecord, "", resultData, "R");
-        //命令状态设置为: 已回复
-        doorCmdRecord.setStatus("5");
-        doorCmdRecord.setResultCode(resultCode);
-        doorCmdRecord.setResultMessage(resultMessage);
-        //设置md5校验值
-        doorCmdRecord.setMd5Check((String) doorRecordAll.get("MD5Check"));
-        //设置数据库的data字段
-        doorCmdRecord.setData(JSON.toJSONString(doorRecordAll.get("result")));
-        //命令数据存入数据库
-        entranceGuardService.insertCommand(doorCmdRecord);
-
-        return doorRecordAll;
     }
 
     /**

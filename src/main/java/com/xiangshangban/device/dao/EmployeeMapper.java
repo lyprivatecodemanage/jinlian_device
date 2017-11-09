@@ -17,4 +17,7 @@ public interface EmployeeMapper {
 
     int updateByPrimaryKey(Employee record);
 
+    //按照卡号查找是否有人员占用了该卡号
+    Employee selectByEmployeeNfc(String employeeNfc);
+
 }

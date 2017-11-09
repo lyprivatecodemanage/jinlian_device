@@ -2,6 +2,7 @@ package com.xiangshangban.device.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.xiangshangban.device.bean.*;
+import com.xiangshangban.device.common.encode.CRC16;
 import com.xiangshangban.device.common.rmq.RabbitMQSender;
 import com.xiangshangban.device.common.utils.CalendarUtil;
 import com.xiangshangban.device.common.utils.DateUtils;
@@ -250,6 +251,8 @@ public class DeviceServiceImpl implements IDeviceService {
         List<Map<String, Object>> rebootRecordVersionList = new ArrayList<Map<String, Object>>();
         String rebootId;
         List<String> rebootIdList = new ArrayList<>();
+        String resultCode;
+        String resultMessage;
 
         rebootRecordList = (List<Map<String, Object>>) mapJson.get("record");
         for (Map<String, Object> singleRecordMap : rebootRecordList) {
@@ -291,8 +294,10 @@ public class DeviceServiceImpl implements IDeviceService {
         //回复设备重启记录上传
         Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
         Map<String, Object> resultData = new LinkedHashMap<String, Object>();
-        resultData.put("resultCode", "0");
-        resultData.put("resultMessage", "执行成功");
+        resultCode = "0";
+        resultMessage = "执行成功";
+        resultData.put("resultCode", resultCode);
+        resultData.put("resultMessage", resultMessage);
         resultData.put("returnObj", rebootIdList);
         resultMap.put("result", resultData);
 
@@ -322,6 +327,8 @@ public class DeviceServiceImpl implements IDeviceService {
         doorCmdRecord.setMd5Check((String) doorRecordAll.get("MD5Check"));
         //设置数据库的data字段
         doorCmdRecord.setData(JSON.toJSONString(doorRecordAll.get("result")));
+        doorCmdRecord.setResultCode(resultCode);
+        doorCmdRecord.setResultMessage(resultMessage);
         //命令数据存入数据库
         entranceGuardService.insertCommand(doorCmdRecord);
         //立即下发回复数据到MQ
@@ -336,17 +343,22 @@ public class DeviceServiceImpl implements IDeviceService {
         Map<String, Object> mapJson = JSONObject.fromObject(jsonString);
         List<Map<String, String>> deviceRunningLogList = (List<Map<String, String>>) mapJson.get("log");
         List<String> logIdList = new ArrayList<String>();
+        String resultCode;
+        String resultMessage;
 
         for (Map<String, String> deviceRunningLogMap : deviceRunningLogList) {
 
+            String logId = deviceRunningLogMap.get("logId");
+            logIdList.add(logId);
+
             DeviceRunningLog deviceRunningLog = new DeviceRunningLog();
-            deviceRunningLog.setLogId(deviceRunningLogMap.get("logId"));
+            deviceRunningLog.setLogId(logId);
             deviceRunningLog.setLogLevel(deviceRunningLogMap.get("logLevel"));
             deviceRunningLog.setLogType(deviceRunningLogMap.get("logType"));
             deviceRunningLog.setLogContent(deviceRunningLogMap.get("logContent"));
             deviceRunningLog.setLogTime(deviceRunningLogMap.get("logTime"));
 
-            DeviceRunningLog deviceRunningLogExist = new DeviceRunningLog();
+            DeviceRunningLog deviceRunningLogExist = deviceRunningLogMapper.selectByPrimaryKey(logId);
             if (deviceRunningLogExist == null){
                 deviceRunningLogMapper.insertSelective(deviceRunningLog);
             }else {
@@ -357,8 +369,10 @@ public class DeviceServiceImpl implements IDeviceService {
         //回复设备重启记录上传
         Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
         Map<String, Object> resultData = new LinkedHashMap<String, Object>();
-        resultData.put("resultCode", "0");
-        resultData.put("resultMessage", "执行成功");
+        resultCode = "0";
+        resultMessage = "执行成功";
+        resultData.put("resultCode", resultCode);
+        resultData.put("resultMessage", resultMessage);
         resultData.put("returnObj", logIdList);
         resultMap.put("result", resultData);
 
@@ -388,10 +402,49 @@ public class DeviceServiceImpl implements IDeviceService {
         doorCmdRecord.setMd5Check((String) doorRecordAll.get("MD5Check"));
         //设置数据库的data字段
         doorCmdRecord.setData(JSON.toJSONString(doorRecordAll.get("result")));
+        doorCmdRecord.setResultCode(resultCode);
+        doorCmdRecord.setResultMessage(resultMessage);
         //命令数据存入数据库
         entranceGuardService.insertCommand(doorCmdRecord);
         //立即下发回复数据到MQ
         rabbitMQSender.sendMessage(downloadQueueName, doorRecordAll);
         System.out.println("运行日志上传已回复");
     }
+
+    /**
+     * CRC16校验设备id
+     */
+    @Override
+    public boolean checkCrc16DeviceId(String deviceId) {
+
+        String deviceIdAhead = deviceId.substring(0, deviceId.length()-5);
+        String deviceIdBehind = deviceId.substring(deviceId.length()-5, deviceId.length());
+
+        String myCrc16 = String.format("%04x", CRC16.calcCrc16(deviceIdAhead.getBytes()));
+
+        if (myCrc16.equals(deviceIdBehind)){
+            System.out.println("CRC16校验成功，数据完好无损");
+            return true;
+        }else {
+            System.out.println("CRC16校验失败，数据已被修改");
+            return false;
+        }
+
+    }
+
+    public static void main(String[] args) {
+
+        String deviceId = "0f1a21d4e6fd3cb8-1-2-6277";
+
+        String deviceIdAhead = deviceId.substring(0, deviceId.length()-5);
+        String deviceIdBehind = deviceId.substring(deviceId.length()-5, deviceId.length());
+        String deviceIdTruth = deviceId.substring(0, 16);
+
+        System.out.println(deviceIdAhead+"*******"+deviceIdBehind);
+        System.out.println(deviceId.length()+"*******"+(deviceId.length()-5));
+        System.out.println(deviceIdTruth);
+
+        System.out.println("十六进制："+String.format("%04x", CRC16.calcCrc16(deviceIdAhead.getBytes())));
+    }
+
 }
