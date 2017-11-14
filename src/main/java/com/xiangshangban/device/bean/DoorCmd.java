@@ -39,6 +39,8 @@ public class DoorCmd {
 
     private String employeeId;
 
+    private String operateEmployeeId;
+
     public String getSuperCmdId() {
         return superCmdId;
     }
@@ -189,5 +191,13 @@ public class DoorCmd {
 
     public void setEmployeeId(String employeeId) {
         this.employeeId = employeeId;
+    }
+
+    public String getOperateEmployeeId() {
+        return operateEmployeeId;
+    }
+
+    public void setOperateEmployeeId(String operateEmployeeId) {
+        this.operateEmployeeId = operateEmployeeId;
     }
 }

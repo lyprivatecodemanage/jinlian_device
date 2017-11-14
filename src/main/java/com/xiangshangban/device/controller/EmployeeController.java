@@ -525,36 +525,6 @@ public class EmployeeController {
     }
 
     /**
-     * 人员的门禁记录上传存储（HTTP POST）
-     * @param message
-     * @return
-     */
-    @ResponseBody
-    @Transactional
-    @RequestMapping(value = "/doorRecordSave", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
-    public Map<String, Object> doorRecordSave(@RequestBody String message){
-
-        Map<String, Object> mapResult = (Map<String, Object>) JSONObject.fromObject(message);
-
-        //md5校验
-        //获取对方的md5
-        String otherMd5 = (String) mapResult.get("MD5Check");
-        mapResult.remove("MD5Check");
-        String messageCheck = JSON.toJSONString(mapResult);
-        //生成我的md5
-        String myMd5 = MD5Util.encryptPassword(messageCheck, "XC9EO5GKOIVRMBQ2YE8X");
-        //双方的md5比较判断
-        if (myMd5.equals(otherMd5)){
-            System.out.println("设备上传的数据未被修改");
-        }else {
-            System.out.println("设备上传的数据已被修改");
-        }
-
-        return iEmployeeService.doorRecordSave(message, "Http-Request");
-
-    }
-
-    /**
      * 人员人脸、指纹、卡号信息上传存储
      * @param jsonString
      * @return
@@ -615,7 +585,7 @@ public class EmployeeController {
         String myMd5 = MD5Util.encryptPassword(messageCheck, "XC9EO5GKOIVRMBQ2YE8X");
         //双方的md5比较判断
         if (myMd5.equals(otherMd5)){
-            System.out.println("设备上传的数据未被修改");
+            System.out.println("MD5校验成功，数据完好无损");
 
             Map<String, Map<String, String>> dataMap = (Map<String, Map<String, String>>) mapResult.get("data");
             String employeeNfc = dataMap.get("userLabel").get("userNFC");
@@ -672,7 +642,7 @@ public class EmployeeController {
             }
 
         }else {
-            System.out.println("设备上传的数据已被修改");
+            System.out.println("MD5校验失败，数据已被修改");
 
             //回复人员人脸、指纹、卡号信息上传
             Map<String, Object> resultMap = new LinkedHashMap<String, Object>();

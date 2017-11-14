@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xiangshangban.device.dao.DeviceUpdatePackSysMapper" >
+  <resultMap id="BaseResultMap" type="com.xiangshangban.device.bean.DeviceUpdatePackSys" >
+    <id column="new_sys_verion" property="newSysVerion" jdbcType="VARCHAR" />
+    <result column="path" property="path" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="VARCHAR" />
+    <result column="file_key" property="fileKey" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    new_sys_verion, path, create_time, file_key
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from device_update_pack_sys
+    where new_sys_verion = #{newSysVerion,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from device_update_pack_sys
+    where new_sys_verion = #{newSysVerion,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.xiangshangban.device.bean.DeviceUpdatePackSys" >
+    insert into device_update_pack_sys (new_sys_verion, path, create_time, 
+      file_key)
+    values (#{newSysVerion,jdbcType=VARCHAR}, #{path,jdbcType=VARCHAR}, #{createTime,jdbcType=VARCHAR}, 
+      #{fileKey,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.xiangshangban.device.bean.DeviceUpdatePackSys" >
+    insert into device_update_pack_sys
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="newSysVerion != null" >
+        new_sys_verion,
+      </if>
+      <if test="path != null" >
+        path,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="fileKey != null" >
+        file_key,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="newSysVerion != null" >
+        #{newSysVerion,jdbcType=VARCHAR},
+      </if>
+      <if test="path != null" >
+        #{path,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="fileKey != null" >
+        #{fileKey,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.xiangshangban.device.bean.DeviceUpdatePackSys" >
+    update device_update_pack_sys
+    <set >
+      <if test="path != null" >
+        path = #{path,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="fileKey != null" >
+        file_key = #{fileKey,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where new_sys_verion = #{newSysVerion,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.xiangshangban.device.bean.DeviceUpdatePackSys" >
+    update device_update_pack_sys
+    set path = #{path,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=VARCHAR},
+      file_key = #{fileKey,jdbcType=VARCHAR}
+    where new_sys_verion = #{newSysVerion,jdbcType=VARCHAR}
+  </update>
+
+  <!--非自动生成-->
+  <select id="selectAllByCreateTimeDesc" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from device_update_pack_sys
+    ORDER BY create_time DESC
+  </select>
+
+</mapper>

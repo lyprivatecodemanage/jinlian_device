@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.xiangshangban.device.dao.DeviceHeartbeatMapper" >
   <resultMap id="BaseResultMap" type="com.xiangshangban.device.bean.DeviceHeartbeat" >
-    <result column="device_id" property="deviceId" jdbcType="VARCHAR" />
+    <id column="device_id" property="deviceId" jdbcType="VARCHAR" />
     <result column="lock_state" property="lockState" jdbcType="VARCHAR" />
     <result column="wifi_opne" property="wifiOpne" jdbcType="VARCHAR" />
     <result column="ip" property="ip" jdbcType="VARCHAR" />
@@ -26,6 +26,22 @@
     <result column="app_used" property="appUsed" jdbcType="VARCHAR" />
     <result column="time" property="time" jdbcType="VARCHAR" />
   </resultMap>
+  <sql id="Base_Column_List" >
+    device_id, lock_state, wifi_opne, ip, mask, gate, time_limit_door_open, time_limit_lock_open, 
+    door_alarm, fire_alarm, user_number, key_switch, company_id, company_name, data_uploadstate, 
+    rom_available_size, cpu_freq, cpu_temper, cpu_unilization, cpu_user_unilization, 
+    "internal_unilization ", app_used, time
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from device_heartbeat
+    where device_id = #{deviceId,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from device_heartbeat
+    where device_id = #{deviceId,jdbcType=VARCHAR}
+  </delete>
   <insert id="insert" parameterType="com.xiangshangban.device.bean.DeviceHeartbeat" >
     insert into device_heartbeat (device_id, lock_state, wifi_opne, 
       ip, mask, gate, time_limit_door_open, 
@@ -189,4 +205,124 @@
       </if>
     </trim>
   </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.xiangshangban.device.bean.DeviceHeartbeat" >
+    update device_heartbeat
+    <set >
+      <if test="lockState != null" >
+        lock_state = #{lockState,jdbcType=VARCHAR},
+      </if>
+      <if test="wifiOpne != null" >
+        wifi_opne = #{wifiOpne,jdbcType=VARCHAR},
+      </if>
+      <if test="ip != null" >
+        ip = #{ip,jdbcType=VARCHAR},
+      </if>
+      <if test="mask != null" >
+        mask = #{mask,jdbcType=VARCHAR},
+      </if>
+      <if test="gate != null" >
+        gate = #{gate,jdbcType=VARCHAR},
+      </if>
+      <if test="timeLimitDoorOpen != null" >
+        time_limit_door_open = #{timeLimitDoorOpen,jdbcType=VARCHAR},
+      </if>
+      <if test="timeLimitLockOpen != null" >
+        time_limit_lock_open = #{timeLimitLockOpen,jdbcType=VARCHAR},
+      </if>
+      <if test="doorAlarm != null" >
+        door_alarm = #{doorAlarm,jdbcType=VARCHAR},
+      </if>
+      <if test="fireAlarm != null" >
+        fire_alarm = #{fireAlarm,jdbcType=VARCHAR},
+      </if>
+      <if test="userNumber != null" >
+        user_number = #{userNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="keySwitch != null" >
+        key_switch = #{keySwitch,jdbcType=VARCHAR},
+      </if>
+      <if test="companyId != null" >
+        company_id = #{companyId,jdbcType=VARCHAR},
+      </if>
+      <if test="companyName != null" >
+        company_name = #{companyName,jdbcType=VARCHAR},
+      </if>
+      <if test="dataUploadstate != null" >
+        data_uploadstate = #{dataUploadstate,jdbcType=VARCHAR},
+      </if>
+      <if test="romAvailableSize != null" >
+        rom_available_size = #{romAvailableSize,jdbcType=VARCHAR},
+      </if>
+      <if test="cpuFreq != null" >
+        cpu_freq = #{cpuFreq,jdbcType=VARCHAR},
+      </if>
+      <if test="cpuTemper != null" >
+        cpu_temper = #{cpuTemper,jdbcType=VARCHAR},
+      </if>
+      <if test="cpuUnilization != null" >
+        cpu_unilization = #{cpuUnilization,jdbcType=VARCHAR},
+      </if>
+      <if test="cpuUserUnilization != null" >
+        cpu_user_unilization = #{cpuUserUnilization,jdbcType=VARCHAR},
+      </if>
+      <if test="internalUnilization != null" >
+        "internal_unilization " = #{internalUnilization,jdbcType=VARCHAR},
+      </if>
+      <if test="appUsed != null" >
+        app_used = #{appUsed,jdbcType=VARCHAR},
+      </if>
+      <if test="time != null" >
+        time = #{time,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where device_id = #{deviceId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.xiangshangban.device.bean.DeviceHeartbeat" >
+    update device_heartbeat
+    set lock_state = #{lockState,jdbcType=VARCHAR},
+      wifi_opne = #{wifiOpne,jdbcType=VARCHAR},
+      ip = #{ip,jdbcType=VARCHAR},
+      mask = #{mask,jdbcType=VARCHAR},
+      gate = #{gate,jdbcType=VARCHAR},
+      time_limit_door_open = #{timeLimitDoorOpen,jdbcType=VARCHAR},
+      time_limit_lock_open = #{timeLimitLockOpen,jdbcType=VARCHAR},
+      door_alarm = #{doorAlarm,jdbcType=VARCHAR},
+      fire_alarm = #{fireAlarm,jdbcType=VARCHAR},
+      user_number = #{userNumber,jdbcType=VARCHAR},
+      key_switch = #{keySwitch,jdbcType=VARCHAR},
+      company_id = #{companyId,jdbcType=VARCHAR},
+      company_name = #{companyName,jdbcType=VARCHAR},
+      data_uploadstate = #{dataUploadstate,jdbcType=VARCHAR},
+      rom_available_size = #{romAvailableSize,jdbcType=VARCHAR},
+      cpu_freq = #{cpuFreq,jdbcType=VARCHAR},
+      cpu_temper = #{cpuTemper,jdbcType=VARCHAR},
+      cpu_unilization = #{cpuUnilization,jdbcType=VARCHAR},
+      cpu_user_unilization = #{cpuUserUnilization,jdbcType=VARCHAR},
+      "internal_unilization " = #{internalUnilization,jdbcType=VARCHAR},
+      app_used = #{appUsed,jdbcType=VARCHAR},
+      time = #{time,jdbcType=VARCHAR}
+    where device_id = #{deviceId,jdbcType=VARCHAR}
+  </update>
+
+  <!--非自动生成-->
+  <select id="selectLatestByDeviceId" resultType="java.util.Map" parameterType="java.lang.String" >
+    SELECT
+    T.*
+    FROM
+    (
+    SELECT
+    device_heartbeat.cpu_user_unilization,
+    device_heartbeat.rom_available_size,
+    device_heartbeat."internal_unilization",
+    device_.device_name,device_.company_name,
+    ROW_NUMBER () OVER (ORDER BY "time" DESC) rn
+    FROM
+    device_heartbeat
+    LEFT JOIN device_ ON (device_.device_id = device_heartbeat.device_id)
+    WHERE device_heartbeat.device_id = #{deviceId,jdbcType=VARCHAR}
+    ) T
+    WHERE
+    rn = 1;
+  </select>
+
 </mapper>

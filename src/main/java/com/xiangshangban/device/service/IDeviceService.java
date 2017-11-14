@@ -15,35 +15,33 @@ public interface IDeviceService {
 
     /**
      * 平台新增设备
-     * @param companyId
      * @param deviceId
      * @param macAddress
      */
-    void addDevice(String companyId, String deviceId, String macAddress);
+    void addDevice(String deviceId, String macAddress);
 
     /**
      * 查找当前公司的设备信息(包括筛选功能，无参传入查询全部设备)
      * @param companyName
      * @param deviceName
-     * @param deviceNumber
+     * @param deviceId
      * @param isOnline
      * @param activeStatus
      * @return
      */
-    List<Map<String, Object>> findDeviceInformation(String companyName, String deviceName, String deviceNumber,
-                                                    String  isOnline, String activeStatus);
+    List<Map<String, String>> findDeviceInformation(String companyId, String companyName, String deviceName,
+                                                    String deviceId, String  isOnline, String activeStatus);
 
     /**
      * 平台管理员编辑当前设备的信息
      * @param deviceId
      * @param deviceName
      * @param doorName
-     * @param companyName
      * @param devicePlace
      * @param deviceUsages
      * @return
      */
-    int editorDeviceInformation(String deviceId, String deviceName, String doorName, String companyName,
+    int editorDeviceInformation(String deviceId, String deviceName, String doorName,
                                 String devicePlace, String deviceUsages);
 
     /**
@@ -55,7 +53,7 @@ public interface IDeviceService {
     /**
      * 查询所有的设备信息
      */
-    List<Device> queryAllDeviceInfo();
+    List<Device> queryAllDeviceInfo(String companyId);
 
     /**
      * 绑定设备

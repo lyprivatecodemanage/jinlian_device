@@ -8,6 +8,7 @@ import com.xiangshangban.device.common.utils.DateUtils;
 import com.xiangshangban.device.common.utils.FormatUtil;
 import com.xiangshangban.device.dao.*;
 import com.xiangshangban.device.service.IEntranceGuardService;
+import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -609,6 +610,99 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         //立即下发数据到MQ
         rabbitMQSender.sendMessage(downloadQueueName, userInformationAll);
     }
+
+    //门禁记录上传存储（mq过来的门禁记录信息）
+    @Override
+    public void doorRecordSave(String doorRecordMap) {
+
+        //提取数据
+        Map<String, Object> doorRecordMapTemp = (Map<String, Object>) JSONObject.fromObject(doorRecordMap);
+        List<Map<String, String>> doorRecordList = (List<Map<String, String>>)doorRecordMapTemp.get("data");
+        String resultCode;
+        String resultMessage;
+
+        //遍历门禁记录
+        for (Map<String, String> recordMap : doorRecordList) {
+
+            DoorRecord doorRecord = new DoorRecord();
+
+            doorRecord.setDoorPermissionRecordId(recordMap.get("id"));
+            doorRecord.setEmployeeId(recordMap.get("userId"));
+            doorRecord.setUpperState(recordMap.get("uploadFlag"));
+            doorRecord.setEmployeeGroupName(recordMap.get("userName"));
+            doorRecord.setEventResult(recordMap.get("outcome"));
+            doorRecord.setEventResultReason(recordMap.get("cause"));
+            doorRecord.setRecordType(recordMap.get("attType"));
+            doorRecord.setDoorId(doorMapper.findDoorIdByDeviceId(recordMap.get("deviceId")).getDoorId());
+            doorRecord.setDeviceGroupName(recordMap.get("deviceName"));
+            doorRecord.setRecordDate(recordMap.get("attTime"));
+            doorRecord.setRealWeek(recordMap.get("week"));
+            doorRecord.setEventPhotoGroupId(recordMap.get("eventPhotoCombinationId"));
+
+            //查找记录是否重复上传
+            DoorRecord doorRecordExit = doorRecordMapper.selectByPrimaryKey(recordMap.get("id"));
+
+            if (doorRecordExit == null){
+                //保存门禁记录到数据库
+                doorRecordMapper.insertSelective(doorRecord);
+            }else {
+                //更新门禁记录到数据库
+                doorRecordMapper.updateByPrimaryKeySelective(doorRecord);
+            }
+        }
+
+        //回复门禁记录上传
+        Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
+        Map<String, Object> resultData = new LinkedHashMap<String, Object>();
+        List<Object> objList = new ArrayList<Object>();
+        resultCode = "0";
+        resultMessage = "执行成功";
+        resultData.put("resultCode", resultCode);
+        resultData.put("resultMessage", resultMessage);
+        for (Map<String, String> recordMap : doorRecordList) {
+            Map<String, Object> objMap = new LinkedHashMap<String, Object>();
+            objMap.put("id", recordMap.get("id"));
+            objList.add(objMap);
+        }
+        resultData.put("returnObj", objList);
+        resultMap.put("result", resultData);
+
+
+        //构造命令格式
+        DoorCmd doorCmdRecord = new DoorCmd();
+        doorCmdRecord.setServerId("001");
+        doorCmdRecord.setDeviceId(doorRecordList.get(0).get("deviceId"));
+        doorCmdRecord.setFileEdition("v1.3");
+        doorCmdRecord.setCommandMode("R");
+        doorCmdRecord.setCommandType("S");
+        doorCmdRecord.setCommandTotal("1");
+        doorCmdRecord.setCommandIndex("1");
+        doorCmdRecord.setSubCmdId("");
+        doorCmdRecord.setAction("UPLOAD_ACCESS_RECORD");
+        doorCmdRecord.setActionCode("3006");
+        doorCmdRecord.setSendTime(CalendarUtil.getCurrentTime());
+        doorCmdRecord.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(),3));
+        doorCmdRecord.setSuperCmdId(FormatUtil.createUuid());
+        doorCmdRecord.setData(JSON.toJSONString(resultMap));
+
+        //获取完整的数据加协议封装格式
+        RabbitMQSender rabbitMQSender = new RabbitMQSender();
+        Map<String, Object> doorRecordAll =  rabbitMQSender.messagePackaging(doorCmdRecord, "", resultData, "R");
+        //命令状态设置为: 已回复
+        doorCmdRecord.setStatus("5");
+        //设置md5校验值
+        doorCmdRecord.setMd5Check((String) doorRecordAll.get("MD5Check"));
+        //设置数据库的data字段
+        doorCmdRecord.setData(JSON.toJSONString(doorRecordAll.get("result")));
+        doorCmdRecord.setResultCode(resultCode);
+        doorCmdRecord.setResultMessage(resultMessage);
+        //命令数据存入数据库
+        insertCommand(doorCmdRecord);
+        //立即下发回复数据到MQ
+        rabbitMQSender.sendMessage(downloadQueueName, doorRecordAll);
+        System.out.println("门禁记录上传已回复MQ");
+    }
+
     //查询一个人在一段时间之内的最早最晚打卡时间
     @Override
     public List<String> queryPunchCardTime (String empId, String companyId, String startTime, String endTime){

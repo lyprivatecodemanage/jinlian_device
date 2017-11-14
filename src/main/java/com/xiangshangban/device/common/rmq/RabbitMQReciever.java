@@ -7,6 +7,7 @@ import com.xiangshangban.device.common.encode.MD5Util;
 import com.xiangshangban.device.dao.DoorCmdMapper;
 import com.xiangshangban.device.service.IDeviceService;
 import com.xiangshangban.device.service.IEmployeeService;
+import com.xiangshangban.device.service.IEntranceGuardService;
 import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -50,6 +51,9 @@ public class RabbitMQReciever {
 
     @Autowired
     private IDeviceService deviceService;
+
+    @Autowired
+    private IEntranceGuardService entranceGuardService;
 
     //接收测试
     //接收可自动创建交换器、队列并绑定，发出不能
@@ -128,13 +132,11 @@ public class RabbitMQReciever {
                             //CRC16校验deviceId
                             if (deviceService.checkCrc16DeviceId(deviceId)){
 
-                                //截取真实的deviceId
-                                deviceId = deviceId.substring(0, deviceId.length()-5);
                                 //命令类型判断
                                 Map<String, String> commandMap = (Map<String, String>)mapResult.get("command");
                                 if (commandMap.get("ACTION").equals("UPLOAD_ACCESS_RECORD")){
                                     //门禁记录上传存储（RabbitMQ 上传）
-                                    employeeService.doorRecordSave(message, "RabbitMQ-Request");
+                                    entranceGuardService.doorRecordSave(message);
                                 }else if (commandMap.get("ACTION").equals("UPLOAD_DEVICE_REBOOT_RECORD")){
                                     //设备重启记录上传存储
                                     deviceService.deviceRebootRecordSave(JSON.toJSONString(mapResult.get("data")), deviceId);

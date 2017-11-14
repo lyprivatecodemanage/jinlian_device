@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xiangshangban.device.dao.DeviceUpdatePackAppMapper" >
+  <resultMap id="BaseResultMap" type="com.xiangshangban.device.bean.DeviceUpdatePackApp" >
+    <id column="app_name" property="appName" jdbcType="VARCHAR" />
+    <result column="version" property="version" jdbcType="VARCHAR" />
+    <result column="path" property="path" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="VARCHAR" />
+    <result column="file_key" property="fileKey" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    app_name, version, path, create_time, file_key
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from device_update_pack_app
+    where app_name = #{appName,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from device_update_pack_app
+    where app_name = #{appName,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.xiangshangban.device.bean.DeviceUpdatePackApp" >
+    insert into device_update_pack_app (app_name, version, path, 
+      create_time, file_key)
+    values (#{appName,jdbcType=VARCHAR}, #{version,jdbcType=VARCHAR}, #{path,jdbcType=VARCHAR}, 
+      #{createTime,jdbcType=VARCHAR}, #{fileKey,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.xiangshangban.device.bean.DeviceUpdatePackApp" >
+    insert into device_update_pack_app
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="appName != null" >
+        app_name,
+      </if>
+      <if test="version != null" >
+        version,
+      </if>
+      <if test="path != null" >
+        path,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="fileKey != null" >
+        file_key,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="appName != null" >
+        #{appName,jdbcType=VARCHAR},
+      </if>
+      <if test="version != null" >
+        #{version,jdbcType=VARCHAR},
+      </if>
+      <if test="path != null" >
+        #{path,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="fileKey != null" >
+        #{fileKey,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.xiangshangban.device.bean.DeviceUpdatePackApp" >
+    update device_update_pack_app
+    <set >
+      <if test="version != null" >
+        version = #{version,jdbcType=VARCHAR},
+      </if>
+      <if test="path != null" >
+        path = #{path,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="fileKey != null" >
+        file_key = #{fileKey,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where app_name = #{appName,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.xiangshangban.device.bean.DeviceUpdatePackApp" >
+    update device_update_pack_app
+    set version = #{version,jdbcType=VARCHAR},
+      path = #{path,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=VARCHAR},
+      file_key = #{fileKey,jdbcType=VARCHAR}
+    where app_name = #{appName,jdbcType=VARCHAR}
+  </update>
+</mapper>

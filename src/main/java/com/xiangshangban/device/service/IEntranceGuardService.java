@@ -127,4 +127,7 @@ public interface IEntranceGuardService {
     //门禁配置---功能配置（门禁日历）
     void handOutDoorCalendar(String doorId, String enableDoorCalendar, List accessCalendar);
 
+    //门禁记录上传存储
+    void doorRecordSave(String doorRecordMap);
+
 }

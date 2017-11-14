@@ -21,11 +21,12 @@
     <result column="data" property="data" jdbcType="VARCHAR" />
     <result column="status" property="status" jdbcType="VARCHAR" />
     <result column="employee_id" property="employeeId" jdbcType="VARCHAR" />
+    <result column="operate_employee_id" property="operateEmployeeId" jdbcType="VARCHAR" />
   </resultMap>
   <sql id="Base_Column_List" >
     super_cmd_id, server_id, device_id, file_edition, command_mode, command_type, command_total, 
     command_index, send_time, out_of_time, md5_check, sub_cmd_id, action, action_code, 
-    result_code, result_message, data, status, employee_id
+    result_code, result_message, data, status, employee_id, operate_employee_id
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
     select 
@@ -44,14 +45,14 @@
       out_of_time, md5_check, sub_cmd_id, 
       action, action_code, result_code, 
       result_message, data, status, 
-      employee_id)
+      employee_id, operate_employee_id)
     values (#{superCmdId,jdbcType=VARCHAR}, #{serverId,jdbcType=VARCHAR}, #{deviceId,jdbcType=VARCHAR}, 
       #{fileEdition,jdbcType=VARCHAR}, #{commandMode,jdbcType=VARCHAR}, #{commandType,jdbcType=VARCHAR}, 
       #{commandTotal,jdbcType=VARCHAR}, #{commandIndex,jdbcType=VARCHAR}, #{sendTime,jdbcType=VARCHAR}, 
       #{outOfTime,jdbcType=VARCHAR}, #{md5Check,jdbcType=VARCHAR}, #{subCmdId,jdbcType=VARCHAR}, 
       #{action,jdbcType=VARCHAR}, #{actionCode,jdbcType=VARCHAR}, #{resultCode,jdbcType=VARCHAR}, 
       #{resultMessage,jdbcType=VARCHAR}, #{data,jdbcType=VARCHAR}, #{status,jdbcType=VARCHAR}, 
-      #{employeeId,jdbcType=VARCHAR})
+      #{employeeId,jdbcType=VARCHAR}, #{operateEmployeeId,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="com.xiangshangban.device.bean.DoorCmd" >
     insert into door_cmd
@@ -113,6 +114,9 @@
       <if test="employeeId != null" >
         employee_id,
       </if>
+      <if test="operateEmployeeId != null" >
+        operate_employee_id,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="superCmdId != null" >
@@ -171,6 +175,9 @@
       </if>
       <if test="employeeId != null" >
         #{employeeId,jdbcType=VARCHAR},
+      </if>
+      <if test="operateEmployeeId != null" >
+        #{operateEmployeeId,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
@@ -231,6 +238,9 @@
       <if test="employeeId != null" >
         employee_id = #{employeeId,jdbcType=VARCHAR},
       </if>
+      <if test="operateEmployeeId != null" >
+        operate_employee_id = #{operateEmployeeId,jdbcType=VARCHAR},
+      </if>
     </set>
     where super_cmd_id = #{superCmdId,jdbcType=VARCHAR}
   </update>
@@ -253,7 +263,8 @@
       result_message = #{resultMessage,jdbcType=VARCHAR},
       data = #{data,jdbcType=VARCHAR},
       status = #{status,jdbcType=VARCHAR},
-      employee_id = #{employeeId,jdbcType=VARCHAR}
+      employee_id = #{employeeId,jdbcType=VARCHAR},
+      operate_employee_id = #{operateEmployeeId,jdbcType=VARCHAR}
     where super_cmd_id = #{superCmdId,jdbcType=VARCHAR}
   </update>
 
@@ -313,6 +324,9 @@
       <if test="employeeId != null" >
         employee_id = #{employeeId,jdbcType=VARCHAR},
       </if>
+      <if test="operateEmployeeId != null" >
+        operate_employee_id = #{operateEmployeeId,jdbcType=VARCHAR},
+      </if>
     </set>
     where super_cmd_id = #{superCmdId,jdbcType=VARCHAR}
   </update>
@@ -343,7 +357,8 @@
     result_message = #{resultMessage,jdbcType=VARCHAR},
     data = #{data,jdbcType=VARCHAR},
     status = #{status,jdbcType=VARCHAR},
-    employee_id = #{employeeId,jdbcType=VARCHAR}
+    employee_id = #{employeeId,jdbcType=VARCHAR},
+    operate_employee_id = #{operateEmployeeId,jdbcType=VARCHAR}
     where super_cmd_id = #{superCmdId,jdbcType=VARCHAR}
   </update>
 

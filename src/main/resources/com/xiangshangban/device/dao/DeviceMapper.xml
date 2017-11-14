@@ -186,22 +186,26 @@
     where device_id = #{deviceId,jdbcType=VARCHAR}
   </update>
 
+  <!--非自动生成-->
   <select id="findByCondition" resultType="java.util.Map" parameterType="com.xiangshangban.device.bean.Device" >
     select * from device_ a LEFT JOIN door_ b ON (a.device_id = b.device_id) where 1=1
+    <if test="companyId != null and companyId != ''" >
+      AND a.company_id LIKE '%${companyId}'
+    </if>
     <if test="companyName != null and companyName != ''" >
-      AND company_name LIKE '%${companyName,jdbcType=VARCHAR}'
+      AND a.company_name LIKE '%${companyName}'
     </if>
     <if test="deviceName != null and deviceName != ''" >
-      AND device_name LIKE '%${deviceName,jdbcType=VARCHAR}'
+      AND a.device_name LIKE '%${deviceName}'
     </if>
-    <if test="deviceNumber != null and deviceNumber != ''" >
-      AND device_number LIKE '%${deviceNumber,jdbcType=VARCHAR}'
+    <if test="deviceId != null and deviceId != ''" >
+      AND a.device_id LIKE '%${deviceId}'
     </if>
     <if test="isOnline != null and isOnline != ''" >
-      AND is_online = #{isOnline,jdbcType=VARCHAR}
+      AND a.is_online = #{isOnline,jdbcType=VARCHAR}
     </if>
     <if test="activeStatus != null and activeStatus != ''" >
-      AND active_status = #{activeStatus,jdbcType=VARCHAR}
+      AND a.active_status = #{activeStatus,jdbcType=VARCHAR}
     </if>
 
   </select>
@@ -211,8 +215,16 @@
   </select>
 
   <!--查询所有的设备信息-->
-  <select id="selectAllDeviceInfo" resultType="com.xiangshangban.device.bean.Device">
-    select device_id as deviceId,device_name as deviceName from device_
+  <select id="selectAllDeviceInfo" parameterType="java.lang.String" resultMap="BaseResultMap">
+    SELECT
+    <include refid="Base_Column_List" />
+    FROM
+	device_
+    WHERE
+	1 = 1
+    <if test="companyId != null and companyId != ''" >
+      AND company_id = #{companyId,jdbcType=VARCHAR}
+    </if>
   </select>
 
 </mapper>

@@ -48,12 +48,11 @@ public class DeviceServiceImpl implements IDeviceService {
     private DeviceRunningLogMapper deviceRunningLogMapper;
 
     @Override
-    public void addDevice(String companyId, String deviceId, String macAddress) {
+    public void addDevice(String deviceId, String macAddress) {
 
         Device device = new Device();
 
         //新增设备信息
-        device.setCompanyId(companyId);
         device.setDeviceId(deviceId);
         device.setMacAddress(macAddress);
 
@@ -68,19 +67,44 @@ public class DeviceServiceImpl implements IDeviceService {
     }
 
     @Override
-    public List<Map<String, Object>> findDeviceInformation(String companyName, String deviceName, String deviceNumber,
+    public List<Map<String, String>> findDeviceInformation(String companyId, String companyName, String deviceName, String deviceId,
                                       String isOnline, String activeStatus) {
 
         Device device = new Device();
 
         //设备信息筛选条件
+        device.setCompanyId(companyId);
         device.setCompanyName(companyName);
         device.setDeviceName(deviceName);
-        device.setDeviceNumber(deviceNumber);
+        device.setDeviceId(deviceId);//设备编号就是deviceId
         device.setIsOnline(isOnline);
         device.setActiveStatus(activeStatus);
 
-        List<Map<String, Object>> mapList = deviceMapper.findByCondition(device);
+        List<Map<String, String>> mapList = deviceMapper.findByCondition(device);
+
+        System.out.println(JSON.toJSONString(mapList));
+        for (Map<String, String> map : mapList) {
+            String isOnlineTemp = map.get("is_online");
+            String activeStatusTemp = map.get("active_status");
+
+            if (isOnlineTemp.equals("0")){
+                map.put("is_online", "在线");
+            }else if (isOnline.equals("1")){
+                map.put("is_online", "离线");
+            }
+
+            if (activeStatusTemp.equals("0")){
+                map.put("active_status", "待激活");
+            }else if (activeStatusTemp.equals("1")){
+                map.put("active_status", "待完善");
+            }else if (activeStatusTemp.equals("2")){
+                map.put("active_status", "使用中");
+            }else if (activeStatusTemp.equals("3")){
+                map.put("active_status", "已欠费");
+            }else if (activeStatusTemp.equals("4")){
+                map.put("active_status", "故障中");
+            }
+        }
 
         System.out.println("------------"+JSON.toJSONString(mapList));
 
@@ -89,13 +113,12 @@ public class DeviceServiceImpl implements IDeviceService {
     }
 
     @Override
-    public int editorDeviceInformation(String deviceId, String deviceName, String doorName, String companyName,
+    public int editorDeviceInformation(String deviceId, String deviceName, String doorName,
                                        String devicePlace, String deviceUsages) {
 
         Device device = new Device();
         device.setDeviceId(deviceId);
         device.setDeviceName(deviceName);
-        device.setCompanyName(companyName);
         device.setDevicePlace(devicePlace);
         device.setDeviceUsages(deviceUsages);
 
@@ -146,9 +169,9 @@ public class DeviceServiceImpl implements IDeviceService {
 
     }
 
-    public List<Device> queryAllDeviceInfo() {
-        List<Device> devices = deviceMapper.selectAllDeviceInfo();
-        return devices;
+    public List<Device> queryAllDeviceInfo(String companyId) {
+
+        return deviceMapper.selectAllDeviceInfo(companyId);
     }
 
     @Override
@@ -417,12 +440,17 @@ public class DeviceServiceImpl implements IDeviceService {
     @Override
     public boolean checkCrc16DeviceId(String deviceId) {
 
+        //去除deviceId尾部的-Crc16得到的字符串
         String deviceIdAhead = deviceId.substring(0, deviceId.length()-5);
-        String deviceIdBehind = deviceId.substring(deviceId.length()-5, deviceId.length());
 
+        //对方的Crc16
+        String otherCrc16= deviceId.substring(deviceId.length()-4, deviceId.length());
+
+        //我方的Crc16
         String myCrc16 = String.format("%04x", CRC16.calcCrc16(deviceIdAhead.getBytes()));
 
-        if (myCrc16.equals(deviceIdBehind)){
+        //比对双方的Crc16
+        if (myCrc16.equals(otherCrc16)){
             System.out.println("CRC16校验成功，数据完好无损");
             return true;
         }else {

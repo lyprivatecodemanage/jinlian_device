@@ -29,9 +29,6 @@ public interface IEmployeeService {
     //人员人脸、指纹、卡号信息上传存储
     Map<String, Object> saveEmployeeInputInfo(String employeeInputInfo, String deviceId);
 
-    //门禁记录上传存储
-    Map<String, Object> doorRecordSave(String doorRecordMap, String requestType);
-
     //删除设备上的人员的所有关联信息
     void deleteEmployeeInformation(String employeeIdCollection);
 

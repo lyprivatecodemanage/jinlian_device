@@ -1,12 +1,10 @@
 package com.xiangshangban.device.dao;
 
 import com.xiangshangban.device.bean.DoorCmd;
-import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
-@Mapper
 public interface DoorCmdMapper {
     int deleteByPrimaryKey(String superCmdId);
 
@@ -34,5 +32,4 @@ public interface DoorCmdMapper {
 
     List<DoorCmd> selectCmdByEmployeeIdSendTimeDesc(@Param("employeeId") String employeeId,
                                                     @Param("action") String action);
-
 }
