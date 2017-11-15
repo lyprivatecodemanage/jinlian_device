@@ -35,13 +35,14 @@ public interface IDeviceService {
     /**
      * 平台管理员编辑当前设备的信息
      * @param deviceId
+     * @param companyId
      * @param deviceName
      * @param doorName
      * @param devicePlace
      * @param deviceUsages
      * @return
      */
-    int editorDeviceInformation(String deviceId, String deviceName, String doorName,
+    int editorDeviceInformation(String deviceId, String companyId, String deviceName, String doorName,
                                 String devicePlace, String deviceUsages);
 
     /**

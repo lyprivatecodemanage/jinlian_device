@@ -2,6 +2,7 @@ package com.xiangshangban.device.dao;
 
 import com.xiangshangban.device.bean.DeviceHeartbeat;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.Map;
 
@@ -24,5 +25,10 @@ public interface DeviceHeartbeatMapper {
      */
 
     //查询最新的一条心跳信息根据设备Id
-    Map<String, Object> selectLatestByDeviceId(String deviceId);
+    Map<String, Object> selectLatestByDeviceId(@Param("deviceId") String deviceId,
+                                               @Param("companyId") String companyId,
+                                               @Param("averageCpuUserUnilization") float averageCpuUserUnilization,
+                                               @Param("averageCpuTemper") float averageCpuTemper,
+                                               @Param("cpuUserUnilizationCondition") String cpuUserUnilizationCondition,
+                                               @Param("cpuTemperCondition") String cpuTemperCondition);
 }

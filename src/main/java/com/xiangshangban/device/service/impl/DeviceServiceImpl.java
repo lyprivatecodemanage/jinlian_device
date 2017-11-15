@@ -113,11 +113,12 @@ public class DeviceServiceImpl implements IDeviceService {
     }
 
     @Override
-    public int editorDeviceInformation(String deviceId, String deviceName, String doorName,
+    public int editorDeviceInformation(String deviceId, String companyId, String deviceName, String doorName,
                                        String devicePlace, String deviceUsages) {
 
         Device device = new Device();
         device.setDeviceId(deviceId);
+        device.setCompanyId(companyId);
         device.setDeviceName(deviceName);
         device.setDevicePlace(devicePlace);
         device.setDeviceUsages(deviceUsages);
@@ -164,8 +165,8 @@ public class DeviceServiceImpl implements IDeviceService {
         doorCmdRebootDevice.setData(JSON.toJSONString(doorCmdPackageAll.get("data")));
         //命令数据存入数据库
         entranceGuardService.insertCommand(doorCmdRebootDevice);
-        //立即下发数据到MQ
-        rabbitMQSender.sendMessage(downloadQueueName, doorCmdPackageAll);
+//        //立即下发数据到MQ
+//        rabbitMQSender.sendMessage(downloadQueueName, doorCmdPackageAll);
 
     }
 

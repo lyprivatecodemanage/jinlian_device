@@ -22,7 +22,7 @@
     <result column="cpu_temper" property="cpuTemper" jdbcType="VARCHAR" />
     <result column="cpu_unilization" property="cpuUnilization" jdbcType="VARCHAR" />
     <result column="cpu_user_unilization" property="cpuUserUnilization" jdbcType="VARCHAR" />
-    <result column="internal_unilization " property="internalUnilization" jdbcType="VARCHAR" />
+    <result column="internal_unilization" property="internalUnilization" jdbcType="VARCHAR" />
     <result column="app_used" property="appUsed" jdbcType="VARCHAR" />
     <result column="time" property="time" jdbcType="VARCHAR" />
   </resultMap>
@@ -30,7 +30,7 @@
     device_id, lock_state, wifi_opne, ip, mask, gate, time_limit_door_open, time_limit_lock_open, 
     door_alarm, fire_alarm, user_number, key_switch, company_id, company_name, data_uploadstate, 
     rom_available_size, cpu_freq, cpu_temper, cpu_unilization, cpu_user_unilization, 
-    "internal_unilization ", app_used, time
+    "internal_unilization", app_used, time
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
     select 
@@ -49,7 +49,7 @@
       user_number, key_switch, company_id, 
       company_name, data_uploadstate, rom_available_size, 
       cpu_freq, cpu_temper, cpu_unilization, 
-      cpu_user_unilization, "internal_unilization ", 
+      cpu_user_unilization, "internal_unilization",
       app_used, time)
     values (#{deviceId,jdbcType=VARCHAR}, #{lockState,jdbcType=VARCHAR}, #{wifiOpne,jdbcType=VARCHAR}, 
       #{ip,jdbcType=VARCHAR}, #{mask,jdbcType=VARCHAR}, #{gate,jdbcType=VARCHAR}, #{timeLimitDoorOpen,jdbcType=VARCHAR}, 
@@ -124,7 +124,7 @@
         cpu_user_unilization,
       </if>
       <if test="internalUnilization != null" >
-        "internal_unilization ",
+        "internal_unilization",
       </if>
       <if test="appUsed != null" >
         app_used,
@@ -266,7 +266,7 @@
         cpu_user_unilization = #{cpuUserUnilization,jdbcType=VARCHAR},
       </if>
       <if test="internalUnilization != null" >
-        "internal_unilization " = #{internalUnilization,jdbcType=VARCHAR},
+        "internal_unilization" = #{internalUnilization,jdbcType=VARCHAR},
       </if>
       <if test="appUsed != null" >
         app_used = #{appUsed,jdbcType=VARCHAR},
@@ -298,7 +298,7 @@
       cpu_temper = #{cpuTemper,jdbcType=VARCHAR},
       cpu_unilization = #{cpuUnilization,jdbcType=VARCHAR},
       cpu_user_unilization = #{cpuUserUnilization,jdbcType=VARCHAR},
-      "internal_unilization " = #{internalUnilization,jdbcType=VARCHAR},
+      "internal_unilization" = #{internalUnilization,jdbcType=VARCHAR},
       app_used = #{appUsed,jdbcType=VARCHAR},
       time = #{time,jdbcType=VARCHAR}
     where device_id = #{deviceId,jdbcType=VARCHAR}
@@ -307,22 +307,57 @@
   <!--非自动生成-->
   <select id="selectLatestByDeviceId" resultType="java.util.Map" parameterType="java.lang.String" >
     SELECT
-    T.*
+	T .*
     FROM
-    (
-    SELECT
-    device_heartbeat.cpu_user_unilization,
-    device_heartbeat.rom_available_size,
-    device_heartbeat."internal_unilization",
-    device_.device_name,device_.company_name,
-    ROW_NUMBER () OVER (ORDER BY "time" DESC) rn
-    FROM
-    device_heartbeat
-    LEFT JOIN device_ ON (device_.device_id = device_heartbeat.device_id)
-    WHERE device_heartbeat.device_id = #{deviceId,jdbcType=VARCHAR}
-    ) T
+	(
+		SELECT
+			device_heartbeat.cpu_user_unilization,
+			device_heartbeat.rom_available_size,
+			device_heartbeat.internal_unilization,
+			device_heartbeat.cpu_temper,
+            device_heartbeat.time,
+			device_.device_name,
+            device_.company_id,
+			device_.company_name,
+			ROW_NUMBER () OVER (ORDER BY "time" DESC) rn
+		FROM
+			device_heartbeat
+		LEFT JOIN device_ ON (
+			device_.device_id = device_heartbeat.device_id
+		)
+		WHERE
+          device_heartbeat.device_id = #{deviceId,jdbcType=VARCHAR}
+	) T
     WHERE
-    rn = 1;
+	rn = 1
+    <if test='companyId != null and companyId != ""' >
+      AND device_.company_id = #{companyId,jdbcType=VARCHAR}
+    </if>
+    <if test="cpuUserUnilizationCondition != null and cpuUserUnilizationCondition != '' and cpuTemperCondition != null and cpuTemperCondition != ''" >
+      AND CAST (
+      "replace" (
+      cpu_user_unilization,
+      '%',
+      ''
+      ) AS INTEGER
+      )
+      <if test='cpuUserUnilizationCondition == "1"' >
+        &gt;=
+      </if>
+      <if test='cpuUserUnilizationCondition == "0"' >
+        &lt;
+      </if>
+      #{averageCpuUserUnilization,jdbcType=FLOAT}
+      AND CAST (cpu_temper AS FLOAT)
+      <if test='cpuTemperCondition == "1"' >
+        &gt;=
+      </if>
+      <if test='cpuTemperCondition == "0"' >
+        &lt;
+      </if>
+      #{averageCpuTemper,jdbcType=FLOAT}
+    </if>
+	;
   </select>
 
 </mapper>
