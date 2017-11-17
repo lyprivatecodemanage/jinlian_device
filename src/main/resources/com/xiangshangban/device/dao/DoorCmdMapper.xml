@@ -2,7 +2,8 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.xiangshangban.device.dao.DoorCmdMapper" >
   <resultMap id="BaseResultMap" type="com.xiangshangban.device.bean.DoorCmd" >
-    <id column="server_id" property="serverId" jdbcType="VARCHAR" />
+    <id column="super_cmd_id" property="superCmdId" jdbcType="VARCHAR" />
+    <result column="server_id" property="serverId" jdbcType="VARCHAR" />
     <result column="device_id" property="deviceId" jdbcType="VARCHAR" />
     <result column="file_edition" property="fileEdition" jdbcType="VARCHAR" />
     <result column="command_mode" property="commandMode" jdbcType="VARCHAR" />
@@ -12,7 +13,6 @@
     <result column="send_time" property="sendTime" jdbcType="VARCHAR" />
     <result column="out_of_time" property="outOfTime" jdbcType="VARCHAR" />
     <result column="md5_check" property="md5Check" jdbcType="VARCHAR" />
-    <result column="super_cmd_id" property="superCmdId" jdbcType="VARCHAR" />
     <result column="sub_cmd_id" property="subCmdId" jdbcType="VARCHAR" />
     <result column="action" property="action" jdbcType="VARCHAR" />
     <result column="action_code" property="actionCode" jdbcType="VARCHAR" />
@@ -20,40 +20,46 @@
     <result column="result_message" property="resultMessage" jdbcType="VARCHAR" />
     <result column="data" property="data" jdbcType="VARCHAR" />
     <result column="status" property="status" jdbcType="VARCHAR" />
+    <result column="employee_id" property="employeeId" jdbcType="VARCHAR" />
+    <result column="operate_employee_id" property="operateEmployeeId" jdbcType="VARCHAR" />
   </resultMap>
   <sql id="Base_Column_List" >
-    server_id, device_id, file_edition, command_mode, command_type, command_total, command_index, 
-    send_time, out_of_time, md5_check, super_cmd_id, sub_cmd_id, action, action_code, 
-    result_code, result_message, data, status
+    super_cmd_id, server_id, device_id, file_edition, command_mode, command_type, command_total, 
+    command_index, send_time, out_of_time, md5_check, sub_cmd_id, action, action_code, 
+    result_code, result_message, data, status, employee_id, operate_employee_id
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
     select 
     <include refid="Base_Column_List" />
     from door_cmd
+    where super_cmd_id = #{superCmdId,jdbcType=VARCHAR}
   </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
     delete from door_cmd
-    where server_id = #{serverId,jdbcType=VARCHAR}
+    where super_cmd_id = #{superCmdId,jdbcType=VARCHAR}
   </delete>
   <insert id="insert" parameterType="com.xiangshangban.device.bean.DoorCmd" >
-    insert into door_cmd (server_id, device_id, file_edition, 
-      command_mode, command_type, command_total, 
-      command_index, send_time, out_of_time, 
-      md5_check, super_cmd_id, sub_cmd_id, 
+    insert into door_cmd (super_cmd_id, server_id, device_id, 
+      file_edition, command_mode, command_type, 
+      command_total, command_index, send_time, 
+      out_of_time, md5_check, sub_cmd_id, 
       action, action_code, result_code, 
-      result_message, data, status
-      )
-    values (#{serverId,jdbcType=VARCHAR}, #{deviceId,jdbcType=VARCHAR}, #{fileEdition,jdbcType=VARCHAR}, 
-      #{commandMode,jdbcType=VARCHAR}, #{commandType,jdbcType=VARCHAR}, #{commandTotal,jdbcType=VARCHAR}, 
-      #{commandIndex,jdbcType=VARCHAR}, #{sendTime,jdbcType=VARCHAR}, #{outOfTime,jdbcType=VARCHAR}, 
-      #{md5Check,jdbcType=VARCHAR}, #{superCmdId,jdbcType=VARCHAR}, #{subCmdId,jdbcType=VARCHAR}, 
+      result_message, data, status, 
+      employee_id, operate_employee_id)
+    values (#{superCmdId,jdbcType=VARCHAR}, #{serverId,jdbcType=VARCHAR}, #{deviceId,jdbcType=VARCHAR}, 
+      #{fileEdition,jdbcType=VARCHAR}, #{commandMode,jdbcType=VARCHAR}, #{commandType,jdbcType=VARCHAR}, 
+      #{commandTotal,jdbcType=VARCHAR}, #{commandIndex,jdbcType=VARCHAR}, #{sendTime,jdbcType=VARCHAR}, 
+      #{outOfTime,jdbcType=VARCHAR}, #{md5Check,jdbcType=VARCHAR}, #{subCmdId,jdbcType=VARCHAR}, 
       #{action,jdbcType=VARCHAR}, #{actionCode,jdbcType=VARCHAR}, #{resultCode,jdbcType=VARCHAR}, 
-      #{resultMessage,jdbcType=VARCHAR}, #{data,jdbcType=VARCHAR}, #{status,jdbcType=VARCHAR}
-      )
+      #{resultMessage,jdbcType=VARCHAR}, #{data,jdbcType=VARCHAR}, #{status,jdbcType=VARCHAR}, 
+      #{employeeId,jdbcType=VARCHAR}, #{operateEmployeeId,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="com.xiangshangban.device.bean.DoorCmd" >
     insert into door_cmd
     <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="superCmdId != null" >
+        super_cmd_id,
+      </if>
       <if test="serverId != null" >
         server_id,
       </if>
@@ -84,9 +90,6 @@
       <if test="md5Check != null" >
         md5_check,
       </if>
-      <if test="superCmdId != null" >
-        super_cmd_id,
-      </if>
       <if test="subCmdId != null" >
         sub_cmd_id,
       </if>
@@ -108,8 +111,17 @@
       <if test="status != null" >
         status,
       </if>
+      <if test="employeeId != null" >
+        employee_id,
+      </if>
+      <if test="operateEmployeeId != null" >
+        operate_employee_id,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="superCmdId != null" >
+        #{superCmdId,jdbcType=VARCHAR},
+      </if>
       <if test="serverId != null" >
         #{serverId,jdbcType=VARCHAR},
       </if>
@@ -140,9 +152,6 @@
       <if test="md5Check != null" >
         #{md5Check,jdbcType=VARCHAR},
       </if>
-      <if test="superCmdId != null" >
-        #{superCmdId,jdbcType=VARCHAR},
-      </if>
       <if test="subCmdId != null" >
         #{subCmdId,jdbcType=VARCHAR},
       </if>
@@ -164,8 +173,103 @@
       <if test="status != null" >
         #{status,jdbcType=VARCHAR},
       </if>
+      <if test="employeeId != null" >
+        #{employeeId,jdbcType=VARCHAR},
+      </if>
+      <if test="operateEmployeeId != null" >
+        #{operateEmployeeId,jdbcType=VARCHAR},
+      </if>
     </trim>
   </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.xiangshangban.device.bean.DoorCmd" >
+    update door_cmd
+    <set >
+      <if test="serverId != null" >
+        server_id = #{serverId,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceId != null" >
+        device_id = #{deviceId,jdbcType=VARCHAR},
+      </if>
+      <if test="fileEdition != null" >
+        file_edition = #{fileEdition,jdbcType=VARCHAR},
+      </if>
+      <if test="commandMode != null" >
+        command_mode = #{commandMode,jdbcType=VARCHAR},
+      </if>
+      <if test="commandType != null" >
+        command_type = #{commandType,jdbcType=VARCHAR},
+      </if>
+      <if test="commandTotal != null" >
+        command_total = #{commandTotal,jdbcType=VARCHAR},
+      </if>
+      <if test="commandIndex != null" >
+        command_index = #{commandIndex,jdbcType=VARCHAR},
+      </if>
+      <if test="sendTime != null" >
+        send_time = #{sendTime,jdbcType=VARCHAR},
+      </if>
+      <if test="outOfTime != null" >
+        out_of_time = #{outOfTime,jdbcType=VARCHAR},
+      </if>
+      <if test="md5Check != null" >
+        md5_check = #{md5Check,jdbcType=VARCHAR},
+      </if>
+      <if test="subCmdId != null" >
+        sub_cmd_id = #{subCmdId,jdbcType=VARCHAR},
+      </if>
+      <if test="action != null" >
+        action = #{action,jdbcType=VARCHAR},
+      </if>
+      <if test="actionCode != null" >
+        action_code = #{actionCode,jdbcType=VARCHAR},
+      </if>
+      <if test="resultCode != null" >
+        result_code = #{resultCode,jdbcType=VARCHAR},
+      </if>
+      <if test="resultMessage != null" >
+        result_message = #{resultMessage,jdbcType=VARCHAR},
+      </if>
+      <if test="data != null" >
+        data = #{data,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeId != null" >
+        employee_id = #{employeeId,jdbcType=VARCHAR},
+      </if>
+      <if test="operateEmployeeId != null" >
+        operate_employee_id = #{operateEmployeeId,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where super_cmd_id = #{superCmdId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.xiangshangban.device.bean.DoorCmd" >
+    update door_cmd
+    set server_id = #{serverId,jdbcType=VARCHAR},
+      device_id = #{deviceId,jdbcType=VARCHAR},
+      file_edition = #{fileEdition,jdbcType=VARCHAR},
+      command_mode = #{commandMode,jdbcType=VARCHAR},
+      command_type = #{commandType,jdbcType=VARCHAR},
+      command_total = #{commandTotal,jdbcType=VARCHAR},
+      command_index = #{commandIndex,jdbcType=VARCHAR},
+      send_time = #{sendTime,jdbcType=VARCHAR},
+      out_of_time = #{outOfTime,jdbcType=VARCHAR},
+      md5_check = #{md5Check,jdbcType=VARCHAR},
+      sub_cmd_id = #{subCmdId,jdbcType=VARCHAR},
+      action = #{action,jdbcType=VARCHAR},
+      action_code = #{actionCode,jdbcType=VARCHAR},
+      result_code = #{resultCode,jdbcType=VARCHAR},
+      result_message = #{resultMessage,jdbcType=VARCHAR},
+      data = #{data,jdbcType=VARCHAR},
+      status = #{status,jdbcType=VARCHAR},
+      employee_id = #{employeeId,jdbcType=VARCHAR},
+      operate_employee_id = #{operateEmployeeId,jdbcType=VARCHAR}
+    where super_cmd_id = #{superCmdId,jdbcType=VARCHAR}
+  </update>
+
+  <!--非自动生成-->
+
   <update id="updateBySuperCmdIdSelective" parameterType="com.xiangshangban.device.bean.DoorCmd" >
     update door_cmd
     <set >
@@ -217,29 +321,14 @@
       <if test="status != null" >
         status = #{status,jdbcType=VARCHAR},
       </if>
+      <if test="employeeId != null" >
+        employee_id = #{employeeId,jdbcType=VARCHAR},
+      </if>
+      <if test="operateEmployeeId != null" >
+        operate_employee_id = #{operateEmployeeId,jdbcType=VARCHAR},
+      </if>
     </set>
     where super_cmd_id = #{superCmdId,jdbcType=VARCHAR}
-  </update>
-  <update id="updateByPrimaryKey" parameterType="com.xiangshangban.device.bean.DoorCmd" >
-    update door_cmd
-    set device_id = #{deviceId,jdbcType=VARCHAR},
-      file_edition = #{fileEdition,jdbcType=VARCHAR},
-      command_mode = #{commandMode,jdbcType=VARCHAR},
-      command_type = #{commandType,jdbcType=VARCHAR},
-      command_total = #{commandTotal,jdbcType=VARCHAR},
-      command_index = #{commandIndex,jdbcType=VARCHAR},
-      send_time = #{sendTime,jdbcType=VARCHAR},
-      out_of_time = #{outOfTime,jdbcType=VARCHAR},
-      md5_check = #{md5Check,jdbcType=VARCHAR},
-      super_cmd_id = #{superCmdId,jdbcType=VARCHAR},
-      sub_cmd_id = #{subCmdId,jdbcType=VARCHAR},
-      action = #{action,jdbcType=VARCHAR},
-      action_code = #{actionCode,jdbcType=VARCHAR},
-      result_code = #{resultCode,jdbcType=VARCHAR},
-      result_message = #{resultMessage,jdbcType=VARCHAR},
-      data = #{data,jdbcType=VARCHAR},
-      status = #{status,jdbcType=VARCHAR}
-    where server_id = #{serverId,jdbcType=VARCHAR}
   </update>
 
   <select id="selectBySuperCmdId" resultMap="BaseResultMap" parameterType="java.lang.String" >
@@ -267,7 +356,9 @@
     result_code = #{resultCode,jdbcType=VARCHAR},
     result_message = #{resultMessage,jdbcType=VARCHAR},
     data = #{data,jdbcType=VARCHAR},
-    status = #{status,jdbcType=VARCHAR}
+    status = #{status,jdbcType=VARCHAR},
+    employee_id = #{employeeId,jdbcType=VARCHAR},
+    operate_employee_id = #{operateEmployeeId,jdbcType=VARCHAR}
     where super_cmd_id = #{superCmdId,jdbcType=VARCHAR}
   </update>
 
@@ -276,6 +367,33 @@
     <include refid="Base_Column_List" />
     from door_cmd
     WHERE status = #{status,jdbcType=VARCHAR}
+  </select>
+
+  <select id="selectEmployeeDraftByDeviceId" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from door_cmd
+    WHERE device_id = #{deviceId,jdbcType=VARCHAR} AND
+    status = '0' AND
+    "action" in ('UPDATE_USER_INFO','UPDATE_USER_ACCESS_CONTROL')
+    ORDER BY send_time DESC
+  </select>
+
+  <select id="selectCmdByEmployeeIdSendTimeDesc" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from door_cmd
+    WHERE employee_id = #{employeeId,jdbcType=VARCHAR} AND
+    action = #{action,jdbcType=VARCHAR} AND
+    status = '0'
+    ORDER BY send_time DESC
+  </select>
+
+  <select id="selectStatusBySuperCmdId" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    status
+    from door_cmd
+    WHERE super_cmd_id = #{superCmdId,jdbcType=VARCHAR}
   </select>
 
 </mapper>

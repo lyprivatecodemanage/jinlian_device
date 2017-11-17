@@ -28,6 +28,9 @@ public class EmployeeServiceImpl implements IEmployeeService {
     @Value("${rabbitmq.download.queue.name}")
     String downloadQueueName;
 
+    @Value("${employee.interface.address}")
+    String employeeInterfaceAddress;
+
     @Autowired
     private EmployeeMapper employeeMapper;
 
@@ -64,7 +67,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
                 httpData.put("employeeId", employeeIdTemp);
 
                 //根据人员id请求单个人员信息
-                String employeeInfo = HttpRequestFactory.sendRequet("http://192.168.0.108:8085/EmployeeController/selectByEmployee", httpData);
+                String employeeInfo = HttpRequestFactory.sendRequet(employeeInterfaceAddress, httpData);
                 System.out.println("[*] send: 已发出请求");
                 System.out.println("[*] employeeInfo: " + employeeInfo);
 
@@ -137,6 +140,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
 //                doorCmd.setActionCode("2001");
 //                doorCmd.setData(dataJsonString);
 //                doorCmd.setStatus("0");
+//                doorCmd.setEmployeeId(employeeId);
 //
 //                System.out.println("[*] CMD: " + JSON.toJSONString(doorCmd));
 
@@ -176,6 +180,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
 //            doorCmd.setActionCode("2002");
 //            doorCmd.setData(dataJsonString);
 //            doorCmd.setStatus("0");
+//            doorCmd.setEmployeeId(employeeId);
 //
 //            System.out.println("[*] CMD: " + JSON.toJSONString(doorCmd));
 //
@@ -268,105 +273,77 @@ public class EmployeeServiceImpl implements IEmployeeService {
 
     //人员人脸、指纹、卡号信息上传存储
     @Override
-    public void saveEmployeeInputInfo(String employeeInputInfo) {
+    public Map<String, Object> saveEmployeeInputInfo(String jsonString, String deviceId) {
 
         //提取数据
-        Map<String, String> dataMap = JSONObject.fromObject(employeeInputInfo);
-        dataMap.get("userLabel");
+        Map<String, Object> allMap = JSONObject.fromObject(jsonString);
+        Map<String, Object> dataMap = (Map<String, Object>) allMap.get("data");
+        Map<String, String> userLabelMap = (Map<String, String>) dataMap.get("userLabel");
+        String employeeId = userLabelMap.get("userId");
+        String resultCode;
+        String resultMessage;
+
         Employee employee = new Employee();
-        employee.setEmployeeId(dataMap.get("userId"));
-        employee.setEmployeeFace(dataMap.get("userFace"));
-        employee.setEmployeeFinger1(dataMap.get("userFinger1"));
-        employee.setEmployeeFinger2(dataMap.get("userFinger2"));
-        employee.setEmployeeNfc(dataMap.get("userNFC"));
+        employee.setEmployeeId(employeeId);
+        employee.setEmployeeFace(userLabelMap.get("userFace"));
+        employee.setEmployeeFinger1(userLabelMap.get("userFinger1"));
+        employee.setEmployeeFinger2(userLabelMap.get("userFinger2"));
+        employee.setEmployeeNfc(userLabelMap.get("userNFC"));
 
-        //保存人员的指纹、人脸、卡号数据
-        employeeMapper.updateByPrimaryKeySelective(employee);
+        Employee employeeExist = employeeMapper.selectByPrimaryKey(employeeId);
+        if (employeeExist != null){
+            //更新人员的指纹、人脸、卡号数据
+            employeeMapper.updateByPrimaryKeySelective(employee);
 
-    }
+            //回复人员人脸、指纹、卡号信息上传
+            Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
+            Map<String, Object> resultData = new LinkedHashMap<String, Object>();
+            resultCode = "0";
+            resultMessage = "执行成功";
+            resultData.put("resultCode", resultCode);
+            resultData.put("resultMessage", resultMessage);
+            resultData.put("returnObj", employeeId);
+            resultMap.put("result", resultData);
 
-    //门禁记录上传存储
-    @Override
-    public void doorRecordSave(String doorRecordMap) {
+            //构造命令格式
+            DoorCmd doorCmdRecord = new DoorCmd();
+            doorCmdRecord.setServerId("001");
+            doorCmdRecord.setDeviceId(deviceId);
+            doorCmdRecord.setFileEdition("v1.3");
+            doorCmdRecord.setCommandMode("R");
+            doorCmdRecord.setCommandType("S");
+            doorCmdRecord.setCommandTotal("1");
+            doorCmdRecord.setCommandIndex("1");
+            doorCmdRecord.setSubCmdId("");
+            doorCmdRecord.setAction("UPDATE_USER_LABEL");
+            doorCmdRecord.setActionCode("2003");
+            doorCmdRecord.setSendTime(CalendarUtil.getCurrentTime());
+            doorCmdRecord.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(),3));
+            doorCmdRecord.setSuperCmdId(FormatUtil.createUuid());
+            doorCmdRecord.setData(JSON.toJSONString(resultMap));
 
-        //提取数据
-        Map<String, Object> doorRecordMapTemp = (Map<String, Object>)JSONObject.fromObject(doorRecordMap);
-        List<Map<String, String>> doorRecordList = (List<Map<String, String>>)doorRecordMapTemp.get("data");
+            //获取完整的数据加协议封装格式
+            RabbitMQSender rabbitMQSender = new RabbitMQSender();
+            Map<String, Object> doorRecordAll =  rabbitMQSender.messagePackaging(doorCmdRecord, "", resultData, "R");
+            //命令状态设置为: 已回复
+            doorCmdRecord.setStatus("5");
+            //设置md5校验值
+            doorCmdRecord.setMd5Check((String) doorRecordAll.get("MD5Check"));
+            //设置数据库的data字段
+            doorCmdRecord.setData(JSON.toJSONString(doorRecordAll.get("result")));
+            doorCmdRecord.setResultCode(resultCode);
+            doorCmdRecord.setResultMessage(resultMessage);
+            //命令数据存入数据库
+            entranceGuardService.insertCommand(doorCmdRecord);
 
-        //遍历门禁记录
-        for (Map<String, String> recordMap : doorRecordList) {
+            System.out.println("人员指纹、人脸信息上传已回复");
+            return doorRecordAll;
+        }else {
 
-            DoorRecord doorRecord = new DoorRecord();
-
-            doorRecord.setDoorPermissionRecordId(recordMap.get("id"));
-            doorRecord.setEmployeeId(recordMap.get("userId"));
-            doorRecord.setDoorId(doorMapper.findDoorIdByDeviceId(recordMap.get("deviceId")).getDoorId());
-            doorRecord.setRecordType(recordMap.get("attType"));
-            doorRecord.setUpperState(recordMap.get("uploadFlag"));
-            doorRecord.setEmployeeGroupName(recordMap.get("userName"));
-            doorRecord.setDeviceGroupName(recordMap.get("deviceName"));
-            doorRecord.setRealWeek(recordMap.get("week"));
-            doorRecord.setEventResult(recordMap.get("outcome"));
-            doorRecord.setEventResultReason(recordMap.get("cause"));
-            doorRecord.setRecordDate(recordMap.get("attTime"));
-
-            //查找记录是否重复上传
-            DoorRecord doorRecordExit = doorRecordMapper.selectByPrimaryKey(recordMap.get("id"));
-
-            if (doorRecordExit == null){
-                //保存门禁记录到数据库
-                doorRecordMapper.insertSelective(doorRecord);
-            }else {
-                //更新门禁记录到数据库
-                doorRecordMapper.updateByPrimaryKeySelective(doorRecord);
-            }
+            System.out.println("服务器没有设备端存在的该人员的信息");
+            return new HashMap<>();
         }
 
-        //回复门禁记录上传
-        Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
-        Map<String, Object> resultData = new LinkedHashMap<String, Object>();
-        List<Object> objList = new ArrayList<Object>();
-        resultData.put("resultCode", "0");
-        resultData.put("resultMessage", "执行成功");
-        for (Map<String, String> recordMap : doorRecordList) {
-            Map<String, Object> objMap = new LinkedHashMap<String, Object>();
-            objMap.put("id", recordMap.get("id"));
-            objList.add(objMap);
-        }
-        resultData.put("returnObj", objList);
-        resultMap.put("result", resultData);
-
-
-        //构造命令格式
-        DoorCmd doorCmdRecord = new DoorCmd();
-        doorCmdRecord.setServerId("001");
-        doorCmdRecord.setDeviceId(doorRecordList.get(0).get("deviceId"));
-        doorCmdRecord.setFileEdition("v1.3");
-        doorCmdRecord.setCommandMode("R");
-        doorCmdRecord.setCommandType("single");
-        doorCmdRecord.setCommandTotal("1");
-        doorCmdRecord.setCommandIndex("1");
-        doorCmdRecord.setSubCmdId("");
-        doorCmdRecord.setAction("UPLOAD_ACCESS_RECORD");
-        doorCmdRecord.setActionCode("3006");
-        doorCmdRecord.setSendTime(CalendarUtil.getCurrentTime());
-        doorCmdRecord.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(),3));
-        doorCmdRecord.setSuperCmdId(FormatUtil.createUuid());
-        doorCmdRecord.setData(JSON.toJSONString(resultMap));
-
-        //获取完整的数据加协议封装格式
-        RabbitMQSender rabbitMQSender = new RabbitMQSender();
-        Map<String, Object> doorRecordAll =  rabbitMQSender.messagePackaging(doorCmdRecord, "", resultData, "R");
-        //命令状态设置为: 发送中
-        doorCmdRecord.setStatus("1");
-        //设置md5校验值
-        doorCmdRecord.setMd5Check((String) doorRecordAll.get("MD5Check"));
-        //设置数据库的data字段
-        doorCmdRecord.setData(JSON.toJSONString(doorRecordAll.get("result")));
-        //命令数据存入数据库
-        entranceGuardService.insertCommand(doorCmdRecord);
-        //立即下发数据到MQ
-        rabbitMQSender.sendMessage(downloadQueueName, doorRecordAll);
     }
 
     @Override
@@ -408,6 +385,65 @@ public class EmployeeServiceImpl implements IEmployeeService {
         RabbitMQSender rabbitMQSender = new RabbitMQSender();
         rabbitMQSender.sendMessage(downloadQueueName, userDeleteInformation);
 
+    }
+
+    @Override
+    public void multipleHandOutEmployeePermission(String doorId) {
+
+        String deviceId;
+        Set<String> hashSet = new HashSet<String>();
+        List<String> employeeIdList;
+        List<DoorCmd> doorCmdLatestList = new ArrayList<DoorCmd>();
+
+        Door door = doorMapper.selectByPrimaryKey(doorId);
+        if (door != null){
+            deviceId = door.getDeviceId();
+            //查找当前设备存为草稿的所有人员信息和人员开门权限的下发命令
+            List<DoorCmd> doorCmdList = doorCmdMapper.selectEmployeeDraftByDeviceId(deviceId);
+            for (DoorCmd doorCmd : doorCmdList) {
+                String employeeId = doorCmd.getEmployeeId();
+                //人员id去重复
+                hashSet.add(employeeId);
+            }
+//            System.out.println(JSON.toJSONString(doorCmdList));
+//            System.out.println(JSON.toJSONString(hashSet));
+
+            employeeIdList = new ArrayList<String>(hashSet);
+            for (String employeeId : employeeIdList) {
+                //取出每个人最新的两条不同类型的草稿命令存在List里
+//                System.out.println(employeeId);
+                List<DoorCmd> doorCmdListUserInfo = doorCmdMapper.selectCmdByEmployeeIdSendTimeDesc(employeeId, "UPDATE_USER_INFO");
+                List<DoorCmd> doorCmdListUserAccessControlInfo = doorCmdMapper.selectCmdByEmployeeIdSendTimeDesc(employeeId, "UPDATE_USER_ACCESS_CONTROL");
+                if (doorCmdListUserInfo.size() > 0){
+                    DoorCmd doorCmdLatestUser = doorCmdListUserInfo.get(0);
+                    doorCmdLatestList.add(doorCmdLatestUser);
+                }
+
+                if (doorCmdListUserAccessControlInfo.size() > 0){
+                    DoorCmd doorCmdLatestAccessControl = doorCmdListUserAccessControlInfo.get(0);
+                    doorCmdLatestList.add(doorCmdLatestAccessControl);
+                }
+            }
+
+//            System.out.println(JSON.toJSONString(doorCmdLatestList));
+
+            if (doorCmdLatestList.size() > 0){
+                //遍历所有最新的草稿命令批量下发
+                for (DoorCmd doorCmd : doorCmdLatestList) {
+                    //获取完整的数据加协议封装格式
+                    RabbitMQSender rabbitMQSender = new RabbitMQSender();
+                    //命令状态设置为: 发送中
+                    doorCmd.setStatus("1");
+                    //更新草稿命令由待发送状态变成发送中状态
+                    doorCmdMapper.updateByPrimaryKey(doorCmd);
+                    //立即下发数据到MQ
+                    rabbitMQSender.sendMessage(downloadQueueName, JSON.toJSONString(doorCmd));
+//                    System.out.println(JSON.toJSONString(doorCmd));
+                }
+            }else {
+                System.out.println("没有可以批量下发的人员");
+            }
+        }
     }
 
     public static void main(String[] args) {

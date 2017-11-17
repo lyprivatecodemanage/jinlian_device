@@ -136,10 +136,10 @@ public class CRC16 {
     // 测试
     public static void main(String[] args) {
         // 0x02 05 00 03 FF 00 , crc16=7C 09
-        String test = "8DSA93YF9329F9SAY91HA92D9Y2QF9AYG32F7YA9239AGF9Y293GF9AS9823F98AG93Y29FYA98Y3298F98EAWY9";
+        String test = "0f1a21d4e6fd3cb8-1-2";
         int crc = CRC16.calcCrc16(test.getBytes());
 //        int crc = CRC16.calcCrc16(new byte[] { 0x02, 0x05, 0x00, 0x03, (byte) 0xff, 0x00 });
-        System.out.println(String.format("0x%04x", crc));
-        System.out.println(crc);
+        System.out.println("十六进制："+String.format("0x%04x", crc));
+        System.out.println("十进制："+crc);
     }
 }

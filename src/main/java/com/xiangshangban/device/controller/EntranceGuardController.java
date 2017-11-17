@@ -1,14 +1,21 @@
 package com.xiangshangban.device.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
 import com.xiangshangban.device.bean.*;
-import com.xiangshangban.device.dao.DoorMapper;
+import com.xiangshangban.device.common.encode.MD5Util;
+import com.xiangshangban.device.common.rmq.RabbitMQSender;
+import com.xiangshangban.device.common.utils.CalendarUtil;
+import com.xiangshangban.device.common.utils.DateUtils;
+import com.xiangshangban.device.common.utils.FormatUtil;
 import com.xiangshangban.device.common.utils.PageUtils;
+import com.xiangshangban.device.dao.DoorMapper;
 import com.xiangshangban.device.service.IEntranceGuardService;
 import org.apache.commons.collections.map.HashedMap;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -578,7 +585,106 @@ public class EntranceGuardController {
         //下发门禁配置---功能配置（门禁日历）
         iegs.handOutDoorCalendar(doorId, enableDoorCalendar, accessCalendar);
 
+        //记录操作人和操作时间，更新到设备日志表里
+        Door doorExist = doorMapper.selectByPrimaryKey(doorId);
+        if (doorExist == null){
+            System.out.println("门信息不存在");
+        }else {
+            Door door = new Door();
+            door.setDoorId(doorId);
+            door.setOperateTime(DateUtils.getDateTime());
+            door.setOperateEmployee("");
+            doorMapper.updateByPrimaryKeySelective(door);
+        }
+
     }
+
+    /**
+     * 门禁警报记录上传及警报消息实时推送（HTTP POST）
+     * @param message
+     * @return
+     */
+    @ResponseBody
+    @Transactional
+    @RequestMapping(value = "/doorAlarmRealTimePushMessage", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    public Map<String, Object> doorAlarmRealTimePushMessage(@RequestBody String message){
+
+        //解析json数据
+        Map<String, Object> mapResult = (Map<String, Object>) net.sf.json.JSONObject.fromObject(message);
+        String deviceId = (String) mapResult.get("deviceId");
+
+        //回复设备
+        Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
+        Map<String, Object> resultData = new LinkedHashMap<String, Object>();
+        String resultCode = "";
+        String resultMessage = "";
+
+        //md5校验
+        //获取对方的md5
+        String otherMd5 = (String) mapResult.get("MD5Check");
+        mapResult.remove("MD5Check");
+        String messageCheck = JSON.toJSONString(mapResult);
+        //生成我的md5
+        String myMd5 = MD5Util.encryptPassword(messageCheck, "XC9EO5GKOIVRMBQ2YE8X");
+        //双方的md5比较判断
+        if (myMd5.equals(otherMd5)){
+            System.out.println("MD5校验成功，数据完好无损");
+        }else {
+            System.out.println("MD5校验失败，数据已被修改");
+        }
+
+        System.out.println("收到实时报警记录："+message);
+
+        //******************************************
+        //*
+        //*
+        //*此处以后加上消息推送，如推送报警消息到app上
+        //*
+        //*
+        //******************************************
+
+        //回复设备
+        resultCode = "0";
+        resultMessage = "执行成功";
+        resultData.put("resultCode", resultCode);
+        resultData.put("resultMessage", resultMessage);
+        resultMap.put("result", resultData);
+
+        //构造命令格式
+        DoorCmd doorCmdRecord = new DoorCmd();
+        doorCmdRecord.setServerId("001");
+        doorCmdRecord.setDeviceId(deviceId);
+        doorCmdRecord.setFileEdition("v1.3");
+        doorCmdRecord.setCommandMode("R");
+        doorCmdRecord.setCommandType("S");
+        doorCmdRecord.setCommandTotal("1");
+        doorCmdRecord.setCommandIndex("1");
+        doorCmdRecord.setSubCmdId("");
+        doorCmdRecord.setAction("UPLOAD_ACCESS_ALARM");
+        doorCmdRecord.setActionCode("3007");
+        doorCmdRecord.setSendTime(CalendarUtil.getCurrentTime());
+        doorCmdRecord.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(),3));
+        doorCmdRecord.setSuperCmdId(FormatUtil.createUuid());
+        doorCmdRecord.setData(JSON.toJSONString(resultMap));
+
+        //获取完整的数据加协议封装格式
+        RabbitMQSender rabbitMQSender = new RabbitMQSender();
+        Map<String, Object> doorRecordAll =  rabbitMQSender.messagePackaging(doorCmdRecord, "", resultData, "R");
+        //命令状态设置为: 已回复
+        doorCmdRecord.setStatus("5");
+        doorCmdRecord.setResultCode(resultCode);
+        doorCmdRecord.setResultMessage(resultMessage);
+        //设置md5校验值
+        doorCmdRecord.setMd5Check((String) doorRecordAll.get("MD5Check"));
+        //设置数据库的data字段
+        doorCmdRecord.setData(JSON.toJSONString(doorRecordAll.get("result")));
+        //命令数据存入数据库
+        iegs.insertCommand(doorCmdRecord);
+
+        return doorRecordAll;
+    }
+
+
 
     /**
      * 获取一个人在一段时间内的最早和最晚打卡时间

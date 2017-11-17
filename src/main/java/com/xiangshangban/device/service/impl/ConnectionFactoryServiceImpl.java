@@ -18,7 +18,7 @@ public class ConnectionFactoryServiceImpl implements IConnectionFactoryService {
 
     private static Map<String,CachingConnectionFactory> connection;//空闲的连接
     private static Map<String,CachingConnectionFactory> useConn; //使用中的连接
-    private static String host = "localhost";
+    private static String host = "192.168.0.111";
     private static String username = "test";
     private static String password = "123";
     private static int port = 5672;

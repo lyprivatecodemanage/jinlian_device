@@ -1,25 +1,53 @@
 package com.xiangshangban.device.bean;
 
 public class DoorCmd {
+    private String superCmdId;
 
     private String serverId;
+
     private String deviceId;
+
     private String fileEdition;
+
     private String commandMode;
+
     private String commandType;
+
     private String commandTotal;
+
     private String commandIndex;
+
     private String sendTime;
+
     private String outOfTime;
+
     private String md5Check;
-    private String superCmdId;
+
     private String subCmdId;
+
     private String action;
+
     private String actionCode;
+
     private String resultCode;
+
     private String resultMessage;
+
     private String data;
+
     private String status;
+
+    private String employeeId;
+
+    private String operateEmployeeId;
+
+    public String getSuperCmdId() {
+        return superCmdId;
+    }
+
+    public void setSuperCmdId(String superCmdId) {
+        this.superCmdId = superCmdId;
+    }
 
     public String getServerId() {
         return serverId;
@@ -101,14 +129,6 @@ public class DoorCmd {
         this.md5Check = md5Check;
     }
 
-    public String getSuperCmdId() {
-        return superCmdId;
-    }
-
-    public void setSuperCmdId(String superCmdId) {
-        this.superCmdId = superCmdId;
-    }
-
     public String getSubCmdId() {
         return subCmdId;
     }
@@ -163,5 +183,21 @@ public class DoorCmd {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getEmployeeId() {
+        return employeeId;
+    }
+
+    public void setEmployeeId(String employeeId) {
+        this.employeeId = employeeId;
+    }
+
+    public String getOperateEmployeeId() {
+        return operateEmployeeId;
+    }
+
+    public void setOperateEmployeeId(String operateEmployeeId) {
+        this.operateEmployeeId = operateEmployeeId;
     }
 }

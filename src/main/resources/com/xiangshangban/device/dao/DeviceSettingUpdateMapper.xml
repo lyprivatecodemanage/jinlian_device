@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xiangshangban.device.dao.DeviceSettingUpdateMapper" >
+  <resultMap id="BaseResultMap" type="com.xiangshangban.device.bean.DeviceSettingUpdate" >
+    <id column="device_id" property="deviceId" jdbcType="VARCHAR" />
+    <result column="is_same_vesion_update_sys" property="isSameVesionUpdateSys" jdbcType="VARCHAR" />
+    <result column="download_time_sys" property="downloadTimeSys" jdbcType="VARCHAR" />
+    <result column="update_time_sys" property="updateTimeSys" jdbcType="VARCHAR" />
+    <result column="is_same_vesion_update_app" property="isSameVesionUpdateApp" jdbcType="VARCHAR" />
+    <result column="download_time_app" property="downloadTimeApp" jdbcType="VARCHAR" />
+    <result column="update_time_app" property="updateTimeApp" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    device_id, is_same_vesion_update_sys, download_time_sys, update_time_sys, is_same_vesion_update_app, 
+    download_time_app, update_time_app
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from device_setting_update
+    where device_id = #{deviceId,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from device_setting_update
+    where device_id = #{deviceId,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.xiangshangban.device.bean.DeviceSettingUpdate" >
+    insert into device_setting_update (device_id, is_same_vesion_update_sys, 
+      download_time_sys, update_time_sys, is_same_vesion_update_app, 
+      download_time_app, update_time_app)
+    values (#{deviceId,jdbcType=VARCHAR}, #{isSameVesionUpdateSys,jdbcType=VARCHAR}, 
+      #{downloadTimeSys,jdbcType=VARCHAR}, #{updateTimeSys,jdbcType=VARCHAR}, #{isSameVesionUpdateApp,jdbcType=VARCHAR}, 
+      #{downloadTimeApp,jdbcType=VARCHAR}, #{updateTimeApp,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.xiangshangban.device.bean.DeviceSettingUpdate" >
+    insert into device_setting_update
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="deviceId != null" >
+        device_id,
+      </if>
+      <if test="isSameVesionUpdateSys != null" >
+        is_same_vesion_update_sys,
+      </if>
+      <if test="downloadTimeSys != null" >
+        download_time_sys,
+      </if>
+      <if test="updateTimeSys != null" >
+        update_time_sys,
+      </if>
+      <if test="isSameVesionUpdateApp != null" >
+        is_same_vesion_update_app,
+      </if>
+      <if test="downloadTimeApp != null" >
+        download_time_app,
+      </if>
+      <if test="updateTimeApp != null" >
+        update_time_app,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="deviceId != null" >
+        #{deviceId,jdbcType=VARCHAR},
+      </if>
+      <if test="isSameVesionUpdateSys != null" >
+        #{isSameVesionUpdateSys,jdbcType=VARCHAR},
+      </if>
+      <if test="downloadTimeSys != null" >
+        #{downloadTimeSys,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTimeSys != null" >
+        #{updateTimeSys,jdbcType=VARCHAR},
+      </if>
+      <if test="isSameVesionUpdateApp != null" >
+        #{isSameVesionUpdateApp,jdbcType=VARCHAR},
+      </if>
+      <if test="downloadTimeApp != null" >
+        #{downloadTimeApp,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTimeApp != null" >
+        #{updateTimeApp,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.xiangshangban.device.bean.DeviceSettingUpdate" >
+    update device_setting_update
+    <set >
+      <if test="isSameVesionUpdateSys != null" >
+        is_same_vesion_update_sys = #{isSameVesionUpdateSys,jdbcType=VARCHAR},
+      </if>
+      <if test="downloadTimeSys != null" >
+        download_time_sys = #{downloadTimeSys,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTimeSys != null" >
+        update_time_sys = #{updateTimeSys,jdbcType=VARCHAR},
+      </if>
+      <if test="isSameVesionUpdateApp != null" >
+        is_same_vesion_update_app = #{isSameVesionUpdateApp,jdbcType=VARCHAR},
+      </if>
+      <if test="downloadTimeApp != null" >
+        download_time_app = #{downloadTimeApp,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTimeApp != null" >
+        update_time_app = #{updateTimeApp,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where device_id = #{deviceId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.xiangshangban.device.bean.DeviceSettingUpdate" >
+    update device_setting_update
+    set is_same_vesion_update_sys = #{isSameVesionUpdateSys,jdbcType=VARCHAR},
+      download_time_sys = #{downloadTimeSys,jdbcType=VARCHAR},
+      update_time_sys = #{updateTimeSys,jdbcType=VARCHAR},
+      is_same_vesion_update_app = #{isSameVesionUpdateApp,jdbcType=VARCHAR},
+      download_time_app = #{downloadTimeApp,jdbcType=VARCHAR},
+      update_time_app = #{updateTimeApp,jdbcType=VARCHAR}
+    where device_id = #{deviceId,jdbcType=VARCHAR}
+  </update>
+</mapper>
