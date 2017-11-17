@@ -347,7 +347,7 @@ public class DeviceController {
             returnData.setMessage("必传参数字段不存在");
             returnData.setReturnCode("3006");
             return returnData;
-        }
+        } //
 
         if ("".equals(deviceId)){
             System.out.println("必传参数字段为空字符串");
