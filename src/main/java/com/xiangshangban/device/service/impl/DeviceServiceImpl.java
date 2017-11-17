@@ -47,8 +47,14 @@ public class DeviceServiceImpl implements IDeviceService {
     @Autowired
     private DeviceRunningLogMapper deviceRunningLogMapper;
 
+    @Autowired
+    private DeviceSettingUpdateMapper deviceSettingUpdateMapper;
+
+    @Autowired
+    private DeviceUpdatePackSysMapper deviceUpdatePackSysMapper;
+
     @Override
-    public void addDevice(String deviceId, String macAddress) {
+    public String addDevice(String deviceId, String macAddress) {
 
         Device device = new Device();
 
@@ -59,9 +65,12 @@ public class DeviceServiceImpl implements IDeviceService {
         Device deviceExist = deviceMapper.selectByPrimaryKey(deviceId);
 
         if (deviceExist == null){
-            System.out.println(deviceMapper.insert(device));
+            deviceMapper.insertSelective(device);
+            return "1";
         }else {
+            deviceMapper.updateByPrimaryKeySelective(device);
             System.out.println("设备已存在");
+            return "0";
         }
 
     }
@@ -82,43 +91,57 @@ public class DeviceServiceImpl implements IDeviceService {
 
         List<Map<String, String>> mapList = deviceMapper.findByCondition(device);
 
-        System.out.println(JSON.toJSONString(mapList));
-        for (Map<String, String> map : mapList) {
-            String isOnlineTemp = map.get("is_online");
-            String activeStatusTemp = map.get("active_status");
+//        System.out.println(JSON.toJSONString(mapList));
+        if (mapList.size() > 0){
+            for (Map<String, String> map : mapList) {
+                //判断离线状态空
+                if (map.get("is_online") == null || "".equals(map.get("is_online"))){
+                    System.out.println(map.get("device_id")+"设备离线状态为空");
+                }else {
+                    String isOnlineTemp = map.get("is_online");
 
-            if (isOnlineTemp.equals("0")){
-                map.put("is_online", "在线");
-            }else if (isOnline.equals("1")){
-                map.put("is_online", "离线");
-            }
+                    if (isOnlineTemp.equals("0")){
+                        map.put("is_online", "在线");
+                    }else if (isOnline.equals("1")){
+                        map.put("is_online", "离线");
+                    }
+                }
 
-            if (activeStatusTemp.equals("0")){
-                map.put("active_status", "待激活");
-            }else if (activeStatusTemp.equals("1")){
-                map.put("active_status", "待完善");
-            }else if (activeStatusTemp.equals("2")){
-                map.put("active_status", "使用中");
-            }else if (activeStatusTemp.equals("3")){
-                map.put("active_status", "已欠费");
-            }else if (activeStatusTemp.equals("4")){
-                map.put("active_status", "故障中");
+                //判断激活状态空
+                if (map.get("active_status") == null || "".equals(map.get("active_status"))){
+                    System.out.println(map.get("device_id")+"设备激活状态为空");
+                }else {
+                    String activeStatusTemp = map.get("active_status");
+
+                    if (activeStatusTemp.equals("0")){
+                        map.put("active_status", "待激活");
+                    }else if (activeStatusTemp.equals("1")){
+                        map.put("active_status", "待完善");
+                    }else if (activeStatusTemp.equals("2")){
+                        map.put("active_status", "使用中");
+                    }else if (activeStatusTemp.equals("3")){
+                        map.put("active_status", "已欠费");
+                    }else if (activeStatusTemp.equals("4")){
+                        map.put("active_status", "故障中");
+                    }
+                }
             }
         }
 
-        System.out.println("------------"+JSON.toJSONString(mapList));
+//        System.out.println("------------"+JSON.toJSONString(mapList));
 
         return mapList;
 
     }
 
     @Override
-    public int editorDeviceInformation(String deviceId, String companyId, String deviceName, String doorName,
+    public void editorDeviceInformation(String deviceId, String companyId, String companyName, String deviceName, String doorName,
                                        String devicePlace, String deviceUsages) {
 
         Device device = new Device();
         device.setDeviceId(deviceId);
         device.setCompanyId(companyId);
+        device.setCompanyName(companyName);
         device.setDeviceName(deviceName);
         device.setDevicePlace(devicePlace);
         device.setDeviceUsages(deviceUsages);
@@ -131,11 +154,13 @@ public class DeviceServiceImpl implements IDeviceService {
 
         doorMapper.updateByPrimaryKeySelective(door);
 
-        return 0;
     }
 
     @Override
-    public void rebootDevice(String deviceId) {
+    public String rebootDevice(String deviceId) {
+
+        //创建命令id
+        String superCmdId = FormatUtil.createUuid();
 
         //构造命令格式
         DoorCmd doorCmdRebootDevice = new DoorCmd();
@@ -151,7 +176,7 @@ public class DeviceServiceImpl implements IDeviceService {
         doorCmdRebootDevice.setActionCode("1007");
         doorCmdRebootDevice.setSendTime(CalendarUtil.getCurrentTime());
         doorCmdRebootDevice.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(),3));
-        doorCmdRebootDevice.setSuperCmdId(FormatUtil.createUuid());
+        doorCmdRebootDevice.setSuperCmdId(superCmdId);
         doorCmdRebootDevice.setData("");
 
         //获取完整的数据加协议封装格式
@@ -168,6 +193,7 @@ public class DeviceServiceImpl implements IDeviceService {
 //        //立即下发数据到MQ
 //        rabbitMQSender.sendMessage(downloadQueueName, doorCmdPackageAll);
 
+        return superCmdId;
     }
 
     public List<Device> queryAllDeviceInfo(String companyId) {
@@ -433,6 +459,149 @@ public class DeviceServiceImpl implements IDeviceService {
         //立即下发回复数据到MQ
         rabbitMQSender.sendMessage(downloadQueueName, doorRecordAll);
         System.out.println("运行日志上传已回复");
+    }
+
+    /**
+     * 定时下载升级更新设备系统
+     * @param deviceIdList
+     * @param downloadTime
+     * @param updateTime
+     */
+    public String updateDeviceSystem(List<String> deviceIdList, String downloadTime, String updateTime){
+
+        //返回命令id
+        String superCmdId = FormatUtil.createUuid();
+
+        DeviceSettingUpdate deviceSettingUpdate = new DeviceSettingUpdate();
+
+        deviceSettingUpdate.setDownloadTimeSys(downloadTime);
+        deviceSettingUpdate.setUpdateTimeSys(updateTime);
+
+        for (String deviceId : deviceIdList) {
+
+            deviceSettingUpdate.setDeviceId(deviceId);
+
+            //检查是否存在该设备的升级设置信息，有则覆盖，无则新增
+            DeviceSettingUpdate deviceSettingUpdateExist = deviceSettingUpdateMapper.selectByPrimaryKey(deviceId);
+            if (deviceSettingUpdateExist == null){
+                deviceSettingUpdateMapper.insertSelective(deviceSettingUpdate);
+            }else {
+                deviceSettingUpdateMapper.updateByPrimaryKeySelective(deviceSettingUpdate);
+            }
+
+            //查询最新的下载包路径信息
+            DeviceUpdatePackSys deviceUpdatePackSys = deviceUpdatePackSysMapper.selectAllByCreateTimeDesc().get(0);
+
+            Map<String, String> mapHandOut = new HashMap<String, String>();
+            mapHandOut.put("newSysVerion", deviceUpdatePackSys.getNewSysVerion());
+            mapHandOut.put("isSameVesionUpdate", "");
+            mapHandOut.put("downloadTime", downloadTime);
+            mapHandOut.put("updateTime", updateTime);
+            mapHandOut.put("path", deviceUpdatePackSys.getPath());
+
+            //构造命令格式
+            DoorCmd doorCmdUpdateSystem = new DoorCmd();
+            doorCmdUpdateSystem.setServerId("001");
+            doorCmdUpdateSystem.setDeviceId(deviceId);
+            doorCmdUpdateSystem.setFileEdition("v1.3");
+            doorCmdUpdateSystem.setCommandMode("C");
+            doorCmdUpdateSystem.setCommandType("single");
+            doorCmdUpdateSystem.setCommandTotal("1");
+            doorCmdUpdateSystem.setCommandIndex("1");
+            doorCmdUpdateSystem.setSubCmdId("");
+            doorCmdUpdateSystem.setAction("UPDATE_DEVICE_SYSTEM");
+            doorCmdUpdateSystem.setActionCode("1008");
+            doorCmdUpdateSystem.setSendTime(CalendarUtil.getCurrentTime());
+            doorCmdUpdateSystem.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(),3));
+            doorCmdUpdateSystem.setSuperCmdId(superCmdId);
+            doorCmdUpdateSystem.setData(JSON.toJSONString(mapHandOut));
+
+            //获取完整的数据加协议封装格式
+            RabbitMQSender rabbitMQSender = new RabbitMQSender();
+            Map<String, Object> doorCmdPackageAll =  rabbitMQSender.messagePackaging(doorCmdUpdateSystem, "update", mapHandOut, "C");
+            //命令状态设置为: 发送中
+            doorCmdUpdateSystem.setStatus("1");
+            //设置md5校验值
+            doorCmdUpdateSystem.setMd5Check((String) doorCmdPackageAll.get("MD5Check"));
+            //设置数据库的data字段
+            doorCmdUpdateSystem.setData(JSON.toJSONString(doorCmdPackageAll.get("data")));
+            //命令数据存入数据库
+            entranceGuardService.insertCommand(doorCmdUpdateSystem);
+            System.out.println(JSON.toJSONString(doorCmdPackageAll));
+//            //立即下发数据到MQ
+//            rabbitMQSender.sendMessage(downloadQueueName, doorCmdPackageAll);
+        }
+
+        return superCmdId;
+    }
+
+    /**
+     * 定时下载升级更新设备应用
+     * @param deviceIdList
+     * @param downloadTime
+     * @param updateTime
+     */
+    public String updateDeviceApplication(List<String> deviceIdList, String downloadTime, String updateTime){
+
+        //返回命令id
+        String superCmdId = FormatUtil.createUuid();
+
+        DeviceSettingUpdate deviceSettingUpdate = new DeviceSettingUpdate();
+
+        deviceSettingUpdate.setDownloadTimeApp(downloadTime);
+        deviceSettingUpdate.setUpdateTimeApp(updateTime);
+
+        for (String deviceId : deviceIdList) {
+
+            deviceSettingUpdate.setDeviceId(deviceId);
+
+            //检查是否存在该设备的升级设置信息，有则覆盖，无则新增
+            DeviceSettingUpdate deviceSettingUpdateExist = deviceSettingUpdateMapper.selectByPrimaryKey(deviceId);
+            if (deviceSettingUpdateExist == null){
+                deviceSettingUpdateMapper.insertSelective(deviceSettingUpdate);
+            }else {
+                deviceSettingUpdateMapper.updateByPrimaryKeySelective(deviceSettingUpdate);
+            }
+
+            Map<String, String> mapHandOut = new HashMap<String, String>();
+            mapHandOut.put("isSameVesionUpdate", "");
+            mapHandOut.put("downloadTime", downloadTime);
+            mapHandOut.put("updateTime", updateTime);
+
+            //构造命令格式
+            DoorCmd doorCmdUpdateSystem = new DoorCmd();
+            doorCmdUpdateSystem.setServerId("001");
+            doorCmdUpdateSystem.setDeviceId(deviceId);
+            doorCmdUpdateSystem.setFileEdition("v1.3");
+            doorCmdUpdateSystem.setCommandMode("C");
+            doorCmdUpdateSystem.setCommandType("single");
+            doorCmdUpdateSystem.setCommandTotal("1");
+            doorCmdUpdateSystem.setCommandIndex("1");
+            doorCmdUpdateSystem.setSubCmdId("");
+            doorCmdUpdateSystem.setAction("UPDATE_DEVICE_APP");
+            doorCmdUpdateSystem.setActionCode("1009");
+            doorCmdUpdateSystem.setSendTime(CalendarUtil.getCurrentTime());
+            doorCmdUpdateSystem.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(),3));
+            doorCmdUpdateSystem.setSuperCmdId(superCmdId);
+            doorCmdUpdateSystem.setData(JSON.toJSONString(mapHandOut));
+
+            //获取完整的数据加协议封装格式
+            RabbitMQSender rabbitMQSender = new RabbitMQSender();
+            Map<String, Object> doorCmdPackageAll =  rabbitMQSender.messagePackaging(doorCmdUpdateSystem, "update", mapHandOut, "C");
+            //命令状态设置为: 发送中
+            doorCmdUpdateSystem.setStatus("1");
+            //设置md5校验值
+            doorCmdUpdateSystem.setMd5Check((String) doorCmdPackageAll.get("MD5Check"));
+            //设置数据库的data字段
+            doorCmdUpdateSystem.setData(JSON.toJSONString(doorCmdPackageAll.get("data")));
+            //命令数据存入数据库
+            entranceGuardService.insertCommand(doorCmdUpdateSystem);
+            System.out.println(JSON.toJSONString(doorCmdPackageAll));
+//            //立即下发数据到MQ
+//            rabbitMQSender.sendMessage(downloadQueueName, doorCmdPackageAll);
+        }
+
+        return superCmdId;
     }
 
     /**

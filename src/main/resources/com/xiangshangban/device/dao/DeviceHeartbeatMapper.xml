@@ -330,32 +330,36 @@
 	) T
     WHERE
 	rn = 1
-    <if test='companyId != null and companyId != ""' >
-      AND device_.company_id = #{companyId,jdbcType=VARCHAR}
+    <if test='companyName != null and companyName != ""' >
+      AND company_name LIKE '%${companyName}%'
     </if>
-    <if test="cpuUserUnilizationCondition != null and cpuUserUnilizationCondition != '' and cpuTemperCondition != null and cpuTemperCondition != ''" >
-      AND CAST (
-      "replace" (
-      cpu_user_unilization,
-      '%',
-      ''
-      ) AS INTEGER
-      )
-      <if test='cpuUserUnilizationCondition == "1"' >
-        &gt;=
+    <if test="cpuUserUnilizationCondition != null and cpuTemperCondition != null" >
+      <if test='cpuUserUnilizationCondition != ""' >
+        AND CAST (
+        "replace" (
+        cpu_user_unilization,
+        '%',
+        ''
+        ) AS INTEGER
+        )
+        <if test='cpuUserUnilizationCondition == "1"' >
+          &gt;=
+        </if>
+        <if test='cpuUserUnilizationCondition == "0"' >
+          &lt;
+        </if>
+        #{averageCpuUserUnilization,jdbcType=FLOAT}
       </if>
-      <if test='cpuUserUnilizationCondition == "0"' >
-        &lt;
+      <if test='cpuTemperCondition != ""' >
+        AND CAST (cpu_temper AS FLOAT)
+        <if test='cpuTemperCondition == "1"' >
+          &gt;=
+        </if>
+        <if test='cpuTemperCondition == "0"' >
+          &lt;
+        </if>
+        #{averageCpuTemper,jdbcType=FLOAT}
       </if>
-      #{averageCpuUserUnilization,jdbcType=FLOAT}
-      AND CAST (cpu_temper AS FLOAT)
-      <if test='cpuTemperCondition == "1"' >
-        &gt;=
-      </if>
-      <if test='cpuTemperCondition == "0"' >
-        &lt;
-      </if>
-      #{averageCpuTemper,jdbcType=FLOAT}
     </if>
 	;
   </select>

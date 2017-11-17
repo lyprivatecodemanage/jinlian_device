@@ -389,4 +389,11 @@
     ORDER BY send_time DESC
   </select>
 
+  <select id="selectStatusBySuperCmdId" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    status
+    from door_cmd
+    WHERE super_cmd_id = #{superCmdId,jdbcType=VARCHAR}
+  </select>
+
 </mapper>

@@ -32,4 +32,6 @@ public interface DoorCmdMapper {
 
     List<DoorCmd> selectCmdByEmployeeIdSendTimeDesc(@Param("employeeId") String employeeId,
                                                     @Param("action") String action);
+
+    String selectStatusBySuperCmdId(String superCmdId);
 }

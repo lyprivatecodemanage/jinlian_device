@@ -190,16 +190,16 @@
   <select id="findByCondition" resultType="java.util.Map" parameterType="com.xiangshangban.device.bean.Device" >
     select * from device_ a LEFT JOIN door_ b ON (a.device_id = b.device_id) where 1=1
     <if test="companyId != null and companyId != ''" >
-      AND a.company_id LIKE '%${companyId}'
+      AND a.company_id LIKE '%${companyId}%'
     </if>
     <if test="companyName != null and companyName != ''" >
-      AND a.company_name LIKE '%${companyName}'
+      AND a.company_name LIKE '%${companyName}%'
     </if>
     <if test="deviceName != null and deviceName != ''" >
-      AND a.device_name LIKE '%${deviceName}'
+      AND a.device_name LIKE '%${deviceName}%'
     </if>
     <if test="deviceId != null and deviceId != ''" >
-      AND a.device_id LIKE '%${deviceId}'
+      AND a.device_id = #{deviceId,jdbcType=VARCHAR}
     </if>
     <if test="isOnline != null and isOnline != ''" >
       AND a.is_online = #{isOnline,jdbcType=VARCHAR}

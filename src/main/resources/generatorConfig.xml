@@ -25,7 +25,7 @@
                 targetProject="C:\Users\loogooloo\IdeaProjects\device\src\main\java"
                 type="XMLMAPPER" />
         <!-- 要生成哪些表,生成的接口中包含哪些方法，设置为false表示不生成-->
-        <table tableName="device_update_pack_sys" domainObjectName="DeviceUpdatePackSys" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false"></table>
+        <table tableName="device_setting_update" domainObjectName="DeviceSettingUpdate" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false"></table>
 
         <!-- <table schema="zpeng" tableName="stu" domainObjectName="Student"
             enableSelectByPrimaryKey="true" enableUpdateByPrimaryKey="true"

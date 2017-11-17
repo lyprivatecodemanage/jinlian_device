@@ -11,6 +11,8 @@ public class DeviceSettingUpdate {
 
     private String isSameVesionUpdateApp;
 
+    private String downloadTimeApp;
+
     private String updateTimeApp;
 
     public String getDeviceId() {
@@ -51,6 +53,14 @@ public class DeviceSettingUpdate {
 
     public void setIsSameVesionUpdateApp(String isSameVesionUpdateApp) {
         this.isSameVesionUpdateApp = isSameVesionUpdateApp;
+    }
+
+    public String getDownloadTimeApp() {
+        return downloadTimeApp;
+    }
+
+    public void setDownloadTimeApp(String downloadTimeApp) {
+        this.downloadTimeApp = downloadTimeApp;
     }
 
     public String getUpdateTimeApp() {

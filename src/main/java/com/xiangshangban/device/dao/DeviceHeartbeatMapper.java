@@ -26,7 +26,7 @@ public interface DeviceHeartbeatMapper {
 
     //查询最新的一条心跳信息根据设备Id
     Map<String, Object> selectLatestByDeviceId(@Param("deviceId") String deviceId,
-                                               @Param("companyId") String companyId,
+                                               @Param("companyName") String companyName,
                                                @Param("averageCpuUserUnilization") float averageCpuUserUnilization,
                                                @Param("averageCpuTemper") float averageCpuTemper,
                                                @Param("cpuUserUnilizationCondition") String cpuUserUnilizationCondition,
