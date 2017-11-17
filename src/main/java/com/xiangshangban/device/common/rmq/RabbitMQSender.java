@@ -144,6 +144,7 @@ public class RabbitMQSender {
         protocolMap.put("command", commandMap);
 
         String md5check = JSON.toJSONString(protocolMap);
+        System.out.println(md5check);
         String md5 = "";
         try {
             md5 = MD5Util.encryptPassword(md5check, "XC9EO5GKOIVRMBQ2YE8X");

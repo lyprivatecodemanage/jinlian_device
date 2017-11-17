@@ -32,7 +32,7 @@ public interface TemplateMapper {
     /**
      * 给设备添加新的模板
      */
-    int insertDeviceTemplate(Map map);
+    int updateTemplateTable(Map map);
 
     //TODO 查询部分
     /**
@@ -65,6 +65,56 @@ public interface TemplateMapper {
      * 查询模板相关图片的详细信息(用于封装下发指令)
      */
     List<Map> selectTemplateImagesDetail(@Param("templateId") String templateId);
+
+    /**
+     * 查询标准模板的信息
+     * @param templateId
+     * @return
+     */
+    List<Map> selectStandardTemplateInfo(@Param("templateId") String templateId);
+
+    /**
+     * 查询标准模板的详细信息（首页选择模板的时候使用）
+     * item的大致位置、背景图片
+     */
+    List<Map> selectStandardTemplateDetailImageInfo();
+
+    /**
+     * 查询标准模板的item详细信息（首页选择模板的时候使用）
+     */
+    List<Map> selectStandardTemplateDetailItemInfo();
+
+    /**
+     * 查询标准模板相关的items信息
+     * @param templateId
+     * @return
+     */
+    List<Map> selectStandardTemplateItems(@Param("templateId") String templateId);
+
+    /**
+     * 查询标准模板相关联的背景图信息
+     * @param templateId
+     * @return
+     */
+    List<Map> selectStandardTemplateImages(@Param("templateId") String templateId);
+
+    /**
+     * 查询所有节假日模板信息
+     */
+    List<Map> selectFestivalTemplateInfo();
+
+    /**
+     * 查询当前设备中是否有自定义的模板
+     * @param deviceId
+     * @return
+     */
+    List<Map> selectTemplateByLevel(String deviceId);
+
+    /**
+     * 查询template表中主键的最大值
+     * @return
+     */
+    int selectTemplateMaxPrimaryKey();
 
     //TODO 删除部分
     int deleteDeviceTemplate(@Param("templateIds") List<String> templateIds);

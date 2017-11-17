@@ -22,11 +22,6 @@ public interface IEntranceGuardService {
     boolean addDoorInfo(Door door);
 
     /**
-     * 删除门信息
-     */
-    boolean deleteDoorInfo(Door door);
-
-    /**
      * 批量删除门信息
      */
     boolean delDoorInfoByBatch(List<String> doorList);
@@ -40,11 +35,6 @@ public interface IEntranceGuardService {
      * 根据门名称查询门信息[动态查询]
      */
     List<Map> queryAllDoorInfo(Door door);
-
-    /**
-     * 根据id查询门信息
-     */
-    Door queryDoorInfo(String doorId);
 
 
     //TODO 授权中心

@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.web.MultipartAutoConfiguration;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -25,6 +26,7 @@ import java.util.Properties;
 @EnableScheduling
 @MapperScan("com.xiangshangban.device.dao")
 @EnableAutoConfiguration(exclude = {MultipartAutoConfiguration.class})
+@ServletComponentScan
 public class DeviceApplication {
 
 	public static void main(String[] args) {

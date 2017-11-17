@@ -80,12 +80,12 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
     //TODO ############《基础信息》###############
     @Override
     public boolean addDoorInfo(Door door) {
-        return false;
-    }
-
-    @Override
-    public boolean deleteDoorInfo(Door door) {
-        return false;
+        int insert = doorMapper.insert(door);
+        if(insert>0){
+            return true;
+        }else{
+            return false;
+        }
     }
 
     /**
@@ -150,17 +150,6 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         List<Map> doorInfo = doorMapper.getDoorInfo(door);
         return doorInfo ;
     }
-
-    /**
-     *通过门ID，单独进行门信息查询
-     * @param doorId
-     * @return
-     */
-    @Override
-    public Door queryDoorInfo(String doorId) {
-        return doorMapper.selectByPrimaryKey(doorId);
-    }
-
 
     //TODO  ##################《授权中心》################
     @Override

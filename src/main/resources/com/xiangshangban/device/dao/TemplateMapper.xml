@@ -179,7 +179,7 @@
 
   <!--查询模板详细信息（用于封装指令信息）-->
   <select id="selectTemplateDetailInfo" parameterType="String" resultType="map">
-    select device_id,template_id,template_type,template_level from template_ where template_id = #{templateId}
+    select device_id,template_id,template_type,template_level,roasting_time from template_ where template_id = #{templateId}
   </select>
 
   <!--根据模板的ID查询详细的模板items（备用方法<用于封装指令信息>）-->
@@ -190,13 +190,14 @@
   </select>
 
   <select id="selectTemplateItems" parameterType="String" resultType="map">
-    select A.item_id,item_type,item_start_date,item_end_date,item_font_content,B.img_name,
+    select A.item_id,item_type,item_top_x,item_top_y,item_font_orient,item_start_date,item_end_date,item_font_content,B.img_name,
     img_url from template_items A left join image_ B on A.item_img_id = B.id where A.template_id = #{templateId} and A.item_type in('0','8')
   </select>
 
   <!--根据模板的ID查询模板相关的详细图片信息（备用方法<用于封装指令信息>）-->
   <select id="selectTemplateImagesDetail" parameterType="String" resultType="map">
-    select A.broad_start_date,A.broad_end_date,A.broad_start_time,A.broad_end_time,B.img_name,B.img_url,B.ripple_color,C.img_name relate_img_name,C.img_url relate_img_url from background_image_template A,image_ B,image_ C where template_id = #{templateId} and A.img_id = B.id  and B.relate = C.id
+    select A.broad_start_date,A.broad_end_date,A.broad_start_time,A.broad_end_time,B.img_name,B.img_url,B.ripple_color,
+    C.img_name relate_img_name,C.img_url relate_img_url from background_image_template A,image_ B,image_ C where template_id = #{templateId} and A.img_id = B.id  and B.relate = C.id
   </select>
 
   <select id="selectTemplateImages" parameterType="String" resultType="map">
@@ -210,11 +211,50 @@
 
   <!--删除模板（默认模板不删除）-->
   <delete id="deleteDeviceTemplate" parameterType="List">
-    delete from template_ where template_id IN
-    <foreach collection="list" item="templateId" index="index" open="(" separator="," close=")">
+    delete from template_ where template_id in
+    <foreach collection="templateIds" item="templateId" index="index" open="(" separator="," close=")">
       #{templateId}
     </foreach>
-    and template_level !='0'
   </delete>
+
+  <!--查询标准模板的信息（默认的轮播周期）-->
+  <select id="selectStandardTemplateInfo" parameterType="String" resultType="map">
+    select roasting_time,template_style from template_ where template_id = #{templateId}
+  </select>
+
+  <!--查询所有标准模板的详细信息(图片)（选择模板的时候使用）-->
+  <select id="selectStandardTemplateDetailImageInfo" resultType="map">
+   select A.template_id,B.id,B.img_name,B.img_url from image_ B,(select template_id from template_ where is_standard = '1') A
+    where B.id in(select img_id from background_image_template where template_id in(select template_id from template_ where is_standard = '1'))
+  </select>
+
+  <!--查询所有标准模板的item详细信息（选择模板的时候使用）-->
+  <select id="selectStandardTemplateDetailItemInfo" resultType="map">
+     select A.item_type,item_top_x,item_top_y,item_font_orient,B.template_id from
+     template_items A,(select template_id from template_ where is_standard = '1') B  where A.template_id in(select template_id from template_ where is_standard = '1')
+  </select>
+
+
+  <!--查询标准模板的item信息-->
+  <select id="selectStandardTemplateItems" parameterType="String" resultType="map">
+     select A.item_type,item_top_x,item_top_y,item_font_orient,item_font_size,item_font_bold,item_font_color,item_start_date,item_end_date,item_font_content,item_img_id,B.img_name,img_url
+     from template_items A left join image_ B on A.item_img_id = B.id where A.template_id = #{templateId}
+  </select>
+
+  <!--查询标准模板的image信息-->
+  <select id="selectStandardTemplateImages" parameterType="String" resultType="map">
+    select B.id,B.img_name,B.img_url,B.ripple_color,C.img_name relate_img_name,C.img_url relate_img_url
+    from image_ B,image_ C where B.id in(select img_id from background_image_template where template_id = #{templateId}) and B.relate = C.id
+  </select>
+
+  <!--查询template表中的主键最大值-->
+  <select id="selectTemplateMaxPrimaryKey" resultType="int">
+       select max(cast(template_id as integer)) from template_
+  </select>
+
+  <!--更新template主表信息-->
+  <update id="updateTemplateTable" parameterType="map">
+    update template_  set template_type = '0',template_level = #{templateLevel},operate_time = #{operateTime},operate_emp = #{operateEmp},device_id = #{deviceId},roasting_time = #{roastingTime},logo_flag = #{logoFlag},solutation_flag = #{salutationFlag},festival_name = NULL,template_style = #{templateStyle},is_use = '1',is_standard = NULL where template_id = #{templateId}
+  </update>
 
 </mapper>

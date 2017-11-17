@@ -27,6 +27,11 @@ public interface TemplateItemsMapper {
     int updateTemplateLogo(Map map);
 
     /**
+     * 查询模板logo的id
+     */
+    String selectTemplateLogoId(@Param("templateId") String templateId);
+
+    /**
      * 更新模板的问候语（单字）
      */
     int updateTemplateSalutation(Map map);
@@ -35,6 +40,16 @@ public interface TemplateItemsMapper {
      * 删除模板原来的问候语
      */
     int deleteTemplateSalutation(@Param("templateId") String templateId);
+
+    /**
+     * 删除模板的item
+     */
+    int deleteTemplateItem(@Param("templateId") String templateId);
+
+    /**
+     * 添加新的item
+     */
+    int insertTemplateItems(Map map);
 
     /**
      * 添加新的问候语（单字）

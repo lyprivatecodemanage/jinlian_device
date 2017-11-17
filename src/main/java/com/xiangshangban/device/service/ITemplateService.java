@@ -15,16 +15,20 @@ public interface ITemplateService {
     //TODO 更新
     /**
      * 更新设备的模板信息(背景图<以及展示的时间>、问候语以及展示的时间、公司Logo)
-     * ###更新xx设备的xx模板
      */
-     int modifyDeviceTemplateInfo(String templateInfo);
+     boolean modifyDeviceTemplateInfo(String templateInfo);
 
      //TODO 添加
     /**
      * 给设备添加模板
      * （模板信息，背景图以及展示时间、问候语以及展示时间，公司Logo）
      */
-    int addDeviceTemplate(String templateInfo);
+    boolean addDeviceTemplate(String templateInfo);
+
+    /**
+     * 下发节日节气模板
+     */
+    boolean addFestivalTemplate(String templateInfo);
 
     //TODO 查询
     /**
@@ -33,7 +37,12 @@ public interface ITemplateService {
     List<Map> queryDeviceTemplateInfo(String deviceId,String deviceName);
 
     /**
-     * 根据模板的ID查询模板相关信息（背景图、铃铛按钮图、items）
+     * 查询标准模板的信息
+     */
+    List<Map> queryStandardTemplateInfo();
+
+    /**
+     * 根据模板的ID查询模板相关items
      */
     List<Map> queryTemplateItems(String templateId);
 
@@ -49,6 +58,6 @@ public interface ITemplateService {
 
 
     //TODO 删除
-    int removeDeviceTemplate(String deviceId,List<String> templateIds);
+    boolean removeDeviceTemplate(String deviceId,List<String> templateIds);
 
 }

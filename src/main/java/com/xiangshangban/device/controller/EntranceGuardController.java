@@ -10,6 +10,8 @@ import com.xiangshangban.device.common.rmq.RabbitMQSender;
 import com.xiangshangban.device.common.utils.CalendarUtil;
 import com.xiangshangban.device.common.utils.DateUtils;
 import com.xiangshangban.device.common.utils.FormatUtil;
+import com.xiangshangban.device.common.utils.ReturnCodeUtil;
+import com.xiangshangban.device.dao.DoorMapper;
 import com.xiangshangban.device.common.utils.PageUtils;
 import com.xiangshangban.device.dao.DoorMapper;
 import com.xiangshangban.device.service.IEntranceGuardService;
@@ -19,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
+
 
 /**
  * 控制层：门禁操作
@@ -39,64 +42,116 @@ public class EntranceGuardController {
      * 删除门信息
      *
      * @return
+     * [
+     *  1,
+     *  2,
+     *  3
+     * ]
      */
     @PostMapping("/basic/delDoor")
-    public String delDoor(@RequestParam("idList") List<String> list) {
-        boolean b = iegs.delDoorInfoByBatch(list);
-        return JSONArray.toJSONString(b);
+    public String delDoor(@RequestBody String requestParam) {
+        JSONArray objects = JSONArray.parseArray(requestParam);
+        List list = new ArrayList();
+        for(int i=0;i<objects.size();i++){
+            list.add(objects.get(i));
+        }
+        boolean result = iegs.delDoorInfoByBatch(list);
+        return JSONArray.toJSONString(ReturnCodeUtil.addReturnCode(result));
     }
 
     /**
      * 添加门信息
+     * {
+     *     "doorName":"超级大门",
+     *     "deviceId":"1"
+     * }
      */
     @PostMapping(value = "/basic/addDoor")
-    public String addDoor(Door door) {
-        boolean b = iegs.addDoorInfo(door);
-        return JSONArray.toJSONString(b);
+    public String addDoor(@RequestBody String requestParam) {
+        JSONObject jsonObject = JSONObject.parseObject(requestParam);
+        Object doorName = jsonObject.get("doorName");
+        Object deviceId = jsonObject.get("deviceId");
+
+        Door door = new Door();
+        door.setDoorName(doorName!=null?doorName.toString():null);
+        door.setDeviceId(deviceId!=null?deviceId.toString():null);
+        boolean result = iegs.addDoorInfo(door);
+        return JSONArray.toJSONString(ReturnCodeUtil.addReturnCode(result));
     }
 
     /**
      * 修改门信息（更改门关联的设备）
+        {
+     *     "doorName":"超级大门",
+     *     "deviceId":"1"
+     * }
      */
     @PostMapping(value = "/basic/updateDoor")
-    public String updateDoor(Door door) {
-        boolean b = iegs.updateDoorInfo(door);
-        return JSONArray.toJSONString(b);
+    public String updateDoor(@RequestBody String requestParam) {
+        JSONObject jsonObject = JSONObject.parseObject(requestParam);
+        Object doorName = jsonObject.get("doorName");
+        Object deviceId = jsonObject.get("deviceId");
+
+        Door door = new Door();
+        door.setDoorName(doorName!=null?doorName.toString():null);
+        door.setDeviceId(deviceId!=null?deviceId.toString():null);
+        boolean result = iegs.updateDoorInfo(door);
+        return JSONArray.toJSONString(ReturnCodeUtil.addReturnCode(result));
     }
 
     /**
      * 查询门信息（根据门名称）
+     * {
+     *     "page":"",----->当前页码
+     *     "rows":"",----->每一页要显示的行数
+     *     "doorName":"" ------>搜索时的门名称
+     * }
      */
-    @GetMapping(value = "/basci/selectDoor")
-    public String selectDoor(String page,String rows,String doorName) {
-        Door door = new Door();
-        door.setDoorName(doorName);
+    @PostMapping(value = "/basic/selectDoor")
+    public String selectDoor(@RequestBody String requestParam) {
+        JSONObject jsonObject = JSONObject.parseObject(requestParam);
+        Object doorName = jsonObject.get("doorName");
+        Object page = jsonObject.get("page");
+        Object rows = jsonObject.get("rows");
 
-        if(page!=null&&!page.isEmpty()&&rows!=null&&!rows.isEmpty()){
-            PageHelper.startPage(Integer.parseInt(page),Integer.parseInt(rows));
+        Door door = new Door();
+        if(doorName!=null){
+            door.setDoorName(jsonObject.get("doorName").toString());
+        }else{
+            door.setDoorName(null);
+        }
+
+        if(page!=null&&!page.toString().isEmpty()&&rows!=null&&!rows.toString().isEmpty()){
+            PageHelper.startPage(Integer.parseInt(page.toString()),Integer.parseInt(rows.toString()));
         }
 
         List<Map> maps = iegs.queryAllDoorInfo(door);
-
-        if(page!=null&&!page.isEmpty()&&rows!=null&&!rows.isEmpty()){
-            //进行分页操作
-            maps = PageUtils.doSplitPage(maps);
-        }
-
-        return JSONArray.toJSONString(maps);
+        Map result =  result  = PageUtils.doSplitPage(maps,page,rows);
+        return JSONArray.toJSONString(result);
     }
 
     //TODO 门禁管理------“授权中心”
     /**
 
      * 获取门信息（包括关联的人员信息）
-     * @param doorName
+     * @param requestParam
      * @return
+     * {
+     *     "page":"1",
+     *     "rows":"10",
+     *     "doorName":"超级大门"
+     * }
      */
-    @GetMapping("/autho/queryDoor")
-    public  String queryDoor(String page,String rows,String doorName){
+    @PostMapping("/autho/queryDoor")
+    public  String queryDoor(@RequestBody String requestParam) {
+
+        JSONObject jsonObject = JSONObject.parseObject(requestParam);
+        Object doorName = jsonObject.get("doorName");
+        Object page = jsonObject.get("page");
+        Object rows = jsonObject.get("rows");
         DoorEmployee doorEmployee = new DoorEmployee();
-        doorEmployee.setDoorName(doorName);
+
+        doorEmployee.setDoorName(doorName != null ? doorName.toString() : null);
 
         //查询门关联的数据
         List<Map> maps = iegs.authoQueryAllDoor(doorEmployee);
@@ -104,22 +159,22 @@ public class EntranceGuardController {
         Map dataItem;
         List<Map> innerList;
         Map innerMap;
-        Map<String,List<Map>> resultMap = new HashMap<String,List<Map>>();
-        Map<String,Map<String,Integer>> realMap = new HashMap<String,Map<String,Integer>>();
+        Map<String, List<Map>> resultMap = new HashMap<String, List<Map>>();
+        Map<String, Map<String, Integer>> realMap = new HashMap<String, Map<String, Integer>>();
         List<String> keyList = new ArrayList<String>();
 
         //根据门名称对数据进行分组
-        for(int i=0;i<maps.size();i++){
+        for (int i = 0; i < maps.size(); i++) {
             //maps集合中的每一个map
             dataItem = maps.get(i);
             //如果拥有对应的key的话，去取出该key对应的List<Map>
-            if(resultMap.containsKey(dataItem.get("door_name"))){
+            if (resultMap.containsKey(dataItem.get("door_name"))) {
                 //获取该List<Map>然后向其中添加一个map
                 resultMap.get(dataItem.get("door_name")).add(dataItem);
-            }else{
+            } else {
                 List<Map> list = new ArrayList<Map>();
                 list.add(dataItem);
-                resultMap.put(dataItem.get("door_name").toString(),list);
+                resultMap.put(dataItem.get("door_name").toString(), list);
             }
             //保存key值
             keyList.add(dataItem.get("door_name").toString());
@@ -130,57 +185,57 @@ public class EntranceGuardController {
          * 计算关联数据的数量
          * 一号门=[{employee_nfc=32rrwef, door_name=一号门, door_id=1, employee_face=fsdfsdsfs, employee_phone=12121}]
          */
-       for(int j=0;j<newList.size();j++){
+        for (int j = 0; j < newList.size(); j++) {
 
-           //关联信息的数量
-           int relatePhone = 0;
-           int relateFace= 0;
-           int relateNFC = 0;
-           String doorId = "";
-           innerList = resultMap.get(newList.get(j));
+            //关联信息的数量
+            int relatePhone = 0;
+            int relateFace = 0;
+            int relateNFC = 0;
+            String doorId = "";
+            innerList = resultMap.get(newList.get(j));
 
-           for(int k=0;k<innerList.size();k++){
-               /**
-                * innerMap数据样式：{employee_nfc=32rrwef, door_name=一号门, door_id=1, employee_face=fsdfsdsfs, employee_phone=12121}
-                */
-               innerMap = innerList.get(k);
-               //关联手机号数量
-               if(innerMap.get("employee_phone")!=null&&!innerMap.get("employee_phone").toString().isEmpty()){
-                   relatePhone++;
-               }
-               //关联人脸数量
-               if(innerMap.get("employee_face")!=null&&!innerMap.get("employee_face").toString().isEmpty()){
-                   relateFace++;
-               }
-               //关联NFC数量
-               if(innerMap.get("employee_nfc")!=null&&!innerMap.get("employee_nfc").toString().isEmpty()){
-                   relateNFC++;
-               }
-               if(innerMap.get("door_id")!=null&&!innerMap.get("door_id").toString().isEmpty()){
-                   doorId = innerMap.get("door_id").toString();
-               }
-           }
+            for (int k = 0; k < innerList.size(); k++) {
+                /**
+                 * innerMap数据样式：{employee_nfc=32rrwef, door_name=一号门, door_id=1, employee_face=fsdfsdsfs, employee_phone=12121}
+                 */
+                innerMap = innerList.get(k);
+                //关联手机号数量
+                if (innerMap.get("employee_phone") != null && !innerMap.get("employee_phone").toString().isEmpty()) {
+                    relatePhone++;
+                }
+                //关联人脸数量
+                if (innerMap.get("employee_face") != null && !innerMap.get("employee_face").toString().isEmpty()) {
+                    relateFace++;
+                }
+                //关联NFC数量
+                if (innerMap.get("employee_nfc") != null && !innerMap.get("employee_nfc").toString().isEmpty()) {
+                    relateNFC++;
+                }
+                if (innerMap.get("door_id") != null && !innerMap.get("door_id").toString().isEmpty()) {
+                    doorId = innerMap.get("door_id").toString();
+                }
+            }
 
-           //包装数据
-           if(realMap.containsKey(newList.get(j).toString())){
-               if(realMap.get(newList.get(j)).get("relatePhone")!=null){
-                   realMap.get(newList.get(j)).put("relatePhone",relatePhone);
-               }
-               if(realMap.get(newList.get(j)).get("relateFace")!=null){
-                   realMap.get(newList.get(j)).put("relateFace",relateFace);
-               }
-               if(realMap.get(newList.get(j)).get("relateNFC")!=null){
-                   realMap.get(newList.get(j)).put("relateNFC",relateNFC);
-               }
-           }else{
-               Map<String,Integer> map = new HashMap<String,Integer>();
-               map.put("doorId",Integer.parseInt(doorId));
-               map.put("relatePhone",relatePhone);
-               map.put("relateFace",relateFace);
-               map.put("relateNFC",relateNFC);
-               realMap.put(newList.get(j).toString(),map);
-           }
-       }
+            //包装数据
+            if (realMap.containsKey(newList.get(j).toString())) {
+                if (realMap.get(newList.get(j)).get("relatePhone") != null) {
+                    realMap.get(newList.get(j)).put("relatePhone", relatePhone);
+                }
+                if (realMap.get(newList.get(j)).get("relateFace") != null) {
+                    realMap.get(newList.get(j)).put("relateFace", relateFace);
+                }
+                if (realMap.get(newList.get(j)).get("relateNFC") != null) {
+                    realMap.get(newList.get(j)).put("relateNFC", relateNFC);
+                }
+            } else {
+                Map<String, Integer> map = new HashMap<String, Integer>();
+                map.put("doorId", Integer.parseInt(doorId));
+                map.put("relatePhone", relatePhone);
+                map.put("relateFace", relateFace);
+                map.put("relateNFC", relateNFC);
+                realMap.put(newList.get(j).toString(), map);
+            }
+        }
 
         /**
          * 格式化数据的样式
@@ -191,59 +246,75 @@ public class EntranceGuardController {
         //拼接最后下发时间
         Integer timeDoorId;
         Integer outterDoorId;
-        List<Map> sentTimes = iegs.querySendTime(doorName);
+        List<Map> sentTimes = iegs.querySendTime(doorName != null ? doorName.toString() : null);
 
-        for(int h=0;h<newList.size();h++){
+        for (int h = 0; h < newList.size(); h++) {
             Map outterMap = new HashedMap();
 
-            outterMap.put("doorName",newList.get(h));
-            outterMap.put("relateInfo",realMap.get(newList.get(h)));
+            outterMap.put("doorName", newList.get(h));
+            outterMap.put("relateInfo", realMap.get(newList.get(h)));
 
-            outterDoorId =realMap.get(newList.get(h)).get("doorId");
-            for(int j=0;j<sentTimes.size();j++){
+            outterDoorId = realMap.get(newList.get(h)).get("doorId");
+            for (int j = 0; j < sentTimes.size(); j++) {
                 timeDoorId = Integer.parseInt(sentTimes.get(j).get("doorId").toString());
-                if(timeDoorId==outterDoorId){
-                    outterMap.put("sendTime",sentTimes.get(j).get("sendTime"));
+                if (timeDoorId == outterDoorId) {
+                    outterMap.put("sendTime", sentTimes.get(j).get("sendTime"));
                 }
             }
             outterList.add(outterMap);
         }
 
         List<Map> newInfo = new ArrayList<Map>();
-        //进行分页操作
-        if(page!=null&&!page.isEmpty()&&rows!=null&&!rows.isEmpty()){
-            int pageIndex = Integer.parseInt(page);
-            int pageSize = Integer.parseInt(rows);
 
-            for(int i=((pageIndex-1)*pageSize);i<(pageSize*pageIndex);i++){
+        //进行分页操作
+        if (page != null && !page.toString().isEmpty() && rows != null && !rows.toString().isEmpty()) {
+            int pageIndex = Integer.parseInt(page.toString());
+            int pageSize = Integer.parseInt(rows.toString());
+
+            for (int i = ((pageIndex - 1) * pageSize); i < (pageSize * pageIndex); i++) {
                 newInfo.add(outterList.get(i));
             }
-
-            //追加数据总行数
-            PageUtils.doSplitPage(newInfo);
-            return JSONArray.toJSONString(newInfo);
-        }else{
-            return JSONArray.toJSONString(outterList);
         }
+        Map result  = PageUtils.doSplitPage(newInfo,page,rows);
+        return JSONArray.toJSONString(result);
     }
 
     /**
      * 查询门关联的用户的权限信息（员工姓名、部门、开门方式，开门时间、设备指令下发时间、状态、数据）
-     * @return
+     * @return  String doorId,String empName,String deptName,String openType,String issueState,String page,String rows
+     * {
+     *     "doorId":"",
+     *     "empName":"",
+     *     "deptName":""
+     *     "openType":""
+     *     "issueState":""
+     *     "page":""
+     *     "rows":""
+     * }
+     *
      */
-    @RequestMapping("/autho/getRelateEmpPermissionInfo")
-    public String getRelateEmpPermissionInfo(String doorId,String empName,String deptName,String openType,String issueState,String page,String rows){
+    @PostMapping("/autho/getRelateEmpPermissionInfo")
+    public String getRelateEmpPermissionInfo(@RequestBody String requestParam){
+        JSONObject jsonObject = JSONObject.parseObject(requestParam);
+        Object doorId = jsonObject.get("doorId");
+        Object empName = jsonObject.get("empName");
+        Object deptName = jsonObject.get("deptName");
+        Object openType = jsonObject.get("openType");
+        Object issueState = jsonObject.get("issueState");
+        Object page = jsonObject.get("page");
+        Object rows = jsonObject.get("rows");
+
 
         RelateEmpPermissionCondition relateEmpPermissionCondition = new RelateEmpPermissionCondition();
-        relateEmpPermissionCondition.setDoorId(doorId);
-        relateEmpPermissionCondition.setEmpName(empName);
-        relateEmpPermissionCondition.setDeptName(deptName);
-        relateEmpPermissionCondition.setOpenType(openType);
-        relateEmpPermissionCondition.setIssueState(issueState);
+        relateEmpPermissionCondition.setDoorId(doorId!=null?doorId.toString():null);
+        relateEmpPermissionCondition.setEmpName(empName!=null?empName.toString():null);
+        relateEmpPermissionCondition.setDeptName(deptName!=null?deptName.toString():null);
+        relateEmpPermissionCondition.setOpenType(openType!=null?openType.toString():null);
+        relateEmpPermissionCondition.setIssueState(issueState!=null?issueState.toString():null);
 
         //分页
-        if(page!=null&&!page.isEmpty()&&rows!=null&&!rows.isEmpty()){
-            PageHelper.startPage(Integer.parseInt(page),Integer.parseInt(rows));
+        if(page!=null&&!page.toString().isEmpty()&&rows!=null&&!rows.toString().isEmpty()){
+            PageHelper.startPage(Integer.parseInt(page.toString()),Integer.parseInt(rows.toString()));
         }
 
         //门关联的《员工姓名、部门、开门方式，开门时间》
@@ -341,29 +412,26 @@ public class EntranceGuardController {
                 }
             }
         }
-
-        //输出测试数据
-        for(int i=0;i<maps.size();i++){
-            System.out.println(maps.get(i).get("cmdInfo"));
-        }
-        if(page!=null&&!page.isEmpty()&&rows!=null&&!rows.isEmpty()){
-            //追加数据总行数信息
-            maps = PageUtils.doSplitPage(maps);
-        }
-        return JSONArray.toJSONString(maps);
+        Map result  = PageUtils.doSplitPage(maps,page,rows);
+        return JSONArray.toJSONString(result);
     }
 
     /**
      * 高级设置（功能模块默认信息查询）
+     * {
+     *     "doorId":"1"
+     * }
      */
-    @GetMapping("/autho/getHighSettingForFunction")
-    public String getHighSettingForFunction(@RequestParam(required = true) String doorId){
+    @PostMapping ("/autho/getHighSettingForFunction")
+    public String getHighSettingForFunction(@RequestBody String requestParam){
+        JSONObject jsonObject = JSONObject.parseObject(requestParam);
+        Object doorId = jsonObject.get("doorId");
         //获取该门的设置信息
-        List<Map> doorSetting = iegs.queryDoorSettingInfo(doorId);
+        List<Map> doorSetting = iegs.queryDoorSettingInfo(doorId!=null?doorId.toString():null);
         //定时常开信息
-        List<DoorTimingKeepOpen> doorTimingKeepOpens = iegs.queryKeepOpenInfo(doorId);
+        List<DoorTimingKeepOpen> doorTimingKeepOpens = iegs.queryKeepOpenInfo(doorId!=null?doorId.toString():null);
         //获取首卡常开信息
-        List<Map> firstCardKeepOpen = iegs.queryFirstCardKeepOpenInfo(doorId);
+        List<Map> firstCardKeepOpen = iegs.queryFirstCardKeepOpenInfo(doorId!=null?doorId.toString():null);
 
         Map<String,List> firstOpenEmp = new HashMap<String,List>();
         List<String> inner = new ArrayList<String>();
@@ -390,7 +458,7 @@ public class EntranceGuardController {
         firstCardKeepOpen.add(firstOpenEmp);
 
         //门禁日历信息
-        List<DoorCalendar> doorCalendars = iegs.queryDoorCalendarInfo(doorId);
+        List<DoorCalendar> doorCalendars = iegs.queryDoorCalendarInfo(doorId!=null?doorId.toString():null);
 
         Map map = new HashMap();
 
@@ -404,12 +472,17 @@ public class EntranceGuardController {
 
     /**
      * 高级设置（常规模块默认信息查询）
-     * @param doorId
+     * @param requestParam
      * @return
+     * {
+     *     "doorId":"1"
+     * }
      */
-    @GetMapping("/autho/getHighSettingForConvention")
-    public String getHighSettingForConvention(String doorId){
-        List<Map> maps = iegs.queryDoorSettingInfo(doorId);
+    @PostMapping("/autho/getHighSettingForConvention")
+    public String getHighSettingForConvention(@RequestBody String requestParam){
+        JSONObject jsonObject = JSONObject.parseObject(requestParam);
+        Object doorId = jsonObject.get("doorId");
+        List<Map> maps = iegs.queryDoorSettingInfo(doorId!=null?doorId.toString():null);
         return JSONArray.toJSONString(maps.get(0));
     }
 
@@ -417,53 +490,84 @@ public class EntranceGuardController {
 
     //1)出入记录
 
-    @RequestMapping("/record/getInOutRecord")
-    public String getInOutRecord(String empName,String dept,String recordType,String recordTime,String page,String rows){
+    /**
+     * {
+     *     "empName":"",
+     *     "dept":"",
+     *     "recordType":"",
+     *     "recordTime":"",
+     *     "page":"",
+     *     "rows":"",
+     * }
+     *
+     */
+    @PostMapping("/record/getInOutRecord")
+    public String getInOutRecord(@RequestBody String requestParam){
+
+        JSONObject jsonObject = JSONObject.parseObject(requestParam);
+        Object empName = jsonObject.get("empName");
+        Object dept = jsonObject.get("dept");
+        Object recordType = jsonObject.get("recordType");
+        Object recordTime = jsonObject.get("recordTime");
+        Object page = jsonObject.get("page");
+        Object rows = jsonObject.get("rows");
+
         DoorRecordCondition doorRecordCondition = new DoorRecordCondition();
 
-        doorRecordCondition.setName(empName);
-        doorRecordCondition.setDepartment(dept);
-        doorRecordCondition.setPunchCardType(recordType);
-        doorRecordCondition.setPunchCardTime(recordTime);
+        doorRecordCondition.setName(empName!=null?empName.toString():null);
+        doorRecordCondition.setDepartment(dept!=null?dept.toString():null);
+        doorRecordCondition.setPunchCardType(recordType!=null?recordType.toString():null);
+        doorRecordCondition.setPunchCardTime(recordTime!=null?recordTime.toString():null);
 
 
-        if(page!=null&&!page.isEmpty()&&rows!=null&&!rows.isEmpty()){
-            PageHelper.startPage(Integer.parseInt(page),Integer.parseInt(rows));
+        if(page!=null&&!page.toString().isEmpty()&&rows!=null&&!rows.toString().isEmpty()){
+            PageHelper.startPage(Integer.parseInt(page.toString()),Integer.parseInt(rows.toString()));
         }
 
         List<Map> doorRecords = iegs.queryPunchCardRecord(doorRecordCondition);
 
-        if(page!=null&&!page.isEmpty()&&rows!=null&&!rows.isEmpty()){
-            //进行分页操作
-            doorRecords = PageUtils.doSplitPage(doorRecords);
-        }
+        Map result = PageUtils.doSplitPage(doorRecords,page,rows);
 
-        return JSONArray.toJSONString(doorRecords);
+        return JSONArray.toJSONString(result);
     }
 
     // 2)门禁异常
 
-    @RequestMapping("/record/getDoorException")
-    public String getDoorException(String empName,String dept,String alarmType,String alarmTime,String page,String rows){
+    /**
+     *{
+     *     "empName":"",
+     *     "dept":"",
+     *     "alarmType":"",
+     *     "alarmTime":"",
+     *     "page":"",
+     *     "rows":"",
+     *}
+     */
+    @PostMapping("/record/getDoorException")
+    public String getDoorException(@RequestBody String requestParam){
+        JSONObject jsonObject = JSONObject.parseObject(requestParam);
+        Object empName = jsonObject.get("empName");
+        Object dept = jsonObject.get("dept");
+        Object alarmType = jsonObject.get("alarmType");
+        Object alarmTime = jsonObject.get("alarmTime");
+        Object page = jsonObject.get("page");
+        Object rows = jsonObject.get("rows");
+
         DoorExceptionCondition doorExceptionCondition = new DoorExceptionCondition();
 
-        doorExceptionCondition.setName(empName);
-        doorExceptionCondition.setDepartment(dept);
-        doorExceptionCondition.setAlarmType(alarmType);
-        doorExceptionCondition.setAlarmTime(alarmTime);
+        doorExceptionCondition.setName(empName!=null?empName.toString():null);
+        doorExceptionCondition.setDepartment(dept!=null?dept.toString():null);
+        doorExceptionCondition.setAlarmType(alarmType!=null?alarmType.toString():null);
+        doorExceptionCondition.setAlarmTime(alarmTime!=null?alarmTime.toString():null);
 
-        if(page!=null&&!page.isEmpty()&&rows!=null&&!rows.isEmpty()){
-            PageHelper.startPage(Integer.parseInt(page),Integer.parseInt(rows));
+        if(page!=null&&!page.toString().isEmpty()&&rows!=null&&!rows.toString().isEmpty()){
+            PageHelper.startPage(Integer.parseInt(page.toString()),Integer.parseInt(rows.toString()));
         }
 
         List<Map> doorExceptions = iegs.queryDoorExceptionRecord(doorExceptionCondition);
 
-        if(page!=null&&!page.isEmpty()&&rows!=null&&!rows.isEmpty()){
-            //进行分页操作
-            doorExceptions = PageUtils.doSplitPage(doorExceptions);
-        }
-
-        return JSONArray.toJSONString(doorExceptions);
+        Map result = PageUtils.doSplitPage(doorExceptions,page,rows);
+        return JSONArray.toJSONString(result);
     }
 
     //TODO 门禁管理------------门禁系统设置下发
@@ -689,7 +793,7 @@ public class EntranceGuardController {
     /**
      * 获取一个人在一段时间内的最早和最晚打卡时间
      */
-    @RequestMapping("/record/getPunchCardRecord")
+    @PostMapping ("/record/getPunchCardRecord")
     public String getPunchCardRecord(@RequestBody String requestParam){
         JSONObject jsonObject = JSONObject.parseObject(requestParam);
         List<String> strings = iegs.queryPunchCardTime(jsonObject.get("empId").toString(),jsonObject.get("companyId").toString(),jsonObject.get("startTime").toString(),jsonObject.get("endTime").toString());
