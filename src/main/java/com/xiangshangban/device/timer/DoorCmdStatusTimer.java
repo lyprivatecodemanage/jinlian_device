@@ -19,7 +19,7 @@ public class DoorCmdStatusTimer {
     @Autowired
     private DoorCmdMapper doorCmdMapper;
 
-    public final static String DOOR_CMD_CHECK_TIME = "0 0/2 * * *  ? ";
+    public final static String DOOR_CMD_CHECK_TIME = "0 0/1 * * *  ? ";
 //    public final static String DOOR_CMD_CHECK_TIME = "*/2 * * * *  ? ";
 
     @Scheduled(cron = DOOR_CMD_CHECK_TIME)

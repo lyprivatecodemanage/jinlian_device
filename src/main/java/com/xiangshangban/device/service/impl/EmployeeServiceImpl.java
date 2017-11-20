@@ -31,6 +31,9 @@ public class EmployeeServiceImpl implements IEmployeeService {
     @Value("${employee.interface.address}")
     String employeeInterfaceAddress;
 
+    @Value("${command.timeout.seconds}")
+    String commandTimeoutSeconds;
+
     @Autowired
     private EmployeeMapper employeeMapper;
 
@@ -57,40 +60,23 @@ public class EmployeeServiceImpl implements IEmployeeService {
 
     //人员模块人员信息同步
     @Override
-    public void employeeCommandGenerate(String action, List<String> employeeIdCollection) {
+    public void employeeCommandGenerate(List<Map<String, Object>> employeeInfoCollection) {
 
 //        if (action.equals("UPDATE_USER_INFO")){
 
-            for (String employeeIdTemp : employeeIdCollection) {
+            for (Map<String, Object> employeeInfoMap : employeeInfoCollection) {
 
-                Map<String, Object> httpData = new HashMap<String, Object>();
-                httpData.put("employeeId", employeeIdTemp);
-
-                //根据人员id请求单个人员信息
-                String employeeInfo = HttpRequestFactory.sendRequet(employeeInterfaceAddress, httpData);
-                System.out.println("[*] send: 已发出请求");
-                System.out.println("[*] employeeInfo: " + employeeInfo);
-
-                Map<String, String> employeeInfoMap = new HashMap<String, String>();
-
-                //取出需要的人员信息
-                try {
-                    employeeInfoMap = (Map<String, String>)JSONObject.fromObject(employeeInfo).get("emp");
-                }catch (Exception e){
-                    System.out.println("人员模块不在线!");
-                }
-
-                String employeeId = employeeInfoMap.get("employeeId");
-                String employeeNo = employeeInfoMap.get("employeeNo");
-                String employeeName = employeeInfoMap.get("employeeName");
-                String departmentId = employeeInfoMap.get("departmentId");
-                String departmentName = employeeInfoMap.get("departmentName");
-                String entryTime = employeeInfoMap.get("entryTime");
-                String probationaryExpired = employeeInfoMap.get("probationaryExpired");
-                String employeePhone = employeeInfoMap.get("employeePhone");
-                String employeeStatus = employeeInfoMap.get("employeeStatus");
-                String companyId = employeeInfoMap.get("companyId");
-                String companyName = employeeInfoMap.get("companyName");
+                String employeeId = (String) employeeInfoMap.get("employeeId");
+                String employeeNo = (String) employeeInfoMap.get("employeeNo");
+                String employeeName = (String) employeeInfoMap.get("employeeName");
+                String departmentId = (String) employeeInfoMap.get("departmentId");
+                String departmentName = (String) employeeInfoMap.get("departmentName");
+                String entryTime = (String) employeeInfoMap.get("entryTime");
+                String probationaryExpired = (String) employeeInfoMap.get("probationaryExpired");
+                String employeePhone = (String) employeeInfoMap.get("employeePhone");
+                String employeeStatus = (String) employeeInfoMap.get("employeeStatus");
+                String companyId = (String) employeeInfoMap.get("companyId");
+                String companyName = (String) employeeInfoMap.get("companyName");
 
                 //增加人员信息到本地人员表
                 Employee employee = new Employee();
@@ -133,7 +119,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
 //                doorCmd.setCommandTotal("1");
 //                doorCmd.setCommandIndex("1");
 //                doorCmd.setSendTime(CalendarUtil.getCurrentTime());
-//                doorCmd.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(),3));
+//                doorCmd.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
 //                doorCmd.setSuperCmdId("");
 //                doorCmd.setSubCmdId("");
 //                doorCmd.setAction(action);
@@ -173,7 +159,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
 //            doorCmd.setCommandTotal("1");
 //            doorCmd.setCommandIndex("1");
 //            doorCmd.setSendTime(CalendarUtil.getCurrentTime());
-//            doorCmd.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(), 3));
+//            doorCmd.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
 //            doorCmd.setSuperCmdId("");
 //            doorCmd.setSubCmdId("");
 //            doorCmd.setAction(action);
@@ -214,25 +200,6 @@ public class EmployeeServiceImpl implements IEmployeeService {
             doorEmployeeMapper.updateByPrimaryKey(doorEmployee);
             System.out.println("人员["+employeeName+"]和门禁["+doorName+"]的关联已存在");
         }
-
-    }
-
-    /**
-     * 根据公司id查询门列表
-     * @param companyId
-     */
-    @Override
-    public List<Door> findDoorIdByCompanyId(String companyId) {
-
-        List<Door> doorIdList = new ArrayList<Door>();
-
-        List<String> deviceIdList = deviceMapper.findDeviceIdByCompanyId(companyId);
-        for (String deviceId : deviceIdList) {
-            Door door = doorMapper.findDoorIdByDeviceId(deviceId);
-            doorIdList.add(door);
-        }
-
-        return doorIdList;
 
     }
 
@@ -318,7 +285,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
             doorCmdRecord.setAction("UPDATE_USER_LABEL");
             doorCmdRecord.setActionCode("2003");
             doorCmdRecord.setSendTime(CalendarUtil.getCurrentTime());
-            doorCmdRecord.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(),3));
+            doorCmdRecord.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
             doorCmdRecord.setSuperCmdId(FormatUtil.createUuid());
             doorCmdRecord.setData(JSON.toJSONString(resultMap));
 
@@ -367,11 +334,12 @@ public class EmployeeServiceImpl implements IEmployeeService {
         doorCmdDeleteEmployee.setActionCode("2002");
 
         doorCmdDeleteEmployee.setSendTime(CalendarUtil.getCurrentTime());
-        doorCmdDeleteEmployee.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(),3));
+        doorCmdDeleteEmployee.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
         doorCmdDeleteEmployee.setSuperCmdId(FormatUtil.createUuid());
         doorCmdDeleteEmployee.setData(JSON.toJSONString(employeeIdList));
 
         //获取完整的数据加协议封装格式
+        RabbitMQSender rabbitMQSender = new RabbitMQSender();
         Map<String, Object> userDeleteInformation =  RabbitMQSender.messagePackaging(doorCmdDeleteEmployee, "employeeIdList", employeeIdList, "C");
         //命令状态设置为: 发送中
         doorCmdDeleteEmployee.setStatus("1");
@@ -381,9 +349,8 @@ public class EmployeeServiceImpl implements IEmployeeService {
         doorCmdDeleteEmployee.setData(JSON.toJSONString(userDeleteInformation.get("data")));
         //命令数据存入数据库
         entranceGuardService.insertCommand(doorCmdDeleteEmployee);
-        //立即下发数据到MQ
-        RabbitMQSender rabbitMQSender = new RabbitMQSender();
-        rabbitMQSender.sendMessage(downloadQueueName, userDeleteInformation);
+//        //立即下发数据到MQ
+//        rabbitMQSender.sendMessage(downloadQueueName, userDeleteInformation);
 
     }
 
@@ -436,8 +403,8 @@ public class EmployeeServiceImpl implements IEmployeeService {
                     doorCmd.setStatus("1");
                     //更新草稿命令由待发送状态变成发送中状态
                     doorCmdMapper.updateByPrimaryKey(doorCmd);
-                    //立即下发数据到MQ
-                    rabbitMQSender.sendMessage(downloadQueueName, JSON.toJSONString(doorCmd));
+//                    //立即下发数据到MQ
+//                    rabbitMQSender.sendMessage(downloadQueueName, JSON.toJSONString(doorCmd));
 //                    System.out.println(JSON.toJSONString(doorCmd));
                 }
             } else {

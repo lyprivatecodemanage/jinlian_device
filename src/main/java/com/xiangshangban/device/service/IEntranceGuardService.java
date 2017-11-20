@@ -134,4 +134,7 @@ public interface IEntranceGuardService {
     //门禁记录上传存储
     void doorRecordSave(String doorRecordMap);
 
+    //根据公司id查门列表
+    List<Door> findDoorIdByCompanyId(String companyId);
+
 }

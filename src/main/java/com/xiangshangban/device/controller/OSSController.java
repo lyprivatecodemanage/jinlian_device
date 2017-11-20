@@ -7,6 +7,7 @@ import com.xiangshangban.device.bean.DeviceUpdatePackSys;
 import com.xiangshangban.device.bean.OSSFile;
 import com.xiangshangban.device.common.utils.DateUtils;
 import com.xiangshangban.device.common.utils.OSSFileUtil;
+import com.xiangshangban.device.dao.DeviceMapper;
 import com.xiangshangban.device.dao.DeviceUpdatePackAppMapper;
 import com.xiangshangban.device.dao.DeviceUpdatePackSysMapper;
 import com.xiangshangban.device.service.OSSFileService;
@@ -31,27 +32,35 @@ public class OSSController {
 	@Autowired
 	DeviceUpdatePackAppMapper deviceUpdatePackAppMapper;
 
+	@Autowired
+	DeviceMapper deviceMapper;
+
 	/**
 	 * 上传文件到OSS
 	 * @param file
-	 * @param ACCESS_TOKEN 
+	 * @param companyId
 	 * @param funcDirectory 存储模块名称
 	 * @return
 	 */
 	@RequestMapping(value = "/upload",method= RequestMethod.POST)
-	public String appUpload(@RequestParam(value="file") MultipartFile file, @RequestHeader String ACCESS_TOKEN,
+	public String appUpload(@RequestParam(value="file") MultipartFile file,
+							@RequestParam(value = "companyId") String companyId,
                             @RequestParam(value="funcDirectory") String funcDirectory){
-		String token = ACCESS_TOKEN;
+		String token = "未使用";
 //		String customerId = "C001";//公司编号，此编号实际应用时，应根据token去查询
-		String customerId = "";
+		String customerId = companyId;
 //		funcDirectory = "portrait";//portrait目录存储员工头像
-		System.out.println("*********开始上传文件**********");
 		if(StringUtils.isNotEmpty(token)){
-	        if(!file.isEmpty()){		
-	        	OSSFile ossFile = oSSFileService.addOSSFile(customerId, funcDirectory, file);
-	        	//System.out.println(JSON.toJSONString(ossFile));
-				System.out.println("*********上传文件成功**********");
-	        	return JSON.toJSONString(ossFile);
+	        if(!file.isEmpty()){
+	        	try {
+					OSSFile ossFile = oSSFileService.addOSSFile(customerId, funcDirectory, file);
+					//System.out.println(JSON.toJSONString(ossFile));
+					System.out.println("*********上传文件成功**********");
+					return JSON.toJSONString(ossFile);
+				}catch (Exception e){
+	        		e.printStackTrace();
+					System.out.println("*********上传文件失败**********");
+				}
 	        }
 		}
         return null;
@@ -79,11 +88,11 @@ public class OSSController {
 	@RequestMapping(value = "/deviceOssUpdate",method= RequestMethod.POST)
 	public String deviceOssUpdate(@RequestParam(value="file") MultipartFile file,
 								  @RequestParam(value = "fileType") String fileType,
-								  @RequestParam(value = "appVersion") String appVersion){
+								  @RequestParam(value = "appVersion") String appVersion,
+								  @RequestParam(value = "deviceId") String deviceId){
 
 		String funcDirectory = "";
 		String ossFile = "";
-		String token = "哈哈";
 
 		//判断上传的文件应该放在哪个文件夹
 		if (fileType.equals("system")){
@@ -92,7 +101,7 @@ public class OSSController {
 
 			try {
 				//上传文件到oss
-				ossFile = appUpload(file, token, funcDirectory);
+				ossFile = appUpload(file, "", funcDirectory);
 				//提取文件上传返回的数据
 				Map<String, String> ossFileResultMap = net.sf.json.JSONObject.fromObject(ossFile);
 				String key = ossFileResultMap.get("key");
@@ -124,7 +133,7 @@ public class OSSController {
 
 			try {
 				//上传文件到oss
-				ossFile = appUpload(file, token, funcDirectory);
+				ossFile = appUpload(file, "", funcDirectory);
 
 				//提取文件上传返回的数据
 				Map<String, String> ossFileResultMap = net.sf.json.JSONObject.fromObject(ossFile);
@@ -152,18 +161,33 @@ public class OSSController {
 				System.out.println("上传应用升级包文件异常");
 			}
 
+		}else if (fileType.equals("deviceRecordImg")){
+
+			if (org.apache.commons.lang3.StringUtils.isNotEmpty(deviceId)){
+				//获取设备所属的公司id
+				String companyId = deviceMapper.selectByPrimaryKey(deviceId).getCompanyId();
+
+				//上传的设备记录图片的文件放在这个文件夹下
+				funcDirectory = "device/"+deviceId;
+				//上传文件到oss
+				ossFile = appUpload(file, companyId, funcDirectory);
+			}else {
+				System.out.println("上传文件时所传设备id为空");
+			}
+
 		}else if (fileType.equals("other")){
 
-			//应用升级的文件放在这个文件夹下
+			//其它的的文件放在这个文件夹下
 			funcDirectory = "device/update/other";
 			//上传文件到oss
-			ossFile = appUpload(file, token, funcDirectory);
+			ossFile = appUpload(file, "", funcDirectory);
 
 		}else {
 
 			//提示文件类型输入错误
 			ossFile = "文件类型输入错误，目前系统升级包文件第二个参数需要输入system," +
 					"应用升级包文件第二个参数需要输入application，" +
+					"设备上传的记录照片第二个参数需要输入deviceRecordImg，" +
 					"其它文件第二个参数需要输入other，请重新输入";
 
 		}

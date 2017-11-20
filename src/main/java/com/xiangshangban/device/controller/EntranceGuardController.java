@@ -14,11 +14,15 @@ import com.xiangshangban.device.common.utils.FormatUtil;
 import com.xiangshangban.device.common.utils.ReturnCodeUtil;
 import com.xiangshangban.device.dao.DoorMapper;
 import com.xiangshangban.device.common.utils.PageUtils;
+import com.xiangshangban.device.dao.DoorRecordMapper;
+import com.xiangshangban.device.dao.EmployeeMapper;
 import com.xiangshangban.device.service.IEntranceGuardService;
 import org.apache.commons.collections.map.HashedMap;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
 
@@ -30,11 +34,23 @@ import java.util.*;
 @RequestMapping("/door")
 public class EntranceGuardController {
 
+    @Value("${command.timeout.seconds}")
+    String commandTimeoutSeconds;
+
     @Autowired
     private IEntranceGuardService iegs;
 
     @Autowired
     private DoorMapper doorMapper;
+
+    @Autowired
+    private OSSController ossController;
+
+    @Autowired
+    private DoorRecordMapper doorRecordMapper;
+
+    @Autowired
+    private EmployeeMapper employeeMapper;
 
     //TODO 门禁管理------“基础信息”
 
@@ -570,12 +586,13 @@ public class EntranceGuardController {
      * @param doorFeaturesSetup
      */
     @PostMapping("/doorFeaturesSetup")
-    public void doorFeaturesSetup(@RequestBody String doorFeaturesSetup){
+    public ReturnData doorFeaturesSetup(@RequestBody String doorFeaturesSetup){
 
         /**测试数据
          *
          {
          "doorId": "001",
+         "loginEmployeeId": "897020EA96214392B28369F2B421E319",
          "countLimitAuthenticationFailed": "5",
          "enableAlarm": "0",
          "alarmTimeLength": "60",
@@ -632,40 +649,115 @@ public class EntranceGuardController {
 
         //解析数据
         Map<String, Object> setupMap = (Map<String, Object>)net.sf.json.JSONObject.fromObject(doorFeaturesSetup);
-        String doorId = (String) setupMap.get("doorId");
-        String countLimitAuthenticationFailed = (String)setupMap.get("countLimitAuthenticationFailed");
-        String enableAlarm = (String)setupMap.get("enableAlarm");
-        String alarmTimeLength = (String)setupMap.get("alarmTimeLength");
-        String publicPassword1 = (String)setupMap.get("publicPassword1");
-        String publicPassword2 = (String)setupMap.get("publicPassword2");
-        String threatenPassword = (String)setupMap.get("threatenPassword");
-        String deviceManagePassword = (String)setupMap.get("deviceManagePassword");
-        String enableDoorOpenRecord = (String)setupMap.get("enableDoorOpenRecord");
-        String enableDoorKeepOpen = (String)setupMap.get("enableDoorKeepOpen");
-        String enableFirstCardKeepOpen = (String)setupMap.get("enableFirstCardKeepOpen");
-        String enableDoorCalendar = (String)setupMap.get("enableDoorCalendar");
+
+        //返回给前端的数据
+        ReturnData returnData = new ReturnData();
+
+        String doorId = "";
+        String loginEmployeeId = "";
+        String countLimitAuthenticationFailed = "";
+        String enableAlarm = "";
+        String alarmTimeLength = "";
+        String publicPassword1 = "";
+        String publicPassword2 = "";
+        String threatenPassword = "";
+        String deviceManagePassword = "";
+        String enableDoorOpenRecord = "";
+        String enableDoorKeepOpen = "";
+        String enableFirstCardKeepOpen = "";
+        String enableDoorCalendar = "";
+        List<String> employeeIdList = new ArrayList<String>();
         List oneWeekTimeDoorKeepList = new ArrayList();
         List oneWeekTimeFirstCardList = new ArrayList();
         List accessCalendar = new ArrayList();
-        List<String> employeeIdList = (List<String>) setupMap.get("employeeIdList");
+
+        try {
+            doorId = (String) setupMap.get("doorId");
+            loginEmployeeId = (String) setupMap.get("loginEmployeeId");
+            countLimitAuthenticationFailed = (String)setupMap.get("countLimitAuthenticationFailed");
+            enableAlarm = (String)setupMap.get("enableAlarm");
+            alarmTimeLength = (String)setupMap.get("alarmTimeLength");
+            publicPassword1 = (String)setupMap.get("publicPassword1");
+            publicPassword2 = (String)setupMap.get("publicPassword2");
+            threatenPassword = (String)setupMap.get("threatenPassword");
+            deviceManagePassword = (String)setupMap.get("deviceManagePassword");
+            enableDoorOpenRecord = (String)setupMap.get("enableDoorOpenRecord");
+            enableDoorKeepOpen = (String)setupMap.get("enableDoorKeepOpen");
+            enableFirstCardKeepOpen = (String)setupMap.get("enableFirstCardKeepOpen");
+            enableDoorCalendar = (String)setupMap.get("enableDoorCalendar");
+            employeeIdList = (List<String>) setupMap.get("employeeIdList");
+        }catch (Exception e){
+
+            System.out.println("必传参数字段为null");
+            returnData.setMessage("必传参数字段为null");
+            returnData.setReturnCode("3006");
+            return returnData;
+        }
+
+        if (doorId == null
+                || loginEmployeeId == null
+                || countLimitAuthenticationFailed == null
+                || enableAlarm == null
+                || alarmTimeLength == null
+                || publicPassword1 == null
+                || publicPassword2 == null
+                || threatenPassword == null
+                || deviceManagePassword == null
+                || enableDoorOpenRecord == null
+                || enableDoorKeepOpen == null
+                || enableFirstCardKeepOpen == null
+                || enableDoorCalendar == null
+                || employeeIdList == null
+                || oneWeekTimeDoorKeepList == null
+                || oneWeekTimeFirstCardList == null
+                || accessCalendar == null){
+            System.out.println("必传参数字段不存在");
+            returnData.setMessage("必传参数字段不存在");
+            returnData.setReturnCode("3006");
+            return returnData;
+        }
 
         //判断门定时常开是否开启
         if (enableDoorKeepOpen.equals("1")){
-            oneWeekTimeDoorKeepList = (List)setupMap.get("oneWeekTimeDoorKeepList");
+            try {
+                oneWeekTimeDoorKeepList = (List)setupMap.get("oneWeekTimeDoorKeepList");
+            }catch (Exception e){
+
+                System.out.println("必传参数字段为null");
+                returnData.setMessage("必传参数字段为null");
+                returnData.setReturnCode("3006");
+                return returnData;
+            }
         }else {
             oneWeekTimeDoorKeepList = new ArrayList<>();
         }
 
         //判断门定时常开是否开启
         if (enableFirstCardKeepOpen.equals("1")){
-            oneWeekTimeFirstCardList = (List)setupMap.get("oneWeekTimeFirstCardList");
+            try {
+                oneWeekTimeFirstCardList = (List)setupMap.get("oneWeekTimeFirstCardList");
+            }catch (Exception e){
+
+                System.out.println("必传参数字段为null");
+                returnData.setMessage("必传参数字段为null");
+                returnData.setReturnCode("3006");
+                return returnData;
+            }
         }else {
             oneWeekTimeFirstCardList = new ArrayList<>();
         }
 
         //判断门定时常开是否开启
         if (enableDoorCalendar.equals("1")){
-            accessCalendar = (List)setupMap.get("accessCalendar");
+            try {
+                accessCalendar = (List)setupMap.get("accessCalendar");
+            }catch (Exception e){
+
+                System.out.println("必传参数字段为null");
+                returnData.setMessage("必传参数字段为null");
+                returnData.setReturnCode("3006");
+                return returnData;
+            }
         }else {
             accessCalendar = new ArrayList<>();
         }
@@ -686,14 +778,26 @@ public class EntranceGuardController {
         Door doorExist = doorMapper.selectByPrimaryKey(doorId);
         if (doorExist == null){
             System.out.println("门信息不存在");
+            returnData.setMessage("门信息不存在");
+            returnData.setReturnCode("4007");
+            return returnData;
         }else {
             Door door = new Door();
             door.setDoorId(doorId);
             door.setOperateTime(DateUtils.getDateTime());
-            door.setOperateEmployee("");
-            doorMapper.updateByPrimaryKeySelective(door);
+            door.setOperateEmployee(loginEmployeeId);
+            try {
+                doorMapper.updateByPrimaryKeySelective(door);
+            }catch (Exception e){
+                returnData.setMessage("没有查到此操作人【"+loginEmployeeId+"】的信息");
+                returnData.setReturnCode("4007");
+                return returnData;
+            }
         }
 
+        returnData.setMessage("数据请求成功");
+        returnData.setReturnCode("3000");
+        return returnData;
     }
 
     /**
@@ -706,12 +810,43 @@ public class EntranceGuardController {
     @RequestMapping(value = "/doorAlarmRealTimePushMessage", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     public Map<String, Object> doorAlarmRealTimePushMessage(@RequestBody String message){
 
+        /**
+         *测试数据
+         {
+         "serverId": "001",
+         "deviceId": "0f1a21d4e6fd3cb8",
+         "fileEdition": "v1.3",
+         "commandMode": "C",
+         "commandType": "single",
+         "commandTotal": "1",
+         "commandIndex": "1",
+         "sendTime": "2017-10-31 19:12:25",
+         "outOfTime": "2017-11-03 19:12",
+         "MD5Check": "5EA3A2027684295414D4AC2696A8C1CF",
+         "command": {
+         "superCMDID": "49641B5A57474BE2B5E4BE126AC63C49",
+         "subCMDID": "",
+         "ACTION": "UPLOAD_ACCESS_ALARM",
+         "ACTIONCode": "3007"
+         },
+         "data": {
+         "attData": {
+         "attType": "0",
+         "deviceId": "111",
+         "deviceName": "张三|金念大门",
+         "attTime": "2017-10-10 10:06:00",
+         "week": "0",
+         "eventPhotoCombinationId": "111|1504825665941"
+         }
+         }
+         }
+         */
+
         //解析json数据
         Map<String, Object> mapResult = (Map<String, Object>) net.sf.json.JSONObject.fromObject(message);
         String deviceId = (String) mapResult.get("deviceId");
 
         //回复设备
-        Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
         Map<String, Object> resultData = new LinkedHashMap<String, Object>();
         String resultCode = "";
         String resultMessage = "";
@@ -723,6 +858,7 @@ public class EntranceGuardController {
         String messageCheck = JSON.toJSONString(mapResult);
         //生成我的md5
         String myMd5 = MD5Util.encryptPassword(messageCheck, "XC9EO5GKOIVRMBQ2YE8X");
+        System.out.println("myMd5="+myMd5);
         //双方的md5比较判断
         if (myMd5.equals(otherMd5)){
             System.out.println("MD5校验成功，数据完好无损");
@@ -745,7 +881,7 @@ public class EntranceGuardController {
         resultMessage = "执行成功";
         resultData.put("resultCode", resultCode);
         resultData.put("resultMessage", resultMessage);
-        resultMap.put("result", resultData);
+        resultData.put("returnObj", new ArrayList<>());
 
         //构造命令格式
         DoorCmd doorCmdRecord = new DoorCmd();
@@ -760,9 +896,9 @@ public class EntranceGuardController {
         doorCmdRecord.setAction("UPLOAD_ACCESS_ALARM");
         doorCmdRecord.setActionCode("3007");
         doorCmdRecord.setSendTime(CalendarUtil.getCurrentTime());
-        doorCmdRecord.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(),3));
+        doorCmdRecord.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
         doorCmdRecord.setSuperCmdId(FormatUtil.createUuid());
-        doorCmdRecord.setData(JSON.toJSONString(resultMap));
+        doorCmdRecord.setData(JSON.toJSONString(resultData));
 
         //获取完整的数据加协议封装格式
         RabbitMQSender rabbitMQSender = new RabbitMQSender();
@@ -781,7 +917,149 @@ public class EntranceGuardController {
         return doorRecordAll;
     }
 
+    /**
+     * 保存设备上传的异常记录图片
+     * @param deviceId
+     * @param id
+     * @param eventPhotoCombinationId
+     * @param file
+     * @return
+     */
+    @ResponseBody
+    @RequestMapping(value = "/saveUploadAccessAlarmImg", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    public Map<String, Object> saveUploadAccessAlarmImg(@RequestParam("deviceId") String deviceId,
+                                                        @RequestParam("id") String id,
+                                                        @RequestParam("eventPhotoCombinationId") String eventPhotoCombinationId,
+                                                        @RequestParam(value="file") MultipartFile file){
 
+        //上传照片到oss服务器
+        String fileJsonString = ossController.deviceOssUpdate(file, "deviceRecordImg", "", deviceId);
+
+        //获取文件上传返回的标识文件的唯一值key
+        String key = ((Map<String, String>)net.sf.json.JSONObject.fromObject(fileJsonString)).get("key");
+
+        //将这个文件标识存到门禁记录表里
+        DoorRecord doorRecord = new DoorRecord();
+        doorRecord.setDoorPermissionRecordId(id);
+        doorRecord.setBackKey(key);
+        DoorRecord doorRecordExist = doorRecordMapper.selectByPrimaryKey(id);
+        if (doorRecordExist != null){
+            doorRecordMapper.updateByPrimaryKeySelective(doorRecord);
+        }else {
+            System.out.println("上传的警报记录图片【"+key+"】没有与之匹配的记录id");
+        }
+
+        //回复设备
+        Map<String, Object> resultData = new LinkedHashMap<String, Object>();
+        String resultCode = "";
+        String resultMessage = "";
+
+        //回复设备
+        resultCode = "0";
+        resultMessage = "执行成功";
+        resultData.put("resultCode", resultCode);
+        resultData.put("resultMessage", resultMessage);
+        Map<String, String> keyMap = new HashMap<String, String>();
+        keyMap.put("imgKey", key);
+        List<Map<String, String>> returnList = new ArrayList<Map<String, String>>();
+        returnList.add(keyMap);
+        resultData.put("returnObj", returnList);
+
+        //构造命令格式
+        DoorCmd doorCmdRecord = new DoorCmd();
+        doorCmdRecord.setServerId("001");
+        doorCmdRecord.setDeviceId(deviceId);
+        doorCmdRecord.setFileEdition("v1.3");
+        doorCmdRecord.setCommandMode("R");
+        doorCmdRecord.setCommandType("S");
+        doorCmdRecord.setCommandTotal("1");
+        doorCmdRecord.setCommandIndex("1");
+        doorCmdRecord.setSubCmdId("");
+        doorCmdRecord.setAction("UPLOAD_ACCESS_ALARM_IMG");
+        doorCmdRecord.setActionCode("3008");
+        doorCmdRecord.setSendTime(CalendarUtil.getCurrentTime());
+        doorCmdRecord.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
+        doorCmdRecord.setSuperCmdId(FormatUtil.createUuid());
+        doorCmdRecord.setData(JSON.toJSONString(resultData));
+
+        //获取完整的数据加协议封装格式
+        RabbitMQSender rabbitMQSender = new RabbitMQSender();
+        Map<String, Object> doorRecordAll = rabbitMQSender.messagePackaging(doorCmdRecord, "", resultData, "R");
+        //命令状态设置为: 已回复
+        doorCmdRecord.setStatus("5");
+        doorCmdRecord.setResultCode(resultCode);
+        doorCmdRecord.setResultMessage(resultMessage);
+        //设置md5校验值
+        doorCmdRecord.setMd5Check((String) doorRecordAll.get("MD5Check"));
+        //设置数据库的data字段
+        doorCmdRecord.setData(JSON.toJSONString(doorRecordAll.get("result")));
+        //命令数据存入数据库
+        iegs.insertCommand(doorCmdRecord);
+
+        return doorRecordAll;
+    }
+
+    /**
+     * 根据公司id查询门列表
+     * @param jsonString
+     * @return
+     */
+    @ResponseBody
+    @Transactional
+    @RequestMapping(value = "/findDoorIdByCompanyId", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    public ReturnData findDoorIdByCompanyId(@RequestBody String jsonString){
+
+        /**
+         * 测试数据
+         {
+         "employeeId": "9C305EC5587745FF9F0D8198512264D6"
+         }
+         */
+
+        Map<String, String> employeeIdMap = (Map<String, String>) net.sf.json.JSONObject.fromObject(jsonString);
+
+        ReturnData returnData = new ReturnData();
+        String employeeId = "";
+        String companyId = "";
+
+        try {
+            employeeId = employeeIdMap.get("employeeId");
+        }catch (Exception e){
+
+            System.out.println("人员id参数字段为null");
+            returnData.setMessage("人员id字段为null，请登录后再操作");
+            returnData.setReturnCode("3006");
+            return returnData;
+        }
+
+        if (employeeId == null){
+            System.out.println("人员id参数字段不存在");
+            returnData.setMessage("人员id参数字段不存在");
+            returnData.setReturnCode("3006");
+            return returnData;
+        }
+
+        //根据人员id查询公司id
+        try {
+            Employee employee = employeeMapper.selectByPrimaryKey(employeeId);
+            if (employee != null){
+                companyId = employee.getEmployeeCompanyId();
+                List<Door> doorList = iegs.findDoorIdByCompanyId(companyId);
+                returnData.setData(doorList);
+                returnData.setMessage("数据请求成功");
+                returnData.setReturnCode("3000");
+                return returnData;
+            }else {
+                returnData.setMessage("没有查到该人员的信息");
+                returnData.setReturnCode("4007");
+                return returnData;
+            }
+        }catch (Exception e){
+            returnData.setMessage("服务器错误");
+            returnData.setReturnCode("3001");
+            return returnData;
+        }
+    }
 
     /**
      * 获取一个人在一段时间内的最早和最晚打卡时间

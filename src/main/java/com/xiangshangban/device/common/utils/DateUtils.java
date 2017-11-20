@@ -4,25 +4,13 @@ package com.xiangshangban.device.common.utils;
  * Created by liuguanglong on 2017/10/20.
  */
 
-import java.text.DateFormat;
-import java.text.DateFormatSymbols;
-import java.text.DecimalFormat;
-import java.text.Format;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.xiangshangban.device.common.utils.DateUtilsDependency.StringUtils;
+import com.xiangshangban.device.common.utils.DateUtilsDependency.TimeConstant;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.joda.time.DateTime;
 
-import com.xiangshangban.device.common.utils.DateUtilsDependency.TimeConstant;
-import com.xiangshangban.device.common.utils.DateUtilsDependency.StringUtils;
+import java.text.*;
+import java.util.*;
 
 /**
  * 日期工具类
@@ -1174,5 +1162,19 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
         return finalDate;
     }
 
+    /**
+     * 传入指定的日期，加上秒数转换成年月日时分的字符串格式
+     * @param date
+     * @param seconds
+     * @return
+     */
+    public static String addSecondsConvertToYMDHM(Date date, String seconds){
+//        System.out.println("转换前："+DateUtils.formatDate(date, "yyyy-MM-dd HH:mm:ss"));
+        int secondsNumber = Integer.valueOf(seconds);
+        Date dateConvert= DateUtils.addSeconds(date, secondsNumber);
+        String dateConvertString = DateUtils.formatDate(dateConvert, "yyyy-MM-dd HH:mm");
+//        System.out.println("转换后："+DateUtils.formatDate(dateTrans, "yyyy-MM-dd HH:mm"));
 
+        return dateConvertString;
+    }
 }

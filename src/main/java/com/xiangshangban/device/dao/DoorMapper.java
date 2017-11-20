@@ -1,7 +1,6 @@
 package com.xiangshangban.device.dao;
 
 import com.xiangshangban.device.bean.Door;
-import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +23,9 @@ public interface DoorMapper {
 
     //通过deviceId查询所有的信息
     Door findAllByDeviceId(String deviceId);
+
+    //通过companyId查询所有的门信息
+    List<Door> selectAllDoorByCompanyId(String companyId);
 
     //TODO 基础信息部分
     /**

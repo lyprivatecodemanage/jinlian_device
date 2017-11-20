@@ -1,6 +1,5 @@
 package com.xiangshangban.device.service;
 
-import com.xiangshangban.device.bean.Door;
 import com.xiangshangban.device.bean.Employee;
 
 import java.util.List;
@@ -15,13 +14,10 @@ import java.util.Map;
 public interface IEmployeeService {
 
     //人员模块人员信息同步
-    void employeeCommandGenerate(String action, List<String> userIdCollection);
+    void employeeCommandGenerate(List<Map<String, Object>> userIdCollection);
 
     //关联门和人员（同一个人传入的数据不一样时执行更新操作）
     void relateEmployeeAndDoor(String doorId, String doorName, String employeeId, String employeeName);
-
-    //根据公司id查门列表
-    List<Door> findDoorIdByCompanyId(String companyId);
 
     //关联人员门禁权限（同一个人传入的数据不一样时执行更新操作）
     void relateEmployeeAndPermission(String employeeId, String dayOfWeek, String isAllDay,

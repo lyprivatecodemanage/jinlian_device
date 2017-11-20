@@ -34,6 +34,9 @@ public class EmployeeController {
     @Value("${employee.interface.address}")
     String employeeInterfaceAddress;
 
+    @Value("${command.timeout.seconds}")
+    String commandTimeoutSeconds;
+
     @Autowired
     private IEmployeeService iEmployeeService;
 
@@ -70,11 +73,10 @@ public class EmployeeController {
         System.out.println("[*] userInformation: " + userInformation);
 
         //JSON字符串解析
-        Map<String, Object> userInformationMap = (Map<String, Object>)JSONObject.fromObject(userInformation);
-        String action = (String) userInformationMap.get("action");
-        List<String> userIdCollection = (List<String>) userInformationMap.get("employeeIdCollection");
+        List userInformationList = (List) JSON.parseArray(userInformation);
+        List<Map<String, Object>> userInfoCollection = (List<Map<String, Object>>) userInformationList;
 
-        iEmployeeService.employeeCommandGenerate(action, userIdCollection);
+        iEmployeeService.employeeCommandGenerate(userInfoCollection);
 
     }
 
@@ -315,13 +317,13 @@ public class EmployeeController {
                 //部分需要循环修改的命令格式
                 //人员基本信息
                 doorCmdEmployeeInformation.setSendTime(CalendarUtil.getCurrentTime());
-                doorCmdEmployeeInformation.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(),3));
+                doorCmdEmployeeInformation.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
                 doorCmdEmployeeInformation.setSuperCmdId(FormatUtil.createUuid());
                 doorCmdEmployeeInformation.setData(JSON.toJSONString(userInformation));
                 doorCmdEmployeeInformation.setEmployeeId(employeeId);
                 //人员基本开门门禁权限信息
                 doorCmdEmployeePermission.setSendTime(CalendarUtil.getCurrentTime());
-                doorCmdEmployeePermission.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(),3));
+                doorCmdEmployeePermission.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
                 doorCmdEmployeePermission.setSuperCmdId(FormatUtil.createUuid());
                 doorCmdEmployeePermission.setData(JSON.toJSONString(userPermission));
                 doorCmdEmployeePermission.setEmployeeId(employeeId);
@@ -373,8 +375,8 @@ public class EmployeeController {
                     doorCmdEmployeeInformation.setData(JSON.toJSONString(userInformationAll.get("data")));
                     //命令数据存入数据库
                     entranceGuardService.insertCommand(doorCmdEmployeeInformation);
-                    //立即下发数据到MQ
-                    rabbitMQSender.sendMessage(downloadQueueName, userInformationAll);
+//                    //立即下发数据到MQ
+//                    rabbitMQSender.sendMessage(downloadQueueName, userInformationAll);
 
                     /**
                      * 人员开门权限
@@ -389,8 +391,8 @@ public class EmployeeController {
                     doorCmdEmployeePermission.setData(JSON.toJSONString(userPermissionAll.get("data")));
                     //命令数据存入数据库
                     entranceGuardService.insertCommand(doorCmdEmployeePermission);
-                    //立即下发数据到MQ
-                    rabbitMQSender.sendMessage(downloadQueueName, userPermissionAll);
+//                    //立即下发数据到MQ
+//                    rabbitMQSender.sendMessage(downloadQueueName, userPermissionAll);
 
                 }
             }
@@ -487,7 +489,7 @@ public class EmployeeController {
 //        doorCmdDeleteEmployee.setActionCode("3002");
 //
 //        doorCmdDeleteEmployee.setSendTime(CalendarUtil.getCurrentTime());
-//        doorCmdDeleteEmployee.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(),3));
+//        doorCmdDeleteEmployee.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
 //        doorCmdDeleteEmployee.setSuperCmdId(FormatUtil.createUuid());
 //        doorCmdDeleteEmployee.setData(JSON.toJSONString(employeeIdList));
 //
@@ -508,24 +510,7 @@ public class EmployeeController {
 //    }
 
     /**
-     * 根据公司id查询门列表
-     * @param companyIdCollection
-     * @return
-     */
-    @ResponseBody
-    @Transactional
-    @RequestMapping(value = "/findDoorIdByCompanyId", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
-    public List<Door> findDoorIdByCompanyId(@RequestBody String companyIdCollection){
-
-        Map<String, String> companyIdMap = (Map<String, String>)JSONObject.fromObject(companyIdCollection);
-        String companyId = companyIdMap.get("companyId");
-
-        return iEmployeeService.findDoorIdByCompanyId(companyId);
-
-    }
-
-    /**
-     * 人员人脸、指纹、卡号信息上传存储
+     * 人员人脸、指纹、卡号信息上传存储(HTTP POST)
      * @param jsonString
      * @return
      */
@@ -619,7 +604,7 @@ public class EmployeeController {
                 doorCmdRecord.setAction("UPDATE_USER_LABEL");
                 doorCmdRecord.setActionCode("2003");
                 doorCmdRecord.setSendTime(CalendarUtil.getCurrentTime());
-                doorCmdRecord.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(),3));
+                doorCmdRecord.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
                 doorCmdRecord.setSuperCmdId(FormatUtil.createUuid());
                 doorCmdRecord.setData(JSON.toJSONString(resultMap));
 
@@ -667,7 +652,7 @@ public class EmployeeController {
             doorCmdRecord.setAction("UPDATE_USER_LABEL");
             doorCmdRecord.setActionCode("2003");
             doorCmdRecord.setSendTime(CalendarUtil.getCurrentTime());
-            doorCmdRecord.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(),3));
+            doorCmdRecord.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
             doorCmdRecord.setSuperCmdId(FormatUtil.createUuid());
             doorCmdRecord.setData(JSON.toJSONString(resultMap));
 

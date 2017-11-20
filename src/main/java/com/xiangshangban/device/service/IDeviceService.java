@@ -1,6 +1,7 @@
 package com.xiangshangban.device.service;
 
 import com.xiangshangban.device.bean.Device;
+import com.xiangshangban.device.bean.Door;
 
 import java.util.List;
 import java.util.Map;
@@ -57,6 +58,13 @@ public interface IDeviceService {
      * @return
      */
     List<Map> queryAllDeviceInfo(String companyId);
+
+    /**
+     * 查询所有的门信息
+     * @param companyId
+     * @return
+     */
+    List<Door> queryAllDoorInfoByCompanyId(String companyId);
 
     /**
      * 绑定设备

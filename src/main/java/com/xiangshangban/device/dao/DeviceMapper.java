@@ -33,4 +33,24 @@ public interface DeviceMapper {
      * 查询所有的设备信息
      */
     List<Map> selectAllDeviceInfo(@Param("companyId") String companyId);
+
+    /**
+     * 根据设备id查询该公司下的设备id的集合
+     * @param deviceId
+     * @return
+     */
+    List<Map<String, String>> selectAllDeviceIdOfCompanyByDeviceId(@Param("deviceId") String deviceId);
+
+    /**
+     * 根据设备id查询该设备上传的最新的一条重启记录带上来的所有版本信息
+     * @param deviceId
+     * @return
+     */
+    List<Map<String, String>> selectAllVersionInfoByDeviceId(@Param("deviceId") String deviceId);
+
+    /**
+     * 查出所有的设备的信息
+     * @return
+     */
+    List<Device> selectAllDeviceInfoByNone();
 }

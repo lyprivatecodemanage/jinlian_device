@@ -175,4 +175,40 @@
       timed_reboot_time = #{timedRebootTime,jdbcType=VARCHAR}
     where device_id = #{deviceId,jdbcType=VARCHAR}
   </update>
+
+  <!--非自动生成-->
+
+  <!--根据设备id，设备激活状态和公司名称模糊查找设备的系统设置参数-->
+  <select id="selectDeviceSettingByCondition" resultType="java.util.Map">
+    SELECT
+    ds.device_id AS "deviceId",
+    ds.heartbeat_period AS "heartbeatPeriod",
+    ds.face_threshold AS "faceThreshold",
+    ds.finger_threshold AS "fingerThreshold",
+    ds.face_detec_time AS "faceDetecTime",
+    ds.fan_on_temp AS "fanOnTemp",
+    ds.fan_off_temp AS "fanOffTemp",
+    ds.enable_self_help_bio_register AS "enableSelfHelpBioRegister",
+    ds.enable_self_help_card_register AS "enableSelfHelpCardRegister",
+    ds.enable_timed_reboot AS "enableTimedReboot",
+    ds.timed_reboot_period AS "timedRebootPeriod",
+    ds.timed_reboot_time AS "timedRebootTime",
+    d.company_name AS "companyName",
+	d.active_status AS "activeStatus"
+    FROM
+	device_setting ds
+    LEFT JOIN device_ d ON (ds.device_id = d.device_id)
+    WHERE
+    1=1
+    <if test='deviceId != null and deviceId != ""' >
+      AND d.device_id LIKE '%${deviceId}%'
+    </if>
+    <if test='activeStatus != null and activeStatus != ""' >
+      AND d.active_status LIKE '%${activeStatus}%'
+    </if>
+    <if test='companyName != null and companyName != ""' >
+      AND d.company_name LIKE '%${companyName}%'
+    </if>
+  </select>
+
 </mapper>

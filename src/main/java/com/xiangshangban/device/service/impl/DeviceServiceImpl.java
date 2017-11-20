@@ -29,6 +29,9 @@ public class DeviceServiceImpl implements IDeviceService {
     @Value("${rabbitmq.download.queue.name}")
     String downloadQueueName;
 
+    @Value("${command.timeout.seconds}")
+    String commandTimeoutSeconds;
+
     @Autowired
     private DeviceMapper deviceMapper;
 
@@ -147,8 +150,13 @@ public class DeviceServiceImpl implements IDeviceService {
         device.setDeviceUsages(deviceUsages);
 
         Door door = new Door();
-        door.setDoorId(doorMapper.findDoorIdByDeviceId(deviceId).getDoorId());
-        door.setDoorName(doorName);
+        String doorId = doorMapper.findDoorIdByDeviceId(deviceId).getDoorId();
+        if (doorId == null || "".equals(doorId)){
+            System.out.println("没有和该设备绑定的门信息");
+        }else {
+            door.setDoorId(doorId);
+            door.setDoorName(doorName);
+        }
 
         deviceMapper.updateByPrimaryKeySelective(device);
 
@@ -175,7 +183,7 @@ public class DeviceServiceImpl implements IDeviceService {
         doorCmdRebootDevice.setAction("REBOOT_DEVICE");
         doorCmdRebootDevice.setActionCode("1007");
         doorCmdRebootDevice.setSendTime(CalendarUtil.getCurrentTime());
-        doorCmdRebootDevice.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(),3));
+        doorCmdRebootDevice.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
         doorCmdRebootDevice.setSuperCmdId(superCmdId);
         doorCmdRebootDevice.setData("");
 
@@ -198,6 +206,11 @@ public class DeviceServiceImpl implements IDeviceService {
 
     public List<Map> queryAllDeviceInfo(String companyId) {
         return deviceMapper.selectAllDeviceInfo(companyId);
+    }
+
+    public List<Door> queryAllDoorInfoByCompanyId(String companyId){
+
+        return doorMapper.selectAllDoorByCompanyId(companyId);
     }
 
     @Override
@@ -235,7 +248,7 @@ public class DeviceServiceImpl implements IDeviceService {
         doorCmdBindDevice.setAction("BIND_DEVICE");
         doorCmdBindDevice.setActionCode("1001");
         doorCmdBindDevice.setSendTime(CalendarUtil.getCurrentTime());
-        doorCmdBindDevice.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(),3));
+        doorCmdBindDevice.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
         doorCmdBindDevice.setSuperCmdId(FormatUtil.createUuid());
         doorCmdBindDevice.setData(JSON.toJSONString(bindInformation));
 
@@ -250,8 +263,8 @@ public class DeviceServiceImpl implements IDeviceService {
         doorCmdBindDevice.setData(JSON.toJSONString(doorCmdPackageAll.get("data")));
         //命令数据存入数据库
         entranceGuardService.insertCommand(doorCmdBindDevice);
-        //立即下发数据到MQ
-        rabbitMQSender.sendMessage(downloadQueueName, doorCmdPackageAll);
+//        //立即下发数据到MQ
+//        rabbitMQSender.sendMessage(downloadQueueName, doorCmdPackageAll);
     }
 
     @Override
@@ -270,7 +283,7 @@ public class DeviceServiceImpl implements IDeviceService {
         doorCmdUnBindDevice.setAction("UNBIND_DEVICE");
         doorCmdUnBindDevice.setActionCode("1002");
         doorCmdUnBindDevice.setSendTime(CalendarUtil.getCurrentTime());
-        doorCmdUnBindDevice.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(),3));
+        doorCmdUnBindDevice.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
         doorCmdUnBindDevice.setSuperCmdId(FormatUtil.createUuid());
         doorCmdUnBindDevice.setData("");
 
@@ -285,8 +298,8 @@ public class DeviceServiceImpl implements IDeviceService {
         doorCmdUnBindDevice.setData(JSON.toJSONString(doorCmdPackageAll.get("data")));
         //命令数据存入数据库
         entranceGuardService.insertCommand(doorCmdUnBindDevice);
-        //立即下发数据到MQ
-        rabbitMQSender.sendMessage(downloadQueueName, doorCmdPackageAll);
+//        //立即下发数据到MQ
+//        rabbitMQSender.sendMessage(downloadQueueName, doorCmdPackageAll);
     }
 
     @Override
@@ -361,7 +374,7 @@ public class DeviceServiceImpl implements IDeviceService {
         doorCmdRecord.setAction("UPLOAD_DEVICE_REBOOT_RECORD");
         doorCmdRecord.setActionCode("1004");
         doorCmdRecord.setSendTime(CalendarUtil.getCurrentTime());
-        doorCmdRecord.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(),3));
+        doorCmdRecord.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
         doorCmdRecord.setSuperCmdId(FormatUtil.createUuid());
         doorCmdRecord.setData(JSON.toJSONString(resultMap));
 
@@ -378,8 +391,8 @@ public class DeviceServiceImpl implements IDeviceService {
         doorCmdRecord.setResultMessage(resultMessage);
         //命令数据存入数据库
         entranceGuardService.insertCommand(doorCmdRecord);
-        //立即下发回复数据到MQ
-        rabbitMQSender.sendMessage(downloadQueueName, doorRecordAll);
+//        //立即下发回复数据到MQ
+//        rabbitMQSender.sendMessage(downloadQueueName, doorRecordAll);
         System.out.println("重启记录已回复");
     }
 
@@ -436,7 +449,7 @@ public class DeviceServiceImpl implements IDeviceService {
         doorCmdRecord.setAction("UPLOAD_DEVICE_RUNNING_LOG");
         doorCmdRecord.setActionCode("1006");
         doorCmdRecord.setSendTime(CalendarUtil.getCurrentTime());
-        doorCmdRecord.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(),3));
+        doorCmdRecord.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
         doorCmdRecord.setSuperCmdId(FormatUtil.createUuid());
         doorCmdRecord.setData(JSON.toJSONString(resultMap));
 
@@ -453,8 +466,8 @@ public class DeviceServiceImpl implements IDeviceService {
         doorCmdRecord.setResultMessage(resultMessage);
         //命令数据存入数据库
         entranceGuardService.insertCommand(doorCmdRecord);
-        //立即下发回复数据到MQ
-        rabbitMQSender.sendMessage(downloadQueueName, doorRecordAll);
+//        //立即下发回复数据到MQ
+//        rabbitMQSender.sendMessage(downloadQueueName, doorRecordAll);
         System.out.println("运行日志上传已回复");
     }
 
@@ -509,7 +522,7 @@ public class DeviceServiceImpl implements IDeviceService {
             doorCmdUpdateSystem.setAction("UPDATE_DEVICE_SYSTEM");
             doorCmdUpdateSystem.setActionCode("1008");
             doorCmdUpdateSystem.setSendTime(CalendarUtil.getCurrentTime());
-            doorCmdUpdateSystem.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(),3));
+            doorCmdUpdateSystem.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
             doorCmdUpdateSystem.setSuperCmdId(superCmdId);
             doorCmdUpdateSystem.setData(JSON.toJSONString(mapHandOut));
 
@@ -578,7 +591,7 @@ public class DeviceServiceImpl implements IDeviceService {
             doorCmdUpdateSystem.setAction("UPDATE_DEVICE_APP");
             doorCmdUpdateSystem.setActionCode("1009");
             doorCmdUpdateSystem.setSendTime(CalendarUtil.getCurrentTime());
-            doorCmdUpdateSystem.setOutOfTime(DateUtils.addDaysOfDateFormatterString(new Date(),3));
+            doorCmdUpdateSystem.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
             doorCmdUpdateSystem.setSuperCmdId(superCmdId);
             doorCmdUpdateSystem.setData(JSON.toJSONString(mapHandOut));
 
