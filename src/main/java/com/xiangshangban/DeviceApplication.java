@@ -12,6 +12,7 @@ import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 
@@ -24,6 +25,7 @@ import java.util.Properties;
  */
 @SpringBootApplication
 @EnableScheduling
+@EnableTransactionManagement
 @MapperScan("com.xiangshangban.device.dao")
 @EnableAutoConfiguration(exclude = {MultipartAutoConfiguration.class})
 @ServletComponentScan

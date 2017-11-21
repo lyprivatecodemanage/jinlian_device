@@ -16,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -77,6 +78,7 @@ public class DeviceController {
      * 平台新增设备，未绑定公司的设备
      * @param jsonString
      */
+    @Transactional
     @ResponseBody
     @RequestMapping(value = "/addDevice", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     public ReturnData addDevice(@RequestBody String jsonString){
@@ -121,9 +123,9 @@ public class DeviceController {
             return returnData;
         }
 
+        //角色权限控制的判断，仅此一处有，目前通过前端判断role角色来隐藏入口控制权限
         if ("superAdmin".equals(role)){
             System.out.println("已匹配到【超级管理员】角色");
-
             try {
                 String returnCode = deviceService.addDevice(deviceId, macAddress);
 
@@ -132,7 +134,7 @@ public class DeviceController {
                     returnData.setReturnCode("4202");
                     return returnData;
                 }else if ("1".equals(returnCode)){
-                    returnData.setMessage("数据请求成功");
+                    returnData.setMessage("添加设备成功");
                     returnData.setReturnCode("3000");
                     return returnData;
                 }else {
@@ -171,6 +173,7 @@ public class DeviceController {
      * @param jsonString
      * @return
      */
+    @Transactional
     @ResponseBody
     @RequestMapping(value = "/findDeviceInformation", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     public ReturnData findDeviceInformation(@RequestBody String jsonString){
@@ -237,6 +240,7 @@ public class DeviceController {
         }
 
         try {
+//            PageHelper.startPage(page,rows);
             List<Map<String, String>> mapListResult = deviceService.findDeviceInformation(companyId,
                     companyName, deviceName, deviceId, isOnline, activeStatus);
 
@@ -247,7 +251,7 @@ public class DeviceController {
                 return returnData;
             }else {
                 returnData.setData(mapListResult);
-                returnData.setMessage("没有匹配的数据");
+                returnData.setMessage("您的公司暂无已绑定的设备");
                 returnData.setReturnCode("4203");
                 return returnData;
             }
@@ -347,7 +351,7 @@ public class DeviceController {
             //下发绑定设备的命令
             deviceService.bindDevice(companyId, companyName, deviceId);
 
-            returnData.setMessage("数据请求成功");
+            returnData.setMessage("编辑信息成功");
             returnData.setReturnCode("3000");
             return returnData;
         } catch (Exception e) {
@@ -409,7 +413,7 @@ public class DeviceController {
         try {
             String superCmdId = deviceService.rebootDevice(deviceId);
 
-            returnData.setMessage("数据请求成功");
+            returnData.setMessage("重启操作已发出请求，请前往设备查看，网络波动时，会有一定的延时");
             returnData.setReturnCode("3000");
             return returnData;
         } catch (Exception e) {
@@ -848,7 +852,7 @@ public class DeviceController {
          "0f1a21d4e6fd3cb8",
          "0f1a21d4e6fd3cb8"
          ],
-         "heartbeatPeriod": "60",
+//         "heartbeatPeriod": "60",
          "faceThreshold": "79.1",
          "fingerThreshold": "56.8",
          "faceDetecTime": "15",
@@ -894,7 +898,7 @@ public class DeviceController {
         Map<String, Object> mapJson = (Map<String, Object>)net.sf.json.JSONObject.fromObject(jsonString);
 
         List<String> deviceIdList = new ArrayList<String>();
-        String heartbeatPeriod = "";
+//        String heartbeatPeriod = "";
         String faceThreshold = "";
         String fingerThreshold = "";
         String faceDetecTime = "";
@@ -920,7 +924,7 @@ public class DeviceController {
 
         try {
             deviceIdList = (List<String>) mapJson.get("deviceIdList");
-            heartbeatPeriod = (String) mapJson.get("heartbeatPeriod");
+//            heartbeatPeriod = (String) mapJson.get("heartbeatPeriod");
             faceThreshold = (String) mapJson.get("faceThreshold");
             fingerThreshold = (String) mapJson.get("fingerThreshold");
             faceDetecTime = (String) mapJson.get("faceDetecTime");
@@ -944,8 +948,8 @@ public class DeviceController {
             return returnData;
         }
 
-        if (heartbeatPeriod == null
-                || faceThreshold == null
+//        heartbeatPeriod == null
+        if (faceThreshold == null
                 || fingerThreshold == null
                 || faceDetecTime ==null
                 || fanOnTemp == null
@@ -976,7 +980,7 @@ public class DeviceController {
         }
 
         try {
-            deviceSetting.setHeartbeatPeriod(heartbeatPeriod);
+//            deviceSetting.setHeartbeatPeriod(heartbeatPeriod);
             deviceSetting.setFaceThreshold(faceThreshold);
             deviceSetting.setFingerThreshold(fingerThreshold);
             deviceSetting.setFaceDetecTime(faceDetecTime);
@@ -1062,8 +1066,8 @@ public class DeviceController {
                 doorCmdBindDevice.setData(JSON.toJSONString(doorCmdPackageAll.get("data")));
                 //命令数据存入数据库
                 entranceGuardService.insertCommand(doorCmdBindDevice);
-//            //立即下发数据到MQ
-//            rabbitMQSender.sendMessage(downloadQueueName, doorCmdPackageAll);
+//                //立即下发数据到MQ
+//                rabbitMQSender.sendMessage(downloadQueueName, doorCmdPackageAll);
             }
 
             //保存并下发系统更新设置
@@ -1072,7 +1076,7 @@ public class DeviceController {
             //保存下发应用更新设置
             deviceService.updateDeviceApplication(deviceIdList, downloadTimeApp, updateTimeApp);
 
-            returnData.setMessage("数据请求成功");
+            returnData.setMessage("设备设置已下发");
             returnData.setReturnCode("3000");
             return returnData;
         } catch (Exception e) {
@@ -1138,6 +1142,16 @@ public class DeviceController {
                 for (Map<String, Object> deviceSettingMap : deviceSettingList) {
                     String deviceIdTemp = (String) deviceSettingMap.get("deviceId");
 
+                    //查询系统升级下载时间
+                    DeviceSettingUpdate deviceSettingUpdate = deviceSettingUpdateMapper.selectByPrimaryKey(deviceIdTemp);
+
+                    deviceSettingMap.put("downloadTimeSys", deviceSettingUpdate.getDownloadTimeSys());
+                    deviceSettingMap.put("updateTimeSys", deviceSettingUpdate.getUpdateTimeSys());
+                    deviceSettingMap.put("downloadTimeApp", deviceSettingUpdate.getDownloadTimeApp());
+                    deviceSettingMap.put("updateTimeApp", deviceSettingUpdate.getUpdateTimeApp());
+
+                    System.out.println(JSON.toJSONString(deviceSettingUpdate));
+
                     //查询屏幕亮度数据
                     List<TimeRangeLcdBrightness> timeRangeLcdBrightnessList = timeRangeLcdBrightnessMapper.selectByPrimaryKey(deviceIdTemp);
 
@@ -1147,27 +1161,29 @@ public class DeviceController {
                     deviceSettingMap.put("lcdBrightnessList", timeRangeLcdBrightnessList);
                     deviceSettingMap.put("lcdOffTimeList", timeRangeLcdOffList);
                     System.out.println("deviceId: "+ deviceIdTemp+"\n"+"lcdBrightnessList: "+JSON.toJSONString(timeRangeLcdBrightnessList));
+
                     //数据展示处理
-                    if ("0".equals(deviceSettingMap.get("enableSelfHelpBioRegister"))){
+                    if ("off".equals(deviceSettingMap.get("enableSelfHelpBioRegister"))){
                         deviceSettingMap.put("enableSelfHelpBioRegister", "不允许");
-                    }else if ("1".equals(deviceSettingMap.get("enableSelfHelpBioRegister"))){
+                    }else if ("on".equals(deviceSettingMap.get("enableSelfHelpBioRegister"))){
                         deviceSettingMap.put("enableSelfHelpBioRegister", "允许");
                     }
 
-                    if ("0".equals(deviceSettingMap.get("enableSelfHelpCardRegister "))){
-                        deviceSettingMap.put("enableSelfHelpCardRegister ", "不允许");
-                    }else if ("1".equals(deviceSettingMap.get("enableSelfHelpCardRegister "))){
-                        deviceSettingMap.put("enableSelfHelpCardRegister ", "允许");
+                    if ("off".equals(deviceSettingMap.get("enableSelfHelpCardRegister"))){
+                        deviceSettingMap.put("enableSelfHelpCardRegister", "不允许");
+                    }else if ("on".equals(deviceSettingMap.get("enableSelfHelpCardRegister"))){
+                        deviceSettingMap.put("enableSelfHelpCardRegister", "允许");
                     }
 
-                    if ("0".equals(deviceSettingMap.get("enableTimedReboot "))){
-                        deviceSettingMap.put("enableTimedReboot ", "不允许");
-                    }else if ("1".equals(deviceSettingMap.get("enableTimedReboot "))){
-                        deviceSettingMap.put("enableTimedReboot ", "允许");
+                    if ("off".equals(deviceSettingMap.get("enableTimedReboot"))){
+                        deviceSettingMap.put("enableTimedReboot", "不允许");
+                    }else if ("on".equals(deviceSettingMap.get("enableTimedReboot"))){
+                        deviceSettingMap.put("enableTimedReboot", "允许");
                     }
                 }
             }
 
+            System.out.println("总的数据: "+JSON.toJSONString(deviceSettingList));
             returnData.setData(deviceSettingList);
             returnData.setMessage("数据请求成功");
             returnData.setReturnCode("3000");
@@ -1216,18 +1232,18 @@ public class DeviceController {
          */
 
         System.out.println("------------"+jsonString);
-//        String jsonUrlDecoderString = UrlUtil.getURLDecoderString(jsonString);
-//        System.out.println(jsonUrlDecoderString);
-//        //去除数据的前缀名称
-//        jsonUrlDecoderString = jsonUrlDecoderString.replace("heartbeatData=", "");
-//        System.out.println(jsonUrlDecoderString);
+        String jsonUrlDecoderString = UrlUtil.getURLDecoderString(jsonString);
+        System.out.println(jsonUrlDecoderString);
+        //去除数据的前缀名称
+        jsonUrlDecoderString = jsonUrlDecoderString.replace("updateApp=", "");
+        System.out.println("转换后的数据："+jsonUrlDecoderString);
 
-        if (jsonString.equals(null) || jsonString.equals("")){
+        if (jsonUrlDecoderString.equals(null) || jsonUrlDecoderString.equals("")){
             System.out.println("收到空的app升级请求数据");
             return new HashMap<>();
         }else {
             //解析JSON数据
-            Map<String, Object> mapJson = (Map<String, Object>)net.sf.json.JSONObject.fromObject(jsonString);
+            Map<String, Object> mapJson = (Map<String, Object>)net.sf.json.JSONObject.fromObject(jsonUrlDecoderString);
             Map<String, String> heartbeatMap = new HashMap<>();
 
             //回复设备
@@ -1258,19 +1274,26 @@ public class DeviceController {
                         //获取app名称
 
                         String appName = ((Map<String, Map<String, String>>) mapJson.get("data")).get("update").get("appName");
-                        System.out.println(appName);
+                        System.out.println("appName: "+appName);
                         if (StringUtils.isNotEmpty(appName)){
                             deviceUpdatePackAppResult = deviceUpdatePackAppMapper.selectByPrimaryKey(appName);
                         }
                     }
 
                     //回复设备
-                    resultCode = "0";
-                    resultMessage = "执行成功";
-                    resultData.put("returnObj", deviceUpdatePackAppResult);
-                    resultData.put("resultCode", resultCode);
-                    resultData.put("resultMessage", resultMessage);
-                    resultMap.put("result", resultData);
+                    if (deviceUpdatePackAppResult == null){
+                        resultCode = "999";
+                        resultMessage = "没有找到对应的app名称的升级包信息";
+                        resultData.put("returnObj", "");
+                        resultData.put("resultCode", resultCode);
+                        resultData.put("resultMessage", resultMessage);
+                    }else {
+                        resultCode = "0";
+                        resultMessage = "执行成功";
+                        resultData.put("returnObj", deviceUpdatePackAppResult);
+                        resultData.put("resultCode", resultCode);
+                        resultData.put("resultMessage", resultMessage);
+                    }
                 }
 
             }else {
@@ -1279,9 +1302,9 @@ public class DeviceController {
                 //回复设备
                 resultCode = "6";
                 resultMessage = "MD5校验失败";
+                resultData.put("returnObj", "");
                 resultData.put("resultCode", resultCode);
                 resultData.put("resultMessage", resultMessage);
-                resultMap.put("result", resultData);
             }
 
             //构造命令格式
@@ -1299,11 +1322,11 @@ public class DeviceController {
             doorCmdRecord.setSendTime(CalendarUtil.getCurrentTime());
             doorCmdRecord.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
             doorCmdRecord.setSuperCmdId(FormatUtil.createUuid());
-            doorCmdRecord.setData(JSON.toJSONString(resultMap));
-            System.out.println(JSON.toJSONString(resultMap));
+            doorCmdRecord.setData(JSON.toJSONString(resultData));
+
             //获取完整的数据加协议封装格式
             RabbitMQSender rabbitMQSender = new RabbitMQSender();
-            Map<String, Object> doorRecordAll =  rabbitMQSender.messagePackaging(doorCmdRecord, "", resultMap, "R");
+            Map<String, Object> doorRecordAll =  rabbitMQSender.messagePackaging(doorCmdRecord, "", resultData, "R");
             //命令状态设置为: 已回复
             doorCmdRecord.setStatus("5");
             doorCmdRecord.setResultCode(resultCode);
@@ -1314,6 +1337,7 @@ public class DeviceController {
             doorCmdRecord.setData(JSON.toJSONString(doorRecordAll.get("result")));
             //命令数据存入数据库
             entranceGuardService.insertCommand(doorCmdRecord);
+            System.out.println("app升级包请求返回的数据： "+JSON.toJSONString(doorRecordAll));
 
             return doorRecordAll;
         }
@@ -1352,18 +1376,18 @@ public class DeviceController {
          */
 
         System.out.println("------------"+jsonString);
-//        String jsonUrlDecoderString = UrlUtil.getURLDecoderString(jsonString);
-//        System.out.println(jsonUrlDecoderString);
-//        //去除数据的前缀名称
-//        jsonUrlDecoderString = jsonUrlDecoderString.replace("heartbeatData=", "");
-//        System.out.println(jsonUrlDecoderString);
+        String jsonUrlDecoderString = UrlUtil.getURLDecoderString(jsonString);
+        System.out.println(jsonUrlDecoderString);
+        //去除数据的前缀名称
+        jsonUrlDecoderString = jsonUrlDecoderString.replace("getIbeaconUuid=", "");
+        System.out.println(jsonUrlDecoderString);
 
-        if (jsonString.equals(null) || jsonString.equals("")){
+        if (jsonUrlDecoderString.equals(null) || jsonUrlDecoderString.equals("")){
             System.out.println("收到空的蓝牙参数请求数据");
             return new HashMap<>();
         }else {
             //解析JSON数据
-            Map<String, Object> mapJson = (Map<String, Object>)net.sf.json.JSONObject.fromObject(jsonString);
+            Map<String, Object> mapJson = (Map<String, Object>)net.sf.json.JSONObject.fromObject(jsonUrlDecoderString);
             Map<String, String> heartbeatMap = new HashMap<>();
 
             //回复设备
@@ -1413,15 +1437,54 @@ public class DeviceController {
 
                                             String name = versionInfoMap.get("name");
                                             if ("major".equals(name)){
-                                                mapTemp.put("major", versionInfoMap.get("value"));
+                                                try {
+                                                    String majorValue = versionInfoMap.get("value");
+                                                    if (majorValue == null || "".equals(majorValue)){
+                                                        System.out.println("major值null或者空字符串");
+                                                    }else {
+                                                        mapTemp.put("major", versionInfoMap.get("value"));
+                                                    }
+
+                                                }catch (Exception e){
+                                                    System.out.println("取major报错");
+                                                }
                                             }else if ("minor".equals(name)){
-                                                mapTemp.put("minor", versionInfoMap.get("value"));
+                                                try {
+                                                    String minorValue = versionInfoMap.get("value");
+                                                    if (minorValue == null || "".equals(minorValue)){
+                                                        System.out.println("minor值null或者空字符串");
+                                                    }else {
+                                                        mapTemp.put("minor", versionInfoMap.get("value"));
+                                                    }
+
+                                                }catch (Exception e){
+                                                    System.out.println("取minor报错");
+                                                }
                                             }else if ("ibeaconUuid".equals(name)){
-                                                mapTemp.put("ibeaconUuid", versionInfoMap.get("value"));
+                                                try {
+                                                    String ibeaconUuidValue = versionInfoMap.get("value");
+                                                    if (ibeaconUuidValue == null || "".equals(ibeaconUuidValue)){
+                                                        System.out.println("ibeaconUuid值null或者空字符串");
+                                                    }else {
+                                                        mapTemp.put("ibeaconUuid", versionInfoMap.get("value"));
+                                                    }
+
+                                                }catch (Exception e){
+                                                    System.out.println("取ibeaconUuid报错");
+                                                }
                                             }
 
                                         }
-                                        bluetoothParameterList.add(mapTemp);
+
+                                        System.out.println("mapTemp = " + JSON.toJSONString(mapTemp));
+
+                                        //判断mapTemp空
+                                        if (mapTemp.isEmpty()){
+                                            System.out.println("mapTemp空");
+                                        }else {
+                                            System.out.println("mapTemp非空");
+                                            bluetoothParameterList.add(mapTemp);
+                                        }
                                     }else {
                                         System.out.println("没有查到设备【"+deviceIdTemp.get("device_id")+"】的蓝牙参数数据");
                                     }
@@ -1429,11 +1492,21 @@ public class DeviceController {
                                 System.out.println("bluetoothParameterList: "+JSON.toJSONString(bluetoothParameterList));
 
                                 //回复设备
-                                resultCode = "0";
-                                resultMessage = "执行成功";
-                                resultData.put("returnObj", bluetoothParameterList);
-                                resultData.put("resultCode", resultCode);
-                                resultData.put("resultMessage", resultMessage);
+                                if (bluetoothParameterList.size() == 0){
+                                    System.out.println("999");
+                                    resultCode = "999";
+                                    resultMessage = "没有查到蓝牙参数信息";
+                                    resultData.put("returnObj", "");
+                                    resultData.put("resultCode", resultCode);
+                                    resultData.put("resultMessage", resultMessage);
+                                }else {
+                                    System.out.println("0");
+                                    resultCode = "0";
+                                    resultMessage = "执行成功";
+                                    resultData.put("returnObj", bluetoothParameterList);
+                                    resultData.put("resultCode", resultCode);
+                                    resultData.put("resultMessage", resultMessage);
+                                }
                             }
                         }
                     }
@@ -1445,6 +1518,7 @@ public class DeviceController {
                 //回复设备
                 resultCode = "6";
                 resultMessage = "MD5校验失败";
+                resultData.put("returnObj", "");
                 resultData.put("resultCode", resultCode);
                 resultData.put("resultMessage", resultMessage);
             }
@@ -1479,6 +1553,7 @@ public class DeviceController {
             doorCmdRecord.setData(JSON.toJSONString(doorRecordAll.get("result")));
             //命令数据存入数据库
             entranceGuardService.insertCommand(doorCmdRecord);
+            System.out.println("设备请求的蓝牙参数返回信息："+JSON.toJSONString(doorRecordAll));
 
             return doorRecordAll;
         }

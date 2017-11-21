@@ -12,6 +12,7 @@ import com.xiangshangban.device.common.utils.CalendarUtil;
 import com.xiangshangban.device.common.utils.DateUtils;
 import com.xiangshangban.device.common.utils.FormatUtil;
 import com.xiangshangban.device.common.utils.ReturnCodeUtil;
+import com.xiangshangban.device.common.utils.*;
 import com.xiangshangban.device.dao.DoorMapper;
 import com.xiangshangban.device.common.utils.PageUtils;
 import com.xiangshangban.device.dao.DoorRecordMapper;
@@ -802,13 +803,13 @@ public class EntranceGuardController {
 
     /**
      * 门禁警报记录上传及警报消息实时推送（HTTP POST）
-     * @param message
+     * @param jsonString
      * @return
      */
     @ResponseBody
     @Transactional
     @RequestMapping(value = "/doorAlarmRealTimePushMessage", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
-    public Map<String, Object> doorAlarmRealTimePushMessage(@RequestBody String message){
+    public Map<String, Object> doorAlarmRealTimePushMessage(@RequestBody String jsonString){
 
         /**
          *测试数据
@@ -842,8 +843,15 @@ public class EntranceGuardController {
          }
          */
 
+        System.out.println("------------"+jsonString);
+        String jsonUrlDecoderString = UrlUtil.getURLDecoderString(jsonString);
+        System.out.println(jsonUrlDecoderString);
+        //去除数据的前缀名称
+        jsonUrlDecoderString = jsonUrlDecoderString.replace("alarmData=", "");
+//        System.out.println(jsonUrlDecoderString);
+
         //解析json数据
-        Map<String, Object> mapResult = (Map<String, Object>) net.sf.json.JSONObject.fromObject(message);
+        Map<String, Object> mapResult = (Map<String, Object>) net.sf.json.JSONObject.fromObject(jsonUrlDecoderString);
         String deviceId = (String) mapResult.get("deviceId");
 
         //回复设备
@@ -866,7 +874,7 @@ public class EntranceGuardController {
             System.out.println("MD5校验失败，数据已被修改");
         }
 
-        System.out.println("收到实时报警记录："+message);
+        System.out.println("收到实时报警记录："+jsonUrlDecoderString);
 
         //******************************************
         //*
