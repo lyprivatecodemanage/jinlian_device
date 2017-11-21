@@ -32,5 +32,5 @@ public interface DeviceMapper {
     /**
      * 查询所有的设备信息
      */
-    List<Device> selectAllDeviceInfo(@Param("companyId") String companyId);
+    List<Map> selectAllDeviceInfo(@Param("companyId") String companyId);
 }

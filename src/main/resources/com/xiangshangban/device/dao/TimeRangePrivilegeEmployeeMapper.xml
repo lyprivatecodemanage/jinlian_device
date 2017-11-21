@@ -130,8 +130,8 @@
     where employee_id = #{employeeId,jdbcType=VARCHAR}
   </delete>
 
-  <!--根据门id查询首卡常开信息-->
+  <!--根据门id查询首卡常开人员ID信息-->
   <select id="selectFirstCardKeepOpenInfo" parameterType="String" resultType="map">
-    select A.*,B.employee_name from time_range_privilege_employee A left join employee_ B on A.employee_id = B.employee_id and A.door_id = #{doorId}
+    select employee_id from time_range_privilege_employee where door_id = #{doorId}
   </select>
 </mapper>

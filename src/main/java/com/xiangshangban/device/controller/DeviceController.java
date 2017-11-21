@@ -1,6 +1,7 @@
 package com.xiangshangban.device.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.xiangshangban.device.bean.*;
 import com.xiangshangban.device.common.encode.MD5Util;
 import com.xiangshangban.device.common.rmq.RabbitMQSender;
@@ -375,22 +376,13 @@ public class DeviceController {
      */
     @ResponseBody
     @RequestMapping("/getAllDevice")
-    public List<Device> getAllDeviceInfo(@RequestBody String jsonString){
-
-        /**
-         * 测试数据
-         {
-         "companyId":"A3789DSYAG7FA7"
-         }
-         */
-
-        System.out.println(jsonString);
+    public String getAllDeviceInfo(@RequestBody String jsonString){
 
         //提取数据
-        Map<String, String> mapJson = (Map<String, String>)net.sf.json.JSONObject.fromObject(jsonString);
-        String companyId = mapJson.get("companyId");
-
-        return deviceService.queryAllDeviceInfo(companyId);
+        JSONObject jsonObject = JSONObject.parseObject(jsonString);
+        String companyId = jsonObject.get("companyId")!=null?jsonObject.get("companyId").toString():null;
+        List<Map> maps = deviceService.queryAllDeviceInfo(companyId);
+        return JSONObject.toJSONString(maps);
     }
 
     /**
@@ -698,12 +690,12 @@ public class DeviceController {
             Map<String, Object> deviceHeartBeatMapResult = new HashMap<String, Object>();
             List<Map<String, Object>> deviceHeartbeatListResult = new ArrayList<Map<String, Object>>();
 
-            List<Device> deviceList = deviceMapper.selectAllDeviceInfo("");
+            List<Map> deviceList = deviceMapper.selectAllDeviceInfo("");
 
             //遍历设备id
-            for (Device device : deviceList) {
+            for (Map map:deviceList) {
                 //去重复的deviceId
-                deviceIdList.add(device.getDeviceId());
+                deviceIdList.add(map.get("deviceId").toString());
             }
 
 //        System.out.println(JSON.toJSONString(deviceIdList));

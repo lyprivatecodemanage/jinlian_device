@@ -23,7 +23,7 @@ public interface ITemplateService {
      * 给设备添加模板
      * （模板信息，背景图以及展示时间、问候语以及展示时间，公司Logo）
      */
-    boolean addDeviceTemplate(String templateInfo);
+    Map addDeviceTemplate(String templateInfo);
 
     /**
      * 下发节日节气模板

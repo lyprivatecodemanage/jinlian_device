@@ -82,24 +82,47 @@
 
   <!--###############《新添加部分》##############-->
   <!--分条件查询门禁异常记录-->
-  <select id="selectDoorExceptionRecord" parameterType="com.xiangshangban.device.bean.DoorExceptionCondition" resultType="map">
-    select A.alarm_type,alarm_date,B.employee_name,employee_department_name from door_exception A
-    inner join employee_ B on A.employee_id = B.employee_id and
-    A.employee_id in (select employee_id from employee_
+  <!--<select id="selectDoorExceptionRecord" parameterType="com.xiangshangban.device.bean.DoorExceptionCondition" resultType="map">
+    select alarm_type,alarm_date,employee_name,employee_department_name from (select A.alarm_type,alarm_date,B.employee_name,employee_department_name from door_exception A
+    left join employee_ B on A.employee_id = B.employee_id and A.employee_id in (select employee_id from employee_) where A.alarm_type in ('','','','','')) S
     <where>
       <if test="doorExceptionCondition.name!=null and doorExceptionCondition.name!=''">
-        employee_name like #{doorExceptionCondition.name}
+        S.employee_name like #{doorExceptionCondition.name}
       </if>
       <if test="doorExceptionCondition.department!=null and doorExceptionCondition.department!=''">
-        and employee_department_name like #{doorExceptionCondition.department}
+        and S.employee_department_name like #{doorExceptionCondition.department}
+      </if>
+      <if test="doorExceptionCondition.alarmType!=null and doorExceptionCondition.alarmType!=''">
+        and S.alarm_type = #{doorExceptionCondition.alarmType}
+      </if>
+      <if test="doorExceptionCondition.alarmTime!=null and doorExceptionCondition.alarmTime!=''">
+        and S.alarm_date like #{doorExceptionCondition.alarmTime}
+      </if>
+      <if test="doorExceptionCondition.companyId!=null and doorExceptionCondition.companyId!=''">
+        and S.employee_company_id = #{doorRecordCondition.companyId}
       </if>
     </where>
-    )
-    <if test="doorExceptionCondition.alarmType!=null and doorExceptionCondition.alarmType!=''">
-      and A.alarm_type like #{doorExceptionCondition.alarmType}
+  </select>-->
+  <!--门禁异常表和门禁记录表进行整合-->
+  <select id="selectDoorExceptionRecord" parameterType="com.xiangshangban.device.bean.DoorRecordCondition" resultType="map">
+  select record_type,record_date,employee_name,employee_department_name from (select A.record_type,record_date,B.employee_name,employee_department_name,employee_company_id from door_record A
+  left join employee_ B on A.employee_id = B.employee_id and A.employee_id in (select employee_id from employee_) where A.record_type in('1','20','25','27','28','30','32') ) S
+  <where>
+    <if test="doorRecordCondition.name!=null and doorRecordCondition.name!=''">
+      S.employee_name like #{doorRecordCondition.name}
     </if>
-    <if test="doorExceptionCondition.alarmTime!=null and doorExceptionCondition.alarmTime!=''">
-      and A.alarm_date = #{doorExceptionCondition.alarmTime}
+    <if test="doorRecordCondition.department!=null and doorRecordCondition.department!=''">
+      and S.employee_department_name like #{doorRecordCondition.department}
     </if>
-  </select>
+    <if test="doorRecordCondition.companyId!=null and doorRecordCondition.companyId!=''">
+      and S.employee_company_id = #{doorRecordCondition.companyId}
+    </if>
+    <if test="doorRecordCondition.punchCardType!=null and doorRecordCondition.punchCardType!=''">
+      and S.record_type = #{doorRecordCondition.punchCardType}
+    </if>
+    <if test="doorRecordCondition.punchCardTime!=null and doorRecordCondition.punchCardTime!=''">
+      and S.record_date like #{doorRecordCondition.punchCardTime}
+    </if>
+  </where>
+</select>
 </mapper>

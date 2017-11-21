@@ -257,4 +257,15 @@
     update template_  set template_type = '0',template_level = #{templateLevel},operate_time = #{operateTime},operate_emp = #{operateEmp},device_id = #{deviceId},roasting_time = #{roastingTime},logo_flag = #{logoFlag},solutation_flag = #{salutationFlag},festival_name = NULL,template_style = #{templateStyle},is_use = '1',is_standard = NULL where template_id = #{templateId}
   </update>
 
+  <!--#########《2017-11-21》########-->
+  <!--查询标准模板信息(样式、item和item关联的图片)-->
+  <select id="selectStandardItemInfo" parameterType="String" resultType="map">
+    select S.*,M.img_name,img_url from
+    (select A.template_style,B.item_type,item_top_x,item_top_y,item_font_orient,item_font_size,item_font_bold,item_font_color,item_img_id
+    from template_ A,template_items B where A.template_id = B.template_id  and A.template_id = #{templateId}) S left join image_ M on S.item_img_id = M.id
+  </select>
+  <!--确认指定设备是否具有自定义模板-->
+  <select id="confirmPersonalTemplate" parameterType="String" resultType="com.xiangshangban.device.bean.Template">
+    select template_id as templateId from template_ where device_id = #{deviceId} and template_level = '2'
+  </select>
 </mapper>

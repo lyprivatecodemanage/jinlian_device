@@ -251,11 +251,14 @@ public class ActivityController {
             int pageSize = Integer.parseInt(rows.toString());
 
             for(int i=((pageIndex-1)*pageSize);i<(pageSize*pageIndex);i++){
-                newInfo.add(fullInfo.get(i));
+                    if(i==fullInfo.size()){
+                        break;
+                    }
+                    newInfo.add(fullInfo.get(i));
+                }
             }
-        }
 
-        Map result = PageUtils.doSplitPage(newInfo,page,rows);
+        Map result = PageUtils.doSplitPage(fullInfo,newInfo,page,rows,null);
         return JSONArray.toJSONString(result);
     }
 
@@ -412,34 +415,32 @@ public class ActivityController {
     }
 
     /**
-     * 添加自动义的模板
+     * TODO 添加自动义的模板
      *
      {
              "deviceId":"1", ------->要进行模板添加的设备
-             "templateId":{
-             "current":"2",
-             "select":"3"
-             },
-             "backImgList":[
+             "templateId":"",------>选择的标准模板的ID
 
-             {"imgId":"1","startTime":"2017-11-04 08:00","endTime":"2017-11-04 12:00"},
-             {"imgId":"2","startTime":"2017-11-04 12:00","endTime":"2017-11-04 18:00"}
+             "backImgList":[--------用户设置的背景图信息
+
+                     {"imgId":"1","startTime":"2017-11-04 08:00","endTime":"2017-11-04 12:00"},
+                     {"imgId":"2","startTime":"2017-11-04 12:00","endTime":"2017-11-04 18:00"}
 
              ],
 
              "salutationList":[
 
-             {"content":"上午","startTime":"2017-11-04 08:00","endTime":"2017-11-04 12:00"},
-             {"content":"下午","startTime":"2017-11-04 12:00","endTime":"2017-11-04 18:00"}
+                   {"content":"上午","startTime":"2017-11-04 08:00","endTime":"2017-11-04 12:00"},
+                   {"content":"下午","startTime":"2017-11-04 12:00","endTime":"2017-11-04 18:00"}
 
              ],
-             "companyLogoName":"xxx"
+
+             "companyLogoName":"logoName"--------------->用户上传的公司Logo名称
      }
      */
     @PostMapping ("/addDeviceTemplate")
     public String addDeviceTemplate(@RequestBody String addTemplateInfo){
-
-        boolean result = iTemplateService.addDeviceTemplate(addTemplateInfo);
+        Map result = iTemplateService.addDeviceTemplate(addTemplateInfo);
         return JSONObject.toJSONString(ReturnCodeUtil.addReturnCode(result));
     }
 

@@ -1,11 +1,15 @@
 package com.xiangshangban.device.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.xiangshangban.device.bean.*;
 import com.xiangshangban.device.common.rmq.RabbitMQSender;
 import com.xiangshangban.device.common.utils.CalendarUtil;
 import com.xiangshangban.device.common.utils.DateUtils;
 import com.xiangshangban.device.common.utils.FormatUtil;
+import com.xiangshangban.device.common.utils.PageUtils;
 import com.xiangshangban.device.dao.*;
 import com.xiangshangban.device.service.IEntranceGuardService;
 import net.sf.json.JSONObject;
@@ -104,6 +108,15 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
     }
 
     /**
+     * 查询door_表主键的最大值
+     * @return
+     */
+    @Override
+    public int queryPrimaryKeyFromDoor() {
+        return doorMapper.selectPrimaryKeyFromDoor();
+    }
+
+    /**
      * 更新门信息
      * @param door
      * @return
@@ -139,25 +152,117 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
 
     /**
      * 根据门名称，查询门信息
-     * @param door
+     * @param
      * @return
      */
     @Override
-    public List<Map> queryAllDoorInfo(Door door) {
-        if(door.getDoorName()!=null&&!door.getDoorName().isEmpty()){
-            door.setDoorName("%"+door.getDoorName()+"%");
-        }
-        List<Map> doorInfo = doorMapper.getDoorInfo(door);
+    public List<Map> queryAllDoorInfo(Map map) {
+        List<Map> doorInfo = doorMapper.getDoorInfo(map);
         return doorInfo ;
+    }
+    //TODO ############《日志管理》###############
+    /**
+     * 按条件查询日志信息
+     * @return
+     * {
+     *     "companyName":"无敌的公司",----->企业名称
+     *     "deviceName":"无敌的设备",----------------------------------->设备名称
+     *     "operateType":"1",----------------->操作类型ID<预留的搜索条件：暂时不需要>
+     *     "time":"2017-11-20 18:00",--------->时间
+     *     "page":"1",------------->当前页码
+     *     "rows":"10"------------->每一页显示的行数
+     * }
+     */
+    @Override
+    public Map queryLogCommand(String requestParam) {
+        //定义操作内容
+        String[] operateStr ={"待发送","下发中","下发成功","下发失败","删除人员权限","已回复"};
+
+        com.alibaba.fastjson.JSONObject jsonObject = com.alibaba.fastjson.JSONObject.parseObject(requestParam);
+        Map map = new HashMap();
+        map.put("companyName",jsonObject.get("companyName")!=null?"%"+jsonObject.get("companyName").toString()+"%":null);
+        map.put("deviceName",jsonObject.get("deviceName")!=null?"%"+jsonObject.get("deviceName").toString()+"%":null);
+       /* map.put("operateType",jsonObject.get("operateType")!=null?jsonObject.get("operateType").toString():null);*/
+        map.put("time",jsonObject.get("time")!=null?"%"+jsonObject.get("time").toString()+"%":null);
+
+        Object page = jsonObject.get("page");
+        Object rows = jsonObject.get("rows");
+        Page pageObj = null;
+        if(page!=null&&!page.toString().isEmpty()&&rows!=null&&!rows.toString().isEmpty()){
+            pageObj = PageHelper.startPage(Integer.parseInt(page.toString()),Integer.parseInt(rows.toString()));
+        }
+
+        List<Map> logs = doorCmdMapper.selectLogCommand(map);
+
+        //将没有的字段设置为“”
+        for(int i=0;i<logs.size();i++){
+            logs.get(i).put("super_cmd_id",logs.get(i).get("super_cmd_id")==null?"":logs.get(i).get("super_cmd_id"));
+            logs.get(i).put("send_time",logs.get(i).get("send_time")==null?"":logs.get(i).get("send_time"));
+            logs.get(i).put("status",logs.get(i).get("status")==null?"":logs.get(i).get("status"));
+            logs.get(i).put("company_name",logs.get(i).get("company_name")==null?"":logs.get(i).get("company_name"));
+            logs.get(i).put("device_name",logs.get(i).get("device_name")==null?"":logs.get(i).get("device_name"));
+            logs.get(i).put("employee_name",logs.get(i).get("employee_name")==null?"":logs.get(i).get("employee_name"));
+        }
+
+        //完善数据结构
+        for(int i=0;i<logs.size();i++){
+            String status = logs.get(i).get("status").toString();
+            for(int j=0;j<operateStr.length;j++){
+                if(status.equals(String.valueOf(j))){
+                    logs.get(i).put("status",operateStr[j].toString());
+                }
+            }
+        }
+
+        List outterLogList = new ArrayList();
+        //更改返回的数据的字段名称，方便识别
+        for(int i=0;i<logs.size();i++){
+            Map innerMap = new HashMap();
+            innerMap.put("logId",logs.get(i).get("super_cmd_id"));
+            innerMap.put("companyName",logs.get(i).get("company_name"));
+            innerMap.put("deviceName",logs.get(i).get("device_name"));
+            innerMap.put("operateType",logs.get(i).get("数据"));//暂时固定：后期要更改
+            innerMap.put("operateEmployee",logs.get(i).get("employee_name"));
+            innerMap.put("time",logs.get(i).get("send_time"));
+            innerMap.put("operateContent",logs.get(i).get("status"));
+
+            outterLogList.add(innerMap);
+        }
+        return PageUtils.doSplitPage(null,outterLogList,page,rows,pageObj);
+    }
+
+    /**
+     * 批量删除日志信息
+     * @param requestParam
+     * @return
+        {
+        "logIdList":[
+        {"log_id":"26C8746239514090926B68CE0A07AA60"},
+        {"log_id":"725E7BD1B1F44DFAB4C64CA09D790E4A"}
+        ]
+        }
+     */
+    @Override
+    public boolean clearLogCommand(String requestParam) {
+        com.alibaba.fastjson.JSONObject jsonObject = com.alibaba.fastjson.JSONObject.parseObject(requestParam);
+        JSONArray logArray = JSONArray.parseArray(com.alibaba.fastjson.JSONObject.toJSONString(jsonObject.get("logIdList")));
+        List list = new ArrayList();
+        com.alibaba.fastjson.JSONObject logId = null;
+        for(int i=0;i<logArray.size();i++){
+            logId = com.alibaba.fastjson.JSONObject.parseObject(logArray.get(i).toString());
+            list.add(logId.get("log_id"));
+        }
+        int delRsult = doorCmdMapper.removeLogCommand(list);
+        return delRsult>0?true:false;
     }
 
     //TODO  ##################《授权中心》################
     @Override
-    public List<Map> authoQueryAllDoor(DoorEmployee doorEmployee) {
-        if(doorEmployee.getDoorName()!=null&&!doorEmployee.getDoorName().isEmpty()){
-            doorEmployee.setDoorName("%"+doorEmployee.getDoorName()+"%");
+    public List<Map> authoQueryAllDoor(Map map) {
+        if(map.get("doorName")!=null&&!map.get("doorName").toString().isEmpty()){
+           map.put("doorName","%"+map.get("dorName")+"%");
         }
-        List<Map> doorEmployeeList = doorEmployeeMapper.queryDoorEmployeeInfo(doorEmployee);
+        List<Map> doorEmployeeList = doorEmployeeMapper.queryDoorEmployeeInfo(map);
         return doorEmployeeList;
     }
 
@@ -191,26 +296,31 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
      * @return
      */
     @Override
-    public List<Map> queryRelateEmpPermissionInfo(RelateEmpPermissionCondition relateEmpPermissionCondition) {
-        if(relateEmpPermissionCondition.getEmpName()!=null&&!relateEmpPermissionCondition.getEmpName().isEmpty()){
-            relateEmpPermissionCondition.setEmpName("%"+relateEmpPermissionCondition.getEmpName()+"%");
+    public List<Map> queryRelateEmpPermissionInfo(Map relateEmpPermissionCondition) {
+        if(relateEmpPermissionCondition.get("empName")!=null&&!relateEmpPermissionCondition.get("empName").toString().isEmpty()){
+            relateEmpPermissionCondition.put("empName","%"+relateEmpPermissionCondition.get("empName")+"%");
         }
-        if(relateEmpPermissionCondition.getDeptName()!=null&&!relateEmpPermissionCondition.getDeptName().isEmpty()){
-            relateEmpPermissionCondition.setDeptName("%"+relateEmpPermissionCondition.getDeptName()+"%");
+        if(relateEmpPermissionCondition.get("deptName")!=null&&!relateEmpPermissionCondition.get("deptName").toString().isEmpty()){
+            relateEmpPermissionCondition.put("deptName","%"+relateEmpPermissionCondition.get("deptName")+"%");
         }
-
+        if(relateEmpPermissionCondition.get("openTime")!=null&&!relateEmpPermissionCondition.get("openTime").toString().isEmpty()){
+            relateEmpPermissionCondition.put("openTime","%"+relateEmpPermissionCondition.get("openTime")+"%");
+        }
+        if(relateEmpPermissionCondition.get("openType")!=null&&!relateEmpPermissionCondition.get("openType").toString().isEmpty()){
+            relateEmpPermissionCondition.put("openType","%"+relateEmpPermissionCondition.get("openType")+"%");
+        }
         List<Map> maps = doorEmployeeMapper.selectRelateEmpPermissionInfo(relateEmpPermissionCondition);
         return maps;
     }
 
     /**
-     * 查询设备命令信息（下方时间、下发状态、下发数据）
-     * @param relateEmpPermissionCondition
+     *查询具有门禁权限的人员一周的开门时间段
+     * @param empId
      * @return
      */
     @Override
-    public List<Map> queryCMDInfo(RelateEmpPermissionCondition relateEmpPermissionCondition) {
-        List<Map> maps = doorEmployeeMapper.selectCMDInfo(relateEmpPermissionCondition);
+    public List<Map> queryAWeekOpenTime(String empId) {
+        List<Map> maps = doorEmployeeMapper.selectAWeekOpenTime(empId);
         return maps;
     }
 
@@ -260,9 +370,9 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
 
     //TODO ################《门禁记录》################
 
-    //查询打卡记录
+    //查询打卡记录和门禁异常
     @Override
-    public List<Map> queryPunchCardRecord(DoorRecordCondition doorRecordCondition) {
+    public List<Map> queryPunchCardRecord(DoorRecordCondition doorRecordCondition,int flag) {
         //验证数据的合法性
         if(doorRecordCondition!=null){
             if(doorRecordCondition.getName()!=null&&!doorRecordCondition.getName().isEmpty()){
@@ -271,32 +381,17 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
             if(doorRecordCondition.getDepartment()!=null&&!doorRecordCondition.getDepartment().isEmpty()){
                 doorRecordCondition.setDepartment("%"+doorRecordCondition.getDepartment()+"%");
             }
-            if(doorRecordCondition.getPunchCardType()!=null&&!doorRecordCondition.getPunchCardType().isEmpty()){
-                doorRecordCondition.setPunchCardType("%"+doorRecordCondition.getPunchCardType()+"%");
+            if(doorRecordCondition.getPunchCardTime()!=null&&!doorRecordCondition.getPunchCardTime().isEmpty()){
+                doorRecordCondition.setPunchCardTime("%"+doorRecordCondition.getPunchCardTime()+"%");
             }
-            List<Map> doorRecords = doorRecordMapper.selectPunchCardRecord(doorRecordCondition);
+            List<Map> doorRecords = null;
+            if(flag==0){//打卡记录
+                doorRecords = doorRecordMapper.selectPunchCardRecord(doorRecordCondition);
+            }
+            if(flag==1){//门禁异常
+                doorRecords = doorExceptionMapper.selectDoorExceptionRecord(doorRecordCondition);
+            }
             return doorRecords;
-        }else{
-            return null;
-        }
-    }
-
-    //查询门禁异常记录
-    @Override
-    public List<Map> queryDoorExceptionRecord(DoorExceptionCondition doorExceptionCondition) {
-        //验证数据的合法性
-        if(doorExceptionCondition!=null){
-            if(doorExceptionCondition.getName()!=null&&!doorExceptionCondition.getName().isEmpty()){
-                doorExceptionCondition.setName("%"+doorExceptionCondition.getName()+"%");
-            }
-            if(doorExceptionCondition.getDepartment()!=null&&!doorExceptionCondition.getDepartment().isEmpty()){
-                doorExceptionCondition.setDepartment("%"+doorExceptionCondition.getDepartment()+"%");
-            }
-            if(doorExceptionCondition.getAlarmType()!=null&&!doorExceptionCondition.getAlarmType().isEmpty()){
-                doorExceptionCondition.setAlarmType("%"+doorExceptionCondition.getAlarmType()+"%");
-            }
-            List<Map> doorExceptionRecords = doorExceptionMapper.selectDoorExceptionRecord(doorExceptionCondition);
-            return doorExceptionRecords;
         }else{
             return null;
         }

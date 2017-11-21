@@ -118,4 +118,21 @@ public interface TemplateMapper {
 
     //TODO 删除部分
     int deleteDeviceTemplate(@Param("templateIds") List<String> templateIds);
+
+
+
+
+    //TODO =============<2017-11-21>================
+
+    /**
+     * 查询标准模板的item信息
+     * @param templateId
+     * @return
+     */
+    List<Map> selectStandardItemInfo(@Param("templateId") String templateId);
+
+    /**
+     * 确认指定设备是否具有自定义模板
+     */
+    Template confirmPersonalTemplate(@Param("deviceId") String deviceId);
 }

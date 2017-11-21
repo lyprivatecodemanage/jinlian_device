@@ -11,6 +11,16 @@ public class RelateEmpPermissionCondition {
     private String empName;
     private String deptName;
 
+    public String getOpenTime() {
+        return openTime;
+    }
+
+    public void setOpenTime(String openTime) {
+        this.openTime = openTime;
+    }
+
+    private String openTime;
+
     //开门方式(ID)
     private String openType;
     //下发状态(ID)

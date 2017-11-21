@@ -2,6 +2,7 @@ package com.xiangshangban.device.dao;
 
 import com.xiangshangban.device.bean.DoorException;
 import com.xiangshangban.device.bean.DoorExceptionCondition;
+import com.xiangshangban.device.bean.DoorRecordCondition;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
@@ -26,5 +27,5 @@ public interface DoorExceptionMapper {
     /**
      * 多条件查询所有的门禁异常信息
      */
-    List<Map> selectDoorExceptionRecord(@Param("doorExceptionCondition") DoorExceptionCondition doorExceptionCondition);
+    List<Map> selectDoorExceptionRecord(@Param("doorRecordCondition") DoorRecordCondition doorRecordCondition);
 }

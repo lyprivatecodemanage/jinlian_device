@@ -213,24 +213,25 @@
   <!--###############《新添加部分》##############-->
   <!--分条件查询打卡记录-->
   <select id="selectPunchCardRecord" parameterType="com.xiangshangban.device.bean.DoorRecordCondition" resultType="map">
-    select A.record_type,record_date,B.employee_name,employee_department_name from door_record A
-    inner join employee_ B on A.employee_id = B.employee_id and
-    A.employee_id in (select employee_id from employee_
+    select record_type,record_date,employee_name,employee_department_name from (select A.record_type,record_date,B.employee_name,employee_department_name,employee_company_id from door_record A
+    left join employee_ B on A.employee_id = B.employee_id and A.employee_id in (select employee_id from employee_) where A.record_type in('3','5','6','7','8') ) S
     <where>
       <if test="doorRecordCondition.name!=null and doorRecordCondition.name!=''">
-        employee_name like #{doorRecordCondition.name}
+        S.employee_name like #{doorRecordCondition.name}
       </if>
       <if test="doorRecordCondition.department!=null and doorRecordCondition.department!=''">
-        and employee_department_name like #{doorRecordCondition.department}
+        and S.employee_department_name like #{doorRecordCondition.department}
       </if>
-    </where>
-      )
+      <if test="doorRecordCondition.companyId!=null and doorRecordCondition.companyId!=''">
+        and S.employee_company_id = #{doorRecordCondition.companyId}
+      </if>
       <if test="doorRecordCondition.punchCardType!=null and doorRecordCondition.punchCardType!=''">
-         and A.record_type like #{doorRecordCondition.punchCardType}
+        and S.record_type = #{doorRecordCondition.punchCardType}
       </if>
       <if test="doorRecordCondition.punchCardTime!=null and doorRecordCondition.punchCardTime!=''">
-         and A.record_date = #{doorRecordCondition.punchCardTime}
+        and S.record_date like #{doorRecordCondition.punchCardTime}
       </if>
+    </where>
   </select>
 
   <!--查询一个员工在某段时间内的最早和最晚打卡时间-->

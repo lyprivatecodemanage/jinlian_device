@@ -50,7 +50,7 @@ public interface DoorMapper {
     /**
      * 分条件查询门信息
      */
-    List<Map> getDoorInfo(@Param("door") Door door);
+    List<Map> getDoorInfo(Map map);
 
     /**
      * 批量删除门信息
@@ -58,4 +58,9 @@ public interface DoorMapper {
      * @return
      */
     int delDoorBatch(List<String> doorList);
+
+    /**
+     * 查询door表主键的最大值
+     */
+    int selectPrimaryKeyFromDoor();
 }

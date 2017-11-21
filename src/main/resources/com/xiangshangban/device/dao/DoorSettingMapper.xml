@@ -188,8 +188,11 @@
       enable_door_calendar = #{enableDoorCalendar,jdbcType=VARCHAR}
     where door_id = #{doorId,jdbcType=VARCHAR}
   </update>
+
   <!--根据门的id查询门的设置信息-->
   <select id="selectDoorSettingInfo" parameterType="String" resultType="map">
-    select * from door_setting where door_id = #{doorId}
+    select fault_count_authentication,alarm_time_length_trespass,first_publish_password,second_publish_password,threaten_publish_passwrod,
+    manager_password,enable_door_event_record,enable_door_keep_open,enable_first_card_keep_open,enable_door_calendar
+    from door_setting where door_id = #{doorId}
   </select>
 </mapper>

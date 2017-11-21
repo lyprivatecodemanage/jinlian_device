@@ -215,16 +215,13 @@
   </select>
 
   <!--查询所有的设备信息-->
-  <select id="selectAllDeviceInfo" parameterType="java.lang.String" resultMap="BaseResultMap">
-    SELECT
-    <include refid="Base_Column_List" />
-    FROM
-	device_
-    WHERE
-	1 = 1
-    <if test="companyId != null and companyId != ''" >
-      AND company_id = #{companyId,jdbcType=VARCHAR}
-    </if>
+  <select id="selectAllDeviceInfo" parameterType="String"  resultType="map">
+    select device_id as deviceId,device_name as deviceName from device_
+    <where>
+      <if test="companyId!=null and companyId!=''">
+        company_id = #{companyId}
+      </if>
+    </where>
   </select>
 
 </mapper>

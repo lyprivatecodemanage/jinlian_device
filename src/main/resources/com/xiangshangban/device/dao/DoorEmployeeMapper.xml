@@ -99,18 +99,19 @@
 
   <!--###############<授权中心>####################-->
   <!--查询门所关联的人员的信息：手机号、人脸、NFC数量-->
-  <select id="queryDoorEmployeeInfo" parameterType="com.xiangshangban.device.bean.DoorEmployee" resultType="map">
+  <select id="queryDoorEmployeeInfo" parameterType="Map" resultType="map">
     select A.door_id,door_name,B.employee_phone,employee_face,employee_nfc from door_employee A,employee_ B where A.employee_id = B.employee_id
-    <if test="doorEmployee!=null">
-      <if test="doorEmployee.doorName!=null and doorEmployee.doorName!=''">
+      <if test="doorName!=null and doorName!=''">
         and A.door_name like #{doorEmployee.doorName}
       </if>
+    <if test="companyId!=null and  companyId!=''">
+        and B.employee_company_id = #{companyId}
     </if>
   </select>
 
   <!--查询门的命令下发的时间-->
   <select id="selectSendTime" parameterType="String" resultType="map">
-   select device_id,max(send_time) sendtime from door_cmd where device_id in
+    select device_id,max(send_time) sendtime from door_cmd where action_code in('2001','3001') and device_id in
     (select device_id from door_
      <where>
        <if test="doorName!=null and doorName!=''">
@@ -127,31 +128,35 @@
     select door_id from door_ where device_id = #{deviceId}
   </select>
 
-<!--查询门关联的用户的权限信息-->
-  <select id="selectRelateEmpPermissionInfo" parameterType="com.xiangshangban.device.bean.RelateEmpPermissionCondition" resultType="map">
-    select A.employee_id,employee_name,employee_department_name,B.day_of_week,range_start_time,range_end_time,range_door_open_type opentype,C.device_id
-    from employee_ A,time_range_common_employee B,door_ C where A.employee_id in(select employee_id from door_employee
-    where door_id = #{relateEmpPermissionCondition.doorId}) and A.employee_id = B.employee_id and C.door_id =  #{relateEmpPermissionCondition.doorId}
-    <if test="relateEmpPermissionCondition!=null">
-      <if test="relateEmpPermissionCondition.empName!=null and relateEmpPermissionCondition.empName!=''">
-        and A.employee_name like #{relateEmpPermissionCondition.empName}
+<!--查询门关联的用户的权限信息(首页展示周一最早的开门时间段)-->
+  <select id="selectRelateEmpPermissionInfo" parameterType="Map" resultType="map">
+    select Q.* from (select F.* from (select DISTINCT W.*,Y.status from (select S.*,X.lasttime from (select A.employee_id,day_of_week,range_start_time,range_end_time,range_door_open_type,B.employee_name,employee_department_name
+    from time_range_common_employee A left join employee_ B on A.employee_id = B.employee_id where A.day_of_week = '1' and A.employee_id in
+    (select employee_id from door_employee where door_id = '001')) S left join (select employee_id,max(send_time) lasttime from door_cmd where action_code = '3001' and status != '6' group by employee_id) X
+    on S.employee_id = X.employee_id ) W left join (select status,send_time from door_cmd) Y on W.lasttime = Y.send_time) F where F.employee_id in
+    (select H.employee_id from(select employee_id,min(range_start_time) earlytime from time_range_common_employee where day_of_week = '1' group by employee_id) H) and
+    F.range_start_time in (select H.earlytime from(select employee_id,min(range_start_time) earlytime from time_range_common_employee where day_of_week = '1' group by employee_id) H)) Q
+    <where>
+      <if test="empName!=null and empName!=''">
+        F.employee_name like #{empName}
       </if>
-      <if test="relateEmpPermissionCondition.deptName!=null and relateEmpPermissionCondition.deptName!=''">
-        and A.employee_department_name like #{relateEmpPermissionCondition.deptName}
+      <if test="deptName!=null and deptName!=''">
+        and F.employee_department_name like #{deptName}
       </if>
-      <if test="relateEmpPermissionCondition.openType!=null and relateEmpPermissionCondition.openType!=''">
-        and B.range_door_open_type = #{relateEmpPermissionCondition.openType}
+      <if test="rangeStartTime!=null and rangeStartTime!=''">
+        and F.range_start_time between #{rangeStartTime} and #{rangeEndTime}
       </if>
-    </if>
+      <if test="rangeEndTime!=null and rangeEndTime!=''">
+        and F.range_end_time between #{rangeStartTime} and #{rangeEndTime}
+      </if>
+      <if test="openType!=null and openType!=''">
+        and F.range_door_open_type = #{openType}
+      </if>
+    </where>
   </select>
 
-  <!--根据设备ID获取命令下发时间、状态、下发的数据-->
-  <select id="selectCMDInfo" parameterType="com.xiangshangban.device.bean.RelateEmpPermissionCondition" resultType="map">
-    select sub_cmd_id,send_time,status,data from door_cmd where device_id = #{relateEmpPermissionCondition.deviceId}
-    <if test="relateEmpPermissionCondition!=null">
-      <if test="relateEmpPermissionCondition.issueState!=null and relateEmpPermissionCondition.issueState!=''">
-        and status = #{relateEmpPermissionCondition.issueState}
-      </if>
-    </if>
+  <!--查询有门禁权限的人员的一周开门时间段-->
+  <select id="selectAWeekOpenTime" parameterType="String" resultType="map">
+    select day_of_week,range_start_time,range_end_time from time_range_common_employee where employee_id = #{empId} order by range_start_time
   </select>
 </mapper>

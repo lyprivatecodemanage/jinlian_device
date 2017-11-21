@@ -56,7 +56,7 @@ public interface IDeviceService {
      * @param companyId
      * @return
      */
-    List<Device> queryAllDeviceInfo(String companyId);
+    List<Map> queryAllDeviceInfo(String companyId);
 
     /**
      * 绑定设备

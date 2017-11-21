@@ -11,6 +11,15 @@ public class DoorRecordCondition {
     private String department;
     private String punchCardType;
     private String punchCardTime;
+    private String companyId;
+
+    public String getCompanyId() {
+        return companyId;
+    }
+
+    public void setCompanyId(String companyId) {
+        this.companyId = companyId;
+    }
 
     public String getName() {
         return name;

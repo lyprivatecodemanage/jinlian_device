@@ -34,7 +34,7 @@ public interface DoorEmployeeMapper {
     /**
      * 获取门信息，以及门关联的人员信息(根据门名称)
      */
-    List<Map> queryDoorEmployeeInfo(@Param("doorEmployee") DoorEmployee doorEmployee);
+    List<Map> queryDoorEmployeeInfo(Map map);
 
     /**
      * 查询命令下发时间
@@ -50,19 +50,13 @@ public interface DoorEmployeeMapper {
     //点击门图标，显示门关联的人员的权限信息
 
     /**
-     *获取门关联人员权限信息（姓名、部门、开门时间，开门方式）
+     *获取门关联人员权限信息（姓名、部门、开门时间，开门方式、人员门禁最后下发时间、下发状态）
+     * <查询的是周一的开门时间段>
      */
-    List<Map> selectRelateEmpPermissionInfo(@Param("relateEmpPermissionCondition")RelateEmpPermissionCondition relateEmpPermissionCondition);
+    List<Map> selectRelateEmpPermissionInfo(Map map);
 
     /**
-     * 获取设备命令信息(下发时间，下发状态，下发的数据)
+     *查询有门禁权限的人员一周的开门时间段
      */
-    List<Map> selectCMDInfo(@Param("relateEmpPermissionCondition")RelateEmpPermissionCondition relateEmpPermissionCondition);
-
-    //批量删除人员权限信息
-
-    /**
-     * 批量删除
-     */
-
+    List<Map> selectAWeekOpenTime(@Param("empId") String empId);
 }

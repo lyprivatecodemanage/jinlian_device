@@ -196,8 +196,7 @@ public class DeviceServiceImpl implements IDeviceService {
         return superCmdId;
     }
 
-    public List<Device> queryAllDeviceInfo(String companyId) {
-
+    public List<Map> queryAllDeviceInfo(String companyId) {
         return deviceMapper.selectAllDeviceInfo(companyId);
     }
 

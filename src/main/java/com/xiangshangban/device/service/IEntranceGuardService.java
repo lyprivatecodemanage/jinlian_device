@@ -27,6 +27,11 @@ public interface IEntranceGuardService {
     boolean delDoorInfoByBatch(List<String> doorList);
 
     /**
+     * 查询door_表主键的最大值
+     */
+    int queryPrimaryKeyFromDoor();
+
+    /**
      * 更新门信息
      */
     boolean updateDoorInfo(Door door);
@@ -34,15 +39,27 @@ public interface IEntranceGuardService {
     /**
      * 根据门名称查询门信息[动态查询]
      */
-    List<Map> queryAllDoorInfo(Door door);
+    List<Map> queryAllDoorInfo(Map map);
 
+    //TODO 日志管理
+
+    /**
+     * 条件查询日志
+     * @param requestParam
+     * @return
+     */
+    Map queryLogCommand(String requestParam);
+    /**
+     * 批量删除日志
+     */
+    boolean clearLogCommand(String requestParam);
 
     //TODO 授权中心
 
     /**
      * 根据门名称查询门和门关联的人员的信息
      */
-    List<Map> authoQueryAllDoor(DoorEmployee doorEmployee);
+    List<Map> authoQueryAllDoor(Map map);
 
     /**
      * 查询门命令下发时间
@@ -53,18 +70,18 @@ public interface IEntranceGuardService {
 
 
     /**
-     * 查询门关联的员工信息（姓名、部门、开门时间、开门方式）
+     * 查询门关联的员工信息（姓名、部门、开门时间、开门方式、下发时间、下发状态）
      * @param relateEmpPermissionCondition
      * @return
      */
-   List<Map> queryRelateEmpPermissionInfo(RelateEmpPermissionCondition relateEmpPermissionCondition);
+   List<Map> queryRelateEmpPermissionInfo(Map relateEmpPermissionCondition);
 
     /**
-     * 查询设备命令信息（下方时间、下发状态、下发数据）
-     * @param relateEmpPermissionCondition
+     * 查询有门禁权限的人员一周的开门时间段
+     * @param empId
      * @return
      */
-   List<Map> queryCMDInfo(RelateEmpPermissionCondition relateEmpPermissionCondition);
+   List<Map> queryAWeekOpenTime(String empId);
 
 
     /**
@@ -96,13 +113,10 @@ public interface IEntranceGuardService {
 
     //TODO 门禁记录
 
-    //1）出入记录
-    public List<Map> queryPunchCardRecord(DoorRecordCondition doorRecordCondition);
+    //1）出入记录和门禁异常
+    public List<Map> queryPunchCardRecord(DoorRecordCondition doorRecordCondition,int flag);
 
-    //2）门禁异常
-    public List<Map> queryDoorExceptionRecord(DoorExceptionCondition doorExceptionCondition);
-
-    //3）查询一个人在某段时间内的最早和最晚的打卡时间
+    //2）查询一个人在某段时间内的最早和最晚的打卡时间
     public List<String> queryPunchCardTime(String empId,String companyId,String startTime,String endTime);
 
     //门禁配置---功能配置（身份验证失败次数、非法入侵、报警时长、密码、开门事件记录）
