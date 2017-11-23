@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xiangshangban.device.dao.FestivalMapper" >
+  <resultMap id="BaseResultMap" type="com.xiangshangban.device.bean.Festival" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="festival_type" property="festivalType" jdbcType="VARCHAR" />
+    <result column="festival_name" property="festivalName" jdbcType="VARCHAR" />
+    <result column="festival_date" property="festivalDate" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, festival_type, festival_name, festival_date
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from festival_
+    where id = #{id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from festival_
+    where id = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.xiangshangban.device.bean.Festival" >
+    insert into festival_ (id, festival_type, festival_name, 
+      festival_date)
+    values (#{id,jdbcType=VARCHAR}, #{festivalType,jdbcType=VARCHAR}, #{festivalName,jdbcType=VARCHAR}, 
+      #{festivalDate,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.xiangshangban.device.bean.Festival" >
+    insert into festival_
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="festivalType != null" >
+        festival_type,
+      </if>
+      <if test="festivalName != null" >
+        festival_name,
+      </if>
+      <if test="festivalDate != null" >
+        festival_date,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="festivalType != null" >
+        #{festivalType,jdbcType=VARCHAR},
+      </if>
+      <if test="festivalName != null" >
+        #{festivalName,jdbcType=VARCHAR},
+      </if>
+      <if test="festivalDate != null" >
+        #{festivalDate,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.xiangshangban.device.bean.Festival" >
+    update festival_
+    <set >
+      <if test="festivalType != null" >
+        festival_type = #{festivalType,jdbcType=VARCHAR},
+      </if>
+      <if test="festivalName != null" >
+        festival_name = #{festivalName,jdbcType=VARCHAR},
+      </if>
+      <if test="festivalDate != null" >
+        festival_date = #{festivalDate,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.xiangshangban.device.bean.Festival" >
+    update festival_
+    set festival_type = #{festivalType,jdbcType=VARCHAR},
+      festival_name = #{festivalName,jdbcType=VARCHAR},
+      festival_date = #{festivalDate,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+</mapper>

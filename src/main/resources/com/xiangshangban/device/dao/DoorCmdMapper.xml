@@ -425,4 +425,8 @@
     </foreach>
   </update>
 
+  <!--查询更新模板指令的执行状态-->
+  <select id="selectDoorCmdResultCode" resultType="String">
+    select result_code from door_cmd where send_time = (select max(send_time) from door_cmd) and action_code = '4001'
+  </select>
 </mapper>

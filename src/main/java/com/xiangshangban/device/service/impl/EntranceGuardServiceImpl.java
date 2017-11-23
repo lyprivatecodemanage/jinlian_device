@@ -234,7 +234,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
 
             outterLogList.add(innerMap);
         }
-        return PageUtils.doSplitPage(null,outterLogList,page,rows,pageObj);
+        return PageUtils.doSplitPage(null,outterLogList,page,rows,pageObj,1);
     }
 
     /**
@@ -311,9 +311,6 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         }
         if(relateEmpPermissionCondition.get("openTime")!=null&&!relateEmpPermissionCondition.get("openTime").toString().isEmpty()){
             relateEmpPermissionCondition.put("openTime","%"+relateEmpPermissionCondition.get("openTime")+"%");
-        }
-        if(relateEmpPermissionCondition.get("openType")!=null&&!relateEmpPermissionCondition.get("openType").toString().isEmpty()){
-            relateEmpPermissionCondition.put("openType","%"+relateEmpPermissionCondition.get("openType")+"%");
         }
         List<Map> maps = doorEmployeeMapper.selectRelateEmpPermissionInfo(relateEmpPermissionCondition);
         return maps;
@@ -822,5 +819,24 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         map.put("endTime", endTime);
         List<String> strings = doorRecordMapper.selectPunchCardTime(map);
         return strings;
+    }
+
+    /**
+     * TODO APP接口，查询员工的打卡记录
+     */
+    @Override
+    public List<Map> queryEmpPunchCardRecord(String requestParam) {
+        com.alibaba.fastjson.JSONObject jsonObject = com.alibaba.fastjson.JSONObject.parseObject(requestParam);
+        Object empId = jsonObject.get("empId");
+        Object searchTime = jsonObject.get("searchTime");
+
+        List<Map> punchCardRecord = null;
+        if(empId!=null){
+            Map map = new HashMap();
+            map.put("empId",empId.toString());
+            map.put("recordDate",(searchTime==null || searchTime.toString().isEmpty())?"%"+DateUtils.getDate()+"%":"%"+searchTime+"%");
+            punchCardRecord = doorRecordMapper.selectEmpPunchRecord(map);
+        }
+        return punchCardRecord;
     }
 }

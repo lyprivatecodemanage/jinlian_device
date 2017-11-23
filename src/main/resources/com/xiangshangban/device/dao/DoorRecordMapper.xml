@@ -241,4 +241,11 @@
     (select device_id from device_ where company_id = #{map.companyId})) and record_date between #{map.startTime} and #{map.endTime}
     order by record_date desc
   </select>
+
+  <!--APP接口:查询指定员工的打卡记录-->
+  <select id="selectEmpPunchRecord" parameterType="map" resultType="map">
+    select record_type,record_date from door_record where employee_id = #{empId} and record_type in ('3','5','6','7','8')
+    and record_date like #{recordDate} order by record_date
+  </select>
+
 </mapper>

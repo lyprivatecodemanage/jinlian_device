@@ -29,45 +29,7 @@ public class ActivityController {
     private IEmployeeService iEmployeeService;
 
     /**
-     * 查询所有设备使用的模板信息
-         [
-         {
-         "templateId":"2",
-         "operateTime":"2017-11-11 14:50",
-         "deviceName":"设备1",
-         "items":[
-         {
-         "content":"秋逝",
-         "startTime":"2017-11-10 08:00",
-         "itemType":0,
-         "endTime":"2017-11-10 18:00"
-         },
-         {
-         "imgUrl":"http://xiangshangban.oss-cn-hangzhou.aliyuncs.com/test%2Fsys%2Fdevice%2Ftemplate%2Ftemplate1%2F",
-         "imgName":"logo",
-         "itemType":"8",
-         "itemId":"51"
-         }
-         ],
-         "templateStyle":"vx",
-         "images":[
-         {
-         "img_url":"http://xiangshangban.oss-cn-hangzhou.aliyuncs.com/test%2Fsys%2Fdevice%2Ftemplate%2Ftemplate1%2F",
-         "id":"27",
-         "img_name":"back"
-         }
-         ],
-         "companyLogo":"有",
-         "salutation":"未设置",
-         "operateEmployee":"员工1",
-         "deviceId":"1"
-         },
-         {
-         "totalCount":"1",
-         "totalPage":"1"
-         }
-         ]
-    /**
+     * TODO 查询所有设备自定义模板信息
      * 请求参数
      * {
      *     "deviceId":"",
@@ -79,7 +41,6 @@ public class ActivityController {
      */
     @PostMapping("/getDeviceTemplate")
     public String getDeviceTemplateInfo(@RequestBody String requestParam ){
-
         JSONObject jsonObject = JSONObject.parseObject(requestParam);
         Object page = jsonObject.get("page");
         Object rows = jsonObject.get("rows");
@@ -258,76 +219,12 @@ public class ActivityController {
                 }
             }
 
-        Map result = PageUtils.doSplitPage(fullInfo,newInfo,page,rows,null);
+        Map result = PageUtils.doSplitPage(fullInfo,newInfo,page,rows,null,1);
         return JSONArray.toJSONString(result);
     }
 
     /**
-     * 查询所有的背景图（根据类别进行分组）
-     *
-     *
-             * {
-             "back_festival":[
-             {
-             "img_type":"back_festival",
-             "img_url":"http://vfdvfdv",
-             "id":"22",
-             "img_name":"dfdfdsf"
-             }
-             ],
-             "back_visit":[
-             {
-             "img_type":"back_visit",
-             "img_url":"http://fbdbfdb",
-             "id":"21",
-             "img_name":"sdsdsd"
-             }
-             ],
-             "back_show":[
-             {
-             "img_type":"back_show",
-             "img_url":"http://csdcsdc",
-             "id":"23",
-             "img_name":"ffasdfsadf"
-             },
-             {
-             "img_type":"back_show",
-             "img_url":"http://dasdasa",
-             "id":"17",
-             "img_name":"ccc"
-             },
-             {
-             "img_type":"back_show",
-             "img_url":"http://ascascas",
-             "id":"18",
-             "img_name":"xxx"
-             },
-             {
-             "img_type":"back_show",
-             "img_url":"http://ggfdgd",
-             "id":"16",
-             "img_name":"aaa"
-             },
-             {
-             "img_type":"back_show",
-             "img_url":"http://ggfdgd",
-             "id":"3",
-             "img_name":"aaa"
-             },
-             {
-             "img_type":"back_show",
-             "img_url":"http://dasdasa",
-             "id":"2",
-             "img_name":"ccc"
-             },
-             {
-             "img_type":"back_show",
-             "img_url":"http://ascascas",
-             "id":"1",
-             "img_name":"xxx"
-             }
-             ]
-             }
+     * TODO 查询所有的背景图（根据类别进行分组）
      */
     @GetMapping("/getAllBackground")
     public String getAllBackGround(){
@@ -356,9 +253,49 @@ public class ActivityController {
         return JSONObject.toJSONString(map);
 
     }
+    /**
+     * TODO 查询所有标准模板的详细信息(关于坐标的问题，可以进行等比缩小。)
+     */
+    @GetMapping("/getStandardTemplateInfo")
+    public String getStandardTemplateInfo(){
+        List<Map> templateInfo = iTemplateService.queryStandardTemplateInfo();
+        return JSONObject.toJSONString(templateInfo);
+    }
+
+    //TODO ==================<2017-11-22>====================
 
     /**
-     * 更新设备当前使用的模板的信息
+     * TODO 添加自定义的模板
+     *
+     {
+     "deviceId":"1", ------->要进行模板添加的设备
+     "templateId":"",------>选择的标准模板的ID
+
+     "backImgList":[--------用户设置的背景图信息
+
+     {"imgId":"1","startTime":"2017-11-04 08:00","endTime":"2017-11-04 12:00"},
+     {"imgId":"2","startTime":"2017-11-04 12:00","endTime":"2017-11-04 18:00"}
+
+     ],
+
+     "salutationList":[
+
+     {"content":"上午","startTime":"2017-11-04 08:00","endTime":"2017-11-04 12:00"},
+     {"content":"下午","startTime":"2017-11-04 12:00","endTime":"2017-11-04 18:00"}
+
+     ],
+
+     "companyLogoName":"logoName"--------------->用户上传的公司Logo名称
+     }
+     */
+    @PostMapping ("/addDeviceTemplate")
+    public String addDeviceTemplate(@RequestBody String addTemplateInfo){
+        Map result = iTemplateService.addDeviceTemplate(addTemplateInfo);
+        return JSONObject.toJSONString(ReturnCodeUtil.addReturnCode(result));
+    }
+
+    /**
+     * TODO 更新设备自定义模板信息
      * 请求参数数据格式：
      *{
      "deviceId":"1",
@@ -383,81 +320,18 @@ public class ActivityController {
     @PostMapping("/refreshDeviceTemplate")
     public String refreshDeviceTemplate(@RequestBody String templateInfo){
         //更新模板信息
-        boolean result= iTemplateService.modifyDeviceTemplateInfo(templateInfo);
-        return JSONObject.toJSONString(ReturnCodeUtil.addReturnCode(result));
-    }
-
-
-    /**
-     * 重置设备的模板（恢复成默认的主题）
-             {
-                 "deviceId":"1",
-                 "templateIds":[
-                         1,
-                         2
-                 ]
-             }
-     *
-     */
-    @PostMapping ("/clearDeviceTemplate")
-    public String clearDeviceTemplate(@RequestBody String delTemplateInfo){
-
-        JSONObject jsonObject = JSONObject.parseObject(delTemplateInfo);
-        String deviceId = jsonObject.get("deviceId").toString();
-        JSONArray templateIds = JSONArray.parseArray(jsonObject.get("templateIds").toString());
-
-        List<String> list = new ArrayList<>();
-        for(int i=0;i<templateIds.size();i++){
-            list.add(templateIds.get(i).toString());
-        }
-        boolean result = iTemplateService.removeDeviceTemplate(deviceId, list);
+        Map result= iTemplateService.modifyDeviceTemplateInfo(templateInfo);
         return JSONObject.toJSONString(ReturnCodeUtil.addReturnCode(result));
     }
 
     /**
-     * TODO 添加自动义的模板
-     *
-     {
-             "deviceId":"1", ------->要进行模板添加的设备
-             "templateId":"",------>选择的标准模板的ID
-
-             "backImgList":[--------用户设置的背景图信息
-
-                     {"imgId":"1","startTime":"2017-11-04 08:00","endTime":"2017-11-04 12:00"},
-                     {"imgId":"2","startTime":"2017-11-04 12:00","endTime":"2017-11-04 18:00"}
-
-             ],
-
-             "salutationList":[
-
-                   {"content":"上午","startTime":"2017-11-04 08:00","endTime":"2017-11-04 12:00"},
-                   {"content":"下午","startTime":"2017-11-04 12:00","endTime":"2017-11-04 18:00"}
-
-             ],
-
-             "companyLogoName":"logoName"--------------->用户上传的公司Logo名称
-     }
+     * TODO 重置设备的模板（恢复成默认的主题：删除该设备所有的自定义模板？）
+         {
+         "deviceId":"1"
+         }
      */
-    @PostMapping ("/addDeviceTemplate")
-    public String addDeviceTemplate(@RequestBody String addTemplateInfo){
-        Map result = iTemplateService.addDeviceTemplate(addTemplateInfo);
-        return JSONObject.toJSONString(ReturnCodeUtil.addReturnCode(result));
-    }
-
-    /**
-     * 查询所有标准模板的详细信息(关于坐标的问题，可以进行等比缩小。)
-     */
-    @GetMapping("/getStandardTemplateInfo")
-    public String getStandardTemplateInfo(){
-        List<Map> templateInfo = iTemplateService.queryStandardTemplateInfo();
-        return JSONObject.toJSONString(templateInfo);
-    }
-
-    /**
-     * 下发节日节气模板
-     */
-    public String issueFestivalTemplate(){
-
-        return  null;
+    @PostMapping ("/resetDeviceTemplate")
+    public String resetDeviceTemplate(@RequestBody String delTemplateInfo){
+        return null;
     }
 }

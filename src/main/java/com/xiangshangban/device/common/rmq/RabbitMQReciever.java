@@ -150,7 +150,6 @@ public class RabbitMQReciever {
 
                         }else {
                             System.out.println("MD5校验失败，数据已被修改");
-
                         }
 
                     }else if (mapResult.get("commandMode").equals("R")){

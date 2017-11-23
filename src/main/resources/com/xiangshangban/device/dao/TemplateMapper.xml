@@ -162,6 +162,8 @@
     where template_id = #{templateId,jdbcType=VARCHAR}
   </update>
 
+  <!--#########《2017-11-21》########-->
+
   <!--查询所有设备的模板信息-->
   <select id="selectDeviceTemplateInfo" parameterType="map" resultType="map">
     select A.device_id,device_name,B.template_id,template_style,logo_flag,solutation_flag,operate_time,operate_emp from device_ A
@@ -182,16 +184,20 @@
     select device_id,template_id,template_type,template_level,roasting_time from template_ where template_id = #{templateId}
   </select>
 
-  <!--根据模板的ID查询详细的模板items（备用方法<用于封装指令信息>）-->
-  <select id="selectTemplateItemsDetail" parameterType="String" resultType="map">
-       select A.item_id,item_type,item_top_x,item_top_y,item_font_orient,item_font_size,item_font_bold,
-     item_font_color,A.template_id,item_start_date,item_end_date,item_font_content,B.img_name,
-     img_url from template_items A left join image_ B on A.item_img_id = B.id where A.template_id = #{templateId}
-  </select>
-
   <select id="selectTemplateItems" parameterType="String" resultType="map">
     select A.item_id,item_type,item_top_x,item_top_y,item_font_orient,item_start_date,item_end_date,item_font_content,B.img_name,
     img_url from template_items A left join image_ B on A.item_img_id = B.id where A.template_id = #{templateId} and A.item_type in('0','8')
+  </select>
+
+  <!--根据模板的ID查询详细的模板items（备用方法<用于封装指令信息>）-->
+  <select id="selectTemplateItemsDetail" parameterType="String" resultType="map">
+    select A.item_id,item_type,item_top_x,item_top_y,item_font_orient,item_font_size,item_font_bold,
+    item_font_color,A.template_id,item_start_date,item_end_date,item_font_content,B.img_name,
+    img_url from template_items A left join image_ B on A.item_img_id = B.id where A.template_id = #{templateId}
+  </select>
+
+  <select id="selectTemplateImages" parameterType="String" resultType="map">
+    select A.broad_start_date,A.broad_end_date,A.broad_start_time,A.broad_end_time,B.id,B.img_name,B.img_url from background_image_template A,image_ B where template_id = #{templateId} and A.img_id = B.id
   </select>
 
   <!--根据模板的ID查询模板相关的详细图片信息（备用方法<用于封装指令信息>）-->
@@ -200,72 +206,68 @@
     C.img_name relate_img_name,C.img_url relate_img_url from background_image_template A,image_ B,image_ C where template_id = #{templateId} and A.img_id = B.id  and B.relate = C.id
   </select>
 
-  <select id="selectTemplateImages" parameterType="String" resultType="map">
-    select A.broad_start_date,A.broad_end_date,A.broad_start_time,A.broad_end_time,B.id,B.img_name,B.img_url from background_image_template A,image_ B where template_id = #{templateId} and A.img_id = B.id
-  </select>
-
-  <!--更新设备的模板类型-->
-  <update id="updateDeviceTemplate" parameterType="map">
-    update template_ set template_level = #{templateLevel},solutation_flag = '1',roasting_time = '' where template_id = #{templateId}
-  </update>
-
-  <!--删除模板（默认模板不删除）-->
-  <delete id="deleteDeviceTemplate" parameterType="List">
-    delete from template_ where template_id in
-    <foreach collection="templateIds" item="templateId" index="index" open="(" separator="," close=")">
-      #{templateId}
-    </foreach>
-  </delete>
-
-  <!--查询标准模板的信息（默认的轮播周期）-->
-  <select id="selectStandardTemplateInfo" parameterType="String" resultType="map">
-    select roasting_time,template_style from template_ where template_id = #{templateId}
-  </select>
-
   <!--查询所有标准模板的详细信息(图片)（选择模板的时候使用）-->
   <select id="selectStandardTemplateDetailImageInfo" resultType="map">
-   select A.template_id,B.id,B.img_name,B.img_url from image_ B,(select template_id from template_ where is_standard = '1') A
+    select A.template_id,B.id,B.img_name,B.img_url from image_ B,(select template_id from template_ where is_standard = '1') A
     where B.id in(select img_id from background_image_template where template_id in(select template_id from template_ where is_standard = '1'))
   </select>
 
   <!--查询所有标准模板的item详细信息（选择模板的时候使用）-->
   <select id="selectStandardTemplateDetailItemInfo" resultType="map">
-     select A.item_type,item_top_x,item_top_y,item_font_orient,B.template_id from
-     template_items A,(select template_id from template_ where is_standard = '1') B  where A.template_id in(select template_id from template_ where is_standard = '1')
-  </select>
-
-
-  <!--查询标准模板的item信息-->
-  <select id="selectStandardTemplateItems" parameterType="String" resultType="map">
-     select A.item_type,item_top_x,item_top_y,item_font_orient,item_font_size,item_font_bold,item_font_color,item_start_date,item_end_date,item_font_content,item_img_id,B.img_name,img_url
-     from template_items A left join image_ B on A.item_img_id = B.id where A.template_id = #{templateId}
-  </select>
-
-  <!--查询标准模板的image信息-->
-  <select id="selectStandardTemplateImages" parameterType="String" resultType="map">
-    select B.id,B.img_name,B.img_url,B.ripple_color,C.img_name relate_img_name,C.img_url relate_img_url
-    from image_ B,image_ C where B.id in(select img_id from background_image_template where template_id = #{templateId}) and B.relate = C.id
+    select A.item_type,item_top_x,item_top_y,item_font_orient,B.template_id from
+    template_items A,(select template_id from template_ where is_standard = '1') B  where A.template_id in(select template_id from template_ where is_standard = '1')
   </select>
 
   <!--查询template表中的主键最大值-->
   <select id="selectTemplateMaxPrimaryKey" resultType="int">
-       select max(cast(template_id as integer)) from template_
+    select max(cast(template_id as integer)) from template_
   </select>
 
-  <!--更新template主表信息-->
-  <update id="updateTemplateTable" parameterType="map">
-    update template_  set template_type = '0',template_level = #{templateLevel},operate_time = #{operateTime},operate_emp = #{operateEmp},device_id = #{deviceId},roasting_time = #{roastingTime},logo_flag = #{logoFlag},solutation_flag = #{salutationFlag},festival_name = NULL,template_style = #{templateStyle},is_use = '1',is_standard = NULL where template_id = #{templateId}
-  </update>
-
-  <!--#########《2017-11-21》########-->
   <!--查询标准模板信息(样式、item和item关联的图片)-->
   <select id="selectStandardItemInfo" parameterType="String" resultType="map">
     select S.*,M.img_name,img_url from
     (select A.template_style,B.item_type,item_top_x,item_top_y,item_font_orient,item_font_size,item_font_bold,item_font_color,item_img_id
     from template_ A,template_items B where A.template_id = B.template_id  and A.template_id = #{templateId}) S left join image_ M on S.item_img_id = M.id
   </select>
+
   <!--确认指定设备是否具有自定义模板-->
   <select id="confirmPersonalTemplate" parameterType="String" resultType="com.xiangshangban.device.bean.Template">
     select template_id as templateId from template_ where device_id = #{deviceId} and template_level = '2'
+  </select>
+
+  <!--向template_表中添加自定义模板信息-->
+  <insert id="insertIntoPersonalTemplate" parameterType="Map">
+    insert into template_ values(#{template_id},#{template_type},#{template_level},
+    #{operate_time},#{operate_emp},#{device_id},#{roasting_time},#{logo_flag},#{solutation_flag},#{festival_name},#{template_style},#{is_use},#{is_standard})
+  </insert>
+
+  <!--查询background_image_template表主键的最大值-->
+  <select id="selectBackgroundImageTemplatePrimaryKey" resultType="int">
+    select max(cast(id as INTEGER )) from background_image_template
+  </select>
+
+  <!--向background_image_template表中添加数据-->
+  <insert id="insertIntoBackImage" parameterType="Map">
+    insert into background_image_template values(#{id},#{img_id},#{template_id},#{broad_start_date},#{broad_end_date},#{broad_start_time},#{broad_end_time})
+  </insert>
+
+  <!--删除指定的自定义模板-->
+  <delete id="deletePersonalTemplate" parameterType="String">
+    delete from template_ where template_id = #{templateId}
+  </delete>
+
+  <!--删除background_image_template中的数据-->
+  <delete id="deleteBackgroundImage" parameterType="String">
+    delete from background_image_template where template_id = #{templateId}
+  </delete>
+
+  <!--根据自定义模板的template_tyle查询其使用的标准模板的id-->
+  <select id="selectStandardTemplateIdByStyle" parameterType="String" resultType="String">
+    select template_id from template_ where template_style = #{template_style}
+  </select>
+
+  <!--查询所有节假日模板信息（下发给设备）-->
+  <select id="selectFestivalTemplateInfo">
+
   </select>
 </mapper>

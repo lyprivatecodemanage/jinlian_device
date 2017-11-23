@@ -139,10 +139,10 @@
 		</dependency>
 
 		<!--<dependency>-->
-			<!--<groupId>org.springframework.boot</groupId>-->
-			<!--<artifactId>spring-boot-devtools</artifactId>-->
-			<!--<version>1.5.8.RELEASE</version>-->
-			<!--<optional>true</optional>-->
+		<!--<groupId>org.springframework.boot</groupId>-->
+		<!--<artifactId>spring-boot-devtools</artifactId>-->
+		<!--<version>1.5.8.RELEASE</version>-->
+		<!--<optional>true</optional>-->
 		<!--</dependency>-->
 
 	</dependencies>
@@ -167,6 +167,30 @@
 				<configuration>
 					<verbose>true</verbose>
 					<overwrite>true</overwrite>
+				</configuration>
+			</plugin>
+
+			<!--打jar包插件-->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.7</source>
+					<target>1.7</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifest>
+							<addClasspath>true</addClasspath>
+							<useUniqueVersions>false</useUniqueVersions>
+							<classpathPrefix>lib/</classpathPrefix>
+							<mainClass>com.xiangshangban.DeviceApplication</mainClass>
+						</manifest>
+					</archive>
 				</configuration>
 			</plugin>
 

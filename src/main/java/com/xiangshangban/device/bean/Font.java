@@ -8,6 +8,42 @@ public class Font {
     private String content;
     private String coordinateX;
     private String coordinateY;
+    private String fontSize;
+    private String fontBold;
+    private String fontColor;
+    private String fontOrient;
+
+    public String getFontSize() {
+        return fontSize;
+    }
+
+    public void setFontSize(String fontSize) {
+        this.fontSize = fontSize;
+    }
+
+    public String getFontBold() {
+        return fontBold;
+    }
+
+    public void setFontBold(String fontBold) {
+        this.fontBold = fontBold;
+    }
+
+    public String getFontColor() {
+        return fontColor;
+    }
+
+    public void setFontColor(String fontColor) {
+        this.fontColor = fontColor;
+    }
+
+    public String getFontOrient() {
+        return fontOrient;
+    }
+
+    public void setFontOrient(String fontOrient) {
+        this.fontOrient = fontOrient;
+    }
 
     public String getContent() {
         return content;

@@ -186,6 +186,8 @@
     where item_id = #{itemId,jdbcType=VARCHAR}
   </update>
 
+  <!--==============<2017-11-22>=================-->
+
   <!--更新模板的logo-->
   <update id="updateTemplateLogo" parameterType="map">
      update image_ set img_name = #{imgName} where id = (select item_img_id from template_items where template_id = #{templateId} and item_type = '8')
@@ -195,161 +197,21 @@
   <select id="selectTemplateLogoId" parameterType="String" resultType="String">
     select item_img_id from template_items where template_id = #{templateId} and item_type = '8'
   </select>
-  <!--更新模板的问候语（单字）-->
-  <!--<update id="updateTemplateSalutation" parameterType="map">
-     update template_items set item_start_date = #{startTime},item_end_date = #{endTime},item_font_content = #{content} where item_id = #{item}
-  </update>-->
-
-  <!--删除模板原来的问候语-->
-  <delete id="deleteTemplateSalutation" parameterType="String">
-    delete from template_items where template_id = #{templateId} and item_type = '0'
-  </delete>
-
-  <!--添加新的问候语（单字）-->
-  <insert id="insertTemplateSalutation" parameterType="map">
-    insert into template_items(item_id,item_type,item_top_x,item_top_y,item_font_orient,item_font_size,item_font_bold,item_font_color,template_id,item_start_date,item_end_date,item_font_content)
-    values(#{itemId},'0',#{itemTopX},#{itemTopY},#{itemFontOrient},#{itemFontSize},#{itemFontBold},#{itemFontColor},#{templateId},#{startTime},#{endTime},#{itemFontContent})
-  </insert>
-
-<!--查询当前模板的问候语的样式-->
-  <select id="selectSalutationStyle" parameterType="String" resultType="map">
-   select item_font_orient,item_font_size,item_font_bold,item_font_color from template_items where template_id = #{templateId} and item_type = '0'
-  </select>
 
   <!--查询item_id的最大值-->
   <select id="selectMaxItemId" resultType="int">
     select max(cast(item_id as integer)) from template_items
   </select>
 
-  <!--查询id最大值-->
-  <select id="selectMaxId" resultType="int">
-    select max(cast(id as integer)) from background_image_template
-  </select>
-
-  <!--删除当前模板原有的背景图-->
-  <delete id="deleteTemplateBackground" parameterType="String">
-    delete from background_image_template where template_id = #{templateId}
-  </delete>
-
-  <!--给模板添加新的背景图-->
-  <insert id="insertTemplateBackground" parameterType="map">
-    insert into background_image_template(id,img_id,template_id
-    <if test="startDate!=null and startDate!=''">
-      ,broad_start_date
-    </if>
-    <if test="endDate!=null and endDate!=''">
-      ,broad_end_date
-    </if>
-    <if test="startTime!=null and startTime!=''">
-      ,broad_start_time
-    </if>
-    <if test="endTime!=null and endTime!=''">
-      ,broad_end_time
-    </if>
-    )
-    values(#{id},#{imgId},#{templateId}
-    <if test="startDate!=null and startDate!=''">
-      ,#{startDate}
-    </if>
-    <if test="endDate!=null and endDate!=''">
-      ,#{endDate}
-    </if>
-    <if test="startTime!=null and startTime!=''">
-      ,#{startTime}
-    </if>
-    <if test="endTime!=null and endTime!=''">
-      ,#{endTime}
-    </if>
-    )
+  <!--添加自定义模板的item信息-->
+  <insert id="insertPersonalTemplateItemInfo" parameterType="Map">
+    insert into template_items values(#{item_id},#{item_type},#{item_top_x},#{item_top_y},#{item_font_orient},#{item_font_size},#{item_font_bold},
+    #{item_font_color},#{template_id},#{item_img_id},#{item_start_date},#{item_end_date},#{item_font_content})
   </insert>
 
-  <!--删除模板原来的Item-->
-  <delete id="deleteTemplateItem" parameterType="String">
+  <!--删除指定自定义模板的item-->
+  <delete id="deletePersonalTemplateItemInfo" parameterType="String">
     delete from template_items where template_id = #{templateId}
   </delete>
 
-  <!--添加新的item
-  <insert id="insertTemplateItems" parameterType="map">
-    insert into template_items(item_id,item_type,item_top_x,item_top_y
-    <if test="itemFontOrient!=null and itemFontOrient!=''">
-      ,item_font_orient
-    </if>
-    <if test="itemFontSize!=null and itemFontSize!=''">
-      ,item_font_size
-    </if>
-    <if test="itemFontBold!=null and itemFontBold!=''">
-      ,item_font_bold
-    </if>
-    <if test="itemFontColor!=null and itemFontColor!=''">
-      ,item_font_color
-    </if>
-      ,template_id
-    <if test="itemImgId!=null and itemImgId!=''">
-      ,item_img_id
-    </if>
-    <if test="itemStartDate!=null and itemStartDate!=''">
-      ,item_start_date
-    </if>
-    <if test="itemEndDate!=null and itemEndDate!=''">
-      ,item_end_date
-    </if>
-    <if test="itemFontContent!=null and itemFontContent!=''">
-      ,item_font_content
-    </if>
-    )
-
-    values(#{itemId},#{itemType},#{itemTopX},#{itemTopY}
-    <if test="itemFontOrient!=null and itemFontOrient!=''">
-     ,#{itemFontOrient}
-    </if>
-    <if test="itemFontSize!=null and itemFontSize!=''">
-      ,#{itemFontSize}
-    </if>
-    <if test="itemFontBold!=null and itemFontBold!=''">
-      ,#{itemFontBold}
-    </if>
-    <if test="itemFontColor!=null and itemFontColor!=''">
-      ,#{itemFontColor}
-    </if>
-      ,#{templateId}
-    <if test="itemImgId!=null and itemImgId!=''">
-      ,#{itemImgId}
-    </if>
-    <if test="itemStartDate!=null and itemStartDate!=''">
-      ,#{itemStartDate}
-    </if>
-    <if test="itemEndDate!=null and itemEndDate!=''">
-      ,#{itemEndDate}
-    </if>
-    <if test="itemFontContent!=null and itemFontContent!=''">
-      ,#{itemFontContent}
-    </if>
-    )
-  </insert>-->
-
-  <!--添加新的item-->
-  <insert id="insertTemplateItems" parameterType="map">
-    insert into template_items(item_id,item_type,item_top_x,item_top_y
-      ,item_font_orient
-      ,item_font_size
-      ,item_font_bold
-      ,item_font_color
-      ,template_id
-      ,item_img_id
-      ,item_start_date
-      ,item_end_date
-      ,item_font_content
-    )
-    values(#{itemId},#{itemType},#{itemTopX},#{itemTopY}
-      ,#{itemFontOrient}
-      ,#{itemFontSize}
-      ,#{itemFontBold}
-      ,#{itemFontColor}
-      ,#{templateId}
-      ,#{itemImgId}
-      ,#{itemStartDate}
-      ,#{itemEndDate}
-      ,#{itemFontContent}
-    )
-  </insert>
 </mapper>

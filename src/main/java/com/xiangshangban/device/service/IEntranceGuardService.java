@@ -137,4 +137,8 @@ public interface IEntranceGuardService {
     //根据公司id查门列表
     List<Door> findDoorIdByCompanyId(String companyId);
 
+    /**
+     *  TODO APP接口（获取员工的打卡记录）
+     */
+    List<Map> queryEmpPunchCardRecord(String requestParam);
 }

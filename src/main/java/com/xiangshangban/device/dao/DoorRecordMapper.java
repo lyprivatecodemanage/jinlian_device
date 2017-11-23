@@ -32,4 +32,9 @@ public interface DoorRecordMapper {
      * 查询一段时间内，一个人的最早最晚打卡时间
      */
     List<String> selectPunchCardTime(@Param("map")Map map);
+
+    /******************************
+     * TODO APP接口：查询人员的打卡记录
+     *******************************/
+    List<Map> selectEmpPunchRecord(Map map);
 }

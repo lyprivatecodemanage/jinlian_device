@@ -46,4 +46,9 @@ public interface DoorCmdMapper {
      * 批量删除日志信息
      */
     int removeLogCommand(@Param("logList") List logList);
+
+    /**
+     * 查询更新模板指令的执行情况(result_code)
+     */
+    String selectDoorCmdResultCode();
 }

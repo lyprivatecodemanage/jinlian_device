@@ -16,7 +16,7 @@ public interface ITemplateService {
     /**
      * 更新设备的模板信息(背景图<以及展示的时间>、问候语以及展示的时间、公司Logo)
      */
-     boolean modifyDeviceTemplateInfo(String templateInfo);
+     Map modifyDeviceTemplateInfo(String templateInfo);
 
      //TODO 添加
     /**
@@ -28,11 +28,11 @@ public interface ITemplateService {
     /**
      * 下发节日节气模板
      */
-    boolean addFestivalTemplate(String templateInfo);
+    boolean addFestivalTemplate();
 
     //TODO 查询
     /**
-     * 查询所有设备当前使用的模板信息
+     * 查询所有设备的自定义模板信息
      */
     List<Map> queryDeviceTemplateInfo(String deviceId,String deviceName);
 
@@ -55,9 +55,5 @@ public interface ITemplateService {
      * 获取所有的背景图
      */
     List<Map> queryAllBackGround();
-
-
-    //TODO 删除
-    boolean removeDeviceTemplate(String deviceId,List<String> templateIds);
 
 }

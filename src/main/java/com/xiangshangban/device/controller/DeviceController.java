@@ -5,10 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.xiangshangban.device.bean.*;
 import com.xiangshangban.device.common.encode.MD5Util;
 import com.xiangshangban.device.common.rmq.RabbitMQSender;
-import com.xiangshangban.device.common.utils.CalendarUtil;
-import com.xiangshangban.device.common.utils.DateUtils;
-import com.xiangshangban.device.common.utils.FormatUtil;
-import com.xiangshangban.device.common.utils.UrlUtil;
+import com.xiangshangban.device.common.utils.*;
 import com.xiangshangban.device.dao.*;
 import com.xiangshangban.device.service.IDeviceService;
 import com.xiangshangban.device.service.IEntranceGuardService;
@@ -430,12 +427,14 @@ public class DeviceController {
     @ResponseBody
     @RequestMapping("/getAllDevice")
     public String getAllDeviceInfo(@RequestBody String jsonString){
-
         //提取数据
         JSONObject jsonObject = JSONObject.parseObject(jsonString);
         String companyId = jsonObject.get("companyId")!=null?jsonObject.get("companyId").toString():null;
         List<Map> maps = deviceService.queryAllDeviceInfo(companyId);
-        return JSONObject.toJSONString(maps);
+        //添加返回码
+        Map result = ReturnCodeUtil.addReturnCode(maps);
+        System.out.println(JSONObject.toJSONString(result));
+        return JSONObject.toJSONString(result);
     }
 
     /**

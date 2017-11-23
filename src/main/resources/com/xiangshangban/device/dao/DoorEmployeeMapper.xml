@@ -138,25 +138,25 @@
     F.range_start_time in (select H.earlytime from(select employee_id,min(range_start_time) earlytime from time_range_common_employee where day_of_week = '1' group by employee_id) H)) Q
     <where>
       <if test="empName!=null and empName!=''">
-        F.employee_name like #{empName}
+        Q.employee_name like #{empName}
       </if>
       <if test="deptName!=null and deptName!=''">
-        and F.employee_department_name like #{deptName}
+        and Q.employee_department_name like #{deptName}
       </if>
       <if test="rangeStartTime!=null and rangeStartTime!=''">
-        and F.range_start_time between #{rangeStartTime} and #{rangeEndTime}
+        and Q.range_start_time between #{rangeStartTime} and #{rangeEndTime}
       </if>
       <if test="rangeEndTime!=null and rangeEndTime!=''">
-        and F.range_end_time between #{rangeStartTime} and #{rangeEndTime}
+        and Q.range_end_time between #{rangeStartTime} and #{rangeEndTime}
       </if>
       <if test="openType!=null and openType!=''">
-        and F.range_door_open_type = #{openType}
+        and Q.range_door_open_type = #{openType}
       </if>
     </where>
   </select>
 
   <!--查询有门禁权限的人员的一周开门时间段-->
   <select id="selectAWeekOpenTime" parameterType="String" resultType="map">
-    select day_of_week,range_start_time,range_end_time from time_range_common_employee where employee_id = #{empId} order by range_start_time
+    select day_of_week,range_start_time,range_end_time,range_door_open_type from time_range_common_employee where employee_id = #{empId} order by range_start_time
   </select>
 </mapper>
