@@ -21,4 +21,7 @@ public interface EmployeeMapper {
 
     //按照卡号查找是否有人员占用了该卡号
     Employee selectByEmployeeNfc(String employeeNfc);
+
+    //根据companyId查找人员信息
+    Employee selectOneByCompanyId(String companyId);
 }

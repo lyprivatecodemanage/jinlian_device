@@ -1,15 +1,13 @@
 package com.xiangshangban.device.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.xiangshangban.device.bean.Device;
-import com.xiangshangban.device.bean.DeviceUpdatePackApp;
-import com.xiangshangban.device.bean.DeviceUpdatePackSys;
-import com.xiangshangban.device.bean.OSSFile;
+import com.xiangshangban.device.bean.*;
 import com.xiangshangban.device.common.utils.DateUtils;
 import com.xiangshangban.device.common.utils.OSSFileUtil;
 import com.xiangshangban.device.dao.DeviceMapper;
 import com.xiangshangban.device.dao.DeviceUpdatePackAppMapper;
 import com.xiangshangban.device.dao.DeviceUpdatePackSysMapper;
+import com.xiangshangban.device.dao.EmployeeMapper;
 import com.xiangshangban.device.service.OSSFileService;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +32,9 @@ public class OSSController {
 
 	@Autowired
 	DeviceMapper deviceMapper;
+
+	@Autowired
+	EmployeeMapper employeeMapper;
 
 	/**
 	 * 上传文件到OSS
@@ -167,10 +168,19 @@ public class OSSController {
 				//获取设备所属的公司id
 				String companyId = deviceMapper.selectByPrimaryKey(deviceId).getCompanyId();
 
+				//获取公司编号
+				Employee employee = employeeMapper.selectOneByCompanyId(companyId);
+
+				String companyNo = "unknowCompanyNo";
+
+				if (employee != null){
+					companyNo = employee.getCompanyNo();
+				}
+
 				//上传的设备记录图片的文件放在这个文件夹下
 				funcDirectory = "device/"+deviceId;
 				//上传文件到oss
-				ossFile = appUpload(file, companyId, funcDirectory);
+				ossFile = appUpload(file, companyNo, funcDirectory);
 			}else {
 				System.out.println("上传文件时所传设备id为空");
 			}
