@@ -326,8 +326,6 @@ public class EntranceGuardController {
                 timeDoorId = sentTimes.get(j).get("doorId").toString();
                 if (timeDoorId.equals(outterDoorId)) {
                     outterMap.put("sendTime", sentTimes.get(j).get("sendTime"));
-                }else{
-                    outterMap.put("sendTime","");
                 }
             }
             outterList.add(outterMap);
