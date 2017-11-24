@@ -192,7 +192,7 @@ public class EntranceGuardController {
         return JSONObject.toJSONString(ReturnCodeUtil.addReturnCode(result));
     }
 
-    //TODO 门禁管理------“授权中心”
+    //TODO 门禁管理--------“授权中心”
     /**
 
      * 获取门信息（包括关联的人员信息）
