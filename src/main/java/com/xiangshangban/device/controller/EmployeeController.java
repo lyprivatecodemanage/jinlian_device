@@ -332,10 +332,17 @@ public class EmployeeController {
                 try {
                     userPermission.put("permissionValidityBeginTime", doorEmployeePermission.getDoorOpenStartTime());
                 }catch (NullPointerException e){
+                    userPermission.put("permissionValidityBeginTime", "");
                     System.out.println("【"+employeeName+"】的开门权限有效时间未设置");
                 }
                 userPermission.put("permissionValidityEndTime", doorEmployeePermission.getDoorOpenEndTime());
-                userPermission.put("employeeDoorPassword", doorSetting.getFirstPublishPassword());
+                try {
+                    userPermission.put("employeeDoorPassword", doorSetting.getFirstPublishPassword());
+                }catch (Exception e){
+                    userPermission.put("employeeDoorPassword", "");
+                    System.out.println("【"+employeeName+"】的门设置未设置");
+                }
+
                 userPermission.put("oneWeekTimeList", oneWeekTimeList);
 
                 //部分需要循环修改的命令格式
@@ -403,7 +410,7 @@ public class EmployeeController {
                     //命令数据存入数据库
                     entranceGuardService.insertCommand(doorCmdEmployeeInformation);
                     //立即下发数据到MQ
-                    rabbitMQSender.sendMessage(downloadQueueName, userInformationAll);
+                    rabbitMQSender.sendMessage(deviceId, userInformationAll);
 
                     /**
                      * 人员开门权限
@@ -419,7 +426,7 @@ public class EmployeeController {
                     //命令数据存入数据库
                     entranceGuardService.insertCommand(doorCmdEmployeePermission);
                     //立即下发数据到MQ
-                    rabbitMQSender.sendMessage(downloadQueueName, userPermissionAll);
+                    rabbitMQSender.sendMessage(deviceId, userPermissionAll);
 
                 }
             }

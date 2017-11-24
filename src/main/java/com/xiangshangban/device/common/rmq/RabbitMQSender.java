@@ -36,6 +36,11 @@ public class RabbitMQSender {
      */
     public String sendMessage(String queueName,Object message) {
 
+        //动态队列名称
+        queueName = "device."+queueName+".download";
+
+        System.out.println("已向【"+queueName+"】队列发送消息.....................................");
+
         RabbitTemplateUtil templateutil = this.getRabbitMQTemplate(queueName);
         RabbitTemplate template = templateutil.getTemplate();
         //DESEncode.encrypt(JSON.toJSONString(message));

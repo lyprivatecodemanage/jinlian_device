@@ -289,6 +289,7 @@ public class DeviceController {
      * @param jsonString
      * @return
      */
+    @Transactional
     @ResponseBody
     @RequestMapping(value = "/editorDeviceInformation", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     public ReturnData editorDeviceInformation(@RequestBody String jsonString) {
@@ -1154,7 +1155,7 @@ public class DeviceController {
                 //命令数据存入数据库
                 entranceGuardService.insertCommand(doorCmdBindDevice);
                 //立即下发数据到MQ
-                rabbitMQSender.sendMessage(downloadQueueName, doorCmdPackageAll);
+                rabbitMQSender.sendMessage(deviceId, doorCmdPackageAll);
             }
 
             //保存并下发系统更新设置

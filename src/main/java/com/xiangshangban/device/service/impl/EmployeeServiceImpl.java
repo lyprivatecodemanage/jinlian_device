@@ -352,7 +352,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
         //命令数据存入数据库
         entranceGuardService.insertCommand(doorCmdDeleteEmployee);
         //立即下发数据到MQ
-        rabbitMQSender.sendMessage(downloadQueueName, userDeleteInformation);
+        rabbitMQSender.sendMessage(deviceId, userDeleteInformation);
 
     }
 
@@ -406,7 +406,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
                     //更新草稿命令由待发送状态变成发送中状态
                     doorCmdMapper.updateByPrimaryKey(doorCmd);
                     //立即下发数据到MQ
-                    rabbitMQSender.sendMessage(downloadQueueName, JSON.toJSONString(doorCmd));
+                    rabbitMQSender.sendMessage(deviceId, JSON.toJSONString(doorCmd));
 //                    System.out.println(JSON.toJSONString(doorCmd));
                 }
             } else {

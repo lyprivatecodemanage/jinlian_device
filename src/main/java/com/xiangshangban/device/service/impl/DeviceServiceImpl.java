@@ -150,12 +150,16 @@ public class DeviceServiceImpl implements IDeviceService {
         device.setDeviceUsages(deviceUsages);
 
         Door door = new Door();
-        String doorId = doorMapper.findDoorIdByDeviceId(deviceId).getDoorId();
-        if (doorId == null || "".equals(doorId)){
+        try {
+            String doorId = doorMapper.findDoorIdByDeviceId(deviceId).getDoorId();
+            if (doorId == null || "".equals(doorId)){
+                System.out.println("没有和该设备绑定的门信息");
+            }else {
+                door.setDoorId(doorId);
+                door.setDoorName(doorName);
+            }
+        }catch (Exception e){
             System.out.println("没有和该设备绑定的门信息");
-        }else {
-            door.setDoorId(doorId);
-            door.setDoorName(doorName);
         }
 
         deviceMapper.updateByPrimaryKeySelective(device);
@@ -199,7 +203,7 @@ public class DeviceServiceImpl implements IDeviceService {
         //命令数据存入数据库
         entranceGuardService.insertCommand(doorCmdRebootDevice);
         //立即下发数据到MQ
-        rabbitMQSender.sendMessage(downloadQueueName, doorCmdPackageAll);
+        rabbitMQSender.sendMessage(deviceId, doorCmdPackageAll);
 
         return superCmdId;
     }
@@ -225,6 +229,7 @@ public class DeviceServiceImpl implements IDeviceService {
         device.setDeviceId(deviceId);
         device.setCompanyId(companyId);
         device.setCompanyName(companyName);
+        System.out.println("device:           "+JSON.toJSONString(device));
         //根据deviceId判断设备信息是否存在
         Device deviceExist = deviceMapper.selectByPrimaryKey(deviceId);
         if (deviceExist == null){
@@ -264,7 +269,7 @@ public class DeviceServiceImpl implements IDeviceService {
         //命令数据存入数据库
         entranceGuardService.insertCommand(doorCmdBindDevice);
         //立即下发数据到MQ
-        rabbitMQSender.sendMessage(downloadQueueName, doorCmdPackageAll);
+        rabbitMQSender.sendMessage(deviceId, doorCmdPackageAll);
     }
 
     @Override
@@ -299,7 +304,7 @@ public class DeviceServiceImpl implements IDeviceService {
         //命令数据存入数据库
         entranceGuardService.insertCommand(doorCmdUnBindDevice);
         //立即下发数据到MQ
-        rabbitMQSender.sendMessage(downloadQueueName, doorCmdPackageAll);
+        rabbitMQSender.sendMessage(deviceId, doorCmdPackageAll);
     }
 
     @Override
@@ -391,8 +396,8 @@ public class DeviceServiceImpl implements IDeviceService {
         doorCmdRecord.setResultMessage(resultMessage);
         //命令数据存入数据库
         entranceGuardService.insertCommand(doorCmdRecord);
-//        //立即下发回复数据到MQ
-//        rabbitMQSender.sendMessage(downloadQueueName, doorRecordAll);
+        //立即下发回复数据到MQ
+        rabbitMQSender.sendMessage(deviceId, doorRecordAll);
         System.out.println("重启记录已回复");
     }
 
@@ -466,8 +471,8 @@ public class DeviceServiceImpl implements IDeviceService {
         doorCmdRecord.setResultMessage(resultMessage);
         //命令数据存入数据库
         entranceGuardService.insertCommand(doorCmdRecord);
-//        //立即下发回复数据到MQ
-//        rabbitMQSender.sendMessage(downloadQueueName, doorRecordAll);
+        //立即下发回复数据到MQ
+        rabbitMQSender.sendMessage(deviceId, doorRecordAll);
         System.out.println("运行日志上传已回复");
     }
 
@@ -539,7 +544,7 @@ public class DeviceServiceImpl implements IDeviceService {
             entranceGuardService.insertCommand(doorCmdUpdateSystem);
             System.out.println(JSON.toJSONString(doorCmdPackageAll));
             //立即下发数据到MQ
-            rabbitMQSender.sendMessage(downloadQueueName, doorCmdPackageAll);
+            rabbitMQSender.sendMessage(deviceId, doorCmdPackageAll);
         }
 
         return superCmdId;
@@ -608,7 +613,7 @@ public class DeviceServiceImpl implements IDeviceService {
             entranceGuardService.insertCommand(doorCmdUpdateSystem);
             System.out.println(JSON.toJSONString(doorCmdPackageAll));
             //立即下发数据到MQ
-            rabbitMQSender.sendMessage(downloadQueueName, doorCmdPackageAll);
+            rabbitMQSender.sendMessage(deviceId, doorCmdPackageAll);
         }
 
         return superCmdId;

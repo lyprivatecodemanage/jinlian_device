@@ -1,19 +1,30 @@
 package com.xiangshangban.device.bean;
 
 public class Device {
-
     private String deviceId;
+
     private String deviceName;
+
     private String companyId;
+
     private String companyName;
+
     private String deviceNumber;
+
     private String macAddress;
+
     private String isOnline;
+
     private String activeStatus;
+
     private String devicePlace;
+
     private String deviceUsages;
+
     private String totalServerTime;
+
     private String haveUsedTime;
+
     private String remainServerTime;
 
     public String getDeviceId() {

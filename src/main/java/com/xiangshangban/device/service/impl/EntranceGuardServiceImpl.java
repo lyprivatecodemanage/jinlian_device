@@ -418,6 +418,8 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         //获取设备id
         Door doorInfo = doorMapper.findAllByDoorId(doorId);
 
+        String deviceId = doorInfo.getDeviceId();
+
         //本地存储的门禁配置数据结构
         DoorSetting doorSetting = new DoorSetting();
         doorSetting.setDoorId(doorId);
@@ -496,7 +498,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         //构造命令格式
         DoorCmd doorCmdEmployeeInformation = new DoorCmd();
         doorCmdEmployeeInformation.setServerId("001");
-        doorCmdEmployeeInformation.setDeviceId(doorInfo.getDeviceId());
+        doorCmdEmployeeInformation.setDeviceId(deviceId);
         doorCmdEmployeeInformation.setFileEdition("v1.3");
         doorCmdEmployeeInformation.setCommandMode("C");
         doorCmdEmployeeInformation.setCommandType("single");
@@ -523,7 +525,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         //命令数据存入数据库
         insertCommand(doorCmdEmployeeInformation);
         //立即下发数据到MQ
-        rabbitMQSender.sendMessage(downloadQueueName, userInformationAll);
+        rabbitMQSender.sendMessage(deviceId, userInformationAll);
     }
 
     //门禁配置---功能配置（首卡常开权限）
@@ -532,6 +534,8 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
 
         //获取设备id
         Door doorInfo = doorMapper.findAllByDoorId(doorId);
+
+        String deviceId = doorInfo.getDeviceId();
 
         //本地存储的门禁配置数据结构
         DoorSetting doorSetting = new DoorSetting();
@@ -594,7 +598,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         //构造命令格式
         DoorCmd doorCmdEmployeeInformation = new DoorCmd();
         doorCmdEmployeeInformation.setServerId("001");
-        doorCmdEmployeeInformation.setDeviceId(doorInfo.getDeviceId());
+        doorCmdEmployeeInformation.setDeviceId(deviceId);
         doorCmdEmployeeInformation.setFileEdition("v1.3");
         doorCmdEmployeeInformation.setCommandMode("C");
         doorCmdEmployeeInformation.setCommandType("single");
@@ -621,7 +625,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         //命令数据存入数据库
         insertCommand(doorCmdEmployeeInformation);
         //立即下发数据到MQ
-        rabbitMQSender.sendMessage(downloadQueueName, userInformationAll);
+        rabbitMQSender.sendMessage(deviceId, userInformationAll);
     }
 
     //门禁配置---功能配置（门禁日历）
@@ -630,6 +634,8 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
 
         //获取设备id
         Door doorInfo = doorMapper.findAllByDoorId(doorId);
+
+        String deviceId = doorInfo.getDeviceId();
 
         //本地存储的门禁配置数据结构
         DoorSetting doorSetting = new DoorSetting();
@@ -676,7 +682,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         //构造命令格式
         DoorCmd doorCmdEmployeeInformation = new DoorCmd();
         doorCmdEmployeeInformation.setServerId("001");
-        doorCmdEmployeeInformation.setDeviceId(doorInfo.getDeviceId());
+        doorCmdEmployeeInformation.setDeviceId(deviceId);
         doorCmdEmployeeInformation.setFileEdition("v1.3");
         doorCmdEmployeeInformation.setCommandMode("C");
         doorCmdEmployeeInformation.setCommandType("single");
@@ -703,7 +709,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         //命令数据存入数据库
         insertCommand(doorCmdEmployeeInformation);
         //立即下发数据到MQ
-        rabbitMQSender.sendMessage(downloadQueueName, userInformationAll);
+        rabbitMQSender.sendMessage(deviceId, userInformationAll);
     }
 
     //门禁记录上传存储（mq过来的门禁记录信息）
@@ -715,6 +721,8 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         List<Map<String, String>> doorRecordList = (List<Map<String, String>>)doorRecordMapTemp.get("data");
         String resultCode;
         String resultMessage;
+
+        String deviceId = doorRecordList.get(0).get("deviceId");
 
         //遍历门禁记录
         for (Map<String, String> recordMap : doorRecordList) {
@@ -766,7 +774,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         //构造命令格式
         DoorCmd doorCmdRecord = new DoorCmd();
         doorCmdRecord.setServerId("001");
-        doorCmdRecord.setDeviceId(doorRecordList.get(0).get("deviceId"));
+        doorCmdRecord.setDeviceId(deviceId);
         doorCmdRecord.setFileEdition("v1.3");
         doorCmdRecord.setCommandMode("R");
         doorCmdRecord.setCommandType("S");
@@ -793,8 +801,8 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         doorCmdRecord.setResultMessage(resultMessage);
         //命令数据存入数据库
         insertCommand(doorCmdRecord);
-//        //立即下发回复数据到MQ
-//        rabbitMQSender.sendMessage(downloadQueueName, doorRecordAll);
+        //立即下发回复数据到MQ
+        rabbitMQSender.sendMessage(deviceId, doorRecordAll);
         System.out.println("门禁记录上传已回复MQ");
     }
 

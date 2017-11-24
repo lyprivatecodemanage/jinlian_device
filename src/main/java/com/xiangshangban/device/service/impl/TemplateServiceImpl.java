@@ -579,6 +579,6 @@ public class TemplateServiceImpl implements ITemplateService{
         //命令数据存入数据库
         entranceGuardService.insertCommand(doorCmdUpdateDeviceTemplate);
         //立即下发数据到MQ
-        rabbitMQSender.sendMessage(downloadQueueName, doorCmdPackageAll);
+        rabbitMQSender.sendMessage(deviceId, doorCmdPackageAll);
     }
 }

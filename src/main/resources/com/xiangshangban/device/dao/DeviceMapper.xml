@@ -227,40 +227,40 @@
   <!--根据设备id查询该公司下的设备id的集合-->
   <select id="selectAllDeviceIdOfCompanyByDeviceId" parameterType="java.lang.String" resultType="java.util.Map">
     SELECT
-	device_id
+    device_id
     FROM
-	device_
+    device_
     WHERE
-	company_id IN (
-		SELECT
-			company_id
-		FROM
-			device_
-		WHERE
-			device_id = #{deviceId,jdbcType=VARCHAR}
-	)
+    company_id IN (
+    SELECT
+    company_id
+    FROM
+    device_
+    WHERE
+    device_id = #{deviceId,jdbcType=VARCHAR}
+    )
   </select>
 
   <!--根据设备id查询该设备上传的最新的一条重启记录带上来的所有版本信息-->
   <select id="selectAllVersionInfoByDeviceId" parameterType="java.lang.String" resultType="java.util.Map">
     SELECT
-	rv.name,rv.value
+    rv.name,rv.value
     FROM
-	(
-		SELECT
-			T .reboot_id
-		FROM
-			(
-				SELECT
-					r.*, "row_number" () OVER (ORDER BY r.reboot_time DESC) rn
-				FROM
-					device_reboot_record r
-				WHERE
-					r.device_id = #{deviceId,jdbcType=VARCHAR}
-			) T
-		WHERE
-			T .rn = 1
-	) x
+    (
+    SELECT
+    T .reboot_id
+    FROM
+    (
+    SELECT
+    r.*, "row_number" () OVER (ORDER BY r.reboot_time DESC) rn
+    FROM
+    device_reboot_record r
+    WHERE
+    r.device_id = #{deviceId,jdbcType=VARCHAR}
+    ) T
+    WHERE
+    T .rn = 1
+    ) x
     LEFT JOIN device_reboot_record_version rv ON (x.reboot_id = rv.reboot_id)
   </select>
 
@@ -268,5 +268,4 @@
   <select id="selectAllDeviceInfoByNone" resultMap="BaseResultMap">
     SELECT * FROM device_
   </select>
-
 </mapper>
