@@ -37,7 +37,6 @@ public class ActivityController {
      *     "page":"",
      *     "rows":""
      * }
-     *
      */
     @PostMapping("/getDeviceTemplate")
     public String getDeviceTemplateInfo(@RequestBody String requestParam ){
