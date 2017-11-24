@@ -956,10 +956,17 @@ public class EntranceGuardController {
      */
     @ResponseBody
     @RequestMapping(value = "/saveUploadAccessAlarmImg", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
-    public Map<String, Object> saveUploadAccessAlarmImg(@RequestParam("deviceId") String deviceId,
-                                                        @RequestParam("id") String id,
-                                                        @RequestParam("eventPhotoCombinationId") String eventPhotoCombinationId,
+    public Map<String, Object> saveUploadAccessAlarmImg(@RequestParam(value = "deviceId") String deviceId,
+                                                        @RequestParam(value = "id") String id,
+                                                        @RequestParam(value = "eventPhotoCombinationId") String eventPhotoCombinationId,
                                                         @RequestParam(value="file") MultipartFile file){
+
+        System.out.println("门禁记录id = "+id);
+
+        //回复设备
+        Map<String, Object> resultData = new LinkedHashMap<String, Object>();
+        String resultCode = "";
+        String resultMessage = "";
 
         //上传照片到oss服务器
         String fileJsonString = ossController.deviceOssUpdate(file, "deviceRecordImg", "", deviceId);
@@ -971,28 +978,31 @@ public class EntranceGuardController {
         DoorRecord doorRecord = new DoorRecord();
         doorRecord.setDoorPermissionRecordId(id);
         doorRecord.setBackKey(key);
+        doorRecord.setEventPhotoGroupId(eventPhotoCombinationId);
         DoorRecord doorRecordExist = doorRecordMapper.selectByPrimaryKey(id);
         if (doorRecordExist != null){
+            System.out.println("上传的警报记录图片【"+key+"】已成功");
             doorRecordMapper.updateByPrimaryKeySelective(doorRecord);
+
+            //回复设备
+            resultCode = "0";
+            resultMessage = "执行成功";
+            resultData.put("resultCode", resultCode);
+            resultData.put("resultMessage", resultMessage);
+            Map<String, String> keyMap = new HashMap<String, String>();
+            keyMap.put("imgKey", key);
+            List<Map<String, String>> returnList = new ArrayList<Map<String, String>>();
+            returnList.add(keyMap);
+            resultData.put("returnObj", returnList);
         }else {
             System.out.println("上传的警报记录图片【"+key+"】没有与之匹配的记录id");
+            //回复设备
+            resultCode = "999";
+            resultMessage = "上传的警报记录图片【"+key+"】没有与之匹配的记录id";
+            resultData.put("resultCode", resultCode);
+            resultData.put("resultMessage", resultMessage);
+            resultData.put("returnObj", "");
         }
-
-        //回复设备
-        Map<String, Object> resultData = new LinkedHashMap<String, Object>();
-        String resultCode = "";
-        String resultMessage = "";
-
-        //回复设备
-        resultCode = "0";
-        resultMessage = "执行成功";
-        resultData.put("resultCode", resultCode);
-        resultData.put("resultMessage", resultMessage);
-        Map<String, String> keyMap = new HashMap<String, String>();
-        keyMap.put("imgKey", key);
-        List<Map<String, String>> returnList = new ArrayList<Map<String, String>>();
-        returnList.add(keyMap);
-        resultData.put("returnObj", returnList);
 
         //构造命令格式
         DoorCmd doorCmdRecord = new DoorCmd();
@@ -1084,6 +1094,7 @@ public class EntranceGuardController {
                 return returnData;
             }
         }catch (Exception e){
+            e.printStackTrace();
             returnData.setMessage("服务器错误");
             returnData.setReturnCode("3001");
             return returnData;

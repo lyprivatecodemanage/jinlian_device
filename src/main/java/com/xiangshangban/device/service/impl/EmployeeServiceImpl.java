@@ -77,6 +77,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
                 String employeeStatus = (String) employeeInfoMap.get("employeeStatus");
                 String companyId = (String) employeeInfoMap.get("companyId");
                 String companyName = (String) employeeInfoMap.get("companyName");
+                String companyNo = (String) employeeInfoMap.get("companyNo");
 
                 //增加人员信息到本地人员表
                 Employee employee = new Employee();
@@ -92,6 +93,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
                 employee.setUpdateTime(DateUtils.getDateTime());
                 employee.setEmployeeCompanyId(companyId);
                 employee.setEmployeeCompanyName(companyName);
+                employee.setCompanyNo(companyNo);
 
                 //查询人员信息是否存在
                 Employee employeeExit = employeeMapper.selectByPrimaryKey(employeeId);
@@ -349,8 +351,8 @@ public class EmployeeServiceImpl implements IEmployeeService {
         doorCmdDeleteEmployee.setData(JSON.toJSONString(userDeleteInformation.get("data")));
         //命令数据存入数据库
         entranceGuardService.insertCommand(doorCmdDeleteEmployee);
-//        //立即下发数据到MQ
-//        rabbitMQSender.sendMessage(downloadQueueName, userDeleteInformation);
+        //立即下发数据到MQ
+        rabbitMQSender.sendMessage(downloadQueueName, userDeleteInformation);
 
     }
 
@@ -403,8 +405,8 @@ public class EmployeeServiceImpl implements IEmployeeService {
                     doorCmd.setStatus("1");
                     //更新草稿命令由待发送状态变成发送中状态
                     doorCmdMapper.updateByPrimaryKey(doorCmd);
-//                    //立即下发数据到MQ
-//                    rabbitMQSender.sendMessage(downloadQueueName, JSON.toJSONString(doorCmd));
+                    //立即下发数据到MQ
+                    rabbitMQSender.sendMessage(downloadQueueName, JSON.toJSONString(doorCmd));
 //                    System.out.println(JSON.toJSONString(doorCmd));
                 }
             } else {

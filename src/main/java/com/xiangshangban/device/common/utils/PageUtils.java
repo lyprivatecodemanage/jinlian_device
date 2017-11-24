@@ -73,4 +73,37 @@ public class PageUtils {
         }
         return map;
     }
+
+    /**
+     *
+     * @param oldMapList （返回给前端的分页前的数据）当一个业务中，需要进行多次查询的时候，
+     *                   需要对查询出来数据进行组拼，这个时候使用PageHelper没有意义，所以为了获取分页前的总行数信息，需要使用分页前的数据
+     * @param mapList （返回给前端的分页后的数据）（针对的是进行分页后）
+     * @param page 当前页码
+     * @param rows 每一页要显示的行数
+     * @param pageObj PageHelper.startPage()方法返回值：Page对象，该对象包含数据的总行数
+     * @return
+     */
+    public static Map doSplitPageOther(List<Map<String, Object>> oldMapList,List<Map> mapList, Object page, Object rows, Page pageObj){
+        Map map = new HashMap();
+
+        //如果进行分页，添加分页信息
+        if (page != null && !page.toString().isEmpty() && rows != null && !rows.toString().isEmpty()) {
+            //获取数据的总行数
+            Long totalCount = null;
+            if (oldMapList != null) {
+                totalCount = ((Integer) oldMapList.size()).longValue();
+            }
+            if (pageObj != null) {
+                totalCount = pageObj.getTotal();
+            }
+            //获取总页数
+            int pageSize = Integer.parseInt(rows.toString());
+            int totalPage = totalCount.intValue() % pageSize == 0 ? totalCount.intValue() / pageSize : (totalCount.intValue() / pageSize) + 1;
+
+            map.put("totalPages", String.valueOf(totalCount));//总条数
+            map.put("pagecountNum", String.valueOf(totalPage));//总页数
+        }
+        return map;
+    }
 }

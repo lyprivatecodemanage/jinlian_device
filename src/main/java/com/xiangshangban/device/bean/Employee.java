@@ -1,29 +1,53 @@
 package com.xiangshangban.device.bean;
 
 public class Employee {
-
     private String employeeId;
+
     private String employeeNumber;
+
     private String employeeName;
+
     private String employeeBirthday;
+
     private String employeeEntryTime;
+
     private String employeeProbationaryExpired;
+
     private String employeeContractExpired;
+
     private String adminFlag;
+
     private String employeeImg;
+
     private String employeePhoto;
+
     private String employeeFinger1;
+
     private String employeeFinger2;
+
     private String employeeFace;
+
     private String employeePhone;
+
     private String employeeNfc;
+
     private String employeeStatus;
+
     private String transactionState;
+
     private String updateTime;
+
     private String employeeCompanyId;
+
     private String employeeCompanyName;
+
     private String employeeDepartmentId;
+
     private String employeeDepartmentName;
+
+    private String companyNo;
+
+    private String bluetoothNo;
 
     public String getEmployeeId() {
         return employeeId;
@@ -199,5 +223,21 @@ public class Employee {
 
     public void setEmployeeDepartmentName(String employeeDepartmentName) {
         this.employeeDepartmentName = employeeDepartmentName;
+    }
+
+    public String getCompanyNo() {
+        return companyNo;
+    }
+
+    public void setCompanyNo(String companyNo) {
+        this.companyNo = companyNo;
+    }
+
+    public String getBluetoothNo() {
+        return bluetoothNo;
+    }
+
+    public void setBluetoothNo(String bluetoothNo) {
+        this.bluetoothNo = bluetoothNo;
     }
 }

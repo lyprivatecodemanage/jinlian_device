@@ -514,8 +514,8 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         doorCmdEmployeeInformation.setData(JSON.toJSONString(userInformationAll.get("data")));
         //命令数据存入数据库
         insertCommand(doorCmdEmployeeInformation);
-//        //立即下发数据到MQ
-//        rabbitMQSender.sendMessage(downloadQueueName, userInformationAll);
+        //立即下发数据到MQ
+        rabbitMQSender.sendMessage(downloadQueueName, userInformationAll);
     }
 
     //门禁配置---功能配置（首卡常开权限）
@@ -612,8 +612,8 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         doorCmdEmployeeInformation.setData(JSON.toJSONString(userInformationAll.get("data")));
         //命令数据存入数据库
         insertCommand(doorCmdEmployeeInformation);
-//        //立即下发数据到MQ
-//        rabbitMQSender.sendMessage(downloadQueueName, userInformationAll);
+        //立即下发数据到MQ
+        rabbitMQSender.sendMessage(downloadQueueName, userInformationAll);
     }
 
     //门禁配置---功能配置（门禁日历）
@@ -694,8 +694,8 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         doorCmdEmployeeInformation.setData(JSON.toJSONString(userInformationAll.get("data")));
         //命令数据存入数据库
         insertCommand(doorCmdEmployeeInformation);
-//        //立即下发数据到MQ
-//        rabbitMQSender.sendMessage(downloadQueueName, userInformationAll);
+        //立即下发数据到MQ
+        rabbitMQSender.sendMessage(downloadQueueName, userInformationAll);
     }
 
     //门禁记录上传存储（mq过来的门禁记录信息）

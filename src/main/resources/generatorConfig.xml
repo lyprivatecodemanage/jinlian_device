@@ -2,9 +2,7 @@
 <!DOCTYPE generatorConfiguration PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN" "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd" >
 <generatorConfiguration>
     <classPathEntry
-
-            location="E:\2017-11-21整合后的项目\device\src\main\resources\postgresql-9.1-901.jdbc4.jar" />
-
+            location="C:\Users\loogooloo\IdeaProjects\device\src\main\resources\postgresql-9.1-901.jdbc4.jar" />
     <context id="context1">
 
         <!--去除注释 -->
@@ -13,22 +11,21 @@
         </commentGenerator>
 
         <jdbcConnection driverClass="org.postgresql.Driver"
-                        connectionURL="jdbc:postgresql://192.168.0.242:5432/xiangshangban2_0" userId="postgres"
+                        connectionURL="jdbc:postgresql://192.168.0.242:5432/xiangshangban2_0" userId="device"
                         password="jinnian-123abc" />
         <!-- 生成模型的包名和位置-->
         <javaModelGenerator targetPackage="com.xiangshangban.device.bean"
-
-                            targetProject="E:\2017-11-21整合后的项目\device\src\main\java" />
+                            targetProject="C:\Users\loogooloo\IdeaProjects\device\src\main\java" />
         <!-- 生成映射文件的包名和位置-->
         <sqlMapGenerator targetPackage="com.xiangshangban.device.dao"
-                         targetProject="E:\2017-11-21整合后的项目\device\src\main\resources" />
+                         targetProject="C:\Users\loogooloo\IdeaProjects\device\src\main\resources" />
         <!-- 生成DAO的包名和位置-->
         <javaClientGenerator
                 targetPackage="com.xiangshangban.device.dao"
-                targetProject="E:\2017-11-21整合后的项目\device\src\main\java"
+                targetProject="C:\Users\loogooloo\IdeaProjects\device\src\main\java"
                 type="XMLMAPPER" />
         <!-- 要生成哪些表,生成的接口中包含哪些方法，设置为false表示不生成-->
-        <table tableName="festival_" domainObjectName="Festival" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false"></table>
+        <table tableName="employee_" domainObjectName="Employee" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false"></table>
 
         <!-- <table schema="zpeng" tableName="stu" domainObjectName="Student"
             enableSelectByPrimaryKey="true" enableUpdateByPrimaryKey="true"

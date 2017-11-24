@@ -198,8 +198,8 @@ public class DeviceServiceImpl implements IDeviceService {
         doorCmdRebootDevice.setData(JSON.toJSONString(doorCmdPackageAll.get("data")));
         //命令数据存入数据库
         entranceGuardService.insertCommand(doorCmdRebootDevice);
-//        //立即下发数据到MQ
-//        rabbitMQSender.sendMessage(downloadQueueName, doorCmdPackageAll);
+        //立即下发数据到MQ
+        rabbitMQSender.sendMessage(downloadQueueName, doorCmdPackageAll);
 
         return superCmdId;
     }
@@ -263,8 +263,8 @@ public class DeviceServiceImpl implements IDeviceService {
         doorCmdBindDevice.setData(JSON.toJSONString(doorCmdPackageAll.get("data")));
         //命令数据存入数据库
         entranceGuardService.insertCommand(doorCmdBindDevice);
-//        //立即下发数据到MQ
-//        rabbitMQSender.sendMessage(downloadQueueName, doorCmdPackageAll);
+        //立即下发数据到MQ
+        rabbitMQSender.sendMessage(downloadQueueName, doorCmdPackageAll);
     }
 
     @Override
@@ -298,8 +298,8 @@ public class DeviceServiceImpl implements IDeviceService {
         doorCmdUnBindDevice.setData(JSON.toJSONString(doorCmdPackageAll.get("data")));
         //命令数据存入数据库
         entranceGuardService.insertCommand(doorCmdUnBindDevice);
-//        //立即下发数据到MQ
-//        rabbitMQSender.sendMessage(downloadQueueName, doorCmdPackageAll);
+        //立即下发数据到MQ
+        rabbitMQSender.sendMessage(downloadQueueName, doorCmdPackageAll);
     }
 
     @Override
@@ -538,8 +538,8 @@ public class DeviceServiceImpl implements IDeviceService {
             //命令数据存入数据库
             entranceGuardService.insertCommand(doorCmdUpdateSystem);
             System.out.println(JSON.toJSONString(doorCmdPackageAll));
-//            //立即下发数据到MQ
-//            rabbitMQSender.sendMessage(downloadQueueName, doorCmdPackageAll);
+            //立即下发数据到MQ
+            rabbitMQSender.sendMessage(downloadQueueName, doorCmdPackageAll);
         }
 
         return superCmdId;
@@ -607,8 +607,8 @@ public class DeviceServiceImpl implements IDeviceService {
             //命令数据存入数据库
             entranceGuardService.insertCommand(doorCmdUpdateSystem);
             System.out.println(JSON.toJSONString(doorCmdPackageAll));
-//            //立即下发数据到MQ
-//            rabbitMQSender.sendMessage(downloadQueueName, doorCmdPackageAll);
+            //立即下发数据到MQ
+            rabbitMQSender.sendMessage(downloadQueueName, doorCmdPackageAll);
         }
 
         return superCmdId;

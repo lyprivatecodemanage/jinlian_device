@@ -65,4 +65,10 @@ public interface DoorMapper {
      * 查询door表主键的最大值
      */
     int selectPrimaryKeyFromDoor();
+
+    /**
+     * 通过设备id查询门信息
+     * @return
+     */
+    Door selectDoorByDeviceId();
 }

@@ -62,7 +62,7 @@ public class EmployeeController {
     private IEntranceGuardService entranceGuardService;
 
     /**
-     * 人员模块人员信息同步
+     * 人员模块人员信息同步（之所以是这个名字，是因为之前打算用协议包成命令记录下来同步的操作日志）
      * @param userInformation
      */
     @ResponseBody
@@ -128,8 +128,14 @@ public class EmployeeController {
 
         //解析json字符串
         Map<String, Object> employeePermissionCollection = (Map<String, Object>) JSONObject.fromObject(employeePermission);
-        List<Map<String, Object>> employeePermissionList = (List<Map<String, Object>>)employeePermissionCollection.get("employeePermission");
 
+//        try {
+//
+//        }catch (Exception e){
+//
+//        }
+        //提取数据
+        List<Map<String, Object>> employeePermissionList = (List<Map<String, Object>>)employeePermissionCollection.get("employeePermission");
         //获取保存草稿还是立即下发
         String immediatelyDownload = (String) employeePermissionCollection.get("immediatelyDownload");
 
@@ -174,61 +180,79 @@ public class EmployeeController {
             //遍历人员
             for (Map<String, String> employeeMap : employeeList) {
 
-                System.out.println("employeeId = " + employeeMap.get("employeeId"));
+//                System.out.println("employeeId = " + employeeMap.get("employeeId"));
+//
+//                Map<String, Object> httpData = new HashMap<String, Object>();
+//                httpData.put("employeeId", employeeMap.get("employeeId"));
+//
+//                /**
+//                 * 下发选定的人员的基本信息
+//                 */
+//                //根据人员id请求单个人员信息
+//                String employeeInfo = HttpRequestFactory.sendRequet(employeeInterfaceAddress, httpData);
+//                System.out.println("[*] HTTP send: 已发出请求");
+//                System.out.println("[*] employeeInfo: " + employeeInfo);
+//
+//                Map<String, String> employeeInfoMap = new HashMap<String, String>();
+//
+//                //取出需要的人员信息
+//                try {
+//                    employeeInfoMap = (Map<String, String>)JSONObject.fromObject(employeeInfo).get("data");
+//                }catch (Exception e){
+//                    System.out.println("人员模块不在线!");
+//                }
+//                String employeeId = employeeInfoMap.get("employeeId");
+//                String employeeNo = employeeInfoMap.get("employeeNo");
+//                String employeeName = employeeInfoMap.get("employeeName");
+//                String departmentId = employeeInfoMap.get("departmentId");
+//                String departmentName = employeeInfoMap.get("departmentName");
+//                String entryTime = employeeInfoMap.get("entryTime");
+//                String probationaryExpired = employeeInfoMap.get("probationaryExpired");
+//                String employeePhone = employeeInfoMap.get("employeePhone");
+//                String employeeStatus = employeeInfoMap.get("employeeStatus");
+//                String companyId = employeeInfoMap.get("companyId");
+//                String companyName = employeeInfoMap.get("companyName");
+//
+//                //增加人员信息到本地人员表
+//                Employee employee = new Employee();
+//                employee.setEmployeeId(employeeId);
+//                employee.setEmployeeNumber(employeeNo);
+//                employee.setEmployeeName(employeeName);
+//                employee.setEmployeeDepartmentId(departmentId);
+//                employee.setEmployeeDepartmentName(departmentName);
+//                employee.setEmployeeEntryTime(entryTime);
+//                employee.setEmployeeProbationaryExpired(probationaryExpired);
+//                employee.setEmployeePhone(employeePhone);
+//                employee.setEmployeeStatus(employeeStatus);
+//                employee.setUpdateTime(DateUtils.getDateTime());
+//                employee.setEmployeeCompanyId(companyId);
+//                employee.setEmployeeCompanyName(companyName);
+//
+//                //查询人员信息是否存在
+//                Employee employeeExit = employeeMapper.selectByPrimaryKey(employeeId);
+//                if (employeeExit == null){
+//                    employeeMapper.insertSelective(employee);
+//                }else {
+//                    employeeMapper.updateByPrimaryKeySelective(employee);
+//                }
 
-                Map<String, Object> httpData = new HashMap<String, Object>();
-                httpData.put("employeeId", employeeMap.get("employeeId"));
+                //从本地查人员信息
+                Employee employeeLocal = employeeMapper.selectByPrimaryKey(employeeMap.get("employeeId"));
 
-                /**
-                 * 下发选定的人员的基本信息
-                 */
-                //根据人员id请求单个人员信息
-                String employeeInfo = HttpRequestFactory.sendRequet(employeeInterfaceAddress, httpData);
-                System.out.println("[*] HTTP send: 已发出请求");
-                System.out.println("[*] employeeInfo: " + employeeInfo);
+                if (employeeLocal == null){
 
-                Map<String, String> employeeInfoMap = new HashMap<String, String>();
-
-                //取出需要的人员信息
-                try {
-                    employeeInfoMap = (Map<String, String>)JSONObject.fromObject(employeeInfo).get("data");
-                }catch (Exception e){
-                    System.out.println("人员模块不在线!");
-                }
-                String employeeId = employeeInfoMap.get("employeeId");
-                String employeeNo = employeeInfoMap.get("employeeNo");
-                String employeeName = employeeInfoMap.get("employeeName");
-                String departmentId = employeeInfoMap.get("departmentId");
-                String departmentName = employeeInfoMap.get("departmentName");
-                String entryTime = employeeInfoMap.get("entryTime");
-                String probationaryExpired = employeeInfoMap.get("probationaryExpired");
-                String employeePhone = employeeInfoMap.get("employeePhone");
-                String employeeStatus = employeeInfoMap.get("employeeStatus");
-                String companyId = employeeInfoMap.get("companyId");
-                String companyName = employeeInfoMap.get("companyName");
-
-                //增加人员信息到本地人员表
-                Employee employee = new Employee();
-                employee.setEmployeeId(employeeId);
-                employee.setEmployeeNumber(employeeNo);
-                employee.setEmployeeName(employeeName);
-                employee.setEmployeeDepartmentId(departmentId);
-                employee.setEmployeeDepartmentName(departmentName);
-                employee.setEmployeeEntryTime(entryTime);
-                employee.setEmployeeProbationaryExpired(probationaryExpired);
-                employee.setEmployeePhone(employeePhone);
-                employee.setEmployeeStatus(employeeStatus);
-                employee.setUpdateTime(DateUtils.getDateTime());
-                employee.setEmployeeCompanyId(companyId);
-                employee.setEmployeeCompanyName(companyName);
-
-                //查询人员信息是否存在
-                Employee employeeExit = employeeMapper.selectByPrimaryKey(employeeId);
-                if (employeeExit == null){
-                    employeeMapper.insertSelective(employee);
                 }else {
-                    employeeMapper.updateByPrimaryKeySelective(employee);
+
                 }
+                String employeeId = employeeLocal.getEmployeeId();
+                String employeeName = employeeLocal.getEmployeeName();
+                String employeeNo = employeeLocal.getEmployeeNumber();
+                String departmentId = employeeLocal.getEmployeeDepartmentId();
+                String departmentName = employeeLocal.getEmployeeDepartmentName();
+                String entryTime = employeeLocal.getEmployeeEntryTime();
+                String probationaryExpired = employeeLocal.getEmployeeProbationaryExpired();
+                String employeePhone = employeeLocal.getEmployeePhone();
+                String blueboothId = employeeLocal.getBluetoothNo();
 
                 //组装人员数据DATA
                 Map<String, Object> userInformation = new LinkedHashMap<String, Object>();
@@ -249,7 +273,7 @@ public class EmployeeController {
                 userInformation.put("userFace", "");
                 userInformation.put("userPhone", employeePhone);
                 userInformation.put("userNFC", "");
-
+                userInformation.put("bluetoothId", blueboothId);
 
                 /**
                  * 下发人员开门的门禁权限
@@ -320,6 +344,7 @@ public class EmployeeController {
                 doorCmdEmployeeInformation.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
                 doorCmdEmployeeInformation.setSuperCmdId(FormatUtil.createUuid());
                 doorCmdEmployeeInformation.setData(JSON.toJSONString(userInformation));
+//                doorCmdEmployeeInformation.setData(JSON.toJSONString(employeeLocal));
                 doorCmdEmployeeInformation.setEmployeeId(employeeId);
                 //人员基本开门门禁权限信息
                 doorCmdEmployeePermission.setSendTime(CalendarUtil.getCurrentTime());
@@ -336,6 +361,7 @@ public class EmployeeController {
                      */
                     //获取完整的数据加协议封装格式
                     Map<String, Object> userInformationAll =  RabbitMQSender.messagePackaging(doorCmdEmployeeInformation, "userInfo", userInformation, "C");
+//                    Map<String, Object> userInformationAll =  RabbitMQSender.messagePackaging(doorCmdEmployeeInformation, "userInfo", employeeLocal, "C");
                     //命令状态设置为: 待发送
                     doorCmdEmployeeInformation.setStatus("0");
                     //设置md5校验值
@@ -367,6 +393,7 @@ public class EmployeeController {
                     //获取完整的数据加协议封装格式
                     RabbitMQSender rabbitMQSender = new RabbitMQSender();
                     Map<String, Object> userInformationAll =  rabbitMQSender.messagePackaging(doorCmdEmployeeInformation, "userInfo", userInformation, "C");
+//                    Map<String, Object> userInformationAll =  rabbitMQSender.messagePackaging(doorCmdEmployeeInformation, "userInfo", employeeLocal, "C");
                     //命令状态设置为: 发送中
                     doorCmdEmployeeInformation.setStatus("1");
                     //设置md5校验值
@@ -375,8 +402,8 @@ public class EmployeeController {
                     doorCmdEmployeeInformation.setData(JSON.toJSONString(userInformationAll.get("data")));
                     //命令数据存入数据库
                     entranceGuardService.insertCommand(doorCmdEmployeeInformation);
-//                    //立即下发数据到MQ
-//                    rabbitMQSender.sendMessage(downloadQueueName, userInformationAll);
+                    //立即下发数据到MQ
+                    rabbitMQSender.sendMessage(downloadQueueName, userInformationAll);
 
                     /**
                      * 人员开门权限
@@ -391,8 +418,8 @@ public class EmployeeController {
                     doorCmdEmployeePermission.setData(JSON.toJSONString(userPermissionAll.get("data")));
                     //命令数据存入数据库
                     entranceGuardService.insertCommand(doorCmdEmployeePermission);
-//                    //立即下发数据到MQ
-//                    rabbitMQSender.sendMessage(downloadQueueName, userPermissionAll);
+                    //立即下发数据到MQ
+                    rabbitMQSender.sendMessage(downloadQueueName, userPermissionAll);
 
                 }
             }
@@ -566,6 +593,7 @@ public class EmployeeController {
         String otherMd5 = (String) mapResult.get("MD5Check");
         mapResult.remove("MD5Check");
         String messageCheck = JSON.toJSONString(mapResult);
+        System.out.println("messageCheck: "+messageCheck);
         //生成我的md5
         String myMd5 = MD5Util.encryptPassword(messageCheck, "XC9EO5GKOIVRMBQ2YE8X");
         //双方的md5比较判断

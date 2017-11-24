@@ -216,9 +216,9 @@
 
   <!--查询所有的设备信息-->
   <select id="selectAllDeviceInfo" parameterType="String"  resultType="map">
-    select device_id as deviceId,device_name as deviceName from device_
+    select device_id as "deviceId",device_name as "deviceName",mac_address as "macAddress" from device_
     <where>
-      <if test="companyId!=null and companyId!=''">
+      <if test="companyId != null and companyId != ''">
         company_id = #{companyId}
       </if>
     </where>
