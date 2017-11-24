@@ -213,7 +213,6 @@ public class EntranceGuardController {
         Object companyId = jsonObject.get("companyId");
         Object page = jsonObject.get("page");
         Object rows = jsonObject.get("rows");
-        DoorEmployee doorEmployee = new DoorEmployee();
 
         Map doorEmployeeMap = new HashMap();
 
@@ -313,7 +312,7 @@ public class EntranceGuardController {
         //拼接最后下发时间
         String timeDoorId;
         String outterDoorId;
-        //查询当前门下发人员权限信息的最后下发时间
+        //查询当前门下发人员权限信息指令的最后下发时间
         List<Map> sentTimes = iegs.querySendTime(doorName != null ? doorName.toString() : null);
 
         for (int h = 0; h < newList.size(); h++) {
@@ -415,7 +414,11 @@ public class EntranceGuardController {
         if(doorId!=null){
             //根据门的id查询门的名称
             Door door = doorMapper.selectByPrimaryKey(doorId.toString());
-            result.put("doorName",door.getDoorName());
+            if(door!=null){
+                result.put("doorName",door.getDoorName());
+            }else{
+                result.put("doorName","");
+            }
         }
         return JSONArray.toJSONString(result);
     }

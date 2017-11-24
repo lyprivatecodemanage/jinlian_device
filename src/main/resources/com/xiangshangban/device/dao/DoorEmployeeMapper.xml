@@ -115,7 +115,7 @@
     (select device_id from door_
      <where>
        <if test="doorName!=null and doorName!=''">
-         door_name like '%一号门%'
+         door_name like #{doorName}
        </if>
      </where>
    )
