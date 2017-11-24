@@ -145,6 +145,13 @@
 		<!--<optional>true</optional>-->
 		<!--</dependency>-->
 
+		<!--QRCode的jar包-->
+		<dependency>
+			<groupId>com.QRCode</groupId>
+			<artifactId>QRCode</artifactId>
+			<version>3.0.0</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
