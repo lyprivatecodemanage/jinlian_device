@@ -309,9 +309,17 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         if(relateEmpPermissionCondition.get("deptName")!=null&&!relateEmpPermissionCondition.get("deptName").toString().isEmpty()){
             relateEmpPermissionCondition.put("deptName","%"+relateEmpPermissionCondition.get("deptName")+"%");
         }
-        if(relateEmpPermissionCondition.get("openTime")!=null&&!relateEmpPermissionCondition.get("openTime").toString().isEmpty()){
-            relateEmpPermissionCondition.put("openTime","%"+relateEmpPermissionCondition.get("openTime")+"%");
+        Object openTime = relateEmpPermissionCondition.get("openTime");
+        if(openTime==null || openTime.toString().equals("")){
+            relateEmpPermissionCondition.put("rangeStartTime","");
+            relateEmpPermissionCondition.put("rangeEndTime","");
+        }else{
+            relateEmpPermissionCondition.put("rangeStartTime",openTime.toString().split("-")[0]);
+            relateEmpPermissionCondition.put("rangeEndTime",openTime.toString().split("-")[1]);
         }
+        //移除openTime
+        relateEmpPermissionCondition.remove("openTime");
+
         List<Map> maps = doorEmployeeMapper.selectRelateEmpPermissionInfo(relateEmpPermissionCondition);
         return maps;
     }

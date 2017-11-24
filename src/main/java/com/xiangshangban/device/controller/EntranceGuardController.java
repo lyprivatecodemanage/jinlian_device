@@ -397,18 +397,26 @@ public class EntranceGuardController {
         List<Map> maps = iegs.queryRelateEmpPermissionInfo(relateEmpPermissionCondition);
         //将开门方式和命令状态由数字更改为文字信息
         for(int i=0;i<maps.size();i++){
-            String statusStr = maps.get(i).get("status").toString();
-            String openDoorType = maps.get(i).get("range_door_open_type").toString();
-           for(int s=0;s<cmdStatusStr.length;s++){
-                if(statusStr.equals(String.valueOf(s))){
+            Object statusStr = maps.get(i).get("status");
+            Object openDoorType = maps.get(i).get("range_door_open_type");
+            for(int s=0;s<cmdStatusStr.length;s++){
+                if(statusStr==null){
+                    maps.get(i).put("status","");
+                    continue;
+                }
+                if(statusStr.toString().equals(String.valueOf(s))){
                     maps.get(i).put("status",cmdStatusStr[i].toString());
                 }
-           }
-           for(int t=0;t<openTypeStr.length;t++){
-               if(openDoorType.equals(String.valueOf(t))){
-                   maps.get(i).put("range_door_open_type",openTypeStr[t].toString());
-               }
-           }
+            }
+            for(int t=0;t<openTypeStr.length;t++){
+                if(openDoorType==null){
+                    maps.get(i).put("range_door_open_type","");
+                    continue;
+                }
+                if(openDoorType.toString().equals(String.valueOf(t))){
+                    maps.get(i).put("range_door_open_type",openTypeStr[t].toString());
+                }
+            }
         }
         Map result = PageUtils.doSplitPage(null,maps,page,rows,pageObj,1);
         if(doorId!=null){
@@ -484,10 +492,14 @@ public class EntranceGuardController {
         Object doorId = jsonObject.get("doorId");
         //获取该门的设置信息
         List<Map> doorSetting = iegs.queryDoorSettingInfo(doorId!=null?doorId.toString():null);
-        //移除报警时长
-        doorSetting.get(0).remove("alarm_time_length_trespass");
-        //移除身份认证上限次数
-        doorSetting.get(0).remove("fault_count_authentication");
+        //完善数据
+        for(int i=0;i<doorSetting.size();i++){
+            if(doorSetting.get(i).get("alarm_time_length_trespass")!=null){
+                doorSetting.get(i).put("alarmFlag","1");//报警
+            }else{
+                doorSetting.get(i).put("alarmFlag","0");//不报警
+            }
+        }
 
         //定时常开信息
         List<DoorTimingKeepOpen> doorTimingKeepOpens = iegs.queryKeepOpenInfo(doorId!=null?doorId.toString():null);
