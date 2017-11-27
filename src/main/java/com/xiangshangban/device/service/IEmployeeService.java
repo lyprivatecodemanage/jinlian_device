@@ -1,6 +1,7 @@
 package com.xiangshangban.device.service;
 
 import com.xiangshangban.device.bean.Employee;
+import com.xiangshangban.device.bean.ReturnData;
 
 import java.util.List;
 import java.util.Map;
@@ -24,10 +25,13 @@ public interface IEmployeeService {
                                      String rangeStartTime, String rangeEndTime, String rangeDoorOpenType);
 
     //人员人脸、指纹、卡号信息上传存储
-    Map<String, Object> saveEmployeeInputInfo(String employeeInputInfo, String deviceId);
+    Map<String, Object> saveEmployeeInputInfo(String employeeInputInfo, String deviceId, String style);
 
-    //删除设备上的人员的所有关联信息
-    void deleteEmployeeInformation(String employeeIdCollection);
+    //删除设备上的人员的所有关联信息（设备模块调用）
+    ReturnData deleteEmployeeInformationDev(String employeeIdCollection);
+
+    //删除设备上的人员的所有关联信息（人员模块调用）
+    ReturnData deleteEmployeeInformationEmp(String employeeIdCollection);
 
     //批量下发存为草稿的人员信息和人员权限信息
     void multipleHandOutEmployeePermission(String doorId);

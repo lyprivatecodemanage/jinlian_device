@@ -207,7 +207,7 @@
     <if test="activeStatus != null and activeStatus != ''" >
       AND a.active_status = #{activeStatus,jdbcType=VARCHAR}
     </if>
-
+    ORDER BY a.device_id
   </select>
 
   <select id="findDeviceIdByCompanyId" resultType="java.lang.String" parameterType="java.lang.String">

@@ -2,6 +2,8 @@ package com.xiangshangban.device.dao;
 
 import com.xiangshangban.device.bean.Employee;
 
+import java.util.List;
+
 public interface EmployeeMapper {
     int deleteByPrimaryKey(String employeeId);
 
@@ -20,8 +22,8 @@ public interface EmployeeMapper {
      */
 
     //按照卡号查找是否有人员占用了该卡号
-    Employee selectByEmployeeNfc(String employeeNfc);
+    List<Employee> selectByEmployeeNfc(String employeeNfc);
 
     //根据companyId查找人员信息
-    Employee selectOneByCompanyId(String companyId);
+    Employee selectOneByCompanyId(String employeeCompanyId);
 }

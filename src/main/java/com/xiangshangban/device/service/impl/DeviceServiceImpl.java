@@ -11,6 +11,7 @@ import com.xiangshangban.device.dao.*;
 import com.xiangshangban.device.service.IDeviceService;
 import com.xiangshangban.device.service.IEntranceGuardService;
 import net.sf.json.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -56,6 +57,9 @@ public class DeviceServiceImpl implements IDeviceService {
     @Autowired
     private DeviceUpdatePackSysMapper deviceUpdatePackSysMapper;
 
+    @Autowired
+    private EmployeeMapper employeeMapper;
+
     @Override
     public String addDevice(String deviceId, String macAddress) {
 
@@ -99,6 +103,8 @@ public class DeviceServiceImpl implements IDeviceService {
             for (Map<String, String> map : mapList) {
                 //判断离线状态空
                 if (map.get("is_online") == null || "".equals(map.get("is_online"))){
+
+                    map.put("is_online", "无状态");
                     System.out.println(map.get("device_id")+"设备离线状态为空");
                 }else {
                     String isOnlineTemp = map.get("is_online");
@@ -107,11 +113,15 @@ public class DeviceServiceImpl implements IDeviceService {
                         map.put("is_online", "在线");
                     }else if (isOnline.equals("1")){
                         map.put("is_online", "离线");
+                    }else{
+                        map.put("is_online", "无状态");
                     }
                 }
 
                 //判断激活状态空
                 if (map.get("active_status") == null || "".equals(map.get("active_status"))){
+
+                    map.put("active_status", "无状态");
                     System.out.println(map.get("device_id")+"设备激活状态为空");
                 }else {
                     String activeStatusTemp = map.get("active_status");
@@ -126,7 +136,39 @@ public class DeviceServiceImpl implements IDeviceService {
                         map.put("active_status", "已欠费");
                     }else if (activeStatusTemp.equals("4")){
                         map.put("active_status", "故障中");
+                    }else {
+                        map.put("active_status", "无状态");
                     }
+                }
+
+                //查找人员姓名
+                String employeeId = map.get("operate_employee");
+                try {
+                    String employeeName = employeeMapper.selectByPrimaryKey(employeeId).getEmployeeName();
+                    map.put("operate_employee", employeeName);
+                }catch (Exception e){
+                    System.out.println("根据人员id没有查到操作人【"+employeeId+"】的姓名");
+                    map.put("operate_employee", "暂无操作人记录");
+                }
+
+                //用空字符串替换undefined操作时间
+                try {
+                    String operateTime = map.get("operate_time");
+                    if (operateTime == null){
+                        System.out.println("当前设备【"+deviceId+"】没有查到操作时间记录");
+                        map.put("operate_time", "暂无操作时间记录");
+                    }
+                }catch (Exception e){
+                    System.out.println("当前设备【"+deviceId+"】没有查到操作时间记录");
+                    map.put("operate_time", "暂无操作时间记录");
+                }
+
+                //替换undefined设备名称
+                if (StringUtils.isEmpty(map.get("device_name"))){
+//                    System.out.println(JSON.toJSONString(map));
+//                    System.out.println("设备未命名");
+                    map.put("device_name", "设备未命名");
+//                    System.out.println(JSON.toJSONString(map));
                 }
             }
         }
@@ -138,34 +180,31 @@ public class DeviceServiceImpl implements IDeviceService {
     }
 
     @Override
-    public void editorDeviceInformation(String deviceId, String companyId, String companyName, String deviceName, String doorName,
+    public void editorDeviceInformation(String deviceId, String companyId, String companyName, String deviceName,
                                        String devicePlace, String deviceUsages) {
 
         Device device = new Device();
-        device.setDeviceId(deviceId);
-        device.setCompanyId(companyId);
-        device.setCompanyName(companyName);
-        device.setDeviceName(deviceName);
-        device.setDevicePlace(devicePlace);
-        device.setDeviceUsages(deviceUsages);
-
-        Door door = new Door();
-        try {
-            String doorId = doorMapper.findDoorIdByDeviceId(deviceId).getDoorId();
-            if (doorId == null || "".equals(doorId)){
-                System.out.println("没有和该设备绑定的门信息");
-            }else {
-                door.setDoorId(doorId);
-                door.setDoorName(doorName);
-            }
-        }catch (Exception e){
-            System.out.println("没有和该设备绑定的门信息");
+        if (!"".equals(deviceId)){
+            device.setDeviceId(deviceId);
+        }
+        if (!"".equals(companyId)){
+            device.setCompanyId(companyId);
+        }
+        if (!"".equals(companyName) && !"请选择".equals(companyName)){
+            device.setCompanyName(companyName);
+        }
+        if (!"".equals(deviceName)){
+            device.setDeviceName(deviceName);
+        }
+        if (!"".equals(devicePlace)){
+            device.setDevicePlace(devicePlace);
+        }
+        if (!"".equals(deviceUsages)){
+            device.setDeviceUsages(deviceUsages);
         }
 
+        //更新设备信息
         deviceMapper.updateByPrimaryKeySelective(device);
-
-        doorMapper.updateByPrimaryKeySelective(door);
-
     }
 
     @Override
@@ -218,27 +257,13 @@ public class DeviceServiceImpl implements IDeviceService {
     }
 
     @Override
-    public void bindDevice(String companyId, String companyName, String deviceId) {
+    public void bindDevice(String deviceId) {
+
+        Device device = deviceMapper.selectByPrimaryKey(deviceId);
 
         Map<String, Object> bindInformation = new LinkedHashMap<String, Object>();
-        bindInformation.put("companyId", companyId);
-        bindInformation.put("companyName", companyName);
-
-        //绑定关系存入数据库
-        Device device = new Device();
-        device.setDeviceId(deviceId);
-        device.setCompanyId(companyId);
-        device.setCompanyName(companyName);
-        System.out.println("device:           "+JSON.toJSONString(device));
-        //根据deviceId判断设备信息是否存在
-        Device deviceExist = deviceMapper.selectByPrimaryKey(deviceId);
-        if (deviceExist == null){
-            //新增设备信息
-            deviceMapper.insertSelective(device);
-        }else {
-            //更新设备信息
-            deviceMapper.updateByPrimaryKeySelective(device);
-        }
+        bindInformation.put("companyId", device.getCompanyId());
+        bindInformation.put("companyName", device.getCompanyName());
 
         //构造命令格式
         DoorCmd doorCmdBindDevice = new DoorCmd();

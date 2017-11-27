@@ -426,6 +426,8 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         doorSetting.setFaultCountAuthentication(countLimitAuthenticationFailed);
         if (enableAlarm.equals("0")){
             doorSetting.setAlarmTimeLengthTrespass(alarmTimeLength);
+        }else if (enableAlarm.equals("1")){
+            doorSetting.setAlarmTimeLengthTrespass("0");
         }
         doorSetting.setFirstPublishPassword(publicPassword1);
         doorSetting.setSecondPublishPassword(publicPassword2);
@@ -736,7 +738,15 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
             doorRecord.setEventResult(recordMap.get("outcome"));
             doorRecord.setEventResultReason(recordMap.get("cause"));
             doorRecord.setRecordType(recordMap.get("attType"));
-            doorRecord.setDoorId(doorMapper.findDoorIdByDeviceId(recordMap.get("deviceId")).getDoorId());
+
+            try {
+                String doorId = doorMapper.findDoorIdByDeviceId(recordMap.get("deviceId")).getDoorId();
+                doorRecord.setDoorId(doorId);
+            }catch (Exception e){
+                System.out.println("门禁记录上传：该设备还未关联门，将不记录门id");
+                doorRecord.setDoorId("");
+            }
+
             doorRecord.setDeviceGroupName(recordMap.get("deviceName"));
             doorRecord.setRecordDate(recordMap.get("attTime"));
             doorRecord.setRealWeek(recordMap.get("week"));

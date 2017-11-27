@@ -176,7 +176,7 @@ public class RabbitMQReciever {
                         }
                     }
                 }catch (Exception e){
-//                    e.printStackTrace();
+                    e.printStackTrace();
                     System.out.println("RabbitMQ收到非法JSON数据！！！");
                     return;
                 }

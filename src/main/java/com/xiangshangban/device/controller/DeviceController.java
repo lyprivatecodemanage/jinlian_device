@@ -270,10 +270,17 @@ public class DeviceController {
                 returnData.setTotalPages((String) map.get("totalPages"));
                 return returnData;
             } else {
-                returnData.setData(mapListResult);
-                returnData.setMessage("您的公司暂无已绑定的设备");
-                returnData.setReturnCode("4203");
-                return returnData;
+                if (!"".equals(companyId)){
+                    returnData.setData(mapListResult);
+                    returnData.setMessage("您的公司暂无已绑定的设备");
+                    returnData.setReturnCode("4203");
+                    return returnData;
+                }else {
+                    returnData.setData(mapListResult);
+                    returnData.setMessage("数据请求成功");
+                    returnData.setReturnCode("3000");
+                    return returnData;
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -301,7 +308,6 @@ public class DeviceController {
          "deviceName": "无敌的设备",
          "companyId": "FE0FB748F7A04BCAA3E4D736E3964B06",
          "companyName":"无敌的公司",
-         "doorName": "无敌的大门",
          "devicePlace": "无敌的乐山新村",
          "deviceUsages": "无敌的考勤"
          }
@@ -319,7 +325,6 @@ public class DeviceController {
         String companyId = "";
         String companyName = "";
         String deviceName = "";
-        String doorName = "";
         String devicePlace = "";
         String deviceUsages = "";
 
@@ -336,7 +341,6 @@ public class DeviceController {
 //            deviceId = mapJson.get("deviceId");
 //            companyName = mapJson.get("companyName");
 //            deviceName = mapJson.get("deviceName");
-//            doorName = mapJson.get("doorName");
 //            devicePlace = mapJson.get("devicePlace");
 //            deviceUsages = mapJson.get("deviceUsages");
 //        } catch (Exception e) {
@@ -350,7 +354,6 @@ public class DeviceController {
 //                || companyId == null
 //                || companyName == null
 //                || deviceName == null
-//                || doorName == null
 //                || devicePlace == null
 //                || deviceUsages == null) {
 //            System.out.println("必传参数字段不存在");
@@ -371,7 +374,6 @@ public class DeviceController {
             deviceId = mapJson.get("deviceId");
             companyName = mapJson.get("companyName");
             deviceName = mapJson.get("deviceName");
-            doorName = mapJson.get("doorName");
             devicePlace = mapJson.get("devicePlace");
             deviceUsages = mapJson.get("deviceUsages");
         } catch (Exception e) {
@@ -380,10 +382,7 @@ public class DeviceController {
 
         try {
             deviceService.editorDeviceInformation(deviceId, companyId, companyName, deviceName,
-                    doorName, devicePlace, deviceUsages);
-
-            //下发绑定设备的命令
-            deviceService.bindDevice(companyId, companyName, deviceId);
+                    devicePlace, deviceUsages);
 
             returnData.setMessage("编辑信息成功");
             returnData.setReturnCode("3000");
@@ -1164,7 +1163,7 @@ public class DeviceController {
             //保存下发应用更新设置
             deviceService.updateDeviceApplication(deviceIdList, downloadTimeApp, updateTimeApp);
 
-            returnData.setMessage("设备设置已下发");
+            returnData.setMessage("已执行下发设备系统设置操作");
             returnData.setReturnCode("3000");
             return returnData;
         } catch (Exception e) {

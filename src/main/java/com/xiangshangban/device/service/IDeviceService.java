@@ -1,6 +1,5 @@
 package com.xiangshangban.device.service;
 
-import com.xiangshangban.device.bean.Device;
 import com.xiangshangban.device.bean.Door;
 
 import java.util.List;
@@ -38,12 +37,11 @@ public interface IDeviceService {
      * @param deviceId
      * @param companyId
      * @param deviceName
-     * @param doorName
      * @param devicePlace
      * @param deviceUsages
      * @return
      */
-    void editorDeviceInformation(String deviceId, String companyId, String companyName, String deviceName, String doorName,
+    void editorDeviceInformation(String deviceId, String companyId, String companyName, String deviceName,
                                 String devicePlace, String deviceUsages);
 
     /**
@@ -68,11 +66,9 @@ public interface IDeviceService {
 
     /**
      * 绑定设备
-     * @param companyId
-     * @param companyName
      * @param deviceId
      */
-    void bindDevice(String companyId, String companyName, String deviceId);
+    void bindDevice(String deviceId);
 
     /**
      * 解绑设备

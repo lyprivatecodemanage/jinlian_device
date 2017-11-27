@@ -11,6 +11,7 @@ import com.xiangshangban.device.dao.*;
 import com.xiangshangban.device.service.IEmployeeService;
 import com.xiangshangban.device.service.IEntranceGuardService;
 import net.sf.json.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -242,22 +243,34 @@ public class EmployeeServiceImpl implements IEmployeeService {
 
     //人员人脸、指纹、卡号信息上传存储
     @Override
-    public Map<String, Object> saveEmployeeInputInfo(String jsonString, String deviceId) {
+    public Map<String, Object> saveEmployeeInputInfo(String jsonString, String deviceId, String style) {
 
         //提取数据
         Map<String, Object> allMap = JSONObject.fromObject(jsonString);
         Map<String, Object> dataMap = (Map<String, Object>) allMap.get("data");
-        Map<String, String> userLabelMap = (Map<String, String>) dataMap.get("userLabel");
-        String employeeId = userLabelMap.get("userId");
+        Map<String, Object> userLabelMap = (Map<String, Object>) dataMap.get("userLabel");
+        String employeeId = (String) userLabelMap.get("userId");
         String resultCode;
         String resultMessage;
 
         Employee employee = new Employee();
         employee.setEmployeeId(employeeId);
-        employee.setEmployeeFace(userLabelMap.get("userFace"));
-        employee.setEmployeeFinger1(userLabelMap.get("userFinger1"));
-        employee.setEmployeeFinger2(userLabelMap.get("userFinger2"));
-        employee.setEmployeeNfc(userLabelMap.get("userNFC"));
+        if ("1".equals(style)){
+            try {
+                employee.setEmployeeFace(((Map<String, String>) userLabelMap.get("userFace")).get("faceData"));
+            }catch (Exception e){
+                employee.setEmployeeFace("");
+            }
+        }
+        if (StringUtils.isNotEmpty((String) userLabelMap.get("userFinger1"))){
+            employee.setEmployeeFinger1((String) userLabelMap.get("userFinger1"));
+        }
+        if (StringUtils.isNotEmpty((String) userLabelMap.get("userFinger1"))){
+            employee.setEmployeeFinger2((String) userLabelMap.get("userFinger2"));
+        }
+        if (StringUtils.isNotEmpty((String) userLabelMap.get("userNFC"))){
+            employee.setEmployeeNfc((String) userLabelMap.get("userNFC"));
+        }
 
         Employee employeeExist = employeeMapper.selectByPrimaryKey(employeeId);
         if (employeeExist != null){
@@ -315,45 +328,147 @@ public class EmployeeServiceImpl implements IEmployeeService {
 
     }
 
+    /**
+     * 删除设备上的人员的所有关联信息（设备模块调用）
+     * @param employeeIdCollection
+     * @return
+     */
     @Override
-    public void deleteEmployeeInformation(String employeeIdCollection) {
+    public ReturnData deleteEmployeeInformationDev(String employeeIdCollection) {
 
         Map<String, Object> employeeIdMap = (Map<String, Object>)JSONObject.fromObject(employeeIdCollection);
         List<String> employeeIdList = (List<String>)employeeIdMap.get("employeeIdList");
-        String deviceId = (String)employeeIdMap.get("deviceId");
+        String doorId = (String)employeeIdMap.get("doorId");
 
-        //构造删除人员的命令格式
-        DoorCmd doorCmdDeleteEmployee = new DoorCmd();
-        doorCmdDeleteEmployee.setServerId("001");
-        doorCmdDeleteEmployee.setDeviceId(deviceId);
-        doorCmdDeleteEmployee.setFileEdition("v1.3");
-        doorCmdDeleteEmployee.setCommandMode("C");
-        doorCmdDeleteEmployee.setCommandType("single");
-        doorCmdDeleteEmployee.setCommandTotal("1");
-        doorCmdDeleteEmployee.setCommandIndex("1");
-        doorCmdDeleteEmployee.setSubCmdId("");
-        doorCmdDeleteEmployee.setAction("DELETE_USER_INFO");
-        doorCmdDeleteEmployee.setActionCode("2002");
+        //返回给前端的数据
+        ReturnData returnData = new ReturnData();
 
-        doorCmdDeleteEmployee.setSendTime(CalendarUtil.getCurrentTime());
-        doorCmdDeleteEmployee.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
-        doorCmdDeleteEmployee.setSuperCmdId(FormatUtil.createUuid());
-        doorCmdDeleteEmployee.setData(JSON.toJSONString(employeeIdList));
+        String deviceId = "";
+        Door door = doorMapper.selectByPrimaryKey(doorId);
+        if (door != null){
+            try {
+                deviceId = door.getDeviceId();
 
-        //获取完整的数据加协议封装格式
-        RabbitMQSender rabbitMQSender = new RabbitMQSender();
-        Map<String, Object> userDeleteInformation =  RabbitMQSender.messagePackaging(doorCmdDeleteEmployee, "employeeIdList", employeeIdList, "C");
-        //命令状态设置为: 发送中
-        doorCmdDeleteEmployee.setStatus("1");
-        //设置md5校验值
-        doorCmdDeleteEmployee.setMd5Check((String) userDeleteInformation.get("MD5Check"));
-        //设置数据库的data字段
-        doorCmdDeleteEmployee.setData(JSON.toJSONString(userDeleteInformation.get("data")));
-        //命令数据存入数据库
-        entranceGuardService.insertCommand(doorCmdDeleteEmployee);
-        //立即下发数据到MQ
-        rabbitMQSender.sendMessage(deviceId, userDeleteInformation);
+                //构造删除人员的命令格式
+                DoorCmd doorCmdDeleteEmployee = new DoorCmd();
+                doorCmdDeleteEmployee.setServerId("001");
+                doorCmdDeleteEmployee.setDeviceId(deviceId);
+                doorCmdDeleteEmployee.setFileEdition("v1.3");
+                doorCmdDeleteEmployee.setCommandMode("C");
+                doorCmdDeleteEmployee.setCommandType("single");
+                doorCmdDeleteEmployee.setCommandTotal("1");
+                doorCmdDeleteEmployee.setCommandIndex("1");
+                doorCmdDeleteEmployee.setSubCmdId("");
+                doorCmdDeleteEmployee.setAction("DELETE_USER_INFO");
+                doorCmdDeleteEmployee.setActionCode("2002");
 
+                doorCmdDeleteEmployee.setSendTime(CalendarUtil.getCurrentTime());
+                doorCmdDeleteEmployee.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
+                doorCmdDeleteEmployee.setSuperCmdId(FormatUtil.createUuid());
+                doorCmdDeleteEmployee.setData(JSON.toJSONString(employeeIdList));
+
+                //获取完整的数据加协议封装格式
+                RabbitMQSender rabbitMQSender = new RabbitMQSender();
+                Map<String, Object> userDeleteInformation =  RabbitMQSender.messagePackaging(doorCmdDeleteEmployee, "employeeIdList", employeeIdList, "C");
+                //命令状态设置为: 发送中
+                doorCmdDeleteEmployee.setStatus("1");
+                //设置md5校验值
+                doorCmdDeleteEmployee.setMd5Check((String) userDeleteInformation.get("MD5Check"));
+                //设置数据库的data字段
+                doorCmdDeleteEmployee.setData(JSON.toJSONString(userDeleteInformation.get("data")));
+                //命令数据存入数据库
+                entranceGuardService.insertCommand(doorCmdDeleteEmployee);
+                //立即下发数据到MQ
+                rabbitMQSender.sendMessage(deviceId, userDeleteInformation);
+
+                returnData.setMessage("已执行删除设备上人员权限的操作");
+                returnData.setReturnCode("3000");
+                return returnData;
+
+            }catch (Exception e){
+                e.printStackTrace();
+                returnData.setMessage("服务器错误");
+                returnData.setReturnCode("3001");
+                return returnData;
+            }
+        }else {
+            returnData.setMessage("没有找到和此门关联的设备");
+            returnData.setReturnCode("4007");
+            return returnData;
+        }
+    }
+
+    /**
+     * 删除设备上的人员的所有关联信息（人员模块调用）
+     * @param employeeIdCollection
+     * @return
+     */
+    @Override
+    public ReturnData deleteEmployeeInformationEmp(String employeeIdCollection) {
+
+        //提取数据
+        Map<String, Object> employeeIdMap = (Map<String, Object>)JSONObject.fromObject(employeeIdCollection);
+        List<String> employeeIdList = (List<String>)employeeIdMap.get("employeeIdList");
+        String companyId = (String) employeeIdMap.get("companyId");
+
+        //返回给前端的数据
+        ReturnData returnData = new ReturnData();
+
+        //查找该公司下的所有设备
+        List<String> deviceIdList = deviceMapper.findDeviceIdByCompanyId(companyId);
+
+        if (deviceIdList.size() > 0){
+            for (String deviceId : deviceIdList) {
+                try {
+                    //构造删除人员的命令格式
+                    DoorCmd doorCmdDeleteEmployee = new DoorCmd();
+                    doorCmdDeleteEmployee.setServerId("001");
+                    doorCmdDeleteEmployee.setDeviceId(deviceId);
+                    doorCmdDeleteEmployee.setFileEdition("v1.3");
+                    doorCmdDeleteEmployee.setCommandMode("C");
+                    doorCmdDeleteEmployee.setCommandType("single");
+                    doorCmdDeleteEmployee.setCommandTotal("1");
+                    doorCmdDeleteEmployee.setCommandIndex("1");
+                    doorCmdDeleteEmployee.setSubCmdId("");
+                    doorCmdDeleteEmployee.setAction("DELETE_USER_INFO");
+                    doorCmdDeleteEmployee.setActionCode("2002");
+
+                    doorCmdDeleteEmployee.setSendTime(CalendarUtil.getCurrentTime());
+                    doorCmdDeleteEmployee.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
+                    doorCmdDeleteEmployee.setSuperCmdId(FormatUtil.createUuid());
+                    doorCmdDeleteEmployee.setData(JSON.toJSONString(employeeIdList));
+
+                    //获取完整的数据加协议封装格式
+                    RabbitMQSender rabbitMQSender = new RabbitMQSender();
+                    Map<String, Object> userDeleteInformation =  RabbitMQSender.messagePackaging(doorCmdDeleteEmployee, "employeeIdList", employeeIdList, "C");
+                    //命令状态设置为: 发送中
+                    doorCmdDeleteEmployee.setStatus("1");
+                    //设置md5校验值
+                    doorCmdDeleteEmployee.setMd5Check((String) userDeleteInformation.get("MD5Check"));
+                    //设置数据库的data字段
+                    doorCmdDeleteEmployee.setData(JSON.toJSONString(userDeleteInformation.get("data")));
+                    //命令数据存入数据库
+                    entranceGuardService.insertCommand(doorCmdDeleteEmployee);
+                    //立即下发数据到MQ
+                    rabbitMQSender.sendMessage(deviceId, userDeleteInformation);
+
+                }catch (Exception e){
+                    e.printStackTrace();
+                    returnData.setMessage("服务器错误");
+                    returnData.setReturnCode("3001");
+                    return returnData;
+                }
+            }
+
+            returnData.setMessage("已执行删除这些人员，在本公司的所有设备上的信息及开门权限");
+            returnData.setReturnCode("3000");
+            return returnData;
+
+        }else {
+            returnData.setMessage("您的公司没有绑定任何设备，删除人员的操作将不会下发到设备");
+            returnData.setReturnCode("4007");
+            return returnData;
+        }
     }
 
     @Override

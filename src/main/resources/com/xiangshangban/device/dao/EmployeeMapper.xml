@@ -330,6 +330,6 @@
   <select id="selectOneByCompanyId" resultType="java.lang.String" parameterType="java.lang.String" >
     select company_no as companyNo
     from employee_
-    where company_id = #{companyId,jdbcType=VARCHAR}
+    where employee_company_id = #{employeeCompanyId,jdbcType=VARCHAR}
   </select>
 </mapper>

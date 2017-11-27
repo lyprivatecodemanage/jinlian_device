@@ -623,8 +623,8 @@ public class EntranceGuardController {
      * 门禁高级设置
      * @param doorFeaturesSetup
      */
-    @PostMapping("/doorFeaturesSetup")
-    public ReturnData doorFeaturesSetup(@RequestBody String doorFeaturesSetup){
+    @PostMapping("/handOutDoorFeaturesSetup")
+    public ReturnData handOutDoorFeaturesSetup(@RequestBody String doorFeaturesSetup){
 
         /**测试数据
          *
@@ -672,7 +672,7 @@ public class EntranceGuardController {
          "doorOpenType": "234"
          }
          ],
-         "accessCalendar": [
+         "accessCalendarList": [
          {
          "deviceCalendarDate": "2017-10-10",
          "enableDoorOpenGlobal": "0"
@@ -707,7 +707,7 @@ public class EntranceGuardController {
         List<String> employeeIdList = new ArrayList<String>();
         List oneWeekTimeDoorKeepList = new ArrayList();
         List oneWeekTimeFirstCardList = new ArrayList();
-        List accessCalendar = new ArrayList();
+        List accessCalendarList = new ArrayList();
 
         try {
             doorId = (String) setupMap.get("doorId");
@@ -748,7 +748,7 @@ public class EntranceGuardController {
                 || employeeIdList == null
                 || oneWeekTimeDoorKeepList == null
                 || oneWeekTimeFirstCardList == null
-                || accessCalendar == null){
+                || accessCalendarList == null){
             System.out.println("必传参数字段不存在");
             returnData.setMessage("必传参数字段不存在");
             returnData.setReturnCode("3006");
@@ -788,7 +788,7 @@ public class EntranceGuardController {
         //判断门定时常开是否开启
         if (enableDoorCalendar.equals("1")){
             try {
-                accessCalendar = (List)setupMap.get("accessCalendar");
+                accessCalendarList = (List)setupMap.get("accessCalendarList");
             }catch (Exception e){
 
                 System.out.println("必传参数字段为null");
@@ -797,45 +797,53 @@ public class EntranceGuardController {
                 return returnData;
             }
         }else {
-            accessCalendar = new ArrayList<>();
+            accessCalendarList = new ArrayList<>();
         }
 
-        //下发门禁配置---功能配置（密码、开门事件记录）
-        iegs.doorCommonSetupAdditional(doorId, countLimitAuthenticationFailed, enableAlarm,
-                alarmTimeLength, publicPassword1, publicPassword2, threatenPassword,
-                deviceManagePassword, enableDoorOpenRecord, oneWeekTimeDoorKeepList,
-                enableDoorKeepOpen, enableFirstCardKeepOpen, enableDoorCalendar);
+        try {
+            //下发门禁配置---功能配置（密码、开门事件记录）
+            iegs.doorCommonSetupAdditional(doorId, countLimitAuthenticationFailed, enableAlarm,
+                    alarmTimeLength, publicPassword1, publicPassword2, threatenPassword,
+                    deviceManagePassword, enableDoorOpenRecord, oneWeekTimeDoorKeepList,
+                    enableDoorKeepOpen, enableFirstCardKeepOpen, enableDoorCalendar);
 
-        //下发门禁配置---功能配置（首卡常开权限）
-        iegs.handOutFirstCard(doorId, enableFirstCardKeepOpen, employeeIdList, oneWeekTimeFirstCardList);
+            //下发门禁配置---功能配置（首卡常开权限）
+            iegs.handOutFirstCard(doorId, enableFirstCardKeepOpen, employeeIdList, oneWeekTimeFirstCardList);
 
-        //下发门禁配置---功能配置（门禁日历）
-        iegs.handOutDoorCalendar(doorId, enableDoorCalendar, accessCalendar);
+            //下发门禁配置---功能配置（门禁日历）
+            iegs.handOutDoorCalendar(doorId, enableDoorCalendar, accessCalendarList);
 
-        //记录操作人和操作时间，更新到设备日志表里
-        Door doorExist = doorMapper.selectByPrimaryKey(doorId);
-        if (doorExist == null){
-            System.out.println("门信息不存在");
-            returnData.setMessage("门信息不存在");
-            returnData.setReturnCode("4007");
-            return returnData;
-        }else {
-            Door door = new Door();
-            door.setDoorId(doorId);
-            door.setOperateTime(DateUtils.getDateTime());
-            door.setOperateEmployee(loginEmployeeId);
-            try {
-                doorMapper.updateByPrimaryKeySelective(door);
-            }catch (Exception e){
-                returnData.setMessage("没有查到此操作人【"+loginEmployeeId+"】的信息");
+            //记录操作人和操作时间，更新到设备日志表里
+            Door doorExist = doorMapper.selectByPrimaryKey(doorId);
+            if (doorExist == null){
+                System.out.println("门信息不存在");
+                returnData.setMessage("门信息不存在");
                 returnData.setReturnCode("4007");
                 return returnData;
+            }else {
+                Door door = new Door();
+                door.setDoorId(doorId);
+                door.setOperateTime(DateUtils.getDateTime());
+                door.setOperateEmployee(loginEmployeeId);
+                try {
+                    doorMapper.updateByPrimaryKeySelective(door);
+                }catch (Exception e){
+                    returnData.setMessage("没有查到此操作人【"+loginEmployeeId+"】的信息");
+                    returnData.setReturnCode("4007");
+                    return returnData;
+                }
             }
-        }
 
-        returnData.setMessage("数据请求成功");
-        returnData.setReturnCode("3000");
-        return returnData;
+            returnData.setMessage("已执行下发门禁设置操作");
+            returnData.setReturnCode("3000");
+            return returnData;
+
+        }catch (Exception e){
+            e.printStackTrace();
+            returnData.setMessage("服务器错误");
+            returnData.setReturnCode("3001");
+            return returnData;
+        }
     }
 
     /**
