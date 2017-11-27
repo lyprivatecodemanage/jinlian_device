@@ -207,7 +207,7 @@ public class OSSController {
 		return ossFile;
 	}
 
-	//List里面的多个对象根据某个字段的值进行比较排序
+	// List里面的多个对象根据某个字段的值进行比较排序
 	public static void main(String[] args) {
 		List<Device> deviceList = new ArrayList<Device>();
 		Device device1 = new Device();
