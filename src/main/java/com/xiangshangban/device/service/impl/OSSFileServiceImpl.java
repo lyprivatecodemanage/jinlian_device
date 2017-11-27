@@ -1,6 +1,8 @@
 package com.xiangshangban.device.service.impl;
 
+import com.aliyun.oss.model.PutObjectResult;
 import com.xiangshangban.device.common.utils.DateUtils;
+import com.xiangshangban.device.dao.ImagesMapper;
 import com.xiangshangban.device.dao.OSSFileMapper;
 import com.xiangshangban.device.service.OSSFileService;
 import com.xiangshangban.device.bean.OSSFile;
@@ -8,9 +10,13 @@ import com.xiangshangban.device.common.utils.OSSFileUtil;
 import com.xiangshangban.device.common.utils.PropertiesUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -18,6 +24,10 @@ public class OSSFileServiceImpl implements OSSFileService {
 
 	@Autowired
 	OSSFileMapper oSSFileMapper;
+
+	@Autowired
+	ImagesMapper imagesMapper;
+
 	
 	@Override
 	public OSSFile autoAddOSSFile(String customerId, String directory, String type,InputStream input){
@@ -52,6 +62,13 @@ public class OSSFileServiceImpl implements OSSFileService {
 		return UUID.randomUUID().toString().replaceAll("-", "").toUpperCase();
 	}
 
+	/**
+	 *
+	 * @param customerId   公司ID
+	 * @param directory 存储模块名称
+	 * @param file
+	 * @return
+	 */
 	@Override
 	public OSSFile addOSSFile(String customerId, String directory, MultipartFile file) {
 		try {
@@ -65,12 +82,18 @@ public class OSSFileServiceImpl implements OSSFileService {
 			String key = client.upload(customerId, directory, getKey(), file);//上传到OSS
 			//设置文件相关信息
 			oSSFile.setKey(key);
+			//获取上传文件名称
 			oSSFile.setName(file.getOriginalFilename());
+			//上传时间
 			oSSFile.setUploadTime(DateUtils.getDateTime());
+			//公司ID
 			oSSFile.setCustomerId(customerId);
+			//上传用户
 			oSSFile.setUploadUser(userId);
+			//上传状态
 			oSSFile.setStatus("0");
 			oSSFile.setPath(OSSFileUtil.getFilePath(customerId, directory, key));
+
 			oSSFileMapper.addOSSFile(oSSFile);//数据库中存储关联关系
 			return oSSFile;
 		} catch (Exception e) {
@@ -112,5 +135,52 @@ public class OSSFileServiceImpl implements OSSFileService {
 			e.printStackTrace();
 			return null;
 		} 
+	}
+
+	/**
+	 * 模板部分上传公司Logo和由设备信息生成的二维码图片
+	 * @param directory
+	 * @param file
+	 * @return 保存到本地的logo图片的ID
+	 */
+	@Override
+	public int templateFileUpload(String directory, MultipartFile file,InputStream inputStream,String flag) throws IOException {
+		//从配置文件中获取登录OSS的凭证
+		String accessId = PropertiesUtils.ossProperty("accessKey");
+		String accessKey = PropertiesUtils.ossProperty("securityKey");
+		OSSFileUtil client  = new OSSFileUtil(accessId,accessKey );
+		int insertResult = 0;
+
+		//以流的形式传递的文件名称
+		String key = getKey();
+		//上传文件的路径
+		String filePath = "";
+		if(file!=null){
+			//以MultipartFile的类型上传文件到OSS
+			filePath = client.templateUploadTransfer(directory,file,null,null);
+		}
+		if(inputStream!=null){
+			//以流的形式上传文件到OSS
+			filePath = client.templateUploadTransfer(directory,null,key,inputStream);
+		}
+		//保存上传的文件信息到本地仓库
+		Map infoMap = new HashMap<>();
+
+		infoMap.put("id",imagesMapper.selectImagePrimaryKey()+1);
+		/**上传的是logo的时候，使用的文件名称是用户上传的文件的真实名称（格式）、
+		上传的如果是二维码的时候，采用的是流的形式，所以要生成不同的文件名称（格式），所以采用UUID*/
+
+		infoMap.put("img_name",flag.equals("1")?file.getOriginalFilename():key+".png");
+		infoMap.put("img_url","http://xiangshangban.oss-cn-hangzhou.aliyuncs.com"+"/"+filePath+"/");
+		infoMap.put("img_type",flag.equals("1")?"logo":"qr_code");
+		infoMap.put("relate","");
+		infoMap.put("ripple_color","");
+
+		int insert = imagesMapper.insertIntoImageInfo(infoMap);
+		if(insert>0){
+			//获取保存的logo图片的ID
+			insertResult = imagesMapper.selectImagePrimaryKey();
+		}
+		return insertResult;
 	}
 }

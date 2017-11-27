@@ -1,6 +1,9 @@
 package com.xiangshangban.device.service;
 
 
+import com.xiangshangban.device.bean.Festival;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
 import java.util.Map;
 
@@ -16,19 +19,19 @@ public interface ITemplateService {
     /**
      * 更新设备的模板信息(背景图<以及展示的时间>、问候语以及展示的时间、公司Logo)
      */
-     Map modifyDeviceTemplateInfo(String templateInfo);
+     Map modifyDeviceTemplateInfo(String templateInfo,MultipartFile file);
 
      //TODO 添加
     /**
      * 给设备添加模板
      * （模板信息，背景图以及展示时间、问候语以及展示时间，公司Logo）
      */
-    Map addDeviceTemplate(String templateInfo);
+    Map addDeviceTemplate(String templateInfo,MultipartFile file);
 
     /**
      * 下发节日节气模板
      */
-    boolean addFestivalTemplate();
+    boolean addFestivalTemplate(String festivalName);
 
     //TODO 查询
     /**
@@ -55,5 +58,10 @@ public interface ITemplateService {
      * 获取所有的背景图
      */
     List<Map> queryAllBackGround();
+
+    /**
+     * 判断当天日期是不是一个节气或者节日
+     */
+    Festival verifyCurrentDate(String date);
 
 }

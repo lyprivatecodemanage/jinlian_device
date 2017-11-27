@@ -67,6 +67,11 @@ public interface TemplateMapper {
     List<Map> selectStandardItemInfo(@Param("templateId") String templateId);
 
     /**
+     * 查询节日模板的item信息
+     */
+    List<Map> selectFestivalItemInfo();
+
+    /**
      * 确认指定设备是否具有自定义模板
      */
     Template confirmPersonalTemplate(@Param("deviceId") String deviceId);
@@ -106,11 +111,6 @@ public interface TemplateMapper {
      * 根据自定义模板的template_style查询其使用的标准模板的ID
      */
     String selectStandardTemplateIdByStyle(@Param("templateStyle") String templateStyle);
-
-    /**
-     * 查询所有节假日模板信息（待写）
-     */
-    List<Map> selectFestivalTemplateInfo();
 
     /**
      * 查询模板相关图片的详细信息(用于封装下发指令)

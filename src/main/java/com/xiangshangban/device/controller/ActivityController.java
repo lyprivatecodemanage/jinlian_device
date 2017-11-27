@@ -10,6 +10,7 @@ import com.xiangshangban.device.service.IEmployeeService;
 import com.xiangshangban.device.service.ITemplateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
 
@@ -288,38 +289,38 @@ public class ActivityController {
      }
      */
     @PostMapping ("/addDeviceTemplate")
-    public String addDeviceTemplate(@RequestBody String addTemplateInfo){
-        Map result = iTemplateService.addDeviceTemplate(addTemplateInfo);
+    public String addDeviceTemplate(@RequestParam("templateInfo") String templateInfo, @RequestParam("file")MultipartFile file){
+        Map result = iTemplateService.addDeviceTemplate(templateInfo,file);
         return JSONObject.toJSONString(ReturnCodeUtil.addReturnCode(result));
     }
 
     /**
      * TODO 更新设备自定义模板信息
-     * 请求参数数据格式：
-     *{
-     "deviceId":"1",
-     "templateId":"2",
-     "backImgList":[
+     *
+     "salutationList":[ 请求参数数据格式：
+         *{
+         "deviceId":"1",
+         "templateId":"2",
+         "backImgList":[
 
-     {"imgId":"1","startTime":"2017-11-04 08:00","endTime":"2017-11-04 12:00"},
-     {"imgId":"2","startTime":"2017-11-04 12:00","endTime":"2017-11-04 18:00"}
+         {"imgId":"1","startTime":"2017-11-04 08:00","endTime":"2017-11-04 12:00"},
+         {"imgId":"2","startTime":"2017-11-04 12:00","endTime":"2017-11-04 18:00"}
 
-     ],
+         ],
 
-     "salutationList":[
 
-     {"content":"上午","startTime":"2017-11-04 08:00","endTime":"2017-11-04 12:00"},
-     {"content":"下午","startTime":"2017-11-04 12:00","endTime":"2017-11-04 18:00"}
+         {"content":"上午","startTime":"2017-11-04 08:00","endTime":"2017-11-04 12:00"},
+         {"content":"下午","startTime":"2017-11-04 12:00","endTime":"2017-11-04 18:00"}
 
-     ],
-     "companyLogoName":"xxx"
-     }
+         ],
+         "companyLogoName":"xxx"
+         }
      *
      */
     @PostMapping("/refreshDeviceTemplate")
-    public String refreshDeviceTemplate(@RequestBody String templateInfo){
+    public String refreshDeviceTemplate(@RequestParam("templateInfo") String templateInfo, @RequestParam("file")MultipartFile file){
         //更新模板信息
-        Map result= iTemplateService.modifyDeviceTemplateInfo(templateInfo);
+        Map result= iTemplateService.modifyDeviceTemplateInfo(templateInfo,file);
         return JSONObject.toJSONString(ReturnCodeUtil.addReturnCode(result));
     }
 

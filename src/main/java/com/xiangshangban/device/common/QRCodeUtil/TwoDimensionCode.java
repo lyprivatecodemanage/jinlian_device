@@ -19,6 +19,15 @@ import com.swetake.util.Qrcode;
 public class TwoDimensionCode {
 
 	/**
+	 * TODO ================<自定义方法>=====================
+	 * 生成二维码(QRCode)图片
+	 * @param content 存储内容
+	 */
+	public BufferedImage getQRCodeBufferImage(String content) {
+		BufferedImage qRCodeCommon = this.qRCodeCommon(content,"png", 4);
+		return qRCodeCommon;
+	}
+	/**
 	 * 生成二维码(QRCode)图片
 	 * @param content 存储内容
 	 * @param imgPath 图片路径

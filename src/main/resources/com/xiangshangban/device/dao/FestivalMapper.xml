@@ -79,4 +79,9 @@
       festival_date = #{festivalDate,jdbcType=VARCHAR}
     where id = #{id,jdbcType=VARCHAR}
   </update>
+
+  <!--根据当天日期判断当天是否是节假日或者节气-->
+  <select id="selectFestivalByDate" parameterType="String" resultMap="BaseResultMap">
+    select * from festival_ where festival_date = #{date}
+  </select>
 </mapper>

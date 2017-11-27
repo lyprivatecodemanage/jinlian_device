@@ -230,6 +230,14 @@
     from template_ A,template_items B where A.template_id = B.template_id  and A.template_id = #{templateId}) S left join image_ M on S.item_img_id = M.id
   </select>
 
+  <!--查询节日模板的item信息-->
+  <select id="selectFestivalItemInfo" resultType="map">
+     select S.*,M.img_name,img_url from
+    (select A.template_id,B.item_id,item_type,item_top_x,item_top_y,item_font_orient,item_font_size,item_font_bold,item_font_color,item_img_id
+    from template_ A,template_items B where A.template_id = B.template_id  and
+    A.template_id = (select template_id from template_ where festival_flag = '1')) S left join image_ M on S.item_img_id = M.id
+  </select>
+
   <!--确认指定设备是否具有自定义模板-->
   <select id="confirmPersonalTemplate" parameterType="String" resultType="com.xiangshangban.device.bean.Template">
     select template_id as templateId from template_ where device_id = #{deviceId} and template_level = '2'
@@ -266,8 +274,4 @@
     select template_id from template_ where template_style = #{template_style}
   </select>
 
-  <!--查询所有节假日模板信息（下发给设备）-->
-  <select id="selectFestivalTemplateInfo">
-
-  </select>
 </mapper>

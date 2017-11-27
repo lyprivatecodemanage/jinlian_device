@@ -36,9 +36,6 @@ public class OSSFileUtil {
 	
 	/**
 	 * 创建OSSClient对象
-	 * @param endPoint
-	 * @param accessId
-	 * @param accessKey
 	 * @return
 	 */
 	public void initialize(){
@@ -91,12 +88,12 @@ public class OSSFileUtil {
 
 	/**
 	 * 设备文件上传专用
-	 * @param String customerId 用户ID
-	 * @param String SN 设备唯一号
-	 * @param String edtion 版本号
-	 * @param String type 1-设备端文件 2-云端文件
-	 * @param byte[] content 内容
-	 * @return String MD5摘要
+	 * @param  customerId 用户ID
+	 * @param  SN 设备唯一号
+	 * @param  edtion 版本号
+	 * @param type 1-设备端文件 2-云端文件
+	 * @param content 内容
+	 * @return  MD5摘要
 	 * @throws OSSException
 	 * @throws ClientException
 	 */
@@ -176,7 +173,7 @@ public class OSSFileUtil {
 
     /**
      * 设置上传文件头类型
-     * @param prefix
+     * @param extension
      * @return
      */
 	public String getFileType(String extension) {
@@ -200,7 +197,6 @@ public class OSSFileUtil {
 
 	/**
 	 * 删除文件
-	 * @param bucketName
 	 * @param key
 	 * @throws OSSException
 	 * @throws ClientException
@@ -212,8 +208,6 @@ public class OSSFileUtil {
 	
 	/**
      * 下载文件
-     * @param client
-     * @param bucketName
      * @param key
      * @param filename
      * @throws OSSException
@@ -291,9 +285,11 @@ public class OSSFileUtil {
 	 */
 	 public String upload(String customerId,String directory, String key,MultipartFile multipartFile) throws OSSException, ClientException, FileNotFoundException {
 		initialize();
+		//截取文件后缀
 		String extention = multipartFile.getOriginalFilename().substring(multipartFile.getOriginalFilename().lastIndexOf(".")+1);
+		//将multipartFile转换成file
 		CommonsMultipartFile commonsMultipartFile= (CommonsMultipartFile)multipartFile;
-		DiskFileItem diskFileItem = (DiskFileItem)commonsMultipartFile.getFileItem(); 
+		DiskFileItem diskFileItem = (DiskFileItem)commonsMultipartFile.getFileItem();
 		File file = diskFileItem.getStoreLocation();
 		return OSSPutObject(customerId,directory,key, extention,file);
 	 }
@@ -388,5 +384,112 @@ public class OSSFileUtil {
 		//上传文件
         client.putObject(OSS_BUCKET, filePath+key+"."+type, input, objectMeta);
         return key+"."+type;
+	}
+
+	/*********************************************************************
+	 * TODO 活动管理部分文件上传
+	 **********************************************************************/
+
+	/**
+	 *活动管理部分上传文件中转站
+	 * @param directory
+	 * @param multipartFile
+	 */
+	public String templateUploadTransfer(String directory,MultipartFile multipartFile,String key,InputStream inputStream) throws FileNotFoundException {
+		initialize();
+		String filePath = "";
+		if(multipartFile!=null){
+			//截取文件后缀
+			String extention = multipartFile.getOriginalFilename().substring(multipartFile.getOriginalFilename().lastIndexOf(".")+1);
+			//获取上传文件名
+			String filename = multipartFile.getOriginalFilename().substring(0,multipartFile.getOriginalFilename().lastIndexOf("."));
+			//将multipartFile转换成file
+			CommonsMultipartFile commonsMultipartFile= (CommonsMultipartFile)multipartFile;
+			DiskFileItem diskFileItem = (DiskFileItem)commonsMultipartFile.getFileItem();
+			File file = diskFileItem.getStoreLocation();
+			//上传文件
+			filePath = doTemplateInfoUpload(directory,filename,extention,file);
+		}
+
+		if(inputStream!=null){
+			filePath = doTemplateInfoUpload(directory,"png",key,inputStream);
+		}
+		return filePath;
+	}
+
+	/**
+	 * 上传模板相关的Logo和设备信息二维码
+	 * @param directory 上传文件保存的路径
+	 * @param extension 文件的后缀
+	 * @param file 要上传的文件
+	 */
+	public String doTemplateInfoUpload(String directory,String fileName,String extension,File file) throws FileNotFoundException {
+		//创建文件头对象
+		ObjectMetadata objectMeta = new ObjectMetadata();
+		//设置文件长度
+		objectMeta.setContentLength(file.length());
+		//设置文件类型
+		objectMeta.setContentType(getFileType(extension));
+		//创建文件流对象
+		InputStream input = new FileInputStream(file);
+		//文件路径(区分系统文件目录和用户文件目录)
+		String filePath = SYS_FILE_LOCATION + "/"+directory+"/"+fileName+"."+extension;
+		String returnFilePath = "";
+		String ossEnvironment="";
+		try {
+			ossEnvironment = PropertiesUtils.ossProperty("ossEnvironment");
+			if("test".equals(ossEnvironment)){
+				filePath="test/"+filePath;
+				returnFilePath = "test/"+SYS_FILE_LOCATION + "/"+directory;
+			}else{
+				filePath="prod/"+filePath;
+				returnFilePath = "prod/"+SYS_FILE_LOCATION + "/"+directory;
+			}
+		} catch (IOException e) {
+			LOG.info("获取OSS环境属性错误");
+		}
+		//上传文件
+		client.putObject(OSS_BUCKET, filePath, input, objectMeta);
+		//返回文件保存路径
+		return returnFilePath;
+	}
+
+	/**
+	 * 上传模板相关的Logo和设备信息二维码
+	 * @param directory 上传文件保存的路径
+	 * @param key 使用UUID生成文件名称
+	 * @param input 要上传的文件流
+	 */
+	public String doTemplateInfoUpload(String directory, String type,String key,InputStream input) throws FileNotFoundException {
+		//创建文件头对象
+		ObjectMetadata objectMeta = new ObjectMetadata();
+		//设置文件类型
+		objectMeta.setContentType(type);
+		try {
+			//设置文件长度
+			objectMeta.setContentLength(input.available());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		//文件路径(区分系统文件目录和用户文件目录)
+		String filePath = SYS_FILE_LOCATION + "/"+directory+"/"+key+"."+type;
+		String returnFilePath = "";
+		String ossEnvironment="";
+		try {
+			ossEnvironment = PropertiesUtils.ossProperty("ossEnvironment");
+			if("test".equals(ossEnvironment)){
+				filePath="test/"+filePath;
+				returnFilePath = "test/"+SYS_FILE_LOCATION + "/"+directory;
+			}else{
+				filePath="prod/"+filePath;
+				returnFilePath = "prod/"+SYS_FILE_LOCATION + "/"+directory;
+			}
+		} catch (IOException e) {
+			LOG.info("获取OSS环境属性错误");
+		}
+		//上传文件
+		client.putObject(OSS_BUCKET, filePath, input, objectMeta);
+		//返回文件保存路径
+		return returnFilePath;
 	}
 }

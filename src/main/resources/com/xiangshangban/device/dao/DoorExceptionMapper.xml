@@ -124,5 +124,6 @@
       and S.record_date like #{doorRecordCondition.punchCardTime}
     </if>
   </where>
+    order by record_date desc
 </select>
 </mapper>

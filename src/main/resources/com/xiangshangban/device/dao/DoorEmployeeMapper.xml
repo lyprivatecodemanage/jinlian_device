@@ -107,6 +107,7 @@
     <if test="companyId!=null and  companyId!=''">
         and B.employee_company_id = #{companyId}
     </if>
+    order by A.door_id
   </select>
 
   <!--查询门的命令下发的时间-->

@@ -3,24 +3,25 @@ package com.xiangshangban.device.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.xiangshangban.device.bean.DoorCmd;
-import com.xiangshangban.device.bean.Font;
-import com.xiangshangban.device.bean.Template;
+import com.xiangshangban.device.bean.*;
+import com.xiangshangban.device.common.QRCodeUtil.TwoDimensionCode;
 import com.xiangshangban.device.common.rmq.RabbitMQSender;
 import com.xiangshangban.device.common.utils.CalendarUtil;
 import com.xiangshangban.device.common.utils.DateUtils;
 import com.xiangshangban.device.common.utils.FormatUtil;
 import com.xiangshangban.device.common.utils.ReturnCodeUtil;
-import com.xiangshangban.device.dao.DoorCmdMapper;
-import com.xiangshangban.device.dao.ImagesMapper;
-import com.xiangshangban.device.dao.TemplateItemsMapper;
-import com.xiangshangban.device.dao.TemplateMapper;
+import com.xiangshangban.device.controller.OSSController;
+import com.xiangshangban.device.dao.*;
 import com.xiangshangban.device.service.IEntranceGuardService;
 import com.xiangshangban.device.service.ITemplateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.*;
 import java.util.*;
 
 /**
@@ -47,6 +48,15 @@ public class TemplateServiceImpl implements ITemplateService{
     @Autowired
     private DoorCmdMapper doorCmdMapper;
 
+    @Autowired
+    private OSSController ossController;
+
+    @Autowired
+    private DeviceMapper deviceMapper;
+
+    @Autowired
+    private FestivalMapper festivalMapper;
+
     @Value("${rabbitmq.download.queue.name}")
     String downloadQueueName;
 
@@ -56,6 +66,7 @@ public class TemplateServiceImpl implements ITemplateService{
     /**
      * TODO 更新自定义模板信息(背景图、问候语、logo)
      * @param templateInfo 新数据
+     * @param file 上传的Logo图片
      * @return
              {
             "deviceId":"1",
@@ -72,7 +83,7 @@ public class TemplateServiceImpl implements ITemplateService{
     }
      */
     @Override
-    public Map modifyDeviceTemplateInfo(String templateInfo) {
+    public Map modifyDeviceTemplateInfo(String templateInfo,MultipartFile file) {
 
         JSONObject jsonObject = JSONObject.parseObject(templateInfo);
         Object deviceId = jsonObject.get("deviceId");
@@ -108,7 +119,7 @@ public class TemplateServiceImpl implements ITemplateService{
 
             if(tresult>0&&bresult>0&&iresult>0){
                 //添加新的自定义模板，代替删除的自定义模板
-                boolean operateResult = addNewPersonalTemplate(rdeviceId, templateItems, personalBackImgList, personalSalutationList, logoName);
+                boolean operateResult = addNewPersonalTemplate(rdeviceId, templateItems, personalBackImgList, personalSalutationList, file);
                 //下发到设备
                 issueUpdateLaterTemplateInfo(String.valueOf(templateMapper.selectTemplateMaxPrimaryKey()),rdeviceId);
                 //查询设备那边的执行情况(睡眠一段时间,等待回复)
@@ -135,6 +146,7 @@ public class TemplateServiceImpl implements ITemplateService{
      /**
      * TODO 添加自定义模板
      * @param templateInfo
+      *@param file 上传的Logo图片
      * @return
       * 参数：
               *{
@@ -153,7 +165,7 @@ public class TemplateServiceImpl implements ITemplateService{
       *
       *
      */
-    public Map addDeviceTemplate(String templateInfo){
+    public Map addDeviceTemplate(String templateInfo,MultipartFile file){
 
         JSONObject jsonObject = JSONObject.parseObject(templateInfo);
         Object deviceId = jsonObject.get("deviceId");
@@ -183,7 +195,7 @@ public class TemplateServiceImpl implements ITemplateService{
             Template resultTemplate = templateMapper.confirmPersonalTemplate(rdeviceId);
 
             if(resultTemplate==null){
-                addNewPersonalTemplate(rdeviceId,templateItems,personalBackImgList,personalSalutationList,logoName);
+                addNewPersonalTemplate(rdeviceId,templateItems,personalBackImgList,personalSalutationList,file);
             }else{
                 //删除拥有的自定义模板（模板item、模板图片)，然后添加新的自定义模板
                 int tresult = templateMapper.deletePersonalTemplate(resultTemplate.getTemplateId());
@@ -192,7 +204,7 @@ public class TemplateServiceImpl implements ITemplateService{
 
                 if(tresult>0&&bresult>0&&iresult>0){
                     //添加新的自定义模板，代替删除的自定义模板
-                    boolean operateResult =  addNewPersonalTemplate(rdeviceId,templateItems,personalBackImgList,personalSalutationList,logoName);
+                    boolean operateResult =  addNewPersonalTemplate(rdeviceId,templateItems,personalBackImgList,personalSalutationList,file);
                     //下发到设备
                     issueUpdateLaterTemplateInfo(String.valueOf(templateMapper.selectTemplateMaxPrimaryKey()),rdeviceId);
                     //查询设备那边的执行情况
@@ -220,13 +232,153 @@ public class TemplateServiceImpl implements ITemplateService{
 
     /**
      * TODO 下发节日节气模板（后台判断日期下发相对应的模板）
+     * 节假日名称充当模板的问候语
      * @param
      * @return
      */
     @Override
-    public boolean addFestivalTemplate() {
-        //查询所有节假日模板的信息
-        List<Map> festivalTemplateInfo = templateMapper.selectFestivalTemplateInfo();
+    public boolean addFestivalTemplate(String festivalName) {
+        //查询和当前节日对应的背景图（以及关联的铃铛按钮图和按钮水波纹颜色）
+        List<Map> background = imagesMapper.selectBackGroundByType((festivalName == null || festivalName.isEmpty()) ? null : "%" + festivalName + "%");
+        //查询节假日标准模板信息
+        List<Map> festivalItem = templateMapper.selectFestivalItemInfo();
+
+
+        //整理item信息(将“节日名称充当问候语”)
+        List<Map> items = new ArrayList<>();
+        List<Map> fontStyle = new ArrayList<>();
+        String itemType = "";
+        //保存每一个问候语字的样式
+        for(int j=0;j<festivalItem.size();j++) {
+            //获取itemType
+            itemType = festivalItem.get(j).get("item_type").toString();
+            //对问候语进行处理
+            if (itemType.equals("0")) {
+                //储存标准模板每一个字的板式信息
+                fontStyle.add(festivalItem.get(j));
+                continue;
+            }
+        }
+
+        //TODO 整理fontStyle
+        List<Font> fontList = new ArrayList<>();
+        //获取文字的方向
+        String fontOrient = fontStyle.get(0).get("item_font_orient").toString();
+        for (int f = 0; f < fontStyle.size(); f++) {
+            //将文字信息封装到font类中
+            Font font = new Font();
+            font.setItemId(fontStyle.get(f).get("item_id").toString());
+            font.setCoordinateX(fontStyle.get(f).get("item_top_x").toString());
+            font.setCoordinateY(fontStyle.get(f).get("item_top_y").toString());
+            font.setFontBold(fontStyle.get(f).get("item_font_bold").toString());
+            font.setFontColor(fontStyle.get(f).get("item_font_color").toString());
+            font.setFontSize(fontStyle.get(f).get("item_font_size").toString());
+            font.setFontOrient(fontOrient);
+
+            fontList.add(font);
+        }
+
+        //TODO 对文字进行排序
+        //对文字进行排序
+        if (fontOrient.equals("0")) {//横向，根据X坐标进行排序
+            Collections.sort(fontList, new Comparator<Font>() {
+                public int compare(Font o1, Font o2) {
+                    return o1.getCoordinateX().compareTo(o2.getCoordinateX());
+                }
+            });
+        }
+        if (fontOrient.equals("1")) {//纵向，根据Y坐标进行排序
+            Collections.sort(fontList, new Comparator<Font>() {
+                public int compare(Font o1, Font o2) {
+                    return o1.getCoordinateY().compareTo(o2.getCoordinateY());
+                }
+            });
+        }
+
+        //保存问候语
+        for(int c = 0;c<festivalName.length();c++){
+            Map fontItem = new HashMap();
+            fontItem.put("templateId",festivalItem.get(0).get("template_id")==null?"":festivalItem.get(0).get("template_id").toString());
+            fontItem.put("itemId",fontList.get(c).getItemId()==null?"":fontList.get(c).getItemId().toString());
+            fontItem.put("itemType","0");
+            fontItem.put("itemTopX",fontList.get(c).getCoordinateX()==null?"":fontList.get(c).getCoordinateX().toString());
+            fontItem.put("itemTopY",fontList.get(c).getCoordinateY()==null?"":fontList.get(c).getCoordinateY().toString());
+            fontItem.put("itemFontOrient",fontList.get(c).getFontOrient()==null?"":fontList.get(c).getFontOrient().toString());
+            fontItem.put("itemFontSize",fontList.get(c).getFontSize()==null?"":fontList.get(c).getFontSize().toString());
+            fontItem.put("itemFontBold",fontList.get(c).getFontBold()==null?"":fontList.get(c).getFontBold().toString());
+            fontItem.put("itemFontColor",fontList.get(c).getFontColor()==null?"":fontList.get(c).getFontColor().toString());
+            fontItem.put("itemFontContent",festivalName.substring(c,c+1)==null?"":festivalName.substring(c,c+1).toString());
+            fontItem.put("itemImgName","");
+            fontItem.put("itemImgPath","");
+            fontItem.put("itemStartDate","");
+            fontItem.put("itemEndDate","");
+
+            items.add(fontItem);
+        }
+
+        //保存问候语以外的item
+        for(int j=0;j<festivalItem.size();j++){
+            itemType = festivalItem.get(j).get("item_type").toString();
+
+            if(itemType.equals("0")){
+                continue;
+            }
+            Map item = new HashMap();
+
+            item.put("templateId",festivalItem.get(0).get("template_id")==null?"":festivalItem.get(0).get("template_id").toString());
+            item.put("itemId",festivalItem.get(j).get("item_id")==null?"":festivalItem.get(j).get("item_id").toString());
+            item.put("itemType",itemType==null?"":itemType);
+            item.put("itemTopX",festivalItem.get(j).get("item_top_x")==null?"":festivalItem.get(j).get("item_top_x").toString());
+            item.put("itemTopY",festivalItem.get(j).get("item_top_y")==null?"":festivalItem.get(j).get("item_top_y").toString());
+            item.put("itemFontOrient",festivalItem.get(j).get("item_font_orient")==null?"":festivalItem.get(j).get("item_font_orient").toString());
+            item.put("itemFontSize",festivalItem.get(j).get("item_font_size")==null?"":festivalItem.get(j).get("item_font_size").toString());
+            item.put("itemFontBold",festivalItem.get(j).get("item_font_bold")==null?"":festivalItem.get(j).get("item_font_bold").toString());
+            item.put("itemFontColor",festivalItem.get(j).get("item_font_color")==null?"":festivalItem.get(j).get("item_font_color").toString());
+            item.put("itemFontContent",festivalItem.get(j).get("item_id")==null?"":festivalItem.get(j).get("item_id").toString());
+            item.put("itemImgName",festivalItem.get(j).get("img_name")==null?"":festivalItem.get(j).get("img_name").toString());
+            item.put("itemImgPath",festivalItem.get(j).get("img_url")==null?"":festivalItem.get(j).get("img_url").toString());
+            item.put("itemStartDate","");
+            item.put("itemEndDate","");
+
+            items.add(item);
+        }
+
+        //下发节假日模板到所有设备
+        List<Map> templates = new ArrayList<>();
+
+        //按照现在的协议，一张背景图对应一个模板
+        for(int i=0;i<background.size();i++){ //遍历背景图
+            Map template = new HashMap();
+
+            template.put("templateId",festivalItem.get(0).get("template_id")==null?"":festivalItem.get(0).get("template_id").toString());
+            template.put("templateType","0");
+            template.put("templateLevel","1");
+            template.put("imageName",background.get(i).get("img_name")==null?"":background.get(i).get("img_name").toString());
+            template.put("imagePath",background.get(i).get("img_url")==null?"":background.get(i).get("img_url").toString());
+            template.put("alertButtonColor",background.get(i).get("ripple_color")==null?"":background.get(i).get("ripple_color").toString());
+            template.put("alertImgName",background.get(i).get("rimg_name")==null?"":background.get(i).get("rimg_name").toString());
+            template.put("alertImgPath",background.get(i).get("rimg_url")==null?"":background.get(i).get("rimg_url").toString());
+            template.put("broadStartDate","");
+            template.put("broadEndDate","");
+            template.put("broadStartTime","");
+            template.put("broadEndTime","");
+            template.put("roastingTime","");
+            template.put("items",items==null?"":items);
+
+            templates.add(template);
+        }
+
+        //测试
+        System.out.println("================="+JSONObject.toJSONString(templates)+"==================");
+        //查询所有的设备
+        List<Device> devices = deviceMapper.selectAllDeviceInfoByNone();
+
+        if(devices!=null&&devices.size()>0){
+            for (Device device :devices) {
+                //下发通用的节假日模板到所有设备
+                issueTemplateInfoCore(device.getDeviceId(),templates);
+            }
+        }
         return false;
     }
 
@@ -234,7 +386,6 @@ public class TemplateServiceImpl implements ITemplateService{
     /**********************************************************
      * TODO web端接口
      *********************************************************/
-
     /**
      * TODO 查询所有的设备自定义模板信息
      * @param deviceId
@@ -312,6 +463,16 @@ public class TemplateServiceImpl implements ITemplateService{
         return maps;
     }
 
+    /**
+     * TODO 验证当天是不是一个节气或者节日（如果是的话返回节日名称）
+     * @param date
+     * @return
+     */
+    @Override
+    public Festival verifyCurrentDate(String date) {
+        return festivalMapper.selectFestivalByDate(date);
+    }
+
 
     /*********************************************************
      *   TODO 公共方法区
@@ -339,7 +500,7 @@ public class TemplateServiceImpl implements ITemplateService{
     /**
      * TODO 添加（替换）自定义模板(公共方法)
      */
-    public boolean addNewPersonalTemplate(String rdeviceId,List<Map> templateItems,JSONArray personalBackImgList,JSONArray personalSalutationList,String logoName) {
+    public boolean addNewPersonalTemplate(String rdeviceId, List<Map> templateItems, JSONArray personalBackImgList, JSONArray personalSalutationList, MultipartFile file) {
         //添加新的自定义模板
         Map templateMap = new HashMap();
 
@@ -402,10 +563,32 @@ public class TemplateServiceImpl implements ITemplateService{
             map.put("template_id", templateMapper.selectTemplateMaxPrimaryKey());
             if (itemType.equals("7") || itemType.equals("8")) {//根据用户选择的设备信息生成二维码,上传之后，该item要使用二维码图片的id
                 if (itemType.equals("7")) {//用户上传二维码
-                    map.put("item_img__id", "222");
+                    //根据当前的设备ID，查询设备信息，根据该信息生成二维码
+                    Device device = deviceMapper.selectByPrimaryKey(rdeviceId);
+                    //创建二维码对象
+                    TwoDimensionCode twoDimensionCode = new TwoDimensionCode();
+                    //根据设备信息生成二维码，写入指定的输出流中
+                    BufferedImage qrCodeBufferImage = twoDimensionCode.getQRCodeBufferImage(device.toString());
+                    //创建字节数组输出流
+                    ByteArrayOutputStream os = new ByteArrayOutputStream();
+                    try {
+                        ImageIO.write(qrCodeBufferImage,"png",os);
+                        InputStream inputStream = new ByteArrayInputStream(os.toByteArray());
+                        //TODO 上传二维码
+                        String qrCodeId = ossController.templateOSSUpload(null, String.valueOf(templateMapper.selectTemplateMaxPrimaryKey()),inputStream,"2");
+                        map.put("item_img__id",Integer.parseInt(qrCodeId)>0?qrCodeId:"添加qrCode图片到本地失败");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
                 if (itemType.equals("8")) {//用户上传logo后，该item要使用logo图片的id
-                    map.put("item_img__id", "666");
+                    try {
+                        //TODO 上传Logo
+                        String logoId = ossController.templateOSSUpload(file, String.valueOf(templateMapper.selectTemplateMaxPrimaryKey()),null,"1");
+                        map.put("item_img__id",Integer.parseInt(logoId)>0?logoId:"添加logo图片到本地失败");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             } else {
                 //使用模板默认的图片
@@ -549,7 +732,14 @@ public class TemplateServiceImpl implements ITemplateService{
             templateInfoMap.put("items",itemsInfo);
             templates.add(templateInfoMap);
         }
+        //下发
+        issueTemplateInfoCore(deviceId,templates);
+    }
 
+    /**
+     * TODO 下发模板到设备（核心业务操作）
+     */
+    public void issueTemplateInfoCore(String deviceId,List<Map> templates){
         //构造命令格式
         DoorCmd doorCmdUpdateDeviceTemplate = new DoorCmd();
         doorCmdUpdateDeviceTemplate.setServerId("001");

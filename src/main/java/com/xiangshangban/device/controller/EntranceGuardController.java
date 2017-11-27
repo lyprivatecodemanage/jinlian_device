@@ -83,6 +83,12 @@ public class EntranceGuardController {
      */
     @PostMapping(value = "/basic/addDoor")
     public String addDoor(@RequestBody String requestParam) {
+
+        //绑定门的时候，同一个门只能绑定一个设备
+        //①：查询当前添加的门对应的设备ID
+
+
+
         JSONObject jsonObject = JSONObject.parseObject(requestParam);
         Object doorName = jsonObject.get("doorName");
         Object deviceId = jsonObject.get("deviceId");
@@ -141,8 +147,8 @@ public class EntranceGuardController {
         Object companyId = jsonObject.get("companyId");
 
         Map doorMap = new HashMap();
-        doorMap.put("doorName", jsonObject.get("doorName") == null ? null : "%" + jsonObject.get("doorName").toString() + "%");
-        doorMap.put("companyId", jsonObject.get("companyId") == null ? null : jsonObject.get("companyId").toString());
+        doorMap.put("doorName", (jsonObject.get("doorName") == null || jsonObject.get("doorName").toString().isEmpty())? null : "%" + jsonObject.get("doorName").toString() + "%");
+        doorMap.put("companyId", (jsonObject.get("companyId") == null || jsonObject.get("companyId").toString().isEmpty())? null : jsonObject.get("companyId").toString());
         Page pageObj = null;
         if (page != null && !page.toString().isEmpty() && rows != null && !rows.toString().isEmpty()) {
             pageObj = PageHelper.startPage(Integer.parseInt(page.toString()), Integer.parseInt(rows.toString()));

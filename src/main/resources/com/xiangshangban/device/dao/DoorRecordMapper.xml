@@ -213,7 +213,7 @@
   <!--###############《新添加部分》##############-->
   <!--分条件查询打卡记录-->
   <select id="selectPunchCardRecord" parameterType="com.xiangshangban.device.bean.DoorRecordCondition" resultType="map">
-    select record_type,record_date,employee_name,employee_department_name from (select A.record_type,record_date,B.employee_name,employee_department_name,employee_company_id from door_record A
+    select S.record_type,record_date,employee_name,employee_department_name from (select A.record_type,record_date,B.employee_name,employee_department_name,employee_company_id from door_record A
     left join employee_ B on A.employee_id = B.employee_id and A.employee_id in (select employee_id from employee_) where A.record_type in('3','5','6','7','8') ) S
     <where>
       <if test="doorRecordCondition.name!=null and doorRecordCondition.name!=''">
@@ -232,7 +232,9 @@
         and S.record_date like #{doorRecordCondition.punchCardTime}
       </if>
     </where>
+    order by record_time desc
   </select>
+
 
   <!--查询一个员工在某段时间内的最早和最晚打卡时间-->
   <select id="selectPunchCardTime" parameterType="map" resultType="String">

@@ -130,4 +130,23 @@ public class Device {
     public void setRemainServerTime(String remainServerTime) {
         this.remainServerTime = remainServerTime;
     }
+
+    @Override
+    public String toString() {
+        return "Device{" +
+                "deviceId='" + deviceId + '\'' +
+                ", deviceName='" + deviceName + '\'' +
+                ", companyId='" + companyId + '\'' +
+                ", companyName='" + companyName + '\'' +
+                ", deviceNumber='" + deviceNumber + '\'' +
+                ", macAddress='" + macAddress + '\'' +
+                ", isOnline='" + isOnline + '\'' +
+                ", activeStatus='" + activeStatus + '\'' +
+                ", devicePlace='" + devicePlace + '\'' +
+                ", deviceUsages='" + deviceUsages + '\'' +
+                ", totalServerTime='" + totalServerTime + '\'' +
+                ", haveUsedTime='" + haveUsedTime + '\'' +
+                ", remainServerTime='" + remainServerTime + '\'' +
+                '}';
+    }
 }

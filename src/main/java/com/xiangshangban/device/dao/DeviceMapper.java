@@ -30,9 +30,10 @@ public interface DeviceMapper {
     List<String> findDeviceIdByCompanyId(String companyId);
 
     /**
-     * 查询所有的设备信息
+     * 查询所有的没有关联门的设备信息
      */
     List<Map> selectAllDeviceInfo(@Param("companyId") String companyId);
+
 
     /**
      * 根据设备id查询该公司下的设备id的集合

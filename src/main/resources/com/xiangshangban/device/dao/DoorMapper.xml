@@ -116,7 +116,7 @@
     <!--################新添加部分#################-->
   <!--根据门名称查询门信息-->
   <select id="getDoorInfo" parameterType="map" resultType="map">
-    select * from(select A.door_id,door_name,operate_time,B.device_id,device_name,company_id,C.employee_id,employee_name
+    select S.* from(select A.door_id,door_name,operate_time,B.device_id,device_name,company_id,C.employee_id,employee_name
     from door_  A,device_ B,employee_ C where A.device_id=B.device_id and A.operate_employee = C.employee_id) S
     <where>
       <if test="doorName!=null and doorName!=''">
@@ -126,6 +126,7 @@
         and S.company_id = #{companyId}
       </if>
     </where>
+    order by S.operate_time desc
   </select>
   <!--批量删除门信息-->
   <delete id="delDoorBatch" parameterType="List">

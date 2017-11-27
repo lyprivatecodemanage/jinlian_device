@@ -25,4 +25,19 @@ public interface ImagesMapper {
      * 查询所有的背景图信息（根据类型进行分组）
      */
     List<Map> selectAllBackGround();
+
+    /**
+     * 根据图片的类型查询图片信息
+     */
+    List<Map> selectBackGroundByType(@Param("imgType") String imgType);
+
+    /**
+     * 查询image_表主键的最大值
+     */
+    int selectImagePrimaryKey();
+
+    /**
+     * 添加图片信息
+     */
+    int insertIntoImageInfo(Map map);
 }

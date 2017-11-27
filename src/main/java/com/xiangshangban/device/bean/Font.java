@@ -5,6 +5,8 @@ package com.xiangshangban.device.bean;
  * @Date 2017/11/12  10:10
  */
 public class Font {
+
+    private String itemId;
     private String content;
     private String coordinateX;
     private String coordinateY;
@@ -69,12 +71,25 @@ public class Font {
         this.coordinateY = coordinateY;
     }
 
+    public String getItemId() {
+        return itemId;
+    }
+
+    public void setItemId(String itemId) {
+        this.itemId = itemId;
+    }
+
     @Override
     public String toString() {
         return "Font{" +
-                "content='" + content + '\'' +
+                "itemId='" + itemId + '\'' +
+                ", content='" + content + '\'' +
                 ", coordinateX='" + coordinateX + '\'' +
                 ", coordinateY='" + coordinateY + '\'' +
+                ", fontSize='" + fontSize + '\'' +
+                ", fontBold='" + fontBold + '\'' +
+                ", fontColor='" + fontColor + '\'' +
+                ", fontOrient='" + fontOrient + '\'' +
                 '}';
     }
 }

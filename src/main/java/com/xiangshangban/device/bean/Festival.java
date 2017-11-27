@@ -40,4 +40,14 @@ public class Festival {
     public void setFestivalDate(String festivalDate) {
         this.festivalDate = festivalDate;
     }
+
+    @Override
+    public String toString() {
+        return "Festival{" +
+                "id='" + id + '\'' +
+                ", festivalType='" + festivalType + '\'' +
+                ", festivalName='" + festivalName + '\'' +
+                ", festivalDate='" + festivalDate + '\'' +
+                '}';
+    }
 }

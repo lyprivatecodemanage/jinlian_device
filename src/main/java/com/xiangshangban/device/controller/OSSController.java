@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 
@@ -233,5 +235,68 @@ public class OSSController {
 			return new Double(p1.getDeviceId()).compareTo(new Double(p2.getDeviceId()));
 		}
 	}
-} 
+
+
+	/**
+	 * 测试下方templateOSSUpload方法的入口
+	 * @return
+	 */
+	/*@GetMapping("/uploadTest")
+	public String uploadTest(){
+		//创建二维码对象
+		TwoDimensionCode twoDimensionCode = new TwoDimensionCode();
+		//根据设备信息生成二维码，写入指定的输出流中
+		BufferedImage qrCodeBufferImage = twoDimensionCode.getQRCodeBufferImage("上传二维码图片到OSS测试");
+		//创建字节数组输出流
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		//返回码
+		String backCode = "";
+		try {
+			ImageIO.write(qrCodeBufferImage, "png", os);
+			InputStream inputStream = new ByteArrayInputStream(os.toByteArray());
+			backCode = templateOSSUpload(null, "1", inputStream, "2");
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return backCode;
+	}*/
+
+	/**
+	 * TODO 模板主题部分：
+	 * 上传Logo和二维码
+	 * @param file
+	 * @param templateId
+	 * @return 添加logo和二维码后，生成的主键的ID
+	 */
+	@PostMapping("/templateOSSUpload")
+	public String templateOSSUpload(@RequestParam(name = "file",required = false) MultipartFile file,
+									@RequestParam(name = "templateId") String templateId,
+									@RequestParam(name = "inputStream",required = false)InputStream inputStream,
+									@RequestParam(name = "flag") String flag) throws IOException {
+		String funcDirectory = "";
+		//根据使用的标准模板的id，设定保存的文件夹
+		funcDirectory = "device/template/template"+templateId;
+		String returnInfo = "";
+		int logoQrCodeId = 0;
+		try {
+			if(file!=null){
+				//使用MultipartFile
+				logoQrCodeId = oSSFileService.templateFileUpload(funcDirectory,file,null,flag);
+			}
+			if(inputStream!=null){
+				//以输入流的形式上传文件
+				logoQrCodeId = oSSFileService.templateFileUpload(funcDirectory,null,inputStream,flag);
+			}
+			if(logoQrCodeId>0){
+				System.out.println("*********上传文件成功,并保存到本地**********");
+				returnInfo = String.valueOf(logoQrCodeId);
+			}
+		}catch (Exception e){
+			e.printStackTrace();
+			System.out.println("*********上传文件失败**********");
+			returnInfo = String.valueOf(logoQrCodeId);
+		}
+		return returnInfo;
+	}
+}
 

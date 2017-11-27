@@ -3,6 +3,7 @@ package com.xiangshangban.device.dao;
 import com.xiangshangban.device.bean.Door;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 import java.util.Map;
@@ -65,10 +66,4 @@ public interface DoorMapper {
      * 查询door表主键的最大值
      */
     int selectPrimaryKeyFromDoor();
-
-    /**
-     * 通过设备id查询门信息
-     * @return
-     */
-    Door selectDoorByDeviceId();
 }

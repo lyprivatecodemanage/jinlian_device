@@ -167,4 +167,19 @@
       select id,img_name,img_url,img_type from image_ where img_type like 'back%'
   </select>
 
+  <!--根据图片的类型查询图片信息-->
+  <select id="selectBackGroundByType" parameterType="String" resultType="map">
+    select A.img_name,A.img_url,A.ripple_color,B.img_name rimg_name,B.img_url rimg_url from image_ A,image_ B where A.img_type like #{imgType} and A.relate = B.id
+  </select>
+
+  <!--查询image表主键的最大值-->
+  <select id="selectImagePrimaryKey" resultType="int">
+    select max(cast(id as integer)) from image_
+  </select>
+
+  <!--添加图片-->
+  <insert id="insertIntoImageInfo" parameterType="map">
+    insert into image_ values(#{id},#{img_name},#{img_url},#{img_type},#{relate},#{ripple_color})
+  </insert>
+
 </mapper>
