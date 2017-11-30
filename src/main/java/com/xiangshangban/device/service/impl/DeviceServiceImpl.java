@@ -511,7 +511,7 @@ public class DeviceServiceImpl implements IDeviceService {
     public String updateDeviceSystem(List<String> deviceIdList, String downloadTime, String updateTime){
 
         //返回命令id
-        String superCmdId = FormatUtil.createUuid();
+        String superCmdId = "";
 
         DeviceSettingUpdate deviceSettingUpdate = new DeviceSettingUpdate();
 
@@ -519,6 +519,9 @@ public class DeviceServiceImpl implements IDeviceService {
         deviceSettingUpdate.setUpdateTimeSys(updateTime);
 
         for (String deviceId : deviceIdList) {
+
+            //返回命令id
+            superCmdId = FormatUtil.createUuid();
 
             deviceSettingUpdate.setDeviceId(deviceId);
 
@@ -585,7 +588,7 @@ public class DeviceServiceImpl implements IDeviceService {
     public String updateDeviceApplication(List<String> deviceIdList, String downloadTime, String updateTime){
 
         //返回命令id
-        String superCmdId = FormatUtil.createUuid();
+        String superCmdId = "";
 
         DeviceSettingUpdate deviceSettingUpdate = new DeviceSettingUpdate();
 
@@ -593,6 +596,9 @@ public class DeviceServiceImpl implements IDeviceService {
         deviceSettingUpdate.setUpdateTimeApp(updateTime);
 
         for (String deviceId : deviceIdList) {
+
+            //返回命令id
+            superCmdId = FormatUtil.createUuid();
 
             deviceSettingUpdate.setDeviceId(deviceId);
 

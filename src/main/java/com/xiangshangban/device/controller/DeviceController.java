@@ -1133,6 +1133,9 @@ public class DeviceController {
                     }
                 }
 
+                //mapJson移除deviceIdList
+                mapJson.remove("deviceIdList");
+
                 //构造命令格式
                 DoorCmd doorCmdBindDevice = new DoorCmd();
                 doorCmdBindDevice.setServerId("001");
@@ -1163,6 +1166,7 @@ public class DeviceController {
                 entranceGuardService.insertCommand(doorCmdBindDevice);
                 //立即下发数据到MQ
                 rabbitMQSender.sendMessage(deviceId, doorCmdPackageAll);
+
             }
 
             //保存并下发系统更新设置
@@ -1851,4 +1855,5 @@ public class DeviceController {
             return returnData;
         }
     }
+
 }
