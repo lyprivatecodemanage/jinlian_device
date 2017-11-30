@@ -592,7 +592,7 @@ public class EntranceGuardController {
         return JSONArray.toJSONString(ReturnCodeUtil.addReturnCode(map));
     }
 
-    //TODO 门禁管理------------门禁记录
+    //TODO 门禁管理-------------门禁记录
     //1)出入记录
     /**
      * {
