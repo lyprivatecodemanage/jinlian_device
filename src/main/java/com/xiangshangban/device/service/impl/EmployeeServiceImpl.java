@@ -59,6 +59,9 @@ public class EmployeeServiceImpl implements IEmployeeService {
     @Autowired
     private IEntranceGuardService entranceGuardService;
 
+    @Autowired
+    private DoorEmployeePermissionMapper doorEmployeePermissionMapper;
+
     //人员模块人员信息同步
     @Override
     public void employeeCommandGenerate(List<Map<String, Object>> employeeInfoCollection) {
@@ -180,29 +183,29 @@ public class EmployeeServiceImpl implements IEmployeeService {
     }
 
     /**
-     * 关联门和人员（同一个人传入的数据不一样时执行更新操作）
+     * 关联门和人员
      * @param doorId
      * @param employeeId
      */
     @Override
-    public void relateEmployeeAndDoor(String doorId, String doorName, String employeeId, String employeeName) {
+    public void relateEmployeeAndDoor(String doorId, String doorName, String employeeId, String employeeName, String rangeFlagId) {
 
         DoorEmployee doorEmployee = new DoorEmployee();
         doorEmployee.setDoorId(doorId);
         doorEmployee.setDoorName(doorName);
         doorEmployee.setEmployeeId(employeeId);
         doorEmployee.setEmployeeName(employeeName);
+        doorEmployee.setRangeFlagId(rangeFlagId);
 
         //查询这个人有没有数据
-        DoorEmployee doorEmployeeExist = doorEmployeeMapper.selectByPrimaryKey(employeeId);
+        DoorEmployee doorEmployeeExist = doorEmployeeMapper.selectByEmployeeIdAndDoorId(employeeId, doorId);
 
-        if (doorEmployeeExist == null){
-            doorEmployeeMapper.insert(doorEmployee);
-            System.out.println("人员["+employeeName+"]和门禁["+doorName+"]的关联不存在");
-        }else {
-            doorEmployeeMapper.updateByPrimaryKey(doorEmployee);
-            System.out.println("人员["+employeeName+"]和门禁["+doorName+"]的关联已存在");
+        //一个人可以在多个门上有开门权限
+        if (doorEmployeeExist != null) {
+            doorEmployeeMapper.deleteByRangeFlagId(doorEmployeeExist.getRangeFlagId());
         }
+
+        doorEmployeeMapper.insert(doorEmployee);
 
     }
 
@@ -216,28 +219,22 @@ public class EmployeeServiceImpl implements IEmployeeService {
      * @param rangeDoorOpenType
      */
     @Override
-    public void relateEmployeeAndPermission(String employeeId, String dayOfWeek, String isAllDay, String rangeStartTime, String rangeEndTime, String rangeDoorOpenType) {
+    public void relateEmployeeAndPermission(String rangeFlagId, String employeeId, String dayOfWeek,
+                                            String isAllDay, String rangeStartTime, String rangeEndTime,
+                                            String rangeDoorOpenType, String isDitto) {
 
         TimeRangeCommonEmployee timeRangeCommonEmployee = new TimeRangeCommonEmployee();
 
-        timeRangeCommonEmployee.setRangeFlagId(FormatUtil.createUuid());
+        timeRangeCommonEmployee.setRangeFlagId(rangeFlagId);
         timeRangeCommonEmployee.setEmployeeId(employeeId);
         timeRangeCommonEmployee.setDayOfWeek(dayOfWeek);
         timeRangeCommonEmployee.setIsAllDay(isAllDay);
         timeRangeCommonEmployee.setRangeStartTime(rangeStartTime);
         timeRangeCommonEmployee.setRangeEndTime(rangeEndTime);
         timeRangeCommonEmployee.setRangeDoorOpenType(rangeDoorOpenType);
+        timeRangeCommonEmployee.setIsDitto(isDitto);
 
-//        //查询这个人有没有数据
-//        TimeRangeCommonEmployee timeRangeCommonEmployeeExist = timeRangeCommonEmployeeMapper.selectByEmployeeId(timeRangeCommonEmployee);
-
-//        if (timeRangeCommonEmployeeExist == null){
-            timeRangeCommonEmployeeMapper.insert(timeRangeCommonEmployee);
-//            System.out.println("人员["+employeeId+"]的门禁权限时间区间不存在");
-//        }else {
-//            timeRangeCommonEmployeeMapper.updateByEmployeeId(timeRangeCommonEmployee);
-//            System.out.println("人员["+employeeId+"]和门禁权限时间区间已存在");
-//        }
+        timeRangeCommonEmployeeMapper.insert(timeRangeCommonEmployee);
 
     }
 
@@ -362,24 +359,32 @@ public class EmployeeServiceImpl implements IEmployeeService {
                 doorCmdDeleteEmployee.setAction("DELETE_USER_INFO");
                 doorCmdDeleteEmployee.setActionCode("2002");
 
-                doorCmdDeleteEmployee.setSendTime(CalendarUtil.getCurrentTime());
-                doorCmdDeleteEmployee.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
-                doorCmdDeleteEmployee.setSuperCmdId(FormatUtil.createUuid());
-                doorCmdDeleteEmployee.setData(JSON.toJSONString(employeeIdList));
+                //删除每个人都要产生一条命令
+                for (String employeeId : employeeIdList){
 
-                //获取完整的数据加协议封装格式
-                RabbitMQSender rabbitMQSender = new RabbitMQSender();
-                Map<String, Object> userDeleteInformation =  RabbitMQSender.messagePackaging(doorCmdDeleteEmployee, "employeeIdList", employeeIdList, "C");
-                //命令状态设置为: 发送中
-                doorCmdDeleteEmployee.setStatus("1");
-                //设置md5校验值
-                doorCmdDeleteEmployee.setMd5Check((String) userDeleteInformation.get("MD5Check"));
-                //设置数据库的data字段
-                doorCmdDeleteEmployee.setData(JSON.toJSONString(userDeleteInformation.get("data")));
-                //命令数据存入数据库
-                entranceGuardService.insertCommand(doorCmdDeleteEmployee);
-                //立即下发数据到MQ
-                rabbitMQSender.sendMessage(deviceId, userDeleteInformation);
+                    List<String> employeeIdListTemp = new ArrayList<String>();
+                    employeeIdListTemp.add(employeeId);
+
+                    doorCmdDeleteEmployee.setSendTime(CalendarUtil.getCurrentTime());
+                    doorCmdDeleteEmployee.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
+                    doorCmdDeleteEmployee.setSuperCmdId(FormatUtil.createUuid());
+                    doorCmdDeleteEmployee.setData(JSON.toJSONString(employeeIdListTemp));
+                    doorCmdDeleteEmployee.setEmployeeId(employeeId);
+
+                    //获取完整的数据加协议封装格式
+                    RabbitMQSender rabbitMQSender = new RabbitMQSender();
+                    Map<String, Object> userDeleteInformation =  RabbitMQSender.messagePackaging(doorCmdDeleteEmployee, "employeeIdList", employeeIdList, "C");
+                    //命令状态设置为: 发送中
+                    doorCmdDeleteEmployee.setStatus("1");
+                    //设置md5校验值
+                    doorCmdDeleteEmployee.setMd5Check((String) userDeleteInformation.get("MD5Check"));
+                    //设置数据库的data字段
+                    doorCmdDeleteEmployee.setData(JSON.toJSONString(userDeleteInformation.get("data")));
+                    //命令数据存入数据库
+                    entranceGuardService.insertCommand(doorCmdDeleteEmployee);
+                    //立即下发数据到MQ
+                    rabbitMQSender.sendMessage(deviceId, userDeleteInformation);
+                }
 
                 returnData.setMessage("已执行删除设备上人员权限的操作");
                 returnData.setReturnCode("3000");
@@ -433,25 +438,32 @@ public class EmployeeServiceImpl implements IEmployeeService {
                     doorCmdDeleteEmployee.setAction("DELETE_USER_INFO");
                     doorCmdDeleteEmployee.setActionCode("2002");
 
-                    doorCmdDeleteEmployee.setSendTime(CalendarUtil.getCurrentTime());
-                    doorCmdDeleteEmployee.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
-                    doorCmdDeleteEmployee.setSuperCmdId(FormatUtil.createUuid());
-                    doorCmdDeleteEmployee.setData(JSON.toJSONString(employeeIdList));
+                    //删除每个人都要产生一条命令
+                    for (String employeeId : employeeIdList) {
 
-                    //获取完整的数据加协议封装格式
-                    RabbitMQSender rabbitMQSender = new RabbitMQSender();
-                    Map<String, Object> userDeleteInformation =  RabbitMQSender.messagePackaging(doorCmdDeleteEmployee, "employeeIdList", employeeIdList, "C");
-                    //命令状态设置为: 发送中
-                    doorCmdDeleteEmployee.setStatus("1");
-                    //设置md5校验值
-                    doorCmdDeleteEmployee.setMd5Check((String) userDeleteInformation.get("MD5Check"));
-                    //设置数据库的data字段
-                    doorCmdDeleteEmployee.setData(JSON.toJSONString(userDeleteInformation.get("data")));
-                    //命令数据存入数据库
-                    entranceGuardService.insertCommand(doorCmdDeleteEmployee);
-                    //立即下发数据到MQ
-                    rabbitMQSender.sendMessage(deviceId, userDeleteInformation);
+                        List<String> employeeIdListTemp = new ArrayList<String>();
+                        employeeIdListTemp.add(employeeId);
 
+                        doorCmdDeleteEmployee.setSendTime(CalendarUtil.getCurrentTime());
+                        doorCmdDeleteEmployee.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
+                        doorCmdDeleteEmployee.setSuperCmdId(FormatUtil.createUuid());
+                        doorCmdDeleteEmployee.setData(JSON.toJSONString(employeeIdList));
+
+                        //获取完整的数据加协议封装格式
+                        RabbitMQSender rabbitMQSender = new RabbitMQSender();
+                        Map<String, Object> userDeleteInformation = RabbitMQSender.messagePackaging(doorCmdDeleteEmployee, "employeeIdList", employeeIdList, "C");
+                        //命令状态设置为: 发送中
+                        doorCmdDeleteEmployee.setStatus("1");
+                        //设置md5校验值
+                        doorCmdDeleteEmployee.setMd5Check((String) userDeleteInformation.get("MD5Check"));
+                        //设置数据库的data字段
+                        doorCmdDeleteEmployee.setData(JSON.toJSONString(userDeleteInformation.get("data")));
+                        //命令数据存入数据库
+                        entranceGuardService.insertCommand(doorCmdDeleteEmployee);
+                        //立即下发数据到MQ
+                        rabbitMQSender.sendMessage(deviceId, userDeleteInformation);
+
+                    }
                 }catch (Exception e){
                     e.printStackTrace();
                     returnData.setMessage("服务器错误");
@@ -535,6 +547,98 @@ public class EmployeeServiceImpl implements IEmployeeService {
     public Employee findEmployeeById(String empId) {
         Employee employee = employeeMapper.selectByPrimaryKey(empId);
         return employee;
+
+    }
+
+    //同步不同设备上，有开门权限的人员的权限信息
+    @Override
+    public void synchronizeEmployeePermissionForDevices(String employeeId) {
+
+        //查询该人员的有效时间是否过期
+        DoorEmployeePermission doorEmployeePermission = doorEmployeePermissionMapper.selectByPrimaryKey(employeeId);
+
+        if (doorEmployeePermission != null){
+
+        }
+
+        //从本地查人员信息
+        Employee employeeLocal = employeeMapper.selectByPrimaryKey(employeeId);
+
+        if (employeeLocal == null){
+            System.out.println("人员信息不同步，未查到【"+employeeLocal.getEmployeeName()+"】的信息");
+        }else {
+            String employeeName = employeeLocal.getEmployeeName();
+            String employeeNo = employeeLocal.getEmployeeNumber();
+            String departmentId = employeeLocal.getEmployeeDepartmentId();
+            String departmentName = employeeLocal.getEmployeeDepartmentName();
+            String entryTime = employeeLocal.getEmployeeEntryTime();
+            String probationaryExpired = employeeLocal.getEmployeeProbationaryExpired();
+            String employeePhone = employeeLocal.getEmployeePhone();
+            String blueboothId = employeeLocal.getBluetoothNo();
+
+            String birthday = employeeLocal.getEmployeeBirthday();
+            String contractExpired = employeeLocal.getEmployeeContractExpired();
+            String adminFlag = employeeLocal.getAdminFlag();
+            String userImg = employeeLocal.getEmployeeImg();
+            String userPhoto = employeeLocal.getEmployeePhoto();
+
+            String userFinger1 = employeeLocal.getEmployeeFinger1();
+            String userFinger2 = employeeLocal.getEmployeeFinger2();
+            String userFace = employeeLocal.getEmployeeFace();
+            String userNFC = employeeLocal.getEmployeeNfc();
+
+            //组装人员数据DATA
+            Map<String, Object> userInformation = new LinkedHashMap<String, Object>();
+            userInformation.put("userId", employeeId);
+            userInformation.put("userCode", employeeNo);
+            userInformation.put("userName", employeeName);
+            userInformation.put("userDeptId", departmentId);
+            userInformation.put("userDeptName", departmentName);
+            userInformation.put("birthday", birthday);
+            userInformation.put("entryTime", entryTime);
+            userInformation.put("probationaryExpired", probationaryExpired);
+            userInformation.put("contractExpired", contractExpired);
+            userInformation.put("adminFlag", adminFlag);
+            userInformation.put("userImg", userImg);
+            userInformation.put("userPhoto", userPhoto);
+            userInformation.put("userFinger1", userFinger1);
+            userInformation.put("userFinger2", userFinger2);
+            userInformation.put("userFace", userFace);
+            userInformation.put("userPhone", employeePhone);
+            userInformation.put("userNFC", userNFC);
+            userInformation.put("bluetoothId", blueboothId);
+
+            //查询该人员在哪些设备上有开门权限
+
+
+            //下发人员基本信息
+            //构造命令格式
+            DoorCmd doorCmdEmployeeInformation = new DoorCmd();
+            doorCmdEmployeeInformation.setServerId("001");
+//            doorCmdEmployeeInformation.setDeviceId(deviceId);
+            doorCmdEmployeeInformation.setFileEdition("v1.3");
+            doorCmdEmployeeInformation.setCommandMode("C");
+            doorCmdEmployeeInformation.setCommandType("single");
+            doorCmdEmployeeInformation.setCommandTotal("1");
+            doorCmdEmployeeInformation.setCommandIndex("1");
+            doorCmdEmployeeInformation.setSubCmdId("");
+            doorCmdEmployeeInformation.setAction("UPDATE_USER_INFO");
+            doorCmdEmployeeInformation.setActionCode("2001");
+
+            //下发人员门禁权限
+            //构造命令格式
+            DoorCmd doorCmdEmployeePermission = new DoorCmd();
+            doorCmdEmployeePermission.setServerId("001");
+//            doorCmdEmployeePermission.setDeviceId(deviceId);
+            doorCmdEmployeePermission.setFileEdition("v1.3");
+            doorCmdEmployeePermission.setCommandMode("C");
+            doorCmdEmployeePermission.setCommandType("single");
+            doorCmdEmployeePermission.setCommandTotal("1");
+            doorCmdEmployeePermission.setCommandIndex("1");
+            doorCmdEmployeePermission.setSubCmdId("");
+            doorCmdEmployeePermission.setAction("UPDATE_USER_ACCESS_CONTROL");
+            doorCmdEmployeePermission.setActionCode("3001");
+        }
 
     }
 

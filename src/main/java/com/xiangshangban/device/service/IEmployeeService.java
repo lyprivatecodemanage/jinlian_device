@@ -17,12 +17,13 @@ public interface IEmployeeService {
     //人员模块人员信息同步
     void employeeCommandGenerate(List<Map<String, Object>> userIdCollection);
 
-    //关联门和人员（同一个人传入的数据不一样时执行更新操作）
-    void relateEmployeeAndDoor(String doorId, String doorName, String employeeId, String employeeName);
+    //关联门和人员
+    void relateEmployeeAndDoor(String doorId, String doorName, String employeeId, String employeeName, String rangeFlagId);
 
-    //关联人员门禁权限（同一个人传入的数据不一样时执行更新操作）
-    void relateEmployeeAndPermission(String employeeId, String dayOfWeek, String isAllDay,
-                                     String rangeStartTime, String rangeEndTime, String rangeDoorOpenType);
+    //关联人员门禁权限
+    void relateEmployeeAndPermission(String rangeFlagId, String employeeId, String dayOfWeek, String isAllDay,
+                                     String rangeStartTime, String rangeEndTime, String rangeDoorOpenType,
+                                     String isDitto);
 
     //人员人脸、指纹、卡号信息上传存储
     Map<String, Object> saveEmployeeInputInfo(String employeeInputInfo, String deviceId, String style);
@@ -38,5 +39,8 @@ public interface IEmployeeService {
 
     //根据人员id查找人的信息
     Employee findEmployeeById(String empId);
+
+    //同步不同设备上，有开门权限的人员的权限信息
+    void synchronizeEmployeePermissionForDevices(String employeeId);
 
 }

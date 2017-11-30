@@ -6,9 +6,10 @@
     <result column="employee_name" property="employeeName" jdbcType="VARCHAR" />
     <result column="door_id" property="doorId" jdbcType="VARCHAR" />
     <result column="door_name" property="doorName" jdbcType="VARCHAR" />
+    <result column="range_flag_id" property="rangeFlagId" jdbcType="VARCHAR" />
   </resultMap>
   <sql id="Base_Column_List" >
-    employee_id, employee_name, door_id, door_name
+    employee_id, employee_name, door_id, door_name, range_flag_id
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
     select 
@@ -22,9 +23,9 @@
   </delete>
   <insert id="insert" parameterType="com.xiangshangban.device.bean.DoorEmployee" >
     insert into door_employee (employee_id, employee_name, door_id, 
-      door_name)
+      door_name, range_flag_id)
     values (#{employeeId,jdbcType=VARCHAR}, #{employeeName,jdbcType=VARCHAR}, #{doorId,jdbcType=VARCHAR}, 
-      #{doorName,jdbcType=VARCHAR})
+      #{doorName,jdbcType=VARCHAR}, #{rangeFlagId,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="com.xiangshangban.device.bean.DoorEmployee" >
     insert into door_employee
@@ -41,6 +42,9 @@
       <if test="doorName != null" >
         door_name,
       </if>
+      <if test="rangeFlagId != null" >
+        range_flag_id,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="employeeId != null" >
@@ -54,6 +58,9 @@
       </if>
       <if test="doorName != null" >
         #{doorName,jdbcType=VARCHAR},
+      </if>
+      <if test="rangeFlagId != null" >
+        #{rangeFlagId,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
@@ -69,6 +76,9 @@
       <if test="doorName != null" >
         door_name = #{doorName,jdbcType=VARCHAR},
       </if>
+      <if test="rangeFlagId != null" >
+        range_flag_id = #{rangeFlagId,jdbcType=VARCHAR},
+      </if>
     </set>
     where employee_id = #{employeeId,jdbcType=VARCHAR}
   </update>
@@ -76,9 +86,12 @@
     update door_employee
     set employee_name = #{employeeName,jdbcType=VARCHAR},
       door_id = #{doorId,jdbcType=VARCHAR},
-      door_name = #{doorName,jdbcType=VARCHAR}
+      door_name = #{doorName,jdbcType=VARCHAR},
+      range_flag_id = #{rangeFlagId,jdbcType=VARCHAR}
     where employee_id = #{employeeId,jdbcType=VARCHAR}
   </update>
+
+  <!--非自动生成-->
 
   <select id="findIfExist" resultMap="BaseResultMap" parameterType="com.xiangshangban.device.bean.DoorEmployee">
     SELECT * FROM door_employee
@@ -101,11 +114,11 @@
   <!--查询门所关联的人员的信息：手机号、人脸、NFC数量-->
   <select id="queryDoorEmployeeInfo" parameterType="Map" resultType="map">
     select A.door_id,door_name,B.employee_phone,employee_face,employee_nfc from door_employee A,employee_ B where A.employee_id = B.employee_id
-      <if test="doorName!=null and doorName!=''">
-        and A.door_name like #{doorEmployee.doorName}
-      </if>
+    <if test="doorName!=null and doorName!=''">
+      and A.door_name like #{doorEmployee.doorName}
+    </if>
     <if test="companyId!=null and  companyId!=''">
-        and B.employee_company_id = #{companyId}
+      and B.employee_company_id = #{companyId}
     </if>
     order by A.door_id
   </select>
@@ -114,13 +127,13 @@
   <select id="selectSendTime" parameterType="String" resultType="map">
     select device_id,max(send_time) sendtime from door_cmd where action_code in('2001','3001') and device_id in
     (select device_id from door_
-     <where>
-       <if test="doorName!=null and doorName!=''">
-         door_name like #{doorName}
-       </if>
-     </where>
-   )
-   group by device_id
+    <where>
+      <if test="doorName!=null and doorName!=''">
+        door_name like #{doorName}
+      </if>
+    </where>
+    )
+    group by device_id
   </select>
 
 
@@ -129,7 +142,7 @@
     select door_id from door_ where device_id = #{deviceId}
   </select>
 
-<!--查询门关联的用户的权限信息(首页展示周一最早的开门时间段)-->
+  <!--查询门关联的用户的权限信息(首页展示周一最早的开门时间段)-->
   <select id="selectRelateEmpPermissionInfo" parameterType="Map" resultType="map">
     select Q.* from (select F.* from (select DISTINCT W.*,Y.status from (select S.*,X.lasttime from (select A.employee_id,day_of_week,range_start_time,range_end_time,range_door_open_type,B.employee_name,employee_department_name
     from time_range_common_employee A left join employee_ B on A.employee_id = B.employee_id where A.day_of_week = '1' and A.employee_id in
@@ -160,4 +173,21 @@
   <select id="selectAWeekOpenTime" parameterType="String" resultType="map">
     select day_of_week,range_start_time,range_end_time,range_door_open_type from time_range_common_employee where employee_id = #{empId} order by range_start_time
   </select>
+
+  <!--通过人员id查询该人对应的所有和门关联的信息-->
+  <select id="selectByEmployeeIdAndDoorId" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    SELECT
+    <include refid="Base_Column_List" />
+    FROM
+    door_employee
+    WHERE
+    employee_id = #{employeeId,jdbcType=VARCHAR}
+    AND door_id = #{doorId,jdbcType=VARCHAR}
+  </select>
+
+  <!--更新人员信息通过rangeFlagId-->
+  <delete id="deleteByRangeFlagId" parameterType="java.lang.String" >
+    delete from door_employee
+    where range_flag_id = #{rangeFlagId,jdbcType=VARCHAR}
+  </delete>
 </mapper>

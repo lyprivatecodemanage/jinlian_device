@@ -7,9 +7,11 @@
     <result column="have_first_card_permission" property="haveFirstCardPermission" jdbcType="VARCHAR" />
     <result column="door_open_start_time" property="doorOpenStartTime" jdbcType="VARCHAR" />
     <result column="door_open_end_time" property="doorOpenEndTime" jdbcType="VARCHAR" />
+    <result column="range_flag_id" property="rangeFlagId" jdbcType="VARCHAR" />
   </resultMap>
   <sql id="Base_Column_List" >
-    employee_id, is_manager, have_first_card_permission, door_open_start_time, door_open_end_time
+    employee_id, is_manager, have_first_card_permission, door_open_start_time, door_open_end_time, 
+    range_flag_id
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
     select 
@@ -23,9 +25,11 @@
   </delete>
   <insert id="insert" parameterType="com.xiangshangban.device.bean.DoorEmployeePermission" >
     insert into door_employee_permission (employee_id, is_manager, have_first_card_permission, 
-      door_open_start_time, door_open_end_time)
+      door_open_start_time, door_open_end_time, range_flag_id
+      )
     values (#{employeeId,jdbcType=VARCHAR}, #{isManager,jdbcType=VARCHAR}, #{haveFirstCardPermission,jdbcType=VARCHAR}, 
-      #{doorOpenStartTime,jdbcType=VARCHAR}, #{doorOpenEndTime,jdbcType=VARCHAR})
+      #{doorOpenStartTime,jdbcType=VARCHAR}, #{doorOpenEndTime,jdbcType=VARCHAR}, #{rangeFlagId,jdbcType=VARCHAR}
+      )
   </insert>
   <insert id="insertSelective" parameterType="com.xiangshangban.device.bean.DoorEmployeePermission" >
     insert into door_employee_permission
@@ -45,6 +49,9 @@
       <if test="doorOpenEndTime != null" >
         door_open_end_time,
       </if>
+      <if test="rangeFlagId != null" >
+        range_flag_id,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="employeeId != null" >
@@ -61,6 +68,9 @@
       </if>
       <if test="doorOpenEndTime != null" >
         #{doorOpenEndTime,jdbcType=VARCHAR},
+      </if>
+      <if test="rangeFlagId != null" >
+        #{rangeFlagId,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
@@ -79,6 +89,9 @@
       <if test="doorOpenEndTime != null" >
         door_open_end_time = #{doorOpenEndTime,jdbcType=VARCHAR},
       </if>
+      <if test="rangeFlagId != null" >
+        range_flag_id = #{rangeFlagId,jdbcType=VARCHAR},
+      </if>
     </set>
     where employee_id = #{employeeId,jdbcType=VARCHAR}
   </update>
@@ -87,7 +100,14 @@
     set is_manager = #{isManager,jdbcType=VARCHAR},
       have_first_card_permission = #{haveFirstCardPermission,jdbcType=VARCHAR},
       door_open_start_time = #{doorOpenStartTime,jdbcType=VARCHAR},
-      door_open_end_time = #{doorOpenEndTime,jdbcType=VARCHAR}
+      door_open_end_time = #{doorOpenEndTime,jdbcType=VARCHAR},
+      range_flag_id = #{rangeFlagId,jdbcType=VARCHAR}
     where employee_id = #{employeeId,jdbcType=VARCHAR}
   </update>
+
+  <!--非自动生成-->
+  <delete id="deleteByRangeFlagId" parameterType="java.lang.String" >
+    delete from door_employee_permission
+    where range_flag_id = #{rangeFlagId,jdbcType=VARCHAR}
+  </delete>
 </mapper>

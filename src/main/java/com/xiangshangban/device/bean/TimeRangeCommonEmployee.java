@@ -1,14 +1,21 @@
 package com.xiangshangban.device.bean;
 
 public class TimeRangeCommonEmployee {
-
     private String rangeFlagId;
+
     private String employeeId;
+
     private String dayOfWeek;
+
     private String rangeStartTime;
+
     private String rangeEndTime;
+
     private String rangeDoorOpenType;
+
     private String isAllDay;
+
+    private String isDitto;
 
     public String getRangeFlagId() {
         return rangeFlagId;
@@ -64,5 +71,13 @@ public class TimeRangeCommonEmployee {
 
     public void setIsAllDay(String isAllDay) {
         this.isAllDay = isAllDay;
+    }
+
+    public String getIsDitto() {
+        return isDitto;
+    }
+
+    public void setIsDitto(String isDitto) {
+        this.isDitto = isDitto;
     }
 }

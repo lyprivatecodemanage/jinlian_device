@@ -7,9 +7,10 @@
     <result column="log_type" property="logType" jdbcType="VARCHAR" />
     <result column="log_content" property="logContent" jdbcType="VARCHAR" />
     <result column="log_time" property="logTime" jdbcType="VARCHAR" />
+    <result column="device_id" property="deviceId" jdbcType="VARCHAR" />
   </resultMap>
   <sql id="Base_Column_List" >
-    log_id, log_level, log_type, log_content, log_time
+    log_id, log_level, log_type, log_content, log_time, device_id
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
     select 
@@ -23,9 +24,11 @@
   </delete>
   <insert id="insert" parameterType="com.xiangshangban.device.bean.DeviceRunningLog" >
     insert into device_running_log (log_id, log_level, log_type, 
-      log_content, log_time)
+      log_content, log_time, device_id
+      )
     values (#{logId,jdbcType=VARCHAR}, #{logLevel,jdbcType=VARCHAR}, #{logType,jdbcType=VARCHAR}, 
-      #{logContent,jdbcType=VARCHAR}, #{logTime,jdbcType=VARCHAR})
+      #{logContent,jdbcType=VARCHAR}, #{logTime,jdbcType=VARCHAR}, #{deviceId,jdbcType=VARCHAR}
+      )
   </insert>
   <insert id="insertSelective" parameterType="com.xiangshangban.device.bean.DeviceRunningLog" >
     insert into device_running_log
@@ -45,6 +48,9 @@
       <if test="logTime != null" >
         log_time,
       </if>
+      <if test="deviceId != null" >
+        device_id,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="logId != null" >
@@ -61,6 +67,9 @@
       </if>
       <if test="logTime != null" >
         #{logTime,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceId != null" >
+        #{deviceId,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
@@ -79,6 +88,9 @@
       <if test="logTime != null" >
         log_time = #{logTime,jdbcType=VARCHAR},
       </if>
+      <if test="deviceId != null" >
+        device_id = #{deviceId,jdbcType=VARCHAR},
+      </if>
     </set>
     where log_id = #{logId,jdbcType=VARCHAR}
   </update>
@@ -87,7 +99,8 @@
     set log_level = #{logLevel,jdbcType=VARCHAR},
       log_type = #{logType,jdbcType=VARCHAR},
       log_content = #{logContent,jdbcType=VARCHAR},
-      log_time = #{logTime,jdbcType=VARCHAR}
+      log_time = #{logTime,jdbcType=VARCHAR},
+      device_id = #{deviceId,jdbcType=VARCHAR}
     where log_id = #{logId,jdbcType=VARCHAR}
   </update>
 </mapper>

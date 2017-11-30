@@ -188,7 +188,28 @@
 
   <!--非自动生成-->
   <select id="findByCondition" resultType="java.util.Map" parameterType="com.xiangshangban.device.bean.Device" >
-    select * from device_ a LEFT JOIN door_ b ON (a.device_id = b.device_id) where 1=1
+    SELECT
+    COALESCE (A .device_id, '') as device_id,
+    COALESCE (A .device_name, '') as device_name,
+    COALESCE (A .company_id, '') as company_id,
+    COALESCE (A .company_name, '') as company_name,
+    COALESCE (A .mac_address, '') as mac_address,
+    COALESCE (A .is_online, '') as is_online,
+    COALESCE (A .active_status, '') as active_status,
+    COALESCE (A .device_place, '') as device_place,
+    COALESCE (A .device_usages, '') as device_usages,
+    COALESCE (A .total_server_time, '') as total_server_time,
+    COALESCE (A .have_used_time, '') as have_used_time,
+    COALESCE (A .remain_server_time, '') as remain_server_time,
+    COALESCE (B.door_id, '') as door_id,
+    COALESCE (B.door_name, '') as door_name,
+    COALESCE (B.operate_time, '') as operate_time,
+    COALESCE (B.operate_employee, '') as operate_employee
+    FROM
+    device_ A
+    LEFT JOIN door_ b ON (A .device_id = b.device_id)
+    WHERE
+    1 = 1
     <if test="companyId != null and companyId != ''" >
       AND a.company_id LIKE '%${companyId}%'
     </if>
@@ -214,7 +235,7 @@
     SELECT device_id FROM device_ WHERE company_id = #{companyId,jdbcType=VARCHAR}
   </select>
 
-  <!--查询所有的设备信息-->
+  <!--查询所有的没有关联门的设备信息-->
   <select id="selectAllDeviceInfo" parameterType="String"  resultType="map">
     select device_id as "deviceId",device_name as "deviceName",mac_address as "macAddress" from device_ where device_id not in
     (select device_id from door_ )
@@ -222,6 +243,16 @@
       and company_id = #{companyId}
     </if>
     order by device_id
+  </select>
+
+  <!--查询所有的设备信息-->
+  <select id="selectAllDevice" parameterType="String"  resultType="map">
+    select device_id as "deviceId",device_name as "deviceName",mac_address as "macAddress" from device_
+    <where>
+      <if test="companyId != null and companyId != ''">
+        company_id = #{companyId}
+      </if>
+    </where>
   </select>
 
   <!--根据设备id查询该公司下的设备id的集合-->

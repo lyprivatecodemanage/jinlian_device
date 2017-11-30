@@ -154,7 +154,7 @@ public class DeviceServiceImpl implements IDeviceService {
                 //用空字符串替换undefined操作时间
                 try {
                     String operateTime = map.get("operate_time");
-                    if (operateTime == null){
+                    if (StringUtils.isEmpty(operateTime)){
                         System.out.println("当前设备【"+deviceId+"】没有查到操作时间记录");
                         map.put("operate_time", "暂无操作时间记录");
                     }
@@ -447,6 +447,7 @@ public class DeviceServiceImpl implements IDeviceService {
             deviceRunningLog.setLogType(deviceRunningLogMap.get("logType"));
             deviceRunningLog.setLogContent(deviceRunningLogMap.get("logContent"));
             deviceRunningLog.setLogTime(deviceRunningLogMap.get("logTime"));
+            deviceRunningLog.setDeviceId(deviceId);
 
             DeviceRunningLog deviceRunningLogExist = deviceRunningLogMapper.selectByPrimaryKey(logId);
             if (deviceRunningLogExist == null){

@@ -171,12 +171,14 @@ public class OSSController {
 				String companyId = deviceMapper.selectByPrimaryKey(deviceId).getCompanyId();
 
 				//获取公司编号
-				Employee employee = employeeMapper.selectOneByCompanyId(companyId);
 
+				List<String> employeeList = employeeMapper.selectCompanyNoByCompanyId(companyId);
 				String companyNo = "unknowCompanyNo";
 
-				if (employee != null){
-					companyNo = employee.getCompanyNo();
+				if (employeeList.size() > 0){
+					if (org.apache.commons.lang3.StringUtils.isNotEmpty(employeeList.get(0))){
+						companyNo = employeeList.get(0);
+					}
 				}
 
 				//上传的设备记录图片的文件放在这个文件夹下

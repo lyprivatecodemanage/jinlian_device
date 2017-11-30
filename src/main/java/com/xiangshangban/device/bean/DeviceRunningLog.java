@@ -11,6 +11,8 @@ public class DeviceRunningLog {
 
     private String logTime;
 
+    private String deviceId;
+
     public String getLogId() {
         return logId;
     }
@@ -49,5 +51,13 @@ public class DeviceRunningLog {
 
     public void setLogTime(String logTime) {
         this.logTime = logTime;
+    }
+
+    public String getDeviceId() {
+        return deviceId;
+    }
+
+    public void setDeviceId(String deviceId) {
+        this.deviceId = deviceId;
     }
 }

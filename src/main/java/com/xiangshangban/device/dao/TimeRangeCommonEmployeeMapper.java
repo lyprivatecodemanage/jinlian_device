@@ -1,11 +1,11 @@
 package com.xiangshangban.device.dao;
 
 import com.xiangshangban.device.bean.TimeRangeCommonEmployee;
-import org.springframework.stereotype.Component;
+import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
 
-@Component
+@Mapper
 public interface TimeRangeCommonEmployeeMapper {
     int deleteByPrimaryKey(String rangeFlagId);
 
@@ -20,7 +20,8 @@ public interface TimeRangeCommonEmployeeMapper {
     int updateByPrimaryKey(TimeRangeCommonEmployee record);
 
     /**
-    **/
+     * 非自动生成
+     */
 
     TimeRangeCommonEmployee findIfExist(TimeRangeCommonEmployee timeRangeCommonEmployee);
 

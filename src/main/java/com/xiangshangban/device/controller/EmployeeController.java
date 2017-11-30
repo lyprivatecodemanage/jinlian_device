@@ -63,6 +63,12 @@ public class EmployeeController {
     @Autowired
     private IEntranceGuardService entranceGuardService;
 
+    @Autowired
+    private DoorEmployeeMapper doorEmployeeMapper;
+
+    @Autowired
+    private EmployeeBluetoothCountMapper employeeBluetoothCountMapper;
+
     /**
      * 人员模块人员信息同步（之所以是这个名字，是因为之前打算用协议包成命令记录下来同步的操作日志）
      * @param userInformation
@@ -96,37 +102,74 @@ public class EmployeeController {
          "immediatelyDownload": "1",
          "employeePermission": [
          {
-         "doorId": "001",
-         "doorName": "金念大门",
+         "doorId": "005",
+         "doorName": "小鲤鱼跃龙门",
+         "doorOpenStartTime": "2017-10-24",
+         "doorOpenEndTime": "2017-12-29",
+         "rangeDoorOpenType": "045",
          "employeeList": [
-         {
-         "employeeId": "897020EA96214392B28369F2B421E319",
-         "employeeName": "吴费"
-         },
          {
          "employeeId": "9C305EC5587745FF9F0D8198512264D6",
          "employeeName": "赵武"
          }
          ],
-         "rangeDoorOpenType": "0",
          "oneWeekTimeList": [
          {
-         "isAllDay": "0",
-         "weekType": "3",
-         "startTime": "08:00",
-         "endTime": "12:00"
+         "isAllDay": "1",
+         "weekType": "1",
+         "startTime": "00:00",
+         "endTime": "23:59",
+         "isDitto": "0"
          },
          {
-         "isAllDay": "0",
+         "isAllDay": "1",
+         "weekType": "2",
+         "startTime": "00:00",
+         "endTime": "23:59",
+         "isDitto": "1"
+         },
+         {
+         "isAllDay": "1",
          "weekType": "3",
-         "startTime": "14:00",
-         "endTime": "18:00"
+         "startTime": "00:00",
+         "endTime": "23:59",
+         "isDitto": "1"
+         },
+         {
+         "isAllDay": "1",
+         "weekType": "4",
+         "startTime": "00:00",
+         "endTime": "23:59",
+         "isDitto": "1"
+         },
+         {
+         "isAllDay": "1",
+         "weekType": "5",
+         "startTime": "00:00",
+         "endTime": "23:59",
+         "isDitto": "1"
+         },
+         {
+         "isAllDay": "1",
+         "weekType": "6",
+         "startTime": "00:00",
+         "endTime": "23:59",
+         "isDitto": "1"
+         },
+         {
+         "isAllDay": "1",
+         "weekType": "7",
+         "startTime": "00:00",
+         "endTime": "23:59",
+         "isDitto": "1"
          }
          ]
          }
          ]
          }
          */
+
+        System.out.println(employeePermission);
 
         //解析json字符串
         Map<String, Object> employeePermissionCollection = (Map<String, Object>) JSONObject.fromObject(employeePermission);
@@ -246,12 +289,58 @@ public class EmployeeController {
                 Employee employeeLocal = employeeMapper.selectByPrimaryKey(employeeMap.get("employeeId"));
 
                 if (employeeLocal == null){
-                    System.out.println("人员信息不同步，未查到【"+employeeLocal.getEmployeeName()+"】的信息");
-                    returnData.setMessage("人员信息不同步，未查到【"+employeeLocal.getEmployeeName()+"】的信息");
+                    System.out.println("人员信息不同步，未查到【"+employeeMap.get("employeeName")+"】的信息");
+                    returnData.setMessage("人员信息不同步，未查到【"+employeeMap.get("employeeName")+"】的信息");
                     returnData.setReturnCode("4007");
                     return returnData;
                 }else {
+                    //获取人员id
                     String employeeId = employeeLocal.getEmployeeId();
+
+                    //存放蓝牙id
+                    String bluetoothIdResult = "";
+
+                    //下发基本信息时，给该人员分配自增长的蓝牙id
+                    //判断该人员有没有蓝牙id
+                    Employee employeeExist = employeeMapper.selectByPrimaryKey(employeeId);
+                    if (StringUtils.isEmpty(employeeExist.getBluetoothNo())){
+                        //人员没有蓝牙id，分配唯一的蓝牙id
+                        EmployeeBluetoothCount employeeBluetoothCountExist = employeeBluetoothCountMapper.selectByPrimaryKey("1");
+                        if (employeeBluetoothCountExist == null){
+                            //第一次空表的时候初始化蓝牙id总和
+                            EmployeeBluetoothCount employeeBluetoothCountTemp = new EmployeeBluetoothCount();
+                            employeeBluetoothCountTemp.setId("1");
+                            employeeBluetoothCountTemp.setBluetoothCount("1");
+                            employeeBluetoothCountMapper.insertSelective(employeeBluetoothCountTemp);
+                            //存入人员表里的蓝牙id
+                            Employee employeeTemp = new Employee();
+                            employeeTemp.setEmployeeId(employeeId);
+                            employeeTemp.setBluetoothNo("1");
+                            employeeMapper.updateByPrimaryKeySelective(employeeTemp);
+                            //第一次初始化时生成的蓝牙id
+                            bluetoothIdResult = "1";
+                        }else {
+                            //蓝牙id总和表有数据时更新
+                            int bluetoothCount = Integer.parseInt(employeeBluetoothCountExist.getBluetoothCount());
+                            bluetoothCount = bluetoothCount + 1;
+                            //存入人员表里的蓝牙id
+                            Employee employeeTemp = new Employee();
+                            employeeTemp.setEmployeeId(employeeId);
+                            employeeTemp.setBluetoothNo(String.valueOf(bluetoothCount));
+                            employeeMapper.updateByPrimaryKeySelective(employeeTemp);
+                            //更新蓝牙id计数总和
+                            EmployeeBluetoothCount employeeBluetoothCount = new EmployeeBluetoothCount();
+                            employeeBluetoothCount.setId("1");
+                            employeeBluetoothCount.setBluetoothCount(String.valueOf(bluetoothCount));
+                            employeeBluetoothCountMapper.updateByPrimaryKey(employeeBluetoothCount);
+                            //新生成的蓝牙id
+                            bluetoothIdResult = String.valueOf(bluetoothCount);
+                        }
+                    }else {
+                        //人员有蓝牙id时，直接获取
+                        bluetoothIdResult = employeeExist.getBluetoothNo();
+                    }
+
                     String employeeName = employeeLocal.getEmployeeName();
                     String employeeNo = employeeLocal.getEmployeeNumber();
                     String departmentId = employeeLocal.getEmployeeDepartmentId();
@@ -261,6 +350,12 @@ public class EmployeeController {
                     String employeePhone = employeeLocal.getEmployeePhone();
                     String blueboothId = employeeLocal.getBluetoothNo();
 
+                    String birthday = employeeLocal.getEmployeeBirthday();
+                    String contractExpired = employeeLocal.getEmployeeContractExpired();
+                    String adminFlag = employeeLocal.getAdminFlag();
+                    String userImg = employeeLocal.getEmployeeImg();
+                    String userPhoto = employeeLocal.getEmployeePhoto();
+
                     //组装人员数据DATA
                     Map<String, Object> userInformation = new LinkedHashMap<String, Object>();
                     userInformation.put("userId", employeeId);
@@ -268,39 +363,44 @@ public class EmployeeController {
                     userInformation.put("userName", employeeName);
                     userInformation.put("userDeptId", departmentId);
                     userInformation.put("userDeptName", departmentName);
-                    userInformation.put("birthday", "");
+                    userInformation.put("birthday", birthday);
                     userInformation.put("entryTime", entryTime);
                     userInformation.put("probationaryExpired", probationaryExpired);
-                    userInformation.put("contractExpired", "");
-                    userInformation.put("adminFlag", "");
-                    userInformation.put("userImg", "");
-                    userInformation.put("userPhoto", "");
+                    userInformation.put("contractExpired", contractExpired);
+                    userInformation.put("adminFlag", adminFlag);
+                    userInformation.put("userImg", userImg);
+                    userInformation.put("userPhoto", userPhoto);
                     userInformation.put("userFinger1", "");
                     userInformation.put("userFinger2", "");
                     userInformation.put("userFace", "");
                     userInformation.put("userPhone", employeePhone);
                     userInformation.put("userNFC", "");
-                    userInformation.put("bluetoothId", blueboothId);
+                    userInformation.put("bluetoothId", bluetoothIdResult);
 
                     /**
                      * 下发人员开门的门禁权限
                      */
+                    //创建人员有效日期和一周时间区间的关联标识id
+                    String rangeFlagId = FormatUtil.createUuid();
+
+                    //查询当前门是不是下发过这个人员
+                    DoorEmployee doorEmployeeExist = doorEmployeeMapper.selectByEmployeeIdAndDoorId(employeeId, doorId);
+
                     //关联人员和门禁
-//                String employeeId = employeeMap.get("employeeId");
-//                String employeeName = employeeMap.get("employeeName");
-                    iEmployeeService.relateEmployeeAndDoor(doorId, doorName, employeeId, employeeName);
+                    iEmployeeService.relateEmployeeAndDoor(doorId, doorName, employeeId, employeeName, rangeFlagId);
 
                     List<Map<String, Object>> oneWeekTimeList = new ArrayList<Map<String, Object>>();
-                    oneWeekTimeList= (List<Map<String, Object>>) employeePermissionMap.get("oneWeekTimeList");
+                    oneWeekTimeList = (List<Map<String, Object>>) employeePermissionMap.get("oneWeekTimeList");
 
                     //获取统一的开门方式
                     String rangeDoorOpenType = (String) employeePermissionMap.get("rangeDoorOpenType");
 
-                    //判断某个人员的时间区间信息是否存在
-                    List<TimeRangeCommonEmployee> timeRangeCommonEmployeeList = timeRangeCommonEmployeeMapper.selectExistByEmployeeId(employeeId);
-                    if (timeRangeCommonEmployeeList != null){
-                        //有信息存在则删除该人员的所有时间区间信息然后后面的时候重新添加
-                        timeRangeCommonEmployeeMapper.deleteByEmployeeId(employeeId);
+                    if (doorEmployeeExist != null){
+
+                        //删除上一次下发的这个门的人员开门时间区间信息
+                        String rangeFlagIdTemp = doorEmployeeExist.getRangeFlagId();
+                        timeRangeCommonEmployeeMapper.deleteByPrimaryKey(rangeFlagIdTemp);
+
                     }
 
                     //遍历一周的时间区间,最多4*7=28条数据
@@ -311,24 +411,24 @@ public class EmployeeController {
                         String isAllDay = (String) timeRangeMap.get("isAllDay");
                         String startTime = (String) timeRangeMap.get("startTime");
                         String endTime = (String) timeRangeMap.get("endTime");
+                        String isDitto = (String) timeRangeMap.get("isDitto");
 
                         //添加每个时间区间的开门类型
                         timeRangeMap.put("doorOpenType", rangeDoorOpenType);
 
-                        //判断是否是全天时间
-                        if (isAllDay.equals("1")){
-                            startTime = "00:00";
-                            endTime = "23:59";
-                        }
+//                        //判断是否是全天时间
+//                        if (isAllDay.equals("1")){
+//                            startTime = "00:00";
+//                            endTime = "23:59";
+//                            timeRangeMap.put("startTime", "00:00");
+//                            timeRangeMap.put("endTime", "23:59");
+//                        }
 
                         //关联人员门禁权限之开门时间区间和开门方式
-                        iEmployeeService.relateEmployeeAndPermission(employeeId, weekType, isAllDay, startTime,
-                                endTime, rangeDoorOpenType);
+                        iEmployeeService.relateEmployeeAndPermission(rangeFlagId, employeeId, weekType, isAllDay, startTime,
+                                endTime, rangeDoorOpenType, isDitto);
 
                     }
-
-                    //查询某个人员开门权限有效时间
-                    DoorEmployeePermission doorEmployeePermission = doorEmployeePermissionMapper.selectByPrimaryKey(employeeId);
 
                     //查询普通人员的公共密码
                     DoorSetting doorSetting = doorSettingMapper.selectByPrimaryKey(doorId);
@@ -336,13 +436,30 @@ public class EmployeeController {
                     //组装更新人员门禁权限业务数据DATA
                     Map<String, Object> userPermission = new LinkedHashMap<String, Object>();
                     userPermission.put("employeeId", employeeId);
-                    try {
-                        userPermission.put("permissionValidityBeginTime", doorEmployeePermission.getDoorOpenStartTime());
-                    }catch (NullPointerException e){
-                        userPermission.put("permissionValidityBeginTime", "");
-                        System.out.println("【"+employeeName+"】的开门权限有效时间未设置");
+
+                    //提取开门权限有效日期，年月日
+                    String doorOpenStartTime = (String) employeePermissionMap.get("doorOpenStartTime");
+                    String doorOpenEndTime = (String) employeePermissionMap.get("doorOpenEndTime");
+
+                    //存储开门权限有效日期
+                    DoorEmployeePermission doorEmployeePermission = new DoorEmployeePermission();
+                    doorEmployeePermission.setEmployeeId(employeeId);
+                    doorEmployeePermission.setDoorOpenStartTime(doorOpenStartTime);
+                    doorEmployeePermission.setDoorOpenEndTime(doorOpenEndTime);
+                    doorEmployeePermission.setRangeFlagId(rangeFlagId);
+
+                    if (doorEmployeeExist != null){
+
+                        String rangeFlagIdTemp = doorEmployeeExist.getRangeFlagId();
+                        //删除上一次下发的这个门的人员权限信息
+                        doorEmployeePermissionMapper.deleteByRangeFlagId(rangeFlagIdTemp);
+
                     }
-                    userPermission.put("permissionValidityEndTime", doorEmployeePermission.getDoorOpenEndTime());
+
+                    doorEmployeePermissionMapper.insertSelective(doorEmployeePermission);
+
+                    userPermission.put("permissionValidityBeginTime", doorOpenStartTime);
+                    userPermission.put("permissionValidityEndTime", doorOpenEndTime);
                     try {
                         userPermission.put("employeeDoorPassword", doorSetting.getFirstPublishPassword());
                     }catch (Exception e){
@@ -439,9 +556,19 @@ public class EmployeeController {
             }
         }
 
-        returnData.setMessage("已执行下发人员信息操作，请前往门列表查看当前选中的门，了解具体的下发状态");
-        returnData.setReturnCode("3000");
-        return returnData;
+        if ("0".equals(immediatelyDownload)){
+            returnData.setMessage("本次下发的信息，已存为草稿");
+            returnData.setReturnCode("3000");
+            return returnData;
+        }else if ("1".equals(immediatelyDownload)){
+            returnData.setMessage("已执行下发人员信息操作，请前往门列表查看当前选中的门，了解具体的下发状态");
+            returnData.setReturnCode("3000");
+            return returnData;
+        }else {
+            returnData.setMessage("非法参数");
+            returnData.setReturnCode("3006");
+            return returnData;
+        }
     }
 
     /**
@@ -586,6 +713,7 @@ public class EmployeeController {
      * @return
      */
     @ResponseBody
+    @Transactional
     @RequestMapping(value = "/saveEmployeeInputInfo", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     public Map<String, Object> saveEmployeeInputInfo(@RequestParam(name = "userInfo") String userInfo,
                                                      @RequestParam(name = "style") String style,

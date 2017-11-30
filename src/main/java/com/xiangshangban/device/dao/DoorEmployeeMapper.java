@@ -1,15 +1,13 @@
 package com.xiangshangban.device.dao;
 
 import com.xiangshangban.device.bean.DoorEmployee;
-import com.xiangshangban.device.bean.RelateEmpPermissionCondition;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
 
-@Component
+@Mapper
 public interface DoorEmployeeMapper {
     int deleteByPrimaryKey(String employeeId);
 
@@ -59,4 +57,15 @@ public interface DoorEmployeeMapper {
      *查询有门禁权限的人员一周的开门时间段
      */
     List<Map> selectAWeekOpenTime(@Param("empId") String empId);
+
+    /**
+     *通过人员id和门id查询
+     */
+    DoorEmployee selectByEmployeeIdAndDoorId(@Param("employeeId") String employeeId,
+                                             @Param("doorId") String doorId);
+
+    /**
+     * 删除人员和门的关联通过rangeFlagId
+     */
+    int deleteByRangeFlagId(String rangeFlagId);
 }

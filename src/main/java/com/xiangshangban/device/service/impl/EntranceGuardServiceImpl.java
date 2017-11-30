@@ -724,7 +724,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         String resultCode;
         String resultMessage;
 
-        String deviceId = doorRecordList.get(0).get("deviceId");
+        String deviceId = (String) doorRecordMapTemp.get("deviceId");
 
         //遍历门禁记录
         for (Map<String, String> recordMap : doorRecordList) {

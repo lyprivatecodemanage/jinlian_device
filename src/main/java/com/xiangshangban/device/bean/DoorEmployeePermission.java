@@ -1,12 +1,17 @@
 package com.xiangshangban.device.bean;
 
 public class DoorEmployeePermission {
-
     private String employeeId;
+
     private String isManager;
+
     private String haveFirstCardPermission;
+
     private String doorOpenStartTime;
+
     private String doorOpenEndTime;
+
+    private String rangeFlagId;
 
     public String getEmployeeId() {
         return employeeId;
@@ -46,5 +51,13 @@ public class DoorEmployeePermission {
 
     public void setDoorOpenEndTime(String doorOpenEndTime) {
         this.doorOpenEndTime = doorOpenEndTime;
+    }
+
+    public String getRangeFlagId() {
+        return rangeFlagId;
+    }
+
+    public void setRangeFlagId(String rangeFlagId) {
+        this.rangeFlagId = rangeFlagId;
     }
 }

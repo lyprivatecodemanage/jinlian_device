@@ -1,11 +1,15 @@
 package com.xiangshangban.device.bean;
 
 public class DoorEmployee {
-
     private String employeeId;
+
     private String employeeName;
+
     private String doorId;
+
     private String doorName;
+
+    private String rangeFlagId;
 
     public String getEmployeeId() {
         return employeeId;
@@ -37,5 +41,13 @@ public class DoorEmployee {
 
     public void setDoorName(String doorName) {
         this.doorName = doorName;
+    }
+
+    public String getRangeFlagId() {
+        return rangeFlagId;
+    }
+
+    public void setRangeFlagId(String rangeFlagId) {
+        this.rangeFlagId = rangeFlagId;
     }
 }

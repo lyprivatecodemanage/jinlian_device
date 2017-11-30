@@ -15,9 +15,16 @@
     download_time_app, update_time_app
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
-    select 
-    <include refid="Base_Column_List" />
-    from device_setting_update
+    SELECT
+	COALESCE (device_id, '') AS device_id,
+	COALESCE (is_same_vesion_update_sys, '') AS is_same_vesion_update_sys,
+	COALESCE (download_time_sys, '') AS download_time_sys,
+	COALESCE (update_time_sys, '') AS update_time_sys,
+	COALESCE (is_same_vesion_update_app, '') AS is_same_vesion_update_app,
+	COALESCE (download_time_app, '') AS download_time_app,
+	COALESCE (update_time_app, '') AS update_time_app
+    FROM
+	device_setting_update
     where device_id = #{deviceId,jdbcType=VARCHAR}
   </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >

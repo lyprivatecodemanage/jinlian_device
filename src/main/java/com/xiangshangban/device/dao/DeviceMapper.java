@@ -34,6 +34,12 @@ public interface DeviceMapper {
      */
     List<Map> selectAllDeviceInfo(@Param("companyId") String companyId);
 
+    /**
+     * 查询所有的设备的信息
+     * @param companyId
+     * @return
+     */
+    List<Map> selectAllDevice(@Param("companyId") String companyId);
 
     /**
      * 根据设备id查询该公司下的设备id的集合

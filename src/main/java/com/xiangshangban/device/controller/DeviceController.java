@@ -77,9 +77,6 @@ public class DeviceController {
     @Autowired
     private EmployeeMapper employeeMapper;
 
-    @Autowired
-    private EmployeeBluetoothCountMapper employeeBluetoothCountMapper;
-
     /**
      * 平台新增设备，未绑定公司的设备
      *
@@ -400,6 +397,7 @@ public class DeviceController {
      *
      * @param jsonString
      */
+    @Transactional
     @ResponseBody
     @RequestMapping(value = "/rebootDevice", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     public ReturnData rebootDevice(@RequestBody String jsonString) {
@@ -461,6 +459,7 @@ public class DeviceController {
     /**
      * 查询当前公司的所有设备信息（一个设备信息列表）
      */
+    @Transactional
     @ResponseBody
     @RequestMapping("/getAllDevice")
     public String getAllDeviceInfo(@RequestBody String jsonString) {
@@ -478,6 +477,7 @@ public class DeviceController {
     /**
      * 查询当前公司的所有门的信息（一个门信息列表）
      */
+    @Transactional
     @ResponseBody
     @RequestMapping("/getAllDoorInfoByCompanyId")
     public List<Door> getAllDoorInfoByCompanyId(@RequestBody String jsonString) {
@@ -558,6 +558,7 @@ public class DeviceController {
      *
      * @param jsonString
      */
+    @Transactional
     @ResponseBody
     @RequestMapping("/saveDeviceHeartBeat")
     public Map<String, Object> saveDeviceHeartBeat(@RequestBody String jsonString) {
@@ -739,8 +740,8 @@ public class DeviceController {
             doorCmdRecord.setMd5Check((String) doorRecordAll.get("MD5Check"));
             //设置数据库的data字段
             doorCmdRecord.setData(JSON.toJSONString(doorRecordAll.get("result")));
-            //命令数据存入数据库
-            entranceGuardService.insertCommand(doorCmdRecord);
+//            //命令数据存入数据库
+//            entranceGuardService.insertCommand(doorCmdRecord);
 
             return doorRecordAll;
         }
@@ -751,6 +752,7 @@ public class DeviceController {
      *
      * @param jsonString
      */
+    @Transactional
     @ResponseBody
     @RequestMapping("/getDeviceHeartBeat")
     public ReturnData getDeviceHeartBeat(@RequestBody String jsonString) {
@@ -811,7 +813,7 @@ public class DeviceController {
             Map<String, Object> deviceHeartBeatMapResult = new HashMap<String, Object>();
             List<Map<String, Object>> deviceHeartbeatListResult = new ArrayList<Map<String, Object>>();
 
-            List<Map> deviceList = deviceMapper.selectAllDeviceInfo("");
+            List<Map> deviceList = deviceMapper.selectAllDevice("");
 //            System.out.println("deviceList: "+JSON.toJSONString(deviceList));
             //遍历设备id
             if (deviceList.size() > 0) {
@@ -916,6 +918,7 @@ public class DeviceController {
      *
      * @param jsonString
      */
+    @Transactional
     @ResponseBody
     @RequestMapping("/handOutDeviceSetting")
     public ReturnData handOutDeviceSetting(@RequestBody String jsonString) {
@@ -1117,12 +1120,17 @@ public class DeviceController {
 
                 for (Map<String, String> lcdOffTimeMap : lcdOffTimeList) {
 
-                    TimeRangeLcdOff timeRangeLcdOff = new TimeRangeLcdOff();
-                    timeRangeLcdOff.setDeviceId(deviceId);
-                    timeRangeLcdOff.setStartTime(lcdOffTimeMap.get("startTime"));
-                    timeRangeLcdOff.setEndTime(lcdOffTimeMap.get("endTime"));
-                    //重新插入新的时间区间设置
-                    timeRangeLcdOffMapper.insertSelective(timeRangeLcdOff);
+                    String startTime = lcdOffTimeMap.get("startTime");
+                    String endTime = lcdOffTimeMap.get("endTime");
+
+                    if (StringUtils.isNotEmpty(endTime)){
+                        TimeRangeLcdOff timeRangeLcdOff = new TimeRangeLcdOff();
+                        timeRangeLcdOff.setDeviceId(deviceId);
+                        timeRangeLcdOff.setStartTime(startTime);
+                        timeRangeLcdOff.setEndTime(endTime);
+                        //重新插入新的时间区间设置
+                        timeRangeLcdOffMapper.insertSelective(timeRangeLcdOff);
+                    }
                 }
 
                 //构造命令格式
@@ -1179,6 +1187,7 @@ public class DeviceController {
      *
      * @param jsonString
      */
+    @Transactional
     @ResponseBody
     @RequestMapping(value = "/getDeviceSetting", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     public ReturnData getDeviceSetting(@RequestBody String jsonString) {
@@ -1258,8 +1267,22 @@ public class DeviceController {
                     //查询息屏时间
                     List<TimeRangeLcdOff> timeRangeLcdOffList = timeRangeLcdOffMapper.selectByPrimaryKey(deviceIdTemp);
 
-                    deviceSettingMap.put("lcdBrightnessList", timeRangeLcdBrightnessList);
-                    deviceSettingMap.put("lcdOffTimeList", timeRangeLcdOffList);
+                    if (timeRangeLcdBrightnessList.size() == 0){
+                        TimeRangeLcdBrightness timeRangeLcdBrightness = new TimeRangeLcdBrightness();
+                        timeRangeLcdBrightnessList.add(timeRangeLcdBrightness);
+                        deviceSettingMap.put("lcdBrightnessList", timeRangeLcdBrightnessList);
+                    }else {
+                        deviceSettingMap.put("lcdBrightnessList", timeRangeLcdBrightnessList);
+                    }
+
+                    if (timeRangeLcdOffList.size() == 0){
+                        TimeRangeLcdOff timeRangeLcdOff = new TimeRangeLcdOff();
+                        timeRangeLcdOffList.add(timeRangeLcdOff);
+                        deviceSettingMap.put("lcdOffTimeList", timeRangeLcdOffList);
+                    }else {
+                        deviceSettingMap.put("lcdOffTimeList", timeRangeLcdOffList);
+                    }
+
                     System.out.println("deviceId: " + deviceIdTemp + "\n" + "lcdBrightnessList: " + JSON.toJSONString(timeRangeLcdBrightnessList));
 
                     //数据展示处理
@@ -1304,6 +1327,7 @@ public class DeviceController {
      *
      * @param jsonString
      */
+    @Transactional
     @ResponseBody
     @RequestMapping(value = "/getDeviceAppUpdate", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     public Map<String, Object> getDeviceAppUpdate(@RequestBody String jsonString) {
@@ -1452,6 +1476,7 @@ public class DeviceController {
      *
      * @param jsonString
      */
+    @Transactional
     @ResponseBody
     @RequestMapping(value = "/getBluetoothParameterList", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     public Map<String, Object> getBluetoothParameterList(@RequestBody String jsonString) {
@@ -1499,6 +1524,9 @@ public class DeviceController {
             Map<String, Object> resultData = new LinkedHashMap<String, Object>();
             String resultCode = "";
             String resultMessage = "";
+            resultData.put("returnObj", "");
+            resultData.put("resultCode", "999");
+            resultData.put("resultMessage", "没有查到蓝牙参数信息");
             String deviceId = (String) mapJson.get("deviceId");
 
             //校验MD5
@@ -1612,6 +1640,13 @@ public class DeviceController {
                                 resultData.put("resultCode", resultCode);
                                 resultData.put("resultMessage", resultMessage);
                             }
+                        }else {
+                            System.out.println("设备未绑定公司，没有查到蓝牙参数信息");
+                            resultCode = "999";
+                            resultMessage = "设备未绑定公司，没有查到蓝牙参数信息";
+                            resultData.put("returnObj", "");
+                            resultData.put("resultCode", resultCode);
+                            resultData.put("resultMessage", resultMessage);
                         }
                     }
                 }
@@ -1669,6 +1704,7 @@ public class DeviceController {
      *
      * @return
      */
+    @Transactional
     @ResponseBody
     @RequestMapping(value = "/getBluetoothParameterListForApp", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     public ReturnData getBluetoothParameterListForApp(@Param("employeeId") String employeeId) {
@@ -1683,7 +1719,7 @@ public class DeviceController {
                 if (employee != null) {
                     //查出该公司的所有设备
                     String companyId = employee.getEmployeeCompanyId();
-                    List<Map> deviceList = deviceMapper.selectAllDeviceInfo(companyId);
+                    List<Map> deviceList = deviceMapper.selectAllDevice(companyId);
 
                     //判断该公司是否有设备
                     if (deviceList.size() > 0) {
@@ -1729,6 +1765,20 @@ public class DeviceController {
                                             mapTemp.put("characUuid", versionInfoMap.get("value"));
                                         } else if ("serviceUuid".equals(name)) {
                                             mapTemp.put("serviceUuid", versionInfoMap.get("value"));
+                                        } else if ("bleModeMacaddr".equals(name)){
+                                            String moduleMac = versionInfoMap.get("value");
+                                            mapTemp.put("moduleMac", moduleMac);
+
+                                            //mac地址更新到设备信息表
+                                            Device device =deviceMapper.selectByPrimaryKey(deviceId);
+                                            if (device != null){
+                                                if (StringUtils.isEmpty(device.getMacAddress())){
+                                                    Device deviceTemp = new Device();
+                                                    deviceTemp.setDeviceId(deviceId);
+                                                    deviceTemp.setMacAddress(moduleMac);
+                                                    deviceMapper.updateByPrimaryKeySelective(deviceTemp);
+                                                }
+                                            }
                                         }
                                     }
                                     if (StringUtils.isNotEmpty(major) && StringUtils.isNotEmpty(minor)) {
@@ -1742,43 +1792,14 @@ public class DeviceController {
                                     Door door = doorMapper.findAllByDeviceId(deviceId);
                                     mapTemp.put("deviceId", deviceId);
                                     mapTemp.put("deviceName", door.getDoorName());
-                                    mapTemp.put("moduleMac", deviceMap.get("macAddress"));
 
                                     //判断该人员有没有蓝牙id
                                     Employee employeeExist = employeeMapper.selectByPrimaryKey(employeeId);
                                     if (StringUtils.isEmpty(employeeExist.getBluetoothNo())){
-                                        //人员没有蓝牙id，分配唯一的蓝牙id
-                                        EmployeeBluetoothCount employeeBluetoothCountExist = employeeBluetoothCountMapper.selectByPrimaryKey("1");
-                                        if (employeeBluetoothCountExist == null){
-                                            //第一次空表的时候初始化蓝牙id总和
-                                            EmployeeBluetoothCount employeeBluetoothCountTemp = new EmployeeBluetoothCount();
-                                            employeeBluetoothCountTemp.setId("1");
-                                            employeeBluetoothCountTemp.setBluetoothCount("1");
-                                            employeeBluetoothCountMapper.insertSelective(employeeBluetoothCountTemp);
-                                            //存入人员表里的蓝牙id
-                                            Employee employeeTemp = new Employee();
-                                            employeeTemp.setEmployeeId(employeeId);
-                                            employeeTemp.setBluetoothNo("1");
-                                            employeeMapper.updateByPrimaryKeySelective(employeeTemp);
-                                            //把第一次生成的蓝牙id返给app端
-                                            bluetoothIdResult = "1";
-                                        }else {
-                                            //蓝牙id总和表有数据时更新
-                                            int bluetoothCount = Integer.parseInt(employeeBluetoothCountExist.getBluetoothCount());
-                                            bluetoothCount = bluetoothCount + 1;
-                                            //存入人员表里的蓝牙id
-                                            Employee employeeTemp = new Employee();
-                                            employeeTemp.setEmployeeId(employeeId);
-                                            employeeTemp.setBluetoothNo(String.valueOf(bluetoothCount));
-                                            employeeMapper.updateByPrimaryKeySelective(employeeTemp);
-                                            //更新蓝牙id计数总和
-                                            EmployeeBluetoothCount employeeBluetoothCount = new EmployeeBluetoothCount();
-                                            employeeBluetoothCount.setId("1");
-                                            employeeBluetoothCount.setBluetoothCount(String.valueOf(bluetoothCount));
-                                            employeeBluetoothCountMapper.updateByPrimaryKey(employeeBluetoothCount);
-                                            //把生成的新的蓝牙id，返回给app端
-                                            bluetoothIdResult = String.valueOf(bluetoothCount);
-                                        }
+
+                                        returnData.setMessage("您还没有分配蓝牙开门参数，请联系管理员下发您的开门权限");
+                                        returnData.setReturnCode("4007");
+                                        return returnData;
                                     }else {
                                         //人员有蓝牙id，直接返给app端
                                         bluetoothIdResult = employeeExist.getBluetoothNo();

@@ -90,6 +90,9 @@ public class RabbitMQReciever {
 
         channel.queueDeclare(QUEUE_NAME, true, false, false, null);
 
+        //RabbitMQ客户端接受消息最大数量
+        channel.basicQos(0,1,false);
+
         //声明一个匹配模式的交换器
         channel.exchangeDeclare(EXCHANGE_NAME, "direct", true);
 

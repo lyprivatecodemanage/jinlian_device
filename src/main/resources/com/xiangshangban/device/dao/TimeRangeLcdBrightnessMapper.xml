@@ -11,9 +11,13 @@
     device_id, start_time, end_time, value
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
-    select 
-    <include refid="Base_Column_List" />
-    from time_range_lcd_brightness
+    SELECT
+	COALESCE (device_id, '') AS device_id,
+	COALESCE (start_time, '') AS start_time,
+	COALESCE (end_time, '') AS end_time,
+	COALESCE ("value", '') AS "value"
+    FROM
+	time_range_lcd_brightness
     where device_id = #{deviceId,jdbcType=VARCHAR}
   </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >

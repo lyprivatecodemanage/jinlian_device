@@ -9,10 +9,11 @@
     <result column="range_end_time" property="rangeEndTime" jdbcType="VARCHAR" />
     <result column="range_door_open_type" property="rangeDoorOpenType" jdbcType="VARCHAR" />
     <result column="is_all_day" property="isAllDay" jdbcType="VARCHAR" />
+    <result column="is_ditto" property="isDitto" jdbcType="VARCHAR" />
   </resultMap>
   <sql id="Base_Column_List" >
     range_flag_id, employee_id, day_of_week, range_start_time, range_end_time, range_door_open_type, 
-    is_all_day
+    is_all_day, is_ditto
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
     select 
@@ -27,10 +28,10 @@
   <insert id="insert" parameterType="com.xiangshangban.device.bean.TimeRangeCommonEmployee" >
     insert into time_range_common_employee (range_flag_id, employee_id, day_of_week, 
       range_start_time, range_end_time, range_door_open_type, 
-      is_all_day)
+      is_all_day, is_ditto)
     values (#{rangeFlagId,jdbcType=VARCHAR}, #{employeeId,jdbcType=VARCHAR}, #{dayOfWeek,jdbcType=VARCHAR}, 
       #{rangeStartTime,jdbcType=VARCHAR}, #{rangeEndTime,jdbcType=VARCHAR}, #{rangeDoorOpenType,jdbcType=VARCHAR}, 
-      #{isAllDay,jdbcType=VARCHAR})
+      #{isAllDay,jdbcType=VARCHAR}, #{isDitto,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="com.xiangshangban.device.bean.TimeRangeCommonEmployee" >
     insert into time_range_common_employee
@@ -56,6 +57,9 @@
       <if test="isAllDay != null" >
         is_all_day,
       </if>
+      <if test="isDitto != null" >
+        is_ditto,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="rangeFlagId != null" >
@@ -78,6 +82,9 @@
       </if>
       <if test="isAllDay != null" >
         #{isAllDay,jdbcType=VARCHAR},
+      </if>
+      <if test="isDitto != null" >
+        #{isDitto,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
@@ -102,6 +109,9 @@
       <if test="isAllDay != null" >
         is_all_day = #{isAllDay,jdbcType=VARCHAR},
       </if>
+      <if test="isDitto != null" >
+        is_ditto = #{isDitto,jdbcType=VARCHAR},
+      </if>
     </set>
     where range_flag_id = #{rangeFlagId,jdbcType=VARCHAR}
   </update>
@@ -112,10 +122,12 @@
       range_start_time = #{rangeStartTime,jdbcType=VARCHAR},
       range_end_time = #{rangeEndTime,jdbcType=VARCHAR},
       range_door_open_type = #{rangeDoorOpenType,jdbcType=VARCHAR},
-      is_all_day = #{isAllDay,jdbcType=VARCHAR}
+      is_all_day = #{isAllDay,jdbcType=VARCHAR},
+      is_ditto = #{isDitto,jdbcType=VARCHAR}
     where range_flag_id = #{rangeFlagId,jdbcType=VARCHAR}
   </update>
 
+  <!--非自动生成-->
   <select id="findIfExist" resultMap="BaseResultMap" parameterType="com.xiangshangban.device.bean.TimeRangeCommonEmployee">
     SELECT * FROM time_range_common_employee
     WHERE 1=1
@@ -162,5 +174,4 @@
     delete from time_range_common_employee
     where employee_id = #{employeeId,jdbcType=VARCHAR}
   </delete>
-
 </mapper>
