@@ -28,31 +28,27 @@ public interface TemplateMapper {
      ******************************************/
 
     /**
+     * TODO ①：首页列表展示
      * 查询所有设备当前的模板信息
      * (根据设备的名称和编号进行条件搜索)
      */
     List<Map> selectDeviceTemplateInfo(Map map);
 
     /**
-     * 根据模板的ID查询模板items
+     * TODO ②：新增主题、编辑主题部分界面默认显示信息
+     * 查询标准模板的预览图
      */
-    List<Map> selectTemplateItems(@Param("templateId") String templateId);
+    List<Map> selectStandardTemplatePreview();
 
     /**
-     * 根据模板的ID查询模板相关的图片
+     * 根据模板的ID查询模板的背景图以及展示时间段
      */
-    List<Map> selectTemplateImages(@Param("templateId") String templateId);
+    List<Map> selectTemplateBackAndTime(@Param("templateId") String templateId);
 
     /**
-     * 查询标准模板的详细信息（首页选择模板的时候使用）
-     * item的大致位置、背景图片
+     * 查询当前自定义模板的问候语
      */
-    List<Map> selectStandardTemplateDetailImageInfo();
-
-    /**
-     * 查询标准模板的item详细信息（首页选择模板的时候使用）
-     */
-    List<Map> selectStandardTemplateDetailItemInfo();
+    List<Map> selectTemplateSalutation(@Param(("templateId")) String templateId);
 
 
     /*********************************************

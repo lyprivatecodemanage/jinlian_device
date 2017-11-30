@@ -116,8 +116,27 @@
     <!--################新添加部分#################-->
   <!--根据门名称查询门信息-->
   <select id="getDoorInfo" parameterType="map" resultType="map">
-    select S.* from(select A.door_id,door_name,operate_time,B.device_id,device_name,company_id,C.employee_id,employee_name
-    from door_  A,device_ B,employee_ C where A.device_id=B.device_id and A.operate_employee = C.employee_id) S
+    SELECT
+    S.*
+    FROM
+    (
+    SELECT
+    A .door_id,
+    COALESCE(door_name,'') as door_name,
+    COALESCE(operate_time,'') as operate_time,
+    B.device_id,
+    COALESCE(device_name,'') as device_name,
+    company_id,
+    C .employee_id,
+    COALESCE(employee_name,'') as employee_name
+    FROM
+    door_ A,
+    device_ B,
+    employee_ C
+    WHERE
+    A .device_id = B.device_id
+    AND A .operate_employee = C .employee_id
+    ) S
     <where>
       <if test="doorName!=null and doorName!=''">
         and S.door_name like #{doorName}
@@ -128,9 +147,14 @@
     </where>
     order by S.operate_time desc
   </select>
+
   <!--批量删除门信息-->
   <delete id="delDoorBatch" parameterType="List">
-      delete from door_ where door_id in
+    DELETE
+    FROM
+    door_
+    WHERE
+    door_id IN
     <foreach collection="list" item="doorId" index="index" open="(" separator="," close=")">
       #{doorId}
     </foreach>
@@ -138,12 +162,11 @@
 
   <!--通过设备id查询门信息-->
   <select id="findAllByDeviceId" resultMap="BaseResultMap" parameterType="java.lang.String">
-    SELECT * FROM door_ WHERE device_id = #{deviceId,jdbcType=VARCHAR}
+   SELECT * FROM door_ WHERE device_id = #{ deviceId,jdbcType = VARCHAR }
   </select>
 
   <!--查询door表主键的最大值-->
   <select id="selectPrimaryKeyFromDoor" resultType="int">
      select max(cast(door_id as integer)) from door_
   </select>
-
 </mapper>

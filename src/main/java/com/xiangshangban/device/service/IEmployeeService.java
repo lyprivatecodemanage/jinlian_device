@@ -42,5 +42,4 @@ public interface IEmployeeService {
 
     //同步不同设备上，有开门权限的人员的权限信息
     void synchronizeEmployeePermissionForDevices(String employeeId);
-
 }

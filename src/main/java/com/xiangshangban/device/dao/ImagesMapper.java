@@ -9,6 +9,7 @@ import java.util.Map;
 
 @Mapper
 public interface ImagesMapper {
+
     int deleteByPrimaryKey(String id);
 
     int insert(Images record);

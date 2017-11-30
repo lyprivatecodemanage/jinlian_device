@@ -61,7 +61,7 @@ public class TemplateServiceImpl implements ITemplateService{
     String downloadQueueName;
 
     /************************************************************
-     * TODO 设备端接口
+     *                           TODO 设备端接口
      ************************************************************/
     /**
      * TODO 更新自定义模板信息(背景图、问候语、logo)
@@ -383,9 +383,9 @@ public class TemplateServiceImpl implements ITemplateService{
     }
 
 
-    /**********************************************************
-     * TODO web端接口
-     *********************************************************/
+    /********************************************************************************
+     *                              TODO web端接口
+     ********************************************************************************/
     /**
      * TODO 查询所有的设备自定义模板信息
      * @param deviceId
@@ -393,7 +393,7 @@ public class TemplateServiceImpl implements ITemplateService{
      * @return
      */
     @Override
-    public List<Map> queryDeviceTemplateInfo(String deviceId,String deviceName) {
+    public List<Map> queryDeviceTemplateInfo(String companyId,String deviceId,String deviceName) {
         String deviceTitle = "";
         if(deviceName!=null&&!deviceName.isEmpty()){
             deviceTitle = "%"+deviceName+"%";
@@ -401,56 +401,21 @@ public class TemplateServiceImpl implements ITemplateService{
         Map map = new HashMap();
         map.put("deviceId",deviceId);
         map.put("deviceName",deviceTitle);
+        map.put("companyId",companyId);
+
         List<Map> maps = templateMapper.selectDeviceTemplateInfo(map);
         return maps;
     }
 
     /**
-     * TODO 查询所有标准模板的详细信息
+     * TODO 查询所有标准模板的预览图
      * @return
      */
     @Override
-    public List<Map> queryStandardTemplateInfo() {
+    public List<Map> queryStandardTemplatePreview() {
         //查询背景图片信息
-        List<Map> standardImage = templateMapper.selectStandardTemplateDetailImageInfo();
-        //查询item信息
-        List<Map> standardItems = templateMapper.selectStandardTemplateDetailItemInfo();
-        //TODO 整合数据
-       //将图片按照模板的Id进行分组
-        Map<String, List<Map>> imgListMap = groupByTemplateId(standardImage);
-        //将item按照模板的id进行分组
-        Map<String, List<Map>> itemListMap = groupByTemplateId(standardItems);
-
-        List<Map> outterFrame = new ArrayList<Map>();
-        for(String myKey:imgListMap.keySet()){
-            Map innerFrame = new HashMap();
-            innerFrame.put("templateId",myKey);
-            innerFrame.put("backgrounds",imgListMap.get(myKey));
-            innerFrame.put("items",itemListMap.get(myKey));
-
-            outterFrame.add(innerFrame);
-        }
-        return outterFrame;
-    }
-
-    /**
-     * TODO 根据模板ID查询模板items
-     * @param templateId
-     * @return
-     */
-    @Override
-    public List<Map> queryTemplateItems(String templateId) {
-        List<Map> maps = templateMapper.selectTemplateItems(templateId);
-        return maps;
-    }
-
-    /**
-     * TODO 根据模板id查找模板关联的图片
-     */
-    @Override
-    public List<Map> queryTemplateImages(String templateId){
-        List<Map> maps = templateMapper.selectTemplateImages(templateId);
-        return maps;
+        List<Map> standardImage = templateMapper.selectStandardTemplatePreview();
+        return standardImage;
     }
 
     /**
@@ -460,6 +425,28 @@ public class TemplateServiceImpl implements ITemplateService{
     @Override
     public List<Map> queryAllBackGround() {
         List<Map> maps = imagesMapper.selectAllBackGround();
+        return maps;
+    }
+
+    /**
+     * TODO 通过模板的ID，查询模板的背景图以及展示时间
+     * @param templateId
+     * @return
+     */
+    @Override
+    public List<Map> queryTemplateBackAndTime(String templateId) {
+        List<Map> maps = templateMapper.selectTemplateBackAndTime(templateId);
+        return maps;
+    }
+
+    /**
+     * 查询当前自定义模板的问候语
+     * @param templateId
+     * @return
+     */
+    @Override
+    public List<Map> queryTemplateSalutation(String templateId) {
+        List<Map> maps = templateMapper.selectTemplateSalutation(templateId);
         return maps;
     }
 

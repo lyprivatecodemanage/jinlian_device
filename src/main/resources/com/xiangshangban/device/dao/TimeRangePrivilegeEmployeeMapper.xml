@@ -132,6 +132,12 @@
 
   <!--根据门id查询首卡常开人员ID信息-->
   <select id="selectFirstCardKeepOpenInfo" parameterType="String" resultType="map">
-    select employee_id from time_range_privilege_employee where door_id = #{doorId}
+    SELECT
+    DISTINCT
+     employee_id
+     from time_range_privilege_employee
+     where
+     door_id = #{doorId}
   </select>
+
 </mapper>

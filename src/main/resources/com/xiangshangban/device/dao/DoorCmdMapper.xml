@@ -399,9 +399,28 @@
   <!--日志管理部分-->
   <!--1:按条件搜索日志信息-->
   <select id="selectLogCommand" parameterType="map" resultType="map">
-    select S.super_cmd_id,send_time,status,company_name,device_name,C.employee_name from
-    (select A.super_cmd_id,operate_employee_id,send_time,status,
-    B.company_name,device_name from door_cmd A left join device_ B on A.device_id = B.device_id where A.action_code in('3003','3004','3005') and A.status !='6'
+    SELECT
+    S.super_cmd_id,
+    COALESCE(send_time,'') AS send_time,
+    COALESCE(status,'') AS status,
+    COALESCE(company_name,'') AS company_name,
+    COALESCE(device_name,'') AS device_name,
+    COALESCE(C .employee_name,'') AS employee_name
+    FROM
+    (
+    SELECT
+    A .super_cmd_id,
+    operate_employee_id,
+    send_time,
+    status,
+    B.company_name,
+    device_name
+    FROM
+    door_cmd A
+    LEFT JOIN device_ B ON A .device_id = B.device_id
+    WHERE
+    A .action_code IN ('3003', '3004', '3005')
+    AND A .status != '6'
     <if test="companyName!=null and companyName!=''">
       and B.company_name like #{companyName}
     </if>
@@ -420,7 +439,10 @@
 
   <!--２：删除日志信息-->
   <update id="removeLogCommand" parameterType="list">
-    update door_cmd set status = '6' where super_cmd_id in
+    UPDATE door_cmd
+    SET status = '6'
+    WHERE
+    super_cmd_id IN
     <foreach collection="logList" index="index" item="logId" open="(" separator="," close=")">
       #{logId}
     </foreach>
@@ -428,6 +450,17 @@
 
   <!--查询更新模板指令的执行状态-->
   <select id="selectDoorCmdResultCode" resultType="String">
-    select result_code from door_cmd where send_time = (select max(send_time) from door_cmd) and action_code = '4001'
+    SELECT
+	result_code
+    FROM
+        door_cmd
+    WHERE
+        send_time = (
+            SELECT
+                MAX (send_time)
+            FROM
+                door_cmd
+        )
+    AND action_code = '4001'
   </select>
 </mapper>

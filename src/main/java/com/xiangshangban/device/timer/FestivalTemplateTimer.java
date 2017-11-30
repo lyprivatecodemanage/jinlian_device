@@ -20,11 +20,10 @@ public class FestivalTemplateTimer {
     private ITemplateService iTemplateService;
 
     //定义定时器（每天早上3点触发）
-   /* private static final String FESTIVAL_CHECK_TIME = "0 0 3 * * ?";*/
-    private static final String FESTIVAL_CHECK_TIME = "0 28 10 * * ?";
+   private static final String FESTIVAL_CHECK_TIME = "0 0 3 * * ?";
 
     @Scheduled(cron = FESTIVAL_CHECK_TIME)
-    public void comfirmFestival(){
+    public void confirmFestival(){
         //判断今天是否是节日
         Festival festival = iTemplateService.verifyCurrentDate(DateUtils.getDate());
         if(festival!=null){

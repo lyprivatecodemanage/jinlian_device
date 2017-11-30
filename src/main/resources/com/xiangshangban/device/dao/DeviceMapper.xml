@@ -237,8 +237,14 @@
 
   <!--查询所有的没有关联门的设备信息-->
   <select id="selectAllDeviceInfo" parameterType="String"  resultType="map">
-    select device_id as "deviceId",device_name as "deviceName",mac_address as "macAddress" from device_ where device_id not in
-    (select device_id from door_ )
+    SELECT
+    device_id AS "deviceId",
+    COALESCE(device_name,'')  AS "deviceName",
+    COALESCE(mac_address,'')   AS "macAddress"
+    FROM
+    device_
+    WHERE
+    device_id NOT IN (SELECT device_id FROM door_)
     <if test="companyId != null and companyId != ''">
       and company_id = #{companyId}
     </if>

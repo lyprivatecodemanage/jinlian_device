@@ -319,7 +319,9 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         }
         //移除openTime
         relateEmpPermissionCondition.remove("openTime");
-
+        if(relateEmpPermissionCondition.get("openType")!=null && !relateEmpPermissionCondition.get("openType").toString().isEmpty()){
+            relateEmpPermissionCondition.put("openType","%"+relateEmpPermissionCondition.get("openType")+"%");
+        }
         List<Map> maps = doorEmployeeMapper.selectRelateEmpPermissionInfo(relateEmpPermissionCondition);
         return maps;
     }

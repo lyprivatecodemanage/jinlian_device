@@ -25,16 +25,6 @@ public interface TemplateItemsMapper {
     //TODO =============<2017-11-22>================
 
     /**
-     * 更新模板的logo
-     */
-    int updateTemplateLogo(Map map);
-
-    /**
-     * 查询模板logo的id
-     */
-    String selectTemplateLogoId(@Param("templateId") String templateId);
-
-    /**
      * 查询(template_items表中)item_id的最大值
      */
     int selectMaxItemId();

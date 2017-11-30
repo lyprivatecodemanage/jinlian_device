@@ -169,7 +169,18 @@
 
   <!--根据图片的类型查询图片信息-->
   <select id="selectBackGroundByType" parameterType="String" resultType="map">
-    select A.img_name,A.img_url,A.ripple_color,B.img_name rimg_name,B.img_url rimg_url from image_ A,image_ B where A.img_type like #{imgType} and A.relate = B.id
+   SELECT
+	A .img_name,
+	A .img_url,
+	A .ripple_color,
+	B.img_name rimg_name,
+	B.img_url rimg_url
+    FROM
+        image_ A,
+        image_ B
+    WHERE
+        A .img_type LIKE #{ imgType }
+    AND A .relate = B. ID
   </select>
 
   <!--查询image表主键的最大值-->

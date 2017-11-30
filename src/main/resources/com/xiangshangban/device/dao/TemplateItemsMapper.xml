@@ -188,16 +188,6 @@
 
   <!--==============<2017-11-22>=================-->
 
-  <!--更新模板的logo-->
-  <update id="updateTemplateLogo" parameterType="map">
-     update image_ set img_name = #{imgName} where id = (select item_img_id from template_items where template_id = #{templateId} and item_type = '8')
-  </update>
-
-  <!--查询模板当前使用的logo图片的id-->
-  <select id="selectTemplateLogoId" parameterType="String" resultType="String">
-    select item_img_id from template_items where template_id = #{templateId} and item_type = '8'
-  </select>
-
   <!--查询item_id的最大值-->
   <select id="selectMaxItemId" resultType="int">
     select max(cast(item_id as integer)) from template_items
@@ -205,8 +195,11 @@
 
   <!--添加自定义模板的item信息-->
   <insert id="insertPersonalTemplateItemInfo" parameterType="Map">
-    insert into template_items values(#{item_id},#{item_type},#{item_top_x},#{item_top_y},#{item_font_orient},#{item_font_size},#{item_font_bold},
-    #{item_font_color},#{template_id},#{item_img_id},#{item_start_date},#{item_end_date},#{item_font_content})
+   INSERT INTO template_items
+    VALUES
+        (
+            #{ item_id },#{ item_type },#{ item_top_x },#{ item_top_y },#{ item_font_orient },#{ item_font_size },#{ item_font_bold }, #{ item_font_color },#{ template_id },#{ item_img_id },#{ item_start_date },#{ item_end_date },#{ item_font_content }
+        )
   </insert>
 
   <!--删除指定自定义模板的item-->

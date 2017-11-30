@@ -37,22 +37,12 @@ public interface ITemplateService {
     /**
      * 查询所有设备的自定义模板信息
      */
-    List<Map> queryDeviceTemplateInfo(String deviceId,String deviceName);
+    List<Map> queryDeviceTemplateInfo(String companyId,String deviceId,String deviceName);
 
     /**
-     * 查询标准模板的信息
+     * 查询标准模板预览图
      */
-    List<Map> queryStandardTemplateInfo();
-
-    /**
-     * 根据模板的ID查询模板相关items
-     */
-    List<Map> queryTemplateItems(String templateId);
-
-    /**
-     * 根据模板id查找模板关联的图片
-     */
-    List<Map> queryTemplateImages(String templateId);
+    List<Map> queryStandardTemplatePreview();
 
     /**
      * 获取所有的背景图
@@ -60,8 +50,17 @@ public interface ITemplateService {
     List<Map> queryAllBackGround();
 
     /**
+     * 根据模板的ID查询模板的背景图以及展示时间
+     */
+    List<Map> queryTemplateBackAndTime(String templateId);
+
+    /**
+     * 查询当前自定义模板的问候语
+     */
+    List<Map> queryTemplateSalutation(String templateId);
+
+    /**
      * 判断当天日期是不是一个节气或者节日
      */
     Festival verifyCurrentDate(String date);
-
 }

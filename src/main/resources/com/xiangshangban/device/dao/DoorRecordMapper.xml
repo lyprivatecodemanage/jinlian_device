@@ -211,10 +211,34 @@
     where door_permission_record_id = #{doorPermissionRecordId,jdbcType=VARCHAR}
   </update>
   <!--###############《新添加部分》##############-->
+
   <!--分条件查询打卡记录-->
   <select id="selectPunchCardRecord" parameterType="com.xiangshangban.device.bean.DoorRecordCondition" resultType="map">
-    select S.record_type,record_date,employee_name,employee_department_name from (select A.record_type,record_date,B.employee_name,employee_department_name,employee_company_id from door_record A
-    left join employee_ B on A.employee_id = B.employee_id and A.employee_id in (select employee_id from employee_) where A.record_type in('3','5','6','7','8') ) S
+    SELECT
+    COALESCE (S.record_type,'') AS  record_type,
+    COALESCE (record_date,'') AS  record_date,
+    COALESCE (employee_name,'') AS  employee_name,
+    COALESCE (employee_department_name,'') AS  employee_department_name
+    FROM
+    (
+    SELECT
+    A .record_type,
+    record_date,
+    B.employee_name,
+    employee_department_name,
+    employee_company_id
+    FROM
+    door_record A
+    LEFT JOIN employee_ B ON A .employee_id = B.employee_id
+    AND A .employee_id IN (
+    SELECT
+    employee_id
+    FROM
+    employee_
+    )
+    WHERE
+    A .record_type IN ('3', '5', '6', '7', '8')
+    ) S
     <where>
       <if test="doorRecordCondition.name!=null and doorRecordCondition.name!=''">
         S.employee_name like #{doorRecordCondition.name}
@@ -232,22 +256,52 @@
         and S.record_date like #{doorRecordCondition.punchCardTime}
       </if>
     </where>
-    order by record_time desc
+    order by record_date DESC
   </select>
 
 
   <!--查询一个员工在某段时间内的最早和最晚打卡时间-->
   <select id="selectPunchCardTime" parameterType="map" resultType="String">
-    select record_date from door_record where employee_id = #{map.empId} and door_id
-    in(select door_id from door_ where device_id in
-    (select device_id from device_ where company_id = #{map.companyId})) and record_date between #{map.startTime} and #{map.endTime}
-    order by record_date desc
+   SELECT
+	record_date
+    FROM
+        door_record
+    WHERE
+        employee_id = #{ MAP .empId }
+    AND door_id IN (
+        SELECT
+            door_id
+        FROM
+            door_
+        WHERE
+            device_id IN (
+                SELECT
+                    device_id
+                FROM
+                    device_
+                WHERE
+                    company_id = #{ MAP .companyId }
+            )
+    )
+    AND record_date BETWEEN #{ MAP .startTime }
+    AND #{ MAP .endTime }
+    ORDER BY
+        record_date DESC
   </select>
 
   <!--APP接口:查询指定员工的打卡记录-->
   <select id="selectEmpPunchRecord" parameterType="map" resultType="map">
-    select record_type,record_date from door_record where employee_id = #{empId} and record_type in ('3','5','6','7','8')
-    and record_date like #{recordDate} order by record_date
+   SELECT
+	record_type,
+	record_date
+    FROM
+        door_record
+    WHERE
+        employee_id = #{ empId }
+    AND record_type IN ('3', '5', '6', '7', '8')
+    AND record_date LIKE #{ recordDate }
+    ORDER BY
+        record_date
   </select>
 
 </mapper>

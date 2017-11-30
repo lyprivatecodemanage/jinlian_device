@@ -1,7 +1,10 @@
 package com.xiangshangban.device.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.xiangshangban.device.bean.Employee;
 import com.xiangshangban.device.bean.Font;
 import com.xiangshangban.device.common.utils.PageUtils;
@@ -29,202 +32,119 @@ public class ActivityController {
     @Autowired
     private IEmployeeService iEmployeeService;
 
+
+    /*******************************************************************************************
+     *                                                  TODO web端接口
+     *****************************************************************************************/
+
     /**
-     * TODO 查询所有设备自定义模板信息
+     * TODO 查询”当前公司“所有设备自定义模板信息(首页展示)
      * 请求参数
      * {
-     *     "deviceId":"",
-     *     "deviceName":"",
+     *      "companyId":"",
+     *      "deviceId":"",
+     *      "deviceName":"",
      *     "page":"",
      *     "rows":""
      * }
-     */
+     *
+     * 返回数据格式：
+     {
+         "message":"数据请求成功/请求数据不存在",
+         "returnCode":"3000/4203",
+         "data":[
+         {
+             "device_name":"设备1.1",
+             "operate_time":"2017-11-28 16:00",
+             "template_style":"vx",
+             "solutation_flag":"已设置",
+             "template_id":"3",
+             "device_id":"1",
+             "operate_emp":"员工1",
+             "logo_flag":"有"
+         }
+         ]
+     }*/
     @PostMapping("/getDeviceTemplate")
     public String getDeviceTemplateInfo(@RequestBody String requestParam ){
         JSONObject jsonObject = JSONObject.parseObject(requestParam);
         Object page = jsonObject.get("page");
         Object rows = jsonObject.get("rows");
+        Object companyId = jsonObject.get("companyId");
         Object deviceId = jsonObject.get("deviceId");
         Object deviceName = jsonObject.get("deviceName");
 
-        List<Map> templates = iTemplateService.queryDeviceTemplateInfo(deviceId!=null?deviceId.toString():null,deviceName!=null?deviceName.toString():null);
-
-        //封装完整信息
-        List<Map> fullInfo = new ArrayList<Map>();
-
-        //判断该设备是否有主题模板，有的话查询出该模板的详细信息
-        for(int i=0;i<templates.size();i++){
-            //创建Map封装数据
-            Map map = new HashMap();
-
-            if(templates.get(i).get("template_id")!=null&&!templates.get(i).get("template_id").toString().isEmpty()){
-                //获取主题操作人名称
-                Employee operate_emp = iEmployeeService.findEmployeeById(templates.get(i).get("operate_emp").toString());
-                //模板的item信息
-                List<Map> templateItems = iTemplateService.queryTemplateItems(templates.get(i).get("template_id").toString());
-
-                //TODO 数据处理，按照时间将问候语进行分组
-                String itemType = "";
-                String timeScope = "";
-                Map<String,Map<String,String>> resultMap = new HashMap<String,Map<String,String>>();
-                List<String> timeKey = new ArrayList<String>();
-                Map logoMap = new HashMap();
-
-                for(int j=0;j<templateItems.size();j++){
-                    itemType = templateItems.get(j).get("item_type").toString();
-                    //type==0表明是文字信息
-                    if(itemType.equals("0")) {
-                        timeScope = templateItems.get(j).get("item_start_date").toString() + "~" + templateItems.get(j).get("item_end_date").toString();
-                        //对时间进行判断
-                        if (resultMap.containsKey(timeScope)) {
-                            //获取单个字的id、内容、X坐标和Y坐标
-                            resultMap.get(timeScope).put(templateItems.get(j).get("item_id").toString(),templateItems.get(j).get("item_font_content").toString()+"-"+templateItems.get(j).get("item_top_x").toString()+"-"+templateItems.get(j).get("item_top_y").toString());
-                            //一句问候语中的字的方向都是一致的
-                            resultMap.get(timeScope).put("fontOrient",templateItems.get(j).get("item_font_orient").toString());
-                            timeKey.add(timeScope);
-                        } else {
-                            Map innerMap = new HashMap();
-                            innerMap.put(templateItems.get(j).get("item_id").toString(),templateItems.get(j).get("item_font_content").toString()+"-"+templateItems.get(j).get("item_top_x").toString()+"-"+templateItems.get(j).get("item_top_y").toString());
-                            innerMap.put("fontOrient",templateItems.get(j).get("item_font_orient").toString());
-                            resultMap.put(timeScope,innerMap);
-                        }
-                    }else{
-                        logoMap.put("itemType",templateItems.get(j).get("item_type").toString());
-                        logoMap.put("itemId",templateItems.get(j).get("item_id").toString());
-                        logoMap.put("imgUrl",templateItems.get(j).get("img_url").toString());
-                        logoMap.put("imgName",templateItems.get(j).get("img_name").toString());
-                    }
-                }
-
-                //TODO 拼接完整的问候语
-                List<Map> listMap = new ArrayList<>();
-                StringBuffer content = new StringBuffer();
-                String fontOrient = "";
-                List<String> keyList = new ArrayList<>();
-                List<Font> fontList = new ArrayList<Font>();
-                for(int k=0;k<timeKey.size();k++){//key是一个时间区间（处理的内容是该时间区间中的问候语）
-
-                    Map myMap = new HashMap();
-                    //获取字的方向
-                    fontOrient = resultMap.get(timeKey.get(k)).get("fontOrient");
-                    for(String key:  resultMap.get(timeKey.get(k)).keySet()){
-                        keyList.add(key);
-                    }
-                    //去除指定的键fontOrient
-                    keyList.remove("fontOrient");
-
-                    //TODO 更正字的顺序
-                    for(int s = 0;s<keyList.size();s++){
-                        //获取每一个字
-                        String[] outterFontInfo =  resultMap.get(timeKey.get(k)).get(keyList.get(s)).split("-");// 逝
-                        //获取字的内容
-                        String outterFontContent = outterFontInfo[0];
-                        //获取字的X坐标
-                        String outterFontX = outterFontInfo[1];
-                        //获取字的Y坐标
-                        String outterFontY = outterFontInfo[2];
-                        //创建Font对象
-                        Font font = new Font();
-                        font.setContent(outterFontContent);
-                        font.setCoordinateX(outterFontX);
-                        font.setCoordinateY(outterFontY);
-
-                        //保存文字到集合中
-                        fontList.add(font);
-                    }
-
-                    //对文字进行排序
-                    if(fontOrient.equals("0")){//横向，根据X坐标进行排序
-                        Collections.sort(fontList, new Comparator<Font>() {
-                            public int compare(Font o1, Font o2) {
-                                return o1.getCoordinateX().compareTo(o2.getCoordinateX());
-                            }
-                        });
-                    }
-
-                    if(fontOrient.equals("1")){
-                        Collections.sort(fontList, new Comparator<Font>() {
-                            public int compare(Font o1, Font o2) {
-                                return o1.getCoordinateY().compareTo(o2.getCoordinateY());
-                            }
-                        });
-                    }
-
-                    //输出问候语
-                    for (Font font: fontList
-                         ) {
-                        content.append(font.getContent());
-                    }
-
-                    String[] times = timeKey.get(k).split("~");
-                    myMap.put("startTime",times[0]);
-                    myMap.put("endTime",times[1]);
-                    myMap.put("content",content);
-                    myMap.put("itemType",0);
-                    listMap.add(myMap);
-                }
-
-                listMap.add(logoMap);
-
-                //模板的背景图以及展示时间
-                List<Map> templateImages = iTemplateService.queryTemplateImages(templates.get(i).get("template_id").toString());
-
-                map.put("deviceId",templates.get(i).get("device_id"));
-                map.put("deviceName",templates.get(i).get("device_name"));
-                map.put("templateId",templates.get(i).get("template_id"));
-                map.put("templateStyle",templates.get(i).get("template_style"));
-
-                //是否有公司Logo
-                if(templates.get(i).get("logo_flag")!=null&&!templates.get(i).get("logo_flag").toString().isEmpty()){
-                    if(Integer.parseInt(templates.get(i).get("logo_flag").toString())==0){
-                        map.put("companyLogo","没有");
-                    }else{
-                        map.put("companyLogo","有");
-                    }
-                }
-
-                //是否自定义问候语
-                if(templates.get(i).get("solutation_flag")!=null&&!templates.get(i).get("solutation_flag").toString().isEmpty()){
-                    if(Integer.parseInt(templates.get(i).get("solutation_flag").toString())==0){
-                        map.put("salutation","未设置");
-                    }else{
-                        map.put("salutation","已设置");
-                    }
-                }
-
-                map.put("operateEmployee",operate_emp.getEmployeeName());
-                map.put("operateTime",templates.get(i).get("operate_time"));
-
-                map.put("items",listMap);
-
-                map.put("images",templateImages);
-
-            }else{ //还没有设置模板
-                map.put("deviceId",templates.get(i).get("device_id"));
-                map.put("deviceName",templates.get(i).get("device_name"));
-            }
-            fullInfo.add(map);
-        }
-        List<Map> newInfo = new ArrayList<>();
-        //进行分页操作
+        Page pageObj = null;
         if(page!=null&&!page.toString().isEmpty()&&rows!=null&&!rows.toString().isEmpty()){
-            int pageIndex = Integer.parseInt(page.toString());
-            int pageSize = Integer.parseInt(rows.toString());
+            pageObj = PageHelper.startPage(Integer.parseInt(page.toString()),Integer.parseInt(rows.toString()));
+        }
 
-            for(int i=((pageIndex-1)*pageSize);i<(pageSize*pageIndex);i++){
-                    if(i==fullInfo.size()){
-                        break;
-                    }
-                    newInfo.add(fullInfo.get(i));
-                }
+        List<Map> templates = iTemplateService.queryDeviceTemplateInfo(companyId!=null?companyId.toString():null,deviceId!=null?deviceId.toString():null,deviceName!=null?deviceName.toString():null);
+
+        //数据处理，查询操作人（自定义文案、公司logo更改为文字信息）
+        Employee operate_emp = null;
+        for(int i=0;i<templates.size();i++){
+            if(templates.get(i).get("operate_emp")!=null && !templates.get(i).get("operate_emp").toString().isEmpty()){
+                //查询用户名称
+                operate_emp = iEmployeeService.findEmployeeById(templates.get(i).get("operate_emp").toString());
             }
+            templates.get(i).put("solutation_flag",templates.get(i).get("solutation_flag").toString().equals("1")?"已设置":"未设置");
+            templates.get(i).put("logo_flag",templates.get(i).get("logo_flag").toString().equals("1")?"有":"无");
+            templates.get(i).put("operate_emp",operate_emp==null?"":operate_emp.getEmployeeName());
+        }
 
-        Map result = PageUtils.doSplitPage(fullInfo,newInfo,page,rows,null,1);
+        Map result =  PageUtils.doSplitPage(null,templates,page,rows,pageObj,1);
+
         return JSONArray.toJSONString(result);
     }
 
     /**
+     * TODO 查询所有标准模板的预览图
+     * 返回的数据类型:
+         * [
+             {
+             "img_url":"http://xiangshangban.oss-cn-hangzhou.aliyuncs.com/test%2Fsys%2Fdevice%2Ftemplate%2Ftemplate1%2F",----->预览图路径
+             "img_id":"27",
+             "template_id":"1",
+             "img_name":"back.png" ------->预览图名称
+             }
+         ]
+     */
+    @GetMapping("/getTemplatePreview")
+    public String getTemplatePreview(){
+        List<Map> templatePreview = iTemplateService.queryStandardTemplatePreview();
+        return JSONObject.toJSONString(ReturnCodeUtil.addReturnCode(templatePreview));
+    }
+
+    /**
      * TODO 查询所有的背景图（根据类别进行分组）
+     * 返回的参数
+     * {
+     "back_festival":[
+     {
+     "img_type":"back_festival_节气",
+     "img_url":"http://xiangshangban.oss-cn-hangzhou.aliyuncs.com/test%2Fsys%2Fdevice%2Ftemplate%2Ftemplate1%2F",
+     "id":"31",
+     "img_name":"festival.png"
+     }
+     ],
+     "back_visit":[
+     {
+     "img_type":"back_visit",
+     "img_url":"http://xiangshangban.oss-cn-hangzhou.aliyuncs.com/test%2Fsys%2Fdevice%2Ftemplate%2Ftemplate1%2F",
+     "id":"34",
+     "img_name":"unknownBack.png"
+     }
+     ],
+     "back_show":[
+     {
+     "img_type":"back_show",
+     "img_url":"http://xiangshangban.oss-cn-hangzhou.aliyuncs.com/test%2Fsys%2Fdevice%2Ftemplate%2Ftemplate1%2F",
+     "id":"33",
+     "img_name":"wooback.png"
+     }
+     ]
+     }
      */
     @GetMapping("/getAllBackground")
     public String getAllBackGround(){
@@ -242,7 +162,7 @@ public class ActivityController {
             if(maps.get(i).get("img_type").toString().equals("back_visit")){
                 back_visit.add(maps.get(i));
             }
-            if(maps.get(i).get("img_type").toString().equals("back_festival")){
+            if(maps.get(i).get("img_type").toString().contains("back_festival")){
                 back_festival.add(maps.get(i));
             }
         }
@@ -250,19 +170,174 @@ public class ActivityController {
         map.put("back_visit",back_visit);
         map.put("back_festival",back_festival);
 
-        return JSONObject.toJSONString(map);
-
+        return JSONObject.toJSONString(ReturnCodeUtil.addReturnCode(map));
     }
+
     /**
-     * TODO 查询所有标准模板的详细信息(关于坐标的问题，可以进行等比缩小。)
+     * TODO 根据模板的ID，查询模板的背景图以及显示时间（标准模板没有背景图，无需显示），以及自定义问候语的展示
+     * ①：请求参数
+     *          {
+     *              "templateId":"3"
+     *          }
+     *  ②：返回的数据格式
+     *
+     *   {
+             "message":"数据请求成功",
+             "returnCode":"3000",
+             "data":{
+             "background":[
+                 {
+                     "img_url":"http://xiangshangban.oss-cn-hangzhou.aliyuncs.com/test%2Fsys%2Fdevice%2Ftemplate%2Ftemplate1%2F",
+                     "img_id":"34",
+                     "broad_end_time":"2017-11-28 10:00",
+                     "img_name":"unknownBack.png",
+                     "broad_start_time":"2017-11-28 08:00"
+                 }
+             ],
+             "salutation":[
+                 {
+                 "content":"快乐",------------------>问候语1
+                 "startDate":"2017-11-29 10:00",
+                 "endDate":"2017-11-29 12:00"
+                 },
+                 {
+                 "content":"冬至",------------------>问候语2
+                 "startDate":"2017-11-29 06:00",
+                 "endDate":"2017-11-29 10:00"
+                 }
+             ]
+            }
+     }
+     *
      */
-    @GetMapping("/getStandardTemplateInfo")
-    public String getStandardTemplateInfo(){
-        List<Map> templateInfo = iTemplateService.queryStandardTemplateInfo();
-        return JSONObject.toJSONString(templateInfo);
+    @PostMapping("/getTemplateBackAndTime")
+    public String getTemplateBackAndTime(@RequestBody String requestParam){
+        JSONObject jsonObject = JSONObject.parseObject(requestParam);
+        Map result = null;
+        if(jsonObject!=null){
+            //查询背景图
+            List<Map> backgroundAndTime = iTemplateService.queryTemplateBackAndTime(jsonObject.get("templateId").toString());
+            //查询该自定义模板的问候语
+            List<Map> templateSalutation = iTemplateService.queryTemplateSalutation(jsonObject.get("templateId").toString());
+
+            Map background = null;
+            if(backgroundAndTime!=null && backgroundAndTime.size()>0){
+                //整理背景图的时间
+                for(int i=0;i<backgroundAndTime.size();i++){
+                    background = backgroundAndTime.get(i);
+                    backgroundAndTime.get(i).put("broad_start_time",background.get("broad_start_date").toString()+" "+background.get("broad_start_time"));
+                    backgroundAndTime.get(i).put("broad_end_time",background.get("broad_end_date").toString()+" "+background.get("broad_end_time"));
+
+                    //移除broad_start_date和broad_end_date
+                    backgroundAndTime.get(i).remove("broad_start_date");
+                    backgroundAndTime.get(i).remove("broad_end_date");
+                }
+            }
+
+            //TODO 处理问候语（按照时间对单个字进行整句话整合）
+            Map<String,List<Map>> fontListMap = new HashMap<>();
+            if(templateSalutation!=null && templateSalutation.size()>0){
+                for(int k=0;k<templateSalutation.size();k++){
+                    String key =  templateSalutation.get(k).get("item_start_date")+"~"+templateSalutation.get(k).get("item_end_date");
+                    if(fontListMap.containsKey(key)){
+                        Map font = new HashMap();
+                        font.put("item_top_x",templateSalutation.get(k).get("item_top_x"));
+                        font.put("item_top_y",templateSalutation.get(k).get("item_top_y"));
+                        font.put("item_font_orient",templateSalutation.get(k).get("item_font_orient"));
+                        font.put("item_font_content",templateSalutation.get(k).get("item_font_content"));
+
+                        fontListMap.get(key).add(font);
+                    }else{
+                        List<Map> fontList = new ArrayList<>();
+
+                        Map font = new HashMap();
+
+                        font.put("item_top_x",templateSalutation.get(k).get("item_top_x"));
+                        font.put("item_top_y",templateSalutation.get(k).get("item_top_y"));
+                        font.put("item_font_orient",templateSalutation.get(k).get("item_font_orient"));
+                        font.put("item_font_content",templateSalutation.get(k).get("item_font_content"));
+
+                        fontList.add(font);
+
+                        fontListMap.put(key,fontList);
+                    }
+                }
+            }
+
+            //保存所有的问候语
+            Map<String,List<Font>> salutationMap = new HashMap<>();
+            //TODO 根据文字的方向，以及坐标判断文字的先后顺序
+            for (String key: fontListMap.keySet()      //遍历所有的问候语（包含多句话）
+                        ) {
+                     //保存一句问候语的字
+                    List<Font> fontList = new ArrayList<>();
+
+                    List<Map> fontStyle = fontListMap.get(key);
+                    //获取文字的方向
+                    String fontOrient = fontStyle.get(0).get("item_font_orient").toString();
+                    for (int f = 0; f < fontStyle.size(); f++) {
+                        //将文字信息封装到font类中
+                        Font font = new Font();
+                        font.setCoordinateX(fontStyle.get(f).get("item_top_x").toString());
+                        font.setCoordinateY(fontStyle.get(f).get("item_top_y").toString());
+                        font.setFontOrient(fontOrient);
+                        font.setContent(fontStyle.get(f).get("item_font_content").toString());
+
+                        fontList.add(font);
+                    }
+
+                //TODO 对文字进行排序
+                //对文字进行排序
+                if (fontOrient.equals("0")) {//横向，根据X坐标进行排序
+                    Collections.sort(fontList, new Comparator<Font>() {
+                        public int compare(Font o1, Font o2) {
+                            return o1.getCoordinateX().compareTo(o2.getCoordinateX());
+                        }
+                    });
+                }
+                if (fontOrient.equals("1")) {//纵向，根据Y坐标进行排序
+                    Collections.sort(fontList, new Comparator<Font>() {
+                        public int compare(Font o1, Font o2) {
+                            return o1.getCoordinateY().compareTo(o2.getCoordinateY());
+                        }
+                    });
+                }
+                salutationMap.put(key,fontList);
+            }
+
+            //遍历问候语集合构建问候语内容
+            List<Map> salutationList = new ArrayList<>();
+            for(String key:salutationMap.keySet()){
+                Map map = new HashMap();
+                map.put("startDate",key.toString().split("~")[0].toString());
+                map.put("endDate",key.toString().split("~")[1].toString());
+                //问候语内容
+                String content = "";
+                //组拼单个字
+                for(int f = 0;f<salutationMap.get(key).size();f++){
+                    content += salutationMap.get(key).get(f).getContent();
+                }
+                map.put("content",content);
+
+                salutationList.add(map);
+            }
+
+            //TODO 将背景图数据和问候语数据进行组拼
+           Map backgroundAndSalutation = new HashMap();
+           backgroundAndSalutation.put("background",backgroundAndTime);
+           backgroundAndSalutation.put("salutation",salutationList);
+
+           result = ReturnCodeUtil.addReturnCode(backgroundAndSalutation);
+        }else{
+            //参数格式错误
+            result = ReturnCodeUtil.addReturnCode(1);
+        }
+        return JSONObject.toJSONString(result);
     }
 
-    //TODO ==================<2017-11-22>====================
+    /******************************************************************************************
+     *                                                  TODO 设备端相关接口
+     *****************************************************************************************/
 
     /**
      * TODO 添加自定义的模板
@@ -273,19 +348,17 @@ public class ActivityController {
 
      "backImgList":[--------用户设置的背景图信息
 
-     {"imgId":"1","startTime":"2017-11-04 08:00","endTime":"2017-11-04 12:00"},
-     {"imgId":"2","startTime":"2017-11-04 12:00","endTime":"2017-11-04 18:00"}
+         {"imgId":"1","startTime":"2017-11-04 08:00","endTime":"2017-11-04 12:00"},
+         {"imgId":"2","startTime":"2017-11-04 12:00","endTime":"2017-11-04 18:00"}
 
      ],
 
      "salutationList":[
 
-     {"content":"上午","startTime":"2017-11-04 08:00","endTime":"2017-11-04 12:00"},
-     {"content":"下午","startTime":"2017-11-04 12:00","endTime":"2017-11-04 18:00"}
+         {"content":"上午","startTime":"2017-11-04 08:00","endTime":"2017-11-04 12:00"},
+         {"content":"下午","startTime":"2017-11-04 12:00","endTime":"2017-11-04 18:00"}
 
-     ],
-
-     "companyLogoName":"logoName"--------------->用户上传的公司Logo名称
+      ]
      }
      */
     @PostMapping ("/addDeviceTemplate")
@@ -300,7 +373,7 @@ public class ActivityController {
      "salutationList":[ 请求参数数据格式：
          *{
          "deviceId":"1",
-         "templateId":"2",
+         "templateId":"2",------->首页展示的自定义模板ID
          "backImgList":[
 
          {"imgId":"1","startTime":"2017-11-04 08:00","endTime":"2017-11-04 12:00"},
