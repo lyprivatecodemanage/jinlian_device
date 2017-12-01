@@ -597,7 +597,7 @@ public class EntranceGuardController {
     /**
      * {
      *     "empName":"",
-     *     "companyId":"",----->当前登陆的管理员的所属公司ID
+     *     "companyId":"",------>当前登陆的管理员的所属公司ID
      *     "dept":"",
      *     "recordType":"",
      *     "recordTime":"",
