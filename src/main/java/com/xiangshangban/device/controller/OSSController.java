@@ -2,6 +2,7 @@ package com.xiangshangban.device.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.xiangshangban.device.bean.*;
+import com.xiangshangban.device.common.utils.CalendarUtil;
 import com.xiangshangban.device.common.utils.DateUtils;
 import com.xiangshangban.device.common.utils.OSSFileUtil;
 import com.xiangshangban.device.dao.DeviceMapper;
@@ -11,6 +12,7 @@ import com.xiangshangban.device.dao.EmployeeMapper;
 import com.xiangshangban.device.service.OSSFileService;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -45,6 +47,7 @@ public class OSSController {
 	 * @param funcDirectory 存储模块名称
 	 * @return
 	 */
+	@Transactional
 	@RequestMapping(value = "/upload",method= RequestMethod.POST)
 	public String appUpload(@RequestParam(value="file") MultipartFile file,
 							@RequestParam(value = "companyId") String companyId,
@@ -74,6 +77,7 @@ public class OSSController {
 	 * @param ACCESS_TOKEN
 	 * @return
 	 */
+	@Transactional
 	@RequestMapping(value = "/path.shtml",produces = "application/json;charset=UTF-8",method= RequestMethod.GET)
 	public String appGetPath(String key, @RequestHeader String ACCESS_TOKEN, @RequestParam String funcDirectory){
 		String token = ACCESS_TOKEN;
@@ -88,6 +92,7 @@ public class OSSController {
 	 * @param appVersion
 	 * @return
 	 */
+	@Transactional
 	@RequestMapping(value = "/deviceOssUpdate",method= RequestMethod.POST)
 	public String deviceOssUpdate(@RequestParam(value="file") MultipartFile file,
 								  @RequestParam(value = "fileType") String fileType,
@@ -100,7 +105,7 @@ public class OSSController {
 		//判断上传的文件应该放在哪个文件夹
 		if (fileType.equals("system")){
 			//系统升级的文件放在这个文件夹下
-			funcDirectory = "device/update/system";
+			funcDirectory = "device/update/system/" + CalendarUtil.getCurrentTime();
 
 			try {
 				//上传文件到oss

@@ -536,12 +536,17 @@ public class DeviceServiceImpl implements IDeviceService {
             //查询最新的下载包路径信息
             DeviceUpdatePackSys deviceUpdatePackSys = deviceUpdatePackSysMapper.selectAllByCreateTimeDesc().get(0);
 
+            //查询路径，截取路径
+            String path = deviceUpdatePackSys.getPath();
+            path = path.substring(0, path.lastIndexOf("/")+1);
+            System.out.println("path: "+path);
+
             Map<String, String> mapHandOut = new HashMap<String, String>();
             mapHandOut.put("newSysVerion", deviceUpdatePackSys.getNewSysVerion());
             mapHandOut.put("isSameVesionUpdate", "");
             mapHandOut.put("downloadTime", downloadTime);
             mapHandOut.put("updateTime", updateTime);
-            mapHandOut.put("path", deviceUpdatePackSys.getPath());
+            mapHandOut.put("path", path);
 
             //构造命令格式
             DoorCmd doorCmdUpdateSystem = new DoorCmd();

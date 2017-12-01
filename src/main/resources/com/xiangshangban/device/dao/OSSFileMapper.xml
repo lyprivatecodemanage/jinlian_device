@@ -32,4 +32,11 @@
             #{path,jdbcType=VARCHAR})
   </insert>
 
+    <select id="selectByFileName" resultMap="BaseResultMap" parameterType="java.lang.String" >
+        select
+        <include refid="Base_Column_List" />
+        from device_oss_file
+        where name = #{fileName,jdbcType=VARCHAR}
+    </select>
+
 </mapper>
