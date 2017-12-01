@@ -256,7 +256,6 @@
     ) Y ON W.lasttime = Y.send_time
 
     ) F
-
     WHERE
     F.employee_id IN (
     SELECT

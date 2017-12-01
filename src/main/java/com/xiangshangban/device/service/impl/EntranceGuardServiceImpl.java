@@ -348,7 +348,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
     }
 
     /**
-     * 根据门的id查询门禁信息
+     * 根据门的id查询门禁日历信息
      * @return
      */
     @Override

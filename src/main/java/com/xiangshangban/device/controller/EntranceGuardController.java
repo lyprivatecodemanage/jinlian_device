@@ -164,10 +164,7 @@ public class EntranceGuardController {
         return JSONObject.toJSONString(result);
     }
 
-
-
     //TODO 门禁管理------“日志管理”
-
     /**
      * 查看日志
      * @param requestParam
@@ -531,7 +528,7 @@ public class EntranceGuardController {
     /**
      * 授权中心高级设置（默认信息查询）
      * {
-     *     "doorId":"1"
+     *     "doorId":"17"
      * }
      */
     @PostMapping ("/autho/getHighSettingForFunction")
@@ -541,6 +538,16 @@ public class EntranceGuardController {
         Object doorId = jsonObject.get("doorId");
         //获取该门的设置信息
         List<Map> doorSetting = iegs.queryDoorSettingInfo(doorId!=null?doorId.toString():null);
+        //声明定时常开标志
+        String keepOpenFlag = "";
+        //声明首卡常开标志
+        String firstCardOpenFlag = "";
+        //声明定时常开数据
+        List<DoorTimingKeepOpen> doorTimingKeepOpens = new ArrayList<>();
+        //声明首卡常开数据
+        List<Map> firstCardKeepOpen = new ArrayList<>();
+
+
         if(doorSetting!=null && doorSetting.size()>0){
             //完善数据
             for(int i=0;i<doorSetting.size();i++){
@@ -550,43 +557,49 @@ public class EntranceGuardController {
                     doorSetting.get(i).put("alarmFlag","0");//不报警
                 }
             }
+            //查看该门的定时常开和首卡常开的标志
+            keepOpenFlag = doorSetting.get(0).get("enable_door_keep_open").toString();
+            firstCardOpenFlag = doorSetting.get(0).get("enable_first_card_keep_open").toString();
         }
-        //定时常开信息
-        List<DoorTimingKeepOpen> doorTimingKeepOpens = iegs.queryKeepOpenInfo(doorId!=null?doorId.toString():null);
-        //获取该门上具有首卡常开权限的人员信息
-        List<Map> firstCardKeepOpen = iegs.queryFirstCardKeepOpenInfo(doorId!=null?doorId.toString():null);
+
+        if(!keepOpenFlag.isEmpty() && Integer.parseInt(keepOpenFlag)==1){
+            //查询门定时常开信息
+            doorTimingKeepOpens = iegs.queryKeepOpenInfo(doorId!=null?doorId.toString():null);
+        }
+
+        if(!firstCardOpenFlag.isEmpty() && Integer.parseInt(firstCardOpenFlag)==1){
+            //获取该门首卡常开信息
+            firstCardKeepOpen = iegs.queryFirstCardKeepOpenInfo(doorId!=null?doorId.toString():null);
+        }
+
+        //声明首卡常开最终数据
+        Map firstCardKeepOpenMap = null;
+        if(firstCardKeepOpen!=null && firstCardKeepOpen.size()>0){
+            firstCardKeepOpenMap  = new HashMap();
+            firstCardKeepOpenMap.put("startWeekNumber",firstCardKeepOpen.get(0).get("start_week_number").toString());
+            firstCardKeepOpenMap.put("endWeekNumber",firstCardKeepOpen.get(0).get("end_week_number").toString());
+            firstCardKeepOpenMap.put("rangeStartTime",firstCardKeepOpen.get(0).get("range_start_time").toString());
+            firstCardKeepOpenMap.put("rangeEndTime",firstCardKeepOpen.get(0).get("range_end_time").toString());
+
+            List<Map> firstCardKeepOpenEmpList = new ArrayList<>();
+            //整理首卡常开人员
+            for(int s = 0;s<firstCardKeepOpen.size();s++){
+                //首卡常开人员
+                Map emp = new HashMap();
+                emp.put("employeeId",firstCardKeepOpen.get(s).get("employee_id").toString());
+
+                firstCardKeepOpenEmpList.add(emp);
+            }
+            firstCardKeepOpenMap.put("employeeIdList",firstCardKeepOpenEmpList);
+        }
+
         //门禁日历信息
         List<DoorCalendar> doorCalendars = iegs.queryDoorCalendarInfo(doorId!=null?doorId.toString():null);
-
-       /* Map<String,List> firstOpenEmp = new HashMap<String,List>();
-        List<String> inner = new ArrayList<String>();
-
-        //挑选出具有首卡常开的人员
-        for(int i=0;i<firstCardKeepOpen.size();i++){
-            String employee_id = firstCardKeepOpen.get(i).get("employee_id").toString();
-            inner.add(employee_id);
-        }
-
-        //去除重复的人员ID
-        List<String> newInner = new ArrayList<String>(new TreeSet<String>(inner));
-
-        //具有首卡常开权限的人员信息
-        firstOpenEmp.put("firstOpenEmp",newInner);
-
-        //去除内部的employee_id和employee_name
-        for(int i=0;i<firstCardKeepOpen.size();i++){
-            firstCardKeepOpen.get(i).remove("employee_id");
-            firstCardKeepOpen.get(i).remove("employee_name");
-        }
-
-        //添加具有首卡常开权限的人员信息，到数据集合中
-        firstCardKeepOpen.add(firstOpenEmp);*/
-
         Map map = new HashMap();
 
         map.put("doorSetting",(doorSetting!=null && doorSetting.size()>0)?doorSetting.get(0):"");
         map.put("timingKeepOpen",doorTimingKeepOpens);
-        map.put("firstCardKeepOpen",firstCardKeepOpen);
+        map.put("firstCardKeepOpen",firstCardKeepOpenMap);
         map.put("doorCanlendar",doorCalendars);
 
         return JSONArray.toJSONString(ReturnCodeUtil.addReturnCode(map));

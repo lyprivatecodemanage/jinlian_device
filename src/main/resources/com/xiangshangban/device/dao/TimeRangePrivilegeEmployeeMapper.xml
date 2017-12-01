@@ -130,14 +130,17 @@
     where employee_id = #{employeeId,jdbcType=VARCHAR}
   </delete>
 
-  <!--根据门id查询首卡常开人员ID信息-->
+  <!--根据门id查询首卡常开(开始结束星期、首卡常开人员ID以及开门时间段)-->
   <select id="selectFirstCardKeepOpenInfo" parameterType="String" resultType="map">
-    SELECT
-    DISTINCT
-     employee_id
-     from time_range_privilege_employee
-     where
-     door_id = #{doorId}
+   SELECT DISTINCT
+	employee_id,
+	COALESCE (range_start_time, '') AS range_start_time,
+	COALESCE (range_end_time, '') AS range_end_time,
+	COALESCE (start_week_number, '') AS start_week_number,
+	COALESCE (end_week_number, '') AS end_week_number
+    FROM
+        time_range_privilege_employee
+    WHERE
+        door_id = #{doorId}
   </select>
-
 </mapper>
