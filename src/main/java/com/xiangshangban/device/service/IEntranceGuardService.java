@@ -62,11 +62,11 @@ public interface IEntranceGuardService {
     List<Map> authoQueryAllDoor(Map map);
 
     /**
-     * 查询门命令下发时间
-     * @param doorName
+     * 查询当前门关于人员（下发删除）部分命令的下发时间
+     * @param doorId
      * @return
      */
-   List<Map> querySendTime(String doorName);
+     String querySendTime(String doorId);
 
 
     /**

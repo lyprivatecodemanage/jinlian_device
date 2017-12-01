@@ -231,133 +231,129 @@ public class EntranceGuardController {
 
         //查询门关联的数据
         List<Map> maps = iegs.authoQueryAllDoor(doorEmployeeMap);
-
-        Map dataItem;
-        List<Map> innerList;
-        Map innerMap;
-        Map<String, List<Map>> resultMap = new HashMap<String, List<Map>>();
-        Map<String, Map<String, String>> realMap = new HashMap<String, Map<String, String>>();
-        List<String> keyList = new ArrayList<String>();
-
-        //根据门名称对数据进行分组
-        for (int i = 0; i < maps.size(); i++) {
-            //maps集合中的每一个map
-            dataItem = maps.get(i);
-            //如果拥有对应的key的话，去取出该key对应的List<Map>
-            if (resultMap.containsKey(dataItem.get("door_name"))) {
-                //获取该List<Map>然后向其中添加一个map
-                resultMap.get(dataItem.get("door_name")).add(dataItem);
-            } else {
-                List<Map> list = new ArrayList<Map>();
-                list.add(dataItem);
-                resultMap.put(dataItem.get("door_name").toString(), list);
-            }
-            //保存key值
-            keyList.add(dataItem.get("door_name").toString());
-        }
-        //去除重复的key
-        List newList = new ArrayList(new TreeSet(keyList));
-        /**
-         * 计算关联数据的数量
-         * 一号门=[{employee_nfc=32rrwef, door_name=一号门, door_id=1, employee_face=fsdfsdsfs, employee_phone=12121}]
-         */
-        for (int j = 0; j < newList.size(); j++) {
-
-            //关联信息的数量
-            int relatePhone = 0;
-            int relateFace = 0;
-            int relateNFC = 0;
-            String doorId = "";
-            innerList = resultMap.get(newList.get(j));
-
-            for (int k = 0; k < innerList.size(); k++) {
-                /**
-                 * innerMap数据样式：{employee_nfc=32rrwef, door_name=一号门, door_id=1, employee_face=fsdfsdsfs, employee_phone=12121}
-                 */
-                innerMap = innerList.get(k);
-                //关联手机号数量
-                if (innerMap.get("employee_phone") != null && !innerMap.get("employee_phone").toString().isEmpty()) {
-                    relatePhone++;
-                }
-                //关联人脸数量
-                if (innerMap.get("employee_face") != null && !innerMap.get("employee_face").toString().isEmpty()) {
-                    relateFace++;
-                }
-                //关联NFC数量
-                if (innerMap.get("employee_nfc") != null && !innerMap.get("employee_nfc").toString().isEmpty()) {
-                    relateNFC++;
-                }
-                if (innerMap.get("door_id") != null && !innerMap.get("door_id").toString().isEmpty()) {
-                    doorId = innerMap.get("door_id").toString();
-                }
-            }
-
-            //包装数据
-            if (realMap.containsKey(newList.get(j).toString())) {
-                if (realMap.get(newList.get(j)).get("relatePhone") != null) {
-                    realMap.get(newList.get(j)).put("relatePhone", String.valueOf(relatePhone));
-                }
-                if (realMap.get(newList.get(j)).get("relateFace") != null) {
-                    realMap.get(newList.get(j)).put("relateFace", String.valueOf(relateFace));
-                }
-                if (realMap.get(newList.get(j)).get("relateNFC") != null) {
-                    realMap.get(newList.get(j)).put("relateNFC",String.valueOf(relateNFC));
-                }
-            } else {
-                Map<String, String> map = new HashMap<String, String>();
-                map.put("doorId", doorId);
-                map.put("relatePhone", String.valueOf(relatePhone));
-                map.put("relateFace", String.valueOf(relateFace));
-                map.put("relateNFC", String.valueOf(relateNFC));
-                realMap.put(newList.get(j).toString(), map);
-            }
-        }
-
         /**
          * 格式化数据的样式
          * {"一号门":{"relateNFC":1,"relateFace":1,"relatePhone":1,door_id=1},"二号门":{"relateNFC":2,"relateFace":1,"relatePhone":2,door_id=2}}
          */
         List<Map> outterList = new ArrayList<Map>();
-
-        //拼接最后下发时间
-        String timeDoorId;
-        String outterDoorId;
-        //查询当前门下发人员权限信息指令的最后下发时间
-        List<Map> sentTimes = iegs.querySendTime(doorName != null ? doorName.toString() : null);
-
-        for (int h = 0; h < newList.size(); h++) {
-            Map outterMap = new HashedMap();
-
-            outterMap.put("doorName", newList.get(h));
-            outterMap.put("relateInfo", realMap.get(newList.get(h)));
-
-            outterDoorId = realMap.get(newList.get(h)).get("doorId");
-            for (int j = 0; j < sentTimes.size(); j++) {
-                timeDoorId = sentTimes.get(j).get("doorId").toString();
-                if (timeDoorId.equals(outterDoorId)) {
-                    outterMap.put("sendTime", sentTimes.get(j).get("sendTime"));
-                }
-            }
-            outterList.add(outterMap);
-        }
-
         List<Map> newInfo = new ArrayList<Map>();
+        //最后返回给前端展示的结果
+        Map result  = null;
 
-        if(outterList!=null&&outterList.size()>0){
-            //进行分页操作
-            if (page != null && !page.toString().isEmpty() && rows != null && !rows.toString().isEmpty()) {
-                int pageIndex = Integer.parseInt(page.toString());
-                int pageSize = Integer.parseInt(rows.toString());
+        if(maps!=null && maps.size()>0){
+            Map dataItem;
+            List<Map> innerList;
+            Map innerMap;
+            Map<String, List<Map>> resultMap = new HashMap<String, List<Map>>();
+            Map<String, Map<String, String>> realMap = new HashMap<String, Map<String, String>>();
+            List<String> keyList = new ArrayList<String>();
 
-                for (int i = ((pageIndex - 1) * pageSize); i < (pageSize * pageIndex); i++) {
-                    if(i==outterList.size()){
-                        break;
+            //根据门名称对数据进行分组
+            for (int i = 0; i < maps.size(); i++) {
+                //maps集合中的每一个map
+                dataItem = maps.get(i);
+                //如果拥有对应的key的话，去取出该key对应的List<Map>
+                if (resultMap.containsKey(dataItem.get("door_name"))) {
+                    //获取该List<Map>然后向其中添加一个map
+                    resultMap.get(dataItem.get("door_name")).add(dataItem);
+                } else {
+                    List<Map> list = new ArrayList<Map>();
+                    list.add(dataItem);
+                    resultMap.put(dataItem.get("door_name").toString(), list);
+                }
+                //保存key值
+                keyList.add(dataItem.get("door_name").toString());
+            }
+            //去除重复的key
+            List newList = new ArrayList(new TreeSet(keyList));
+            /**
+             * 计算关联数据的数量
+             * 一号门=[{employee_nfc=32rrwef, door_name=一号门, door_id=1, employee_face=fsdfsdsfs, employee_phone=12121}]
+             */
+            for (int j = 0; j < newList.size(); j++) {
+
+                //关联信息的数量
+                int relatePhone = 0;
+                int relateFace = 0;
+                int relateNFC = 0;
+                String doorId = "";
+                innerList = resultMap.get(newList.get(j));
+
+                //遍历当前门关联的所有人员信息
+                for (int k = 0; k < innerList.size(); k++) {
+                    /**
+                     * innerMap数据样式：{employee_nfc=32rrwef, door_name=一号门, door_id=1, employee_face=fsdfsdsfs, employee_phone=12121}
+                     * ---->获取其中的一个人
+                     */
+                    innerMap = innerList.get(k);
+                    //关联手机号数量
+                    if (innerMap.get("employee_phone") != null && !innerMap.get("employee_phone").toString().isEmpty()) {
+                        relatePhone++;
                     }
-                    newInfo.add(outterList.get(i));
+                    //关联人脸数量
+                    if (innerMap.get("employee_face") != null && !innerMap.get("employee_face").toString().isEmpty()) {
+                        relateFace++;
+                    }
+                    //关联NFC数量
+                    if (innerMap.get("employee_nfc") != null && !innerMap.get("employee_nfc").toString().isEmpty()) {
+                        relateNFC++;
+                    }
+                    if (innerMap.get("door_id") != null && !innerMap.get("door_id").toString().isEmpty()) {
+                        doorId = innerMap.get("door_id").toString();
+                    }
+                }
+
+                //包装数据
+                if (realMap.containsKey(newList.get(j).toString())) {
+                    if (realMap.get(newList.get(j)).get("relatePhone") != null) {
+                        realMap.get(newList.get(j)).put("relatePhone", String.valueOf(relatePhone));
+                    }
+                    if (realMap.get(newList.get(j)).get("relateFace") != null) {
+                        realMap.get(newList.get(j)).put("relateFace", String.valueOf(relateFace));
+                    }
+                    if (realMap.get(newList.get(j)).get("relateNFC") != null) {
+                        realMap.get(newList.get(j)).put("relateNFC",String.valueOf(relateNFC));
+                    }
+                    if(realMap.get(newList.get(j)).get("doorId") != null){
+                        realMap.get(newList.get(j)).put("doorId",doorId);
+                    }
+                } else {
+                    Map<String, String> map = new HashMap<String, String>();
+                    map.put("doorId", doorId);
+                    map.put("relatePhone", String.valueOf(relatePhone));
+                    map.put("relateFace", String.valueOf(relateFace));
+                    map.put("relateNFC", String.valueOf(relateNFC));
+                    realMap.put(newList.get(j).toString(), map);
+                }
+            }
+            //拼接每一扇门的人员指令下发时间
+            for(String key:realMap.keySet()){
+                String sentTimes = iegs.querySendTime(realMap.get(key).get("doorId"));
+
+                Map outterMap = new HashedMap();
+                outterMap.put("doorName",key);
+                outterMap.put("relateInfo", realMap.get(key));
+                outterMap.put("sendTime",sentTimes);
+
+                outterList.add(outterMap);
+            }
+            //进行分页操作
+            if(outterList!=null&&outterList.size()>0){
+                //进行分页操作
+                if (page != null && !page.toString().isEmpty() && rows != null && !rows.toString().isEmpty()) {
+                    int pageIndex = Integer.parseInt(page.toString());
+                    int pageSize = Integer.parseInt(rows.toString());
+
+                    for (int i = ((pageIndex - 1) * pageSize); i < (pageSize * pageIndex); i++) {
+                        if(i==outterList.size()){
+                            break;
+                        }
+                        newInfo.add(outterList.get(i));
+                    }
                 }
             }
         }
-        Map result  = PageUtils.doSplitPage(outterList,newInfo,page,rows,null,1);
+        result  = PageUtils.doSplitPage(outterList,newInfo,page,rows,null,1);
         return JSONArray.toJSONString(result);
     }
 

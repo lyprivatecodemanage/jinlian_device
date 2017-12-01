@@ -113,44 +113,69 @@
   <!--###############<授权中心>####################-->
   <!--查询门所关联的人员的信息：手机号、人脸、NFC数量-->
   <select id="queryDoorEmployeeInfo" parameterType="Map" resultType="map">
-
     SELECT
-    A .door_id,
-    COALESCE (door_name,'未命名') AS door_name,
-    COALESCE (B.employee_phone,'') AS employee_phone,
+    F.*
+    FROM
+    (
+    SELECT
+    S.door_id,
+    COALESCE (door_name,'') AS door_name,
+    COALESCE (E.employee_phone,'') AS employee_phone,
     COALESCE (employee_face,'') AS employee_face,
     COALESCE (employee_nfc,'') AS employee_nfc
     FROM
-    door_employee A,
-    employee_ B
+    (
+    SELECT
+    X.*, D.employee_id
+    FROM
+    (
+    SELECT
+    door_id,
+    door_name
+    FROM
+    door_
     WHERE
-    A .employee_id = B.employee_id
+    device_id IN (
+    SELECT
+    device_id
+    FROM
+    device_
+    <where>
+      <if test="companyId!=null and companyId!=''">
+        company_id = #{companyId}
+      </if>
+    </where>
+    )
+    ) X
+    LEFT JOIN door_employee D ON X.door_id = D.door_id
+    ) S
+    LEFT JOIN employee_ E ON S.employee_id = E.employee_id
+    ) F
+    <where>
       <if test="doorName!=null and doorName!=''">
-        and A.door_name like #{doorEmployee.doorName}
+        F.door_name LIKE #{doorName}
       </if>
-      <if test="companyId!=null and  companyId!=''">
-        and B.employee_company_id = #{companyId}
-      </if>
-    order by CAST (A.door_id as INTEGER )
+    </where>
+    ORDER BY
+    CAST (F.door_id AS INTEGER)
   </select>
 
   <!--查询门的命令下发的时间-->
-  <select id="selectSendTime" parameterType="String" resultType="map">
+  <select id="selectSendTime" parameterType="String" resultType="String">
     SELECT
-    device_id,
     MAX (send_time) sendtime
     FROM
     door_cmd
     WHERE
-    action_code IN ('2001', '3001')
-    AND device_id IN (
+    action_code IN ('2002','3001')
+    AND device_id = (
     SELECT
     device_id
     FROM
     door_
      <where>
-       <if test="doorName!=null and doorName!=''">
-         door_name like #{doorName}
+       <if test="doorId!=null and doorId!=''">
+         door_id = #{doorId}
        </if>
      </where>
    )

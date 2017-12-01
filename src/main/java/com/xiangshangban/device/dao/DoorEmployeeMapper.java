@@ -37,12 +37,12 @@ public interface DoorEmployeeMapper {
     /**
      * 查询命令下发时间
      */
-    List<Map> selectSendTime(@Param("doorName") String doorName);
+    String selectSendTime(@Param("doorId") String doorId);
 
     /**
      * 根据设备id查询门id
      */
-    String selectDoorIdByDeviceId(@Param("deviceId") String deviceId);
+   /* String selectDoorIdByDeviceId(@Param("deviceId") String deviceId);*/
 
 
     //点击门图标，显示门关联的人员的权限信息

@@ -266,34 +266,22 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
     @Override
     public List<Map> authoQueryAllDoor(Map map) {
         if(map.get("doorName")!=null&&!map.get("doorName").toString().isEmpty()){
-           map.put("doorName","%"+map.get("dorName")+"%");
+           map.put("doorName","%"+map.get("doorName")+"%");
         }
         List<Map> doorEmployeeList = doorEmployeeMapper.queryDoorEmployeeInfo(map);
         return doorEmployeeList;
     }
 
     /**
-     * 查询门（设备上）最后一次接收到指令的时间
-     * @param doorName
+     * 查询门（设备上）最后一次下发人员相关指令的时间
+     * @param doorId
      * @return
      */
     @Override
-    public List<Map> querySendTime(String doorName) {
-        String verifyStr = "";
-        if(doorName!=null&&!doorName.isEmpty()){
-            verifyStr = "%"+doorName+"%";
-        }
-        List<Map> maps = doorEmployeeMapper.selectSendTime(verifyStr);
-        List<Map> newMaps = new ArrayList<Map>();
-        String door_id;
-        for(int i=0;i<maps.size();i++){
-            door_id = doorEmployeeMapper.selectDoorIdByDeviceId(maps.get(i).get("device_id").toString());
-            Map innerMap= new HashMap();
-            innerMap.put("doorId",door_id);
-            innerMap.put("sendTime",maps.get(i).get("sendtime"));
-            newMaps.add(innerMap);
-        }
-        return newMaps;
+    public String querySendTime(String doorId) {
+        //获取设备的ID和有关人员的指令的最后下发时间
+        String sendTime = doorEmployeeMapper.selectSendTime(doorId);
+        return sendTime;
     }
 
     /**

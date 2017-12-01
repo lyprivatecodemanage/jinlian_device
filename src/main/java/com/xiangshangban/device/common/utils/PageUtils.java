@@ -30,9 +30,11 @@ public class PageUtils {
             //判断是否查询出数据
             if(mapList!=null&&mapList.size()>0){
                 commonOperate(oldMapList, mapList, page, rows, pageObj, map);
-            }else{
+            }else if(oldMapList == null || oldMapList.size()== 0){
                 map.put("returnCode","4203");
                 map.put("message","请求数据不存在");
+            }else{
+                commonOperate(oldMapList, mapList, page, rows, pageObj, map);
             }
         }else{//表明返回的时候不需要4203返回码，前端自动进行判断
             map = commonOperate(oldMapList, mapList, page, rows, pageObj, map);
