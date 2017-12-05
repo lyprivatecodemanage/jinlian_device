@@ -1035,7 +1035,7 @@ public class EntranceGuardController {
          }
          */
 
-        System.out.println("------------"+jsonString);
+        System.out.println("--------------"+jsonString);
         String jsonUrlDecoderString = UrlUtil.getURLDecoderString(jsonString);
         System.out.println(jsonUrlDecoderString);
         //去除数据的前缀名称
