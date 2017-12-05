@@ -17,6 +17,14 @@ public interface OSSFileService {
 	public OSSFile addOSSFile(String customerId, String directory, MultipartFile file);
 
 	/**
+	 * 上传文件
+	 * @param token
+	 * @param file
+	 * @return
+	 */
+	public OSSFile addOSSFileSysApp(String customerId, String directory, MultipartFile file);
+
+	/**
 	 * 自动上传
 	 * @param customerId
 	 * @param type

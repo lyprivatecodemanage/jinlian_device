@@ -100,6 +100,46 @@ public class OSSFileServiceImpl implements OSSFileService {
 		} 	
 	}
 
+	/**
+	 *
+	 * @param customerId   公司ID
+	 * @param directory 存储模块名称
+	 * @param file
+	 * @return
+	 */
+	@Override
+	public OSSFile addOSSFileSysApp(String customerId, String directory, MultipartFile file) {
+		try {
+			OSSFile oSSFile = new OSSFile();
+			//从配置文件中获取登录OSS的凭证
+			String accessId = PropertiesUtils.ossProperty("accessKey");
+			String accessKey = PropertiesUtils.ossProperty("securityKey");
+			OSSFileUtil client  = new OSSFileUtil(accessId,accessKey );
+			//String customerId = "C001";//公司编号
+			String userId = "u001";//用户编号ID
+			String key = client.uploadSysApp(customerId, directory, getKey(), file);//上传到OSS
+			//设置文件相关信息
+			oSSFile.setKey(key);
+			//获取上传文件名称
+			oSSFile.setName(file.getOriginalFilename());
+			//上传时间
+			oSSFile.setUploadTime(DateUtils.getDateTime());
+			//公司ID
+			oSSFile.setCustomerId(customerId);
+			//上传用户
+			oSSFile.setUploadUser(userId);
+			//上传状态
+			oSSFile.setStatus("0");
+			oSSFile.setPath(OSSFileUtil.getFilePath(customerId, directory, key));
+
+			oSSFileMapper.addOSSFile(oSSFile);//数据库中存储关联关系
+			return oSSFile;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
 	@Override
 	public String deviceFileUpload(String customerId, String directory, String SN, String edtion, String type,String fileMd5, byte[] content) {
 		try {

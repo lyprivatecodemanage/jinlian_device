@@ -12,15 +12,11 @@ import com.xiangshangban.device.dao.*;
 import com.xiangshangban.device.service.IDeviceService;
 import com.xiangshangban.device.service.IEntranceGuardService;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
@@ -1760,7 +1756,7 @@ public class DeviceController {
     @Transactional
     @ResponseBody
     @RequestMapping(value = "/getBluetoothParameterListForApp", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
-    public ReturnData getBluetoothParameterListForApp(@Param("employeeId") String employeeId) {
+    public ReturnData getBluetoothParameterListForApp(@RequestParam("employeeId") String employeeId) {
 
         //返回参数给app
         ReturnData returnData = new ReturnData();

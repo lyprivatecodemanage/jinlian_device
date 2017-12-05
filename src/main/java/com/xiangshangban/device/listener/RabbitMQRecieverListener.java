@@ -22,9 +22,9 @@ public class RabbitMQRecieverListener implements ApplicationListener<Application
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent applicationReadyEvent) {
-       /* try {
+      try {
 
-//           *//* RabbitMQReciever rabbitMQReciever = new RabbitMQReciever();*//*
+//            RabbitMQReciever rabbitMQReciever = new RabbitMQReciever();
             rabbitMQReciever.startRabbitMqReceiver();
 
         } catch (InterruptedException e) {
@@ -33,6 +33,6 @@ public class RabbitMQRecieverListener implements ApplicationListener<Application
             e.printStackTrace();
         } catch (TimeoutException e) {
             e.printStackTrace();
-        }*/
+        }
     }
 }

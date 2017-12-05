@@ -91,7 +91,7 @@ public class OSSController {
 		if(StringUtils.isNotEmpty(token)){
 			if(!file.isEmpty()){
 				try {
-					OSSFile ossFile = oSSFileService.addOSSFile(customerId, funcDirectory, file);
+					OSSFile ossFile = oSSFileService.addOSSFileSysApp(customerId, funcDirectory, file);
 					//System.out.println(JSON.toJSONString(ossFile));
 					System.out.println("*********上传文件成功**********");
 					return JSON.toJSONString(ossFile);

@@ -100,7 +100,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
                 employee.setCompanyNo(companyNo);
 
                 //查询人员信息是否存在
-                Employee employeeExit = employeeMapper.selectByPrimaryKey(employeeId);
+                Employee employeeExit = employeeMapper.selectByEmployeeIdAndCompanyId(employeeId, companyId);
                 if (employeeExit == null){
                     employeeMapper.insertSelective(employee);
                 }else {

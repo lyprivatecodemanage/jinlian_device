@@ -84,6 +84,48 @@ public class OSSFileUtil {
         client.putObject(OSS_BUCKET, filePath, input, objectMeta);
         return key+"."+extension;
     }
+
+	/**
+	 * 上传文件
+	 * @param customerId 公司编号。系统目录不需要指定该参数
+	 * @param key 文件key
+	 * @param directory 功能模块名
+	 * @param extension 扩展名
+	 * @param file 文件
+	 * @return
+	 * @throws OSSException
+	 * @throws ClientException
+	 * @throws FileNotFoundException
+	 */
+	public String OSSPutObjectSysApp(String customerId, String directory, String key, String extension,File file,String fileName)
+			throws OSSException, ClientException, FileNotFoundException {
+		//创建文件头对象
+		ObjectMetadata objectMeta = new ObjectMetadata();
+		//设置文件长度
+		objectMeta.setContentLength(file.length());
+		//设置文件类型
+		objectMeta.setContentType(getFileType(extension));
+		//创建文件流对象
+		InputStream input = new FileInputStream(file);
+		//文件路径(区分系统文件目录和用户文件目录)
+		String filePath = StringUtils.isEmpty(customerId)?
+				SYS_FILE_LOCATION + "/"+directory+"/"+fileName+"."+extension
+				: USER_FILE_LOCATION+"/"+customerId + "/"+directory+ "/"+fileName+"."+extension;
+		String ossEnvironment="";
+		try {
+			ossEnvironment = PropertiesUtils.ossProperty("ossEnvironment");
+			if("test".equals(ossEnvironment)){
+				filePath="test/"+filePath;
+			}else{
+				filePath="prod/"+filePath;
+			}
+		} catch (IOException e) {
+			LOG.info("获取OSS环境属性错误");
+		}
+		//上传文件
+		client.putObject(OSS_BUCKET, filePath, input, objectMeta);
+		return fileName+"."+extension;
+	}
 	
 
 	/**
@@ -293,6 +335,28 @@ public class OSSFileUtil {
 		File file = diskFileItem.getStoreLocation();
 		return OSSPutObject(customerId,directory,key, extention,file);
 	 }
+
+	/**
+	 * 上传
+	 * @param customerId
+	 * @param key
+	 * @param multipartFile
+	 * @return
+	 * @throws OSSException
+	 * @throws ClientException
+	 * @throws FileNotFoundException
+	 */
+	public String uploadSysApp(String customerId,String directory, String key,MultipartFile multipartFile) throws OSSException, ClientException, FileNotFoundException {
+		initialize();
+		//截取文件后缀
+		String extention = multipartFile.getOriginalFilename().substring(multipartFile.getOriginalFilename().lastIndexOf(".")+1);
+		//将multipartFile转换成file
+		CommonsMultipartFile commonsMultipartFile= (CommonsMultipartFile)multipartFile;
+		DiskFileItem diskFileItem = (DiskFileItem)commonsMultipartFile.getFileItem();
+		File file = diskFileItem.getStoreLocation();
+		String fileName = multipartFile.getOriginalFilename().substring(0, multipartFile.getOriginalFilename().indexOf("."));
+		return OSSPutObjectSysApp(customerId,directory,key, extention,file,fileName);
+	}
 	 
 	 /**
 	  * 自动提交

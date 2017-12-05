@@ -28,7 +28,7 @@ public class DoorCmdStatusTimer {
 //        System.out.println("hello!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
         //检测所有处于发送中状态的命令是否超时
-     /*   List<DoorCmd> doorCmdList = doorCmdMapper.selectByStatus("1");
+        List<DoorCmd> doorCmdList = doorCmdMapper.selectByStatus("1");
         for (DoorCmd doorCmd : doorCmdList) {
             String currentTime = DateUtils.getDateminutes();
             String outOfTime = doorCmd.getOutOfTime();
@@ -44,6 +44,6 @@ public class DoorCmdStatusTimer {
                 doorCmdMapper.updateBySuperCmdIdSelective(doorCmdTemp);
 
             }
-        }*/
+        }
     }
 }
