@@ -1216,7 +1216,6 @@ public class DeviceController {
                 entranceGuardService.insertCommand(doorCmdBindDevice);
                 //立即下发数据到MQ
                 rabbitMQSender.sendMessage(deviceId, doorCmdPackageAll);
-
             }
 
             //保存并下发系统更新设置

@@ -514,8 +514,20 @@ public class DeviceServiceImpl implements IDeviceService {
                 mapHandOut.put("isSameVesionUpdate", "");
                 mapHandOut.put("downloadTime", downloadTime);
                 mapHandOut.put("updateTime", updateTime);
-                mapHandOut.put("path1", deviceUpdatePackSys.get(0).getPath());
-                mapHandOut.put("path2", deviceUpdatePackSys.get(1).getPath());
+                //判断升级包文件类型
+                String pathTemp1 = deviceUpdatePackSys.get(0).getPath();
+                String pathTemp2 = deviceUpdatePackSys.get(1).getPath();
+                String path1 = "";
+                String path2 = "";
+                if ("prop".equals(pathTemp1.substring(pathTemp1.lastIndexOf(".")+1, pathTemp1.length())) && "zip".equals(pathTemp2.substring(pathTemp2.lastIndexOf(".")+1, pathTemp2.length()))){
+                    path1 = pathTemp1;
+                    path2 = pathTemp2;
+                }else if ("zip".equals(pathTemp1.substring(pathTemp1.lastIndexOf(".")+1, pathTemp1.length())) && "prop".equals(pathTemp2.substring(pathTemp2.lastIndexOf(".")+1, pathTemp2.length()))){
+                    path1 = pathTemp2;
+                    path2 = pathTemp1;
+                }
+                mapHandOut.put("path1", path1);
+                mapHandOut.put("path2", path2);
             }else {
                 mapHandOut.put("newSysVerion", "");
                 mapHandOut.put("isSameVesionUpdate", "");
@@ -553,7 +565,6 @@ public class DeviceServiceImpl implements IDeviceService {
             doorCmdUpdateSystem.setData(JSON.toJSONString(doorCmdPackageAll.get("data")));
             //命令数据存入数据库
             entranceGuardService.insertCommand(doorCmdUpdateSystem);
-            System.out.println(JSON.toJSONString(doorCmdPackageAll));
             //立即下发数据到MQ
             rabbitMQSender.sendMessage(deviceId, doorCmdPackageAll);
         }
@@ -625,7 +636,6 @@ public class DeviceServiceImpl implements IDeviceService {
             doorCmdUpdateSystem.setData(JSON.toJSONString(doorCmdPackageAll.get("data")));
             //命令数据存入数据库
             entranceGuardService.insertCommand(doorCmdUpdateSystem);
-            System.out.println(JSON.toJSONString(doorCmdPackageAll));
             //立即下发数据到MQ
             rabbitMQSender.sendMessage(deviceId, doorCmdPackageAll);
         }
