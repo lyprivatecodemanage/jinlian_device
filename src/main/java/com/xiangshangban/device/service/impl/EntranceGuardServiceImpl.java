@@ -64,6 +64,9 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
     @Autowired
     private DeviceMapper deviceMapper;
 
+    @Autowired
+    private EmployeeMapper employeeMapper;
+
     /**
      * 添加命令到命令表
      * @param doorCmd
@@ -291,6 +294,11 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
      */
     @Override
     public List<Map> queryRelateEmpPermissionInfo(Map relateEmpPermissionCondition) {
+        //根据门的ID查询门关联的设备的ID
+        Door doorObj = doorMapper.findAllByDoorId(relateEmpPermissionCondition.get("doorId").toString());
+        //进行door_employee表数据的删除和添加
+        maintainDoorEmployee(doorObj);
+
         if(relateEmpPermissionCondition.get("empName")!=null&&!relateEmpPermissionCondition.get("empName").toString().isEmpty()){
             relateEmpPermissionCondition.put("empName","%"+relateEmpPermissionCondition.get("empName")+"%");
         }
@@ -307,11 +315,166 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         }
         //移除openTime
         relateEmpPermissionCondition.remove("openTime");
+
         if(relateEmpPermissionCondition.get("openType")!=null && !relateEmpPermissionCondition.get("openType").toString().isEmpty()){
             relateEmpPermissionCondition.put("openType","%"+relateEmpPermissionCondition.get("openType")+"%");
         }
-        List<Map> maps = doorEmployeeMapper.selectRelateEmpPermissionInfo(relateEmpPermissionCondition);
+        //查询门相关的人员的基本信息和周一的最早的打卡时间段
+        List<Map> maps = doorEmployeeMapper.selectMondayPunchCardTimeAndEmpInfo(relateEmpPermissionCondition);
+
+        //遍历所有人员信息，查询该人员相关的指令的最后下发时间和状态
+        if(maps!=null && maps.size()>0){
+            for(int i=0;i<maps.size();i++){
+                Object employee_id = maps.get(i).get("employee_id");
+                if(employee_id!=null){
+                    Map requestParam = new HashMap();
+                    requestParam.put("employeeId",employee_id.toString());
+                    requestParam.put("deviceId",doorObj.getDeviceId());
+                    List<Map> commandList = doorEmployeeMapper.selectRelateEmpCommand(requestParam);
+                    if(commandList!=null && commandList.size()>0){
+                        //设置下发时间
+                        maps.get(i).put("lasttime",commandList.get(0).get("send_time").toString());
+                        //判断指令的条数
+                        if(commandList.size()==1){  //删除人员权限
+                            maps.get(i).put("status",commandList.get(0).get("status").toString());
+                        }
+                        if(commandList.size()==2){  //下发、更新人员权限
+                            String firstStatus = commandList.get(0).get("status").toString();
+                            String secondStatus = commandList.get(1).get("status").toString();
+
+                            if(firstStatus.equals("2") && secondStatus.equals("2")){
+                                maps.get(i).put("status","2");
+                            }else if(firstStatus.equals("0") || secondStatus.equals("0")){
+                                maps.get(i).put("status","0");
+                            }else if(firstStatus.equals("1") || secondStatus.equals("1")){
+                                maps.get(i).put("status","1");
+                            }else if(firstStatus.equals("3") || secondStatus.equals("3")){
+                                maps.get(i).put("status","3");
+                            }
+                        }
+                    }
+                }
+            }
+        }
         return maps;
+    }
+
+    /**
+     * TODO 维护doorEmployee表
+     * 判断当前门关联的人员的最新的一条指令是哪个（删除、下发人员）
+     */
+    public void maintainDoorEmployee(Door doorObj){
+        //查询该门（设备）上所有人员的最新的指令是哪种指令
+        Map allEmpMap = new HashMap();
+        allEmpMap.put("employeeId",null);
+        allEmpMap.put("deviceId",doorObj.getDeviceId());
+        List<Map> commandList = doorEmployeeMapper.selectRelateEmpCommand(allEmpMap);
+
+        if(commandList!=null && commandList.size()>0){
+            //根据人员的ID对指令数据进行分组
+            Map<String,List<Map>> empCommandMap = new HashMap<>();
+            for(int i=0;i<commandList.size();i++){
+                String key = commandList.get(i).get("employee_id").toString();
+                if(empCommandMap.containsKey(key)){
+                    Map innerMap = new HashMap();
+                    innerMap.put("actionCode",commandList.get(i).get("action_code").toString());
+                    innerMap.put("sendTime",commandList.get(i).get("send_time"));
+                    innerMap.put("status",commandList.get(i).get("status"));
+
+                    empCommandMap.get(key).add(innerMap);
+                }else{
+                    List<Map> list = new ArrayList();
+                    Map innerMap = new HashMap();
+                    innerMap.put("actionCode",commandList.get(i).get("action_code").toString());
+                    innerMap.put("sendTime",commandList.get(i).get("send_time"));
+                    innerMap.put("status",commandList.get(i).get("status"));
+
+                    list.add(innerMap);
+
+                    empCommandMap.put(key,list);
+                }
+            }
+            /*{
+                "emp1":[  ------------------->更新指令
+                     {
+                         "actionCode":"",
+                         "sendTime":"",
+                         "status":""
+                     },
+                     {
+                          "actionCode":"",
+                         "sendTime":"",
+                         "status":""
+                     }
+              ],
+                "emp2":[ ---------------------->删除指令
+                    {
+                        "actionCode":"",
+                         "sendTime":"",
+                         "status":""
+                    }
+              ]
+            }*/
+
+            //判断最新指令的类型和状态（删除人员/下发人员    <待发送、下发中、下发成功、下发失败>）
+            for(String key:empCommandMap.keySet()){
+                int commandNum = empCommandMap.get(key).size();
+                //根据人员的ID查询人员的名称
+                String empName = employeeMapper.selectEmpNameByEmpId(key);
+                if(commandNum==1){
+                    String actionCode = empCommandMap.get(key).get(0).get("actionCode").toString();
+                    String status = empCommandMap.get(key).get(0).get("status").toString();
+                    if(actionCode.equals("2002")){ //删除人员权限
+                        //判断删除指令的状态
+                        if(status.equals("4")){
+                            //删除该人员在door_employee表中的信息
+                            Map delMap = new HashMap();
+                            delMap.put("doorId",doorObj.getDoorId());
+                            delMap.put("employeeId",key);
+                            doorEmployeeMapper.deleteByDoorIdAndEmployeeId(delMap);
+                        }
+                    }
+                }
+               /* if(commandNum==2){ //下发人员权限
+                    String actionCodeFirst = empCommandMap.get(key).get(0).get("actionCode").toString();
+                    String actionCodeSecond = empCommandMap.get(key).get(1).get("actionCode").toString();
+                    String firstStatus = empCommandMap.get(key).get(0).get("status").toString();
+                    String secondStatus = empCommandMap.get(key).get(1).get("status").toString();
+                    if((actionCodeFirst.equals("2001") && actionCodeSecond.equals("3001"))
+                            || actionCodeFirst.equals("3001") && actionCodeSecond.equals("2001")){ //下发人员
+
+                        //判断指令的状态
+                        if(firstStatus.equals("2") && secondStatus.equals("2")){
+                            //先判断当前门当前人员在door_employee表中是否存在
+                            Map existsMap = new HashMap();
+                            existsMap.put("doorId",doorObj.getDoorId());
+                            existsMap.put("employeeId",key);
+                            String doorEmpByDoorIdAndEmpId = doorEmployeeMapper.getDoorEmpByDoorIdAndEmpId(existsMap);
+                            if(doorEmpByDoorIdAndEmpId!=null && !doorEmpByDoorIdAndEmpId.isEmpty()){
+                                //更新该人员信息到door_employee表中
+                                Map updateMap = new HashMap();
+                                updateMap.put("employee_id",key);
+                                updateMap.put("employee_name",empName);
+                                updateMap.put("door_id",doorObj.getDoorId());
+                                updateMap.put("door_name",doorObj.getDoorName());
+                                updateMap.put("range_flag_id",FormatUtil.createUuid());
+
+                                doorEmployeeMapper.updateEmpInfoToDoorEmployee(updateMap);
+                            }else{
+                                //添加该人员的信息到door_employee表中
+                                Map insertMap = new HashMap();
+                                insertMap.put("employee_id",key);
+                                insertMap.put("employee_name",empName);
+                                insertMap.put("door_id",doorObj.getDoorId());
+                                insertMap.put("door_name",doorObj.getDoorName());
+                                insertMap.put("range_flag_id",FormatUtil.createUuid());
+                                doorEmployeeMapper.insertEmpInfoToDoorEmployee(insertMap);
+                            }
+                        }
+                    }
+                }*/
+            }
+        }
     }
 
     /**
@@ -847,7 +1010,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
 
     }
 
-    //查询一个人在一段时间之内的最早最晚打卡时间
+    //TODO 查询一个人在一段时间之内的最早最晚打卡时间
     @Override
     public List<String> queryPunchCardTime (String empId, String companyId, String startTime, String endTime){
         Map map = new HashMap();

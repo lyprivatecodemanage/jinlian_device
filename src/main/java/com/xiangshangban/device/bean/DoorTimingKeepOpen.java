@@ -10,7 +10,6 @@ public class DoorTimingKeepOpen {
     private String timingOpenEndTime;
 
     private String isAllDay;
-
     private String isDitto;
 
     public String getDoorId() {

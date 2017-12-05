@@ -1,6 +1,7 @@
 package com.xiangshangban.device.dao;
 
 import com.xiangshangban.device.bean.Employee;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -26,4 +27,7 @@ public interface EmployeeMapper {
 
     //根据companyId查找公司编号
     List<String> selectCompanyNoByCompanyId(String employeeCompanyId);
+
+    //根据人员的ID查询人员的名称
+    String selectEmpNameByEmpId(@Param("empId") String empId);
 }

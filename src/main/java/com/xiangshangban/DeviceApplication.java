@@ -36,6 +36,7 @@ public class DeviceApplication {
 		ConfigurableApplicationContext run = SpringApplication.run(DeviceApplication.class, args);
 	}
 
+	//配置PageHelper分页插件属性
     @Bean
 	public PageHelper pageHelper(){
 		PageHelper pageHelper = new PageHelper();

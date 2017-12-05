@@ -85,15 +85,29 @@
   <!--门禁异常表和门禁记录表进行整合-->
   <select id="selectDoorExceptionRecord" parameterType="com.xiangshangban.device.bean.DoorRecordCondition" resultType="map">
     SELECT
-    COALESCE(record_type,'') AS  record_type,
-    COALESCE(record_date,'') AS  record_date,
-    COALESCE(employee_name,'') AS  employee_name,
-    COALESCE(employee_department_name,'') AS  employee_department_name
+    COALESCE (S.record_type, '') AS record_type,
+    COALESCE (record_date, '') AS record_date,
+    COALESCE (employee_name, '') AS employee_name,
+    COALESCE (
+    employee_department_name,
+    ''
+    ) AS employee_department_name,
+    COALESCE (device_name, '') AS device_name
+
+    FROM
+    (
+    SELECT
+    N.*, D.device_name
+    FROM
+    (
+    SELECT
+    X.*, Y.device_id
     FROM
     (
     SELECT
     A .record_type,
     record_date,
+    door_id,
     B.employee_name,
     employee_department_name,
     employee_company_id
@@ -114,8 +128,11 @@
     '27',
     '28',
     '30',
-    '32'
-    )
+    '32')
+    ) X
+    LEFT JOIN door_ Y ON X.door_id = Y.door_id
+    ) N
+    LEFT JOIN device_ D ON N.device_id = D.device_id
     ) S
   <where>
     <if test="doorRecordCondition.name!=null and doorRecordCondition.name!=''">
@@ -132,6 +149,9 @@
     </if>
     <if test="doorRecordCondition.punchCardTime!=null and doorRecordCondition.punchCardTime!=''">
       and S.record_date like #{doorRecordCondition.punchCardTime}
+    </if>
+    <if test="doorRecordCondition.deviceName != null  and doorRecordCondition.deviceName!=''">
+      and S.device_name like #{doorRecordCondition.deviceName}
     </if>
   </where>
     order by S.record_date DESC

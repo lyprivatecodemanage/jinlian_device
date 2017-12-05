@@ -332,4 +332,9 @@
     from employee_
     where employee_company_id = #{employeeCompanyId,jdbcType=VARCHAR}
   </select>
+
+  <!--根据人员的ID查询人员的名称-->
+  <select id="selectEmpNameByEmpId" parameterType="String" resultType="String">
+    select employee_name from employee_ where employee_id = #{empId}
+  </select>
 </mapper>

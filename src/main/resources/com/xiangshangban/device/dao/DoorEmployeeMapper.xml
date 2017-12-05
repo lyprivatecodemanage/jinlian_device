@@ -193,122 +193,116 @@
         device_id = #{ deviceId }
   </select>
 
-  <!--查询门关联的用户的权限信息(首页展示周一最早的开门时间段)-->
-  <select id="selectRelateEmpPermissionInfo" parameterType="Map" resultType="map">
+  <!--获取门关联人员相关联的指令的最新下发时间和状态-->
+  <select id="selectRelateEmpCommand" parameterType="String" resultType="map">
     SELECT
-    Q.*
+	X.*
     FROM
-    (
-    SELECT
-    F.*
-    FROM
-    (
-    SELECT DISTINCT
-    W.*, Y.status
-    FROM
-    (
-    SELECT
-    DISTINCT S.*, X.lasttime
-    FROM
-    (
-    SELECT
-    A .employee_id,
-    COALESCE (day_of_week, '') AS day_of_week,
-    COALESCE (range_start_time, '') AS range_start_time,
-    COALESCE (range_end_time, '') AS range_end_time,
-    COALESCE (range_door_open_type, '') AS range_door_open_type,
-    COALESCE (B.employee_name, '') AS employee_name,
-    COALESCE (employee_department_name,'') AS employee_department_name
-    FROM
-    time_range_common_employee A
-    LEFT JOIN employee_ B
-    ON A .employee_id = B.employee_id
-    WHERE
-    A .day_of_week = '1'
-    AND A .employee_id IN (
-    SELECT
-    employee_id
-    FROM
-    door_employee
-    WHERE
-    door_id = #{doorId}
-    )
-    ) S
-    LEFT JOIN (
-    SELECT
-    employee_id,
-    MAX (send_time) lasttime
-    FROM
-    door_cmd
-    WHERE
-    action_code in ('2002','3001')
-    AND status not in('4','5','6')
-    GROUP BY
-    employee_id
-    ) X ON S.employee_id = X.employee_id
-    ) W
-    LEFT JOIN (
-    SELECT
-    status,
-    send_time
-    FROM
-    door_cmd
-    ) Y ON W.lasttime = Y.send_time
-
-    ) F
-    WHERE
-    F.employee_id IN (
-    SELECT
-    H.employee_id
-    FROM
-    (
-    SELECT
-    employee_id,
-    MIN (range_start_time) earlytime
-    FROM
-    time_range_common_employee
-    WHERE
-    day_of_week = '1'
-    GROUP BY
-    employee_id
-    ) H
-    )
-    AND F.range_start_time IN (
-    SELECT
-    H.earlytime
-    FROM
-    (
-    SELECT
-    employee_id,
-    MIN (range_start_time) earlytime
-    FROM
-    time_range_common_employee
-    WHERE
-    day_of_week = '1'
-    GROUP BY
-    employee_id
-    ) H
-    )
-    ) Q
-    <where>
-      <if test="empName!=null and empName!=''">
-        Q.employee_name like #{empName}
-      </if>
-      <if test="deptName!=null and deptName!=''">
-        and Q.employee_department_name like #{deptName}
-      </if>
-      <if test="rangeStartTime!=null and rangeStartTime!=''">
-        and Q.range_start_time between #{rangeStartTime} and #{rangeEndTime}
-      </if>
-      <if test="rangeEndTime!=null and rangeEndTime!=''">
-        and Q.range_end_time between #{rangeStartTime} and #{rangeEndTime}
-      </if>
-      <if test="openType!=null and openType!=''">
-        and Q.range_door_open_type LIKE #{openType}
-      </if>
-    </where>
-    ORDER BY Q.lasttime DESC
+        (
+            SELECT
+                action_code,
+                send_time,
+                status,
+                employee_id
+            FROM
+                door_cmd
+            <where>
+                <if test="employeeId != null and employeeId!=''">
+                    employee_id = #{employeeId}
+                </if>
+            </where>
+        ) X
+    INNER JOIN (
+        SELECT
+            employee_id,
+            MAX (send_time) lasttime
+        FROM
+            door_cmd
+        WHERE
+            action_code IN ('2001', '2002', '3001')
+        AND status NOT IN
+        <if test="employeeId == null">
+            ('5','6')
+        </if>
+        <if test="employeeId !=null and employeeId !=''">
+            ('4','5','6')
+        </if>
+        AND device_id = #{deviceId}
+        GROUP BY
+            employee_id
+    ) Y ON X.send_time = Y.lasttime
+    AND X.employee_id = Y.employee_id
   </select>
+
+  <!--查询门关联的人员的周一最早打卡时间和员工的基本信息-->
+  <select id="selectMondayPunchCardTimeAndEmpInfo" parameterType="Map" resultType="map">
+      SELECT DISTINCT
+      Q.*
+      FROM
+      (
+      SELECT
+      S.*, COALESCE (W.range_door_open_type, '') range_door_open_type
+      FROM
+      (
+      SELECT
+      X.*, Y.range_start_time,
+      range_end_time
+      FROM
+      (
+      SELECT
+      A .employee_id,
+      range_flag_id,
+      COALESCE (B.employee_name, '') employee_name,
+      COALESCE (
+      employee_department_name,
+      ''
+      ) employee_department_name
+      FROM
+      door_employee A
+      LEFT JOIN employee_ B ON A .employee_id = B.employee_id
+      WHERE
+      A .door_id = #{doorId}
+      ) X
+      LEFT JOIN (
+      SELECT
+      employee_id,
+      range_flag_id,
+      COALESCE (MIN(range_start_time), '') range_start_time,
+      COALESCE (MIN(range_end_time), '') range_end_time
+      FROM
+      time_range_common_employee
+      WHERE
+      day_of_week = '1'
+      GROUP BY
+      employee_id,
+      range_flag_id
+      ) Y ON X.range_flag_id = Y.range_flag_id
+      ) S
+      LEFT JOIN time_range_common_employee W ON S.range_start_time = W.range_start_time
+      AND S.range_end_time = W.range_end_time
+      AND S.range_flag_id = W.range_flag_id
+      WHERE
+      W.day_of_week = '1'
+      ) Q
+      <where>
+          <if test="empName!=null and empName!=''">
+              Q.employee_name like #{empName}
+          </if>
+          <if test="deptName!=null and deptName!=''">
+              and Q.employee_department_name like #{deptName}
+          </if>
+          <if test="rangeStartTime!=null and rangeStartTime!=''">
+              and Q.range_start_time between #{rangeStartTime} and #{rangeEndTime}
+          </if>
+          <if test="rangeEndTime!=null and rangeEndTime!=''">
+              and Q.range_end_time between #{rangeStartTime} and #{rangeEndTime}
+          </if>
+          <if test="openType!=null and openType!=''">
+              and Q.range_door_open_type LIKE #{openType}
+          </if>
+      </where>
+  </select>
+
 
   <!--查询有门禁权限的人员的一周开门时间段-->
   <select id="selectAWeekOpenTime" parameterType="String" resultType="map">
@@ -351,4 +345,41 @@
     delete from door_employee
     where range_flag_id = #{rangeFlagId,jdbcType=VARCHAR}
   </delete>
+
+  <!--删除人员和门的关联通过doorId和employeeId-->
+  <delete id="deleteByDoorIdAndEmployeeId" parameterType="Map">
+    delete from door_employee
+    where door_id = #{doorId} and employee_id = #{employeeId}
+  </delete>
+
+  <!--判断当前门当前人员信息是否在door_employee表中存在-->
+  <select id="getDoorEmpByDoorIdAndEmpId" parameterType="Map" resultType="String">
+    select employee_id from door_employee where door_id = #{doorId} and employee_id = #{employeeId}
+  </select>
+
+  <!--添加人员权限信息到door_employee表中-->
+  <insert id="insertEmpInfoToDoorEmployee" parameterType="Map">
+    insert into door_employee
+    values(
+            #{employee_id},
+            #{employee_name},
+            #{door_id},
+            #{door_name},
+            #{range_flag_id}
+           )
+  </insert>
+    <!--更新人员权限信息-->
+    <update id="updateEmpInfoToDoorEmployee" parameterType="Map">
+        update door_employee
+        set
+        employee_id = #{employee_id},
+        employee_name = #{employee_name},
+        door_id = #{door_id},
+        door_name = #{door_name},
+        range_flag_id = #{range_flag_id}
+        where
+        door_id = #{door_id}
+        and
+        employee_id = #{employee_id}
+    </update>
 </mapper>

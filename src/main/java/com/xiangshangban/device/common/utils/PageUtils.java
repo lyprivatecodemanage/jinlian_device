@@ -1,6 +1,7 @@
 package com.xiangshangban.device.common.utils;
 
 import com.github.pagehelper.Page;
+import com.xiangshangban.device.bean.DoorPermissionEmp;
 
 import java.util.HashMap;
 import java.util.List;
@@ -86,6 +87,61 @@ public class PageUtils {
      */
     public static Map doSplitPageOther(List<Map<String,Object>> oldMapList,List<Map> mapList, Object page, Object rows, Page pageObj){
         Map map = new HashMap();
+        //如果进行分页，添加分页信息
+        if (page != null && !page.toString().isEmpty() && rows != null && !rows.toString().isEmpty()) {
+            //获取数据的总行数
+            Long totalCount = null;
+            if (oldMapList != null) {
+                totalCount = ((Integer) oldMapList.size()).longValue();
+            }
+            if (pageObj != null) {
+                totalCount = pageObj.getTotal();
+            }
+            //获取总页数
+            int pageSize = Integer.parseInt(rows.toString());
+            int totalPage = totalCount.intValue() % pageSize == 0 ? totalCount.intValue() / pageSize : (totalCount.intValue() / pageSize) + 1;
+
+            map.put("totalPages", String.valueOf(totalCount));//总条数
+            map.put("pagecountNum", String.valueOf(totalPage));//总页数
+        }
+        return map;
+    }
+
+    /**
+     * 授权中心部分信息展示
+     */
+    public static Map doSplitPagePermission(List<DoorPermissionEmp> oldMapList, List<DoorPermissionEmp> mapList, Object page, Object rows, Page pageObj, int flag){
+        Map map = new HashMap();
+        if(flag==1){
+            //判断是否查询出数据
+            if(mapList!=null&&mapList.size()>0){
+                commonOperatePermission(oldMapList, mapList, page, rows, pageObj, map);
+            }else if(oldMapList == null || oldMapList.size()== 0){
+                map.put("returnCode","4203");
+                map.put("message","请求数据不存在");
+            }else{
+                commonOperatePermission(oldMapList, mapList, page, rows, pageObj, map);
+            }
+        }else{//表明返回的时候不需要4203返回码，前端自动进行判断
+            map = commonOperatePermission(oldMapList, mapList, page, rows, pageObj, map);
+        }
+        return map;
+    }
+
+    private static Map commonOperatePermission(List<DoorPermissionEmp> oldMapList,List<DoorPermissionEmp> mapList, Object page, Object rows, Page pageObj,Map map){
+        if(mapList.size()==0){
+            if(oldMapList!=null&&oldMapList.size()>0){
+                map.put("data",oldMapList);
+            }else{
+                map.put("data",mapList);
+            }
+        }else{
+            map.put("data",mapList);
+        }
+        map.put("returnCode","3000");
+        map.put("message","数据请求成功");
+
+
         //如果进行分页，添加分页信息
         if (page != null && !page.toString().isEmpty() && rows != null && !rows.toString().isEmpty()) {
             //获取数据的总行数

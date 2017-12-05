@@ -364,10 +364,14 @@ public class EntranceGuardController {
      */
     @PostMapping("/autho/getRelateEmpPermissionInfo")
     public String getRelateEmpPermissionInfo(@RequestBody String requestParam){
+
         //定义指令的状态
         String[] cmdStatusStr = {"待发送","下发中","下发成功","下发失败","删除人员权限","已回复"};
         //定义开门方式
         String[] openTypeStr = {"卡","个人密码","卡+个人密码","指纹","人脸","手机蓝牙","手机NFC"};
+
+        //定义最终返回的数据结果集
+        Map result = null;
 
         JSONObject jsonObject = JSONObject.parseObject(requestParam);
         Object doorId = jsonObject.get("doorId");
@@ -384,48 +388,91 @@ public class EntranceGuardController {
         relateEmpPermissionCondition.put("deptName",deptName!=null?deptName.toString():null);
         relateEmpPermissionCondition.put("openTime",openTime!=null?openTime.toString():null);
         relateEmpPermissionCondition.put("openType",openType!=null?openType.toString():null);
-        Page pageObj = null;
+       /* Page pageObj = null;
         //分页
         if(page!=null&&!page.toString().isEmpty()&&rows!=null&&!rows.toString().isEmpty()){
             pageObj = PageHelper.startPage(Integer.parseInt(page.toString()),Integer.parseInt(rows.toString()));
-        }
+        }*/
         //门关联的《员工姓名、部门、开门方式，开门时间》
         List<Map> maps = iegs.queryRelateEmpPermissionInfo(relateEmpPermissionCondition);
+        //对查询出的数据根据最后下发时间进行排序
+        List<DoorPermissionEmp> permissionEmps = new ArrayList<>();
+       if(maps!=null && maps.size()>0){
+           //将开门方式和命令状态由数字更改为文字信息
+           for(int i=0;i<maps.size();i++){
+               Object statusStr = maps.get(i).get("status");
+               Object openDoorType = maps.get(i).get("range_door_open_type");
+               for(int s=0;s<cmdStatusStr.length;s++){
+                   if(statusStr==null){
+                       maps.get(i).put("status","");
+                       continue;
+                   }
+                   if(statusStr.toString().equals(String.valueOf(s))){
+                       maps.get(i).put("status",cmdStatusStr[s].toString());
+                   }
+               }
 
-        //将开门方式和命令状态由数字更改为文字信息
-        for(int i=0;i<maps.size();i++){  // size 4
-            Object statusStr = maps.get(i).get("status"); //4个状态
-            Object openDoorType = maps.get(i).get("range_door_open_type");
-            for(int s=0;s<cmdStatusStr.length;s++){ //length 6
-                if(statusStr==null){
-                    maps.get(i).put("status","");
-                    continue;
-                }
-                if(statusStr.toString().equals(String.valueOf(s))){
-                    maps.get(i).put("status",cmdStatusStr[s].toString());
-                }
-            }
+               //TODO 转换打卡方式（包含组合打卡方式）
+               if(openDoorType!=null){
+                   StringBuffer buffer = new StringBuffer();
+                   //遍历打卡方式
+                   for(int d = 0;d<openDoorType.toString().trim().length();d++){
+                       //判断每一个字符的数值
+                       Character c = openDoorType.toString().trim().charAt(d);
 
-            //TODO 转换打卡方式（包含组合打卡方式）
-            if(openDoorType!=null){
-                StringBuffer buffer = new StringBuffer();
-                //遍历打卡方式
-                for(int d = 0;d<openDoorType.toString().trim().length();d++){
-                    //判断每一个字符的数值
-                    Character c = openDoorType.toString().trim().charAt(d);
+                       for(int t=0;t<openTypeStr.length;t++){
+                           if(c.toString().equals(String.valueOf(t))){
+                               buffer.append(openTypeStr[t].toString()+"-");
+                           }
+                       }
+                   }
+                   maps.get(i).put("range_door_open_type",buffer.toString().substring(0,buffer.toString().length()-1));
+               }else{
+                   maps.get(i).put("range_door_open_type","");
+               }
+               maps.get(i).put("day_of_week","1");
+           }
 
-                    for(int t=0;t<openTypeStr.length;t++){
-                        if(c.toString().equals(String.valueOf(t))){
-                            buffer.append(openTypeStr[t].toString()+"-");
-                        }
+
+           for(int x = 0;x<maps.size();x++){
+               DoorPermissionEmp doorPermissionEmp = new DoorPermissionEmp();
+               doorPermissionEmp.setDay_of_week(maps.get(x).get("day_of_week") != null?maps.get(x).get("day_of_week").toString():"");
+               doorPermissionEmp.setRange_door_open_type(maps.get(x).get("range_door_open_type")!= null?maps.get(x).get("range_door_open_type").toString():"");
+               doorPermissionEmp.setStatus(maps.get(x).get("status")!= null?maps.get(x).get("status").toString():"");
+               doorPermissionEmp.setLasttime(maps.get(x).get("lasttime")!= null?maps.get(x).get("lasttime").toString():"");
+               doorPermissionEmp.setRange_end_time(maps.get(x).get("range_end_time")!= null?maps.get(x).get("range_end_time").toString():"");
+               doorPermissionEmp.setRange_start_time(maps.get(x).get("range_start_time")!= null?maps.get(x).get("range_start_time").toString():"");
+               doorPermissionEmp.setEmployee_department_name(maps.get(x).get("employee_department_name")!= null?maps.get(x).get("employee_department_name").toString():"");
+               doorPermissionEmp.setEmployee_id(maps.get(x).get("employee_id")!= null?maps.get(x).get("employee_id").toString():"");
+               doorPermissionEmp.setEmployee_name(maps.get(x).get("employee_name")!= null?maps.get(x).get("employee_name").toString():"");
+
+               permissionEmps.add(doorPermissionEmp);
+           }
+
+           Collections.sort(permissionEmps, new Comparator<DoorPermissionEmp>() {
+               @Override
+               public int compare(DoorPermissionEmp o1, DoorPermissionEmp o2) {
+                   return (o2.getLasttime()+o2.getEmployee_name()).compareTo((o1.getLasttime()+o1.getEmployee_name()));
+               }
+           });
+       }
+        List<DoorPermissionEmp> newPermissionEmps = new ArrayList<>();
+        //进行分页操作
+        if(permissionEmps!=null&&permissionEmps.size()>0){
+            //进行分页操作
+            if (page != null && !page.toString().isEmpty() && rows != null && !rows.toString().isEmpty()) {
+                int pageIndex = Integer.parseInt(page.toString());
+                int pageSize = Integer.parseInt(rows.toString());
+
+                for (int i = ((pageIndex - 1) * pageSize); i < (pageSize * pageIndex); i++) {
+                    if(i==permissionEmps.size()){
+                        break;
                     }
+                    newPermissionEmps.add(permissionEmps.get(i));
                 }
-                maps.get(i).put("range_door_open_type",buffer.toString().substring(0,buffer.toString().length()-1));
-            }else{
-                maps.get(i).put("range_door_open_type","");
             }
         }
-        Map result = PageUtils.doSplitPage(null,maps,page,rows,pageObj,1);
+        result = PageUtils.doSplitPagePermission(permissionEmps,newPermissionEmps,page,rows,null,1);
         if(doorId!=null){
             //根据门的id查询门的名称
             Door door = doorMapper.selectByPrimaryKey(doorId.toString());
@@ -558,7 +605,7 @@ public class EntranceGuardController {
         }
 
         if(!keepOpenFlag.isEmpty() && Integer.parseInt(keepOpenFlag)==1){
-            //查询门定时常开信息
+            //查询门定时常开信息(每一天分为四个时间段)
             doorTimingKeepOpens = iegs.queryKeepOpenInfo(doorId!=null?doorId.toString():null);
         }
 
@@ -567,25 +614,95 @@ public class EntranceGuardController {
             firstCardKeepOpen = iegs.queryFirstCardKeepOpenInfo(doorId!=null?doorId.toString():null);
         }
 
+        //整理定时常开数据(根据星期进行分组)
+        Map<String,List<Map>> keepOpenMap = new HashMap<>();
+        //最终的定时常开数据
+        List<Map> timingKeepOpenList = new ArrayList<>();
+        if(doorTimingKeepOpens!= null && doorTimingKeepOpens.size()>0){
+
+            for(int k = 0;k<doorTimingKeepOpens.size();k++){
+                String key = doorTimingKeepOpens.get(k).getDayOfWeek();
+                if(keepOpenMap.containsKey(key)){
+                    Map weekMap = new HashMap();
+                    weekMap.put("startTime",doorTimingKeepOpens.get(k).getTimingOpenStartTime());
+                    weekMap.put("endTime",doorTimingKeepOpens.get(k).getTimingOpenEndTime());
+                    weekMap.put("isAllDay",doorTimingKeepOpens.get(k).getIsAllDay());
+                    weekMap.put("isDitto",doorTimingKeepOpens.get(k).getIsDitto());
+
+                    keepOpenMap.get(key).add(weekMap);
+                }else{
+                    List<Map> weekList = new ArrayList<>();
+                    Map weekMap = new HashMap();
+                    weekMap.put("startTime",doorTimingKeepOpens.get(k).getTimingOpenStartTime());
+                    weekMap.put("endTime",doorTimingKeepOpens.get(k).getTimingOpenEndTime());
+                    weekMap.put("isAllDay",doorTimingKeepOpens.get(k).getIsAllDay());
+                    weekMap.put("isDitto",doorTimingKeepOpens.get(k).getIsDitto());
+
+                    weekList.add(weekMap);
+
+                    keepOpenMap.put(key,weekList);
+                }
+            }
+
+            //TODO 更改数据的结构
+            for(String realKey:keepOpenMap.keySet()){
+                Object isAllDay = keepOpenMap.get(realKey).get(0).get("isAllDay");
+                Object isDitto = keepOpenMap.get(realKey).get(0).get("isDitto");
+
+                //移除isDitto和isAllDay
+                for(int j = 0;j<keepOpenMap.get(realKey).size();j++){
+                    keepOpenMap.get(realKey).get(j).remove("isDitto");
+                    keepOpenMap.get(realKey).get(j).remove("isAllDay");
+                }
+                Map timingKeepOpenMap = new HashMap();
+
+                timingKeepOpenMap.put("week",realKey);
+                timingKeepOpenMap.put("isAllDay",isAllDay.toString());
+                timingKeepOpenMap.put("isDitto",isDitto.toString());
+                timingKeepOpenMap.put("timeRange",keepOpenMap.get(realKey));
+
+                timingKeepOpenList.add(timingKeepOpenMap);
+            }
+        }
+
         //声明首卡常开最终数据
         Map firstCardKeepOpenMap = null;
         if(firstCardKeepOpen!=null && firstCardKeepOpen.size()>0){
             firstCardKeepOpenMap  = new HashMap();
             firstCardKeepOpenMap.put("startWeekNumber",firstCardKeepOpen.get(0).get("start_week_number").toString());
             firstCardKeepOpenMap.put("endWeekNumber",firstCardKeepOpen.get(0).get("end_week_number").toString());
-            firstCardKeepOpenMap.put("rangeStartTime",firstCardKeepOpen.get(0).get("range_start_time").toString());
-            firstCardKeepOpenMap.put("rangeEndTime",firstCardKeepOpen.get(0).get("range_end_time").toString());
 
-            List<Map> firstCardKeepOpenEmpList = new ArrayList<>();
+            Set<FirstCardOpen> firstCardKeepOpenEmpList = new TreeSet<>(new Comparator<FirstCardOpen>() {
+                @Override
+                public int compare(FirstCardOpen o1, FirstCardOpen o2) {
+                    return (o1.getEmployeeId()+o1.getEmployeeName()).compareTo(o2.getEmployeeId()+o2.getEmployeeName());
+                }
+            });
+            Set<FirstCardOpen> firstCardKeepOpenTimeRange = new TreeSet<>(new Comparator<FirstCardOpen>() {
+                @Override
+                public int compare(FirstCardOpen o1, FirstCardOpen o2) {
+                    return (o1.getStartTime()+o1.getEndTime()).compareTo(o2.getStartTime()+o2.getEndTime());
+                }
+            });
+
             //整理首卡常开人员
             for(int s = 0;s<firstCardKeepOpen.size();s++){
-                //首卡常开人员
-                Map emp = new HashMap();
-                emp.put("employeeId",firstCardKeepOpen.get(s).get("employee_id").toString());
 
-                firstCardKeepOpenEmpList.add(emp);
+                FirstCardOpen firstCardOpenEmp = new FirstCardOpen();
+                FirstCardOpen firstCardOpenTime = new FirstCardOpen();
+
+                firstCardOpenEmp.setEmployeeId(firstCardKeepOpen.get(s).get("employee_id").toString());
+                firstCardOpenEmp.setEmployeeName(firstCardKeepOpen.get(s).get("employee_name").toString());
+
+                firstCardOpenTime.setStartTime(firstCardKeepOpen.get(s).get("range_start_time").toString());
+                firstCardOpenTime.setEndTime(firstCardKeepOpen.get(s).get("range_end_time").toString());
+
+                firstCardKeepOpenEmpList.add(firstCardOpenEmp);
+                firstCardKeepOpenTimeRange.add(firstCardOpenTime);
             }
+
             firstCardKeepOpenMap.put("employeeIdList",firstCardKeepOpenEmpList);
+            firstCardKeepOpenMap.put("timeList",firstCardKeepOpenTimeRange);
         }
 
         //门禁日历信息
@@ -593,9 +710,9 @@ public class EntranceGuardController {
         Map map = new HashMap();
 
         map.put("doorSetting",(doorSetting!=null && doorSetting.size()>0)?doorSetting.get(0):"");
-        map.put("timingKeepOpen",doorTimingKeepOpens);
+        map.put("timingKeepOpen",timingKeepOpenList);
         map.put("firstCardKeepOpen",firstCardKeepOpenMap);
-        map.put("doorCanlendar",doorCalendars);
+        map.put("doorCalendar",doorCalendars);
 
         return JSONArray.toJSONString(ReturnCodeUtil.addReturnCode(map));
     }
@@ -606,6 +723,7 @@ public class EntranceGuardController {
      * {
      *     "empName":"",
      *     "companyId":"",------>当前登陆的管理员的所属公司ID
+     *     "deviceName":"",
      *     "dept":"",
      *     "recordType":"",
      *     "recordTime":"",
@@ -626,6 +744,7 @@ public class EntranceGuardController {
      *{
      *     "empName":"",
      *     "companyId":"",----->当前登陆的管理员的所属公司ID
+     *     "deviceName":"",
      *     "dept":"",
      *     "alarmType":"",
      *     "alarmTime":"",
@@ -1200,6 +1319,7 @@ public class EntranceGuardController {
 
             Object recordType = jsonObject.get(flag==0?"recordType":"alarmType");
             Object recordTime = jsonObject.get(flag==0?"recordTime":"alarmTime");
+            Object deviceName = jsonObject.get("deviceName");
             Object empName = jsonObject.get("empName");
             Object companyId = jsonObject.get("companyId");
             Object dept = jsonObject.get("dept");
@@ -1213,11 +1333,12 @@ public class EntranceGuardController {
             doorRecordCondition.setDepartment(dept != null ? dept.toString() : null);
             doorRecordCondition.setPunchCardType(recordType != null ? recordType.toString() : null);
             doorRecordCondition.setPunchCardTime(recordTime != null ? recordTime.toString() : null);
+            doorRecordCondition.setDeviceName(deviceName != null ? deviceName.toString() : null);
 
             Page pageObj = null;
-        if (page != null && !page.toString().isEmpty() && rows != null && !rows.toString().isEmpty()) {
-            pageObj = PageHelper.startPage(Integer.parseInt(page.toString()), Integer.parseInt(rows.toString()));
-        }
+            if (page != null && !page.toString().isEmpty() && rows != null && !rows.toString().isEmpty()) {
+                pageObj = PageHelper.startPage(Integer.parseInt(page.toString()), Integer.parseInt(rows.toString()));
+            }
             //查询打卡记录和门禁异常
             List<Map> doorRecords = iegs.queryPunchCardRecord(doorRecordCondition,flag);
 
@@ -1243,6 +1364,7 @@ public class EntranceGuardController {
                     recordMap.put(flag==0?"record_date":"alarm_date",jSObject.get("record_date"));
                     recordMap.put("employee_department_name", jSObject.get("employee_department_name"));
                     recordMap.put("employee_name", jSObject.get("employee_name"));
+                    recordMap.put("deviceName",jSObject.get("device_name"));
 
                     recordList.add(recordMap);
                 }
@@ -1253,7 +1375,6 @@ public class EntranceGuardController {
             }
            return result;
     }
-
 
     /****************************************************
      * TODO APP接口（获取员工的打卡记录）

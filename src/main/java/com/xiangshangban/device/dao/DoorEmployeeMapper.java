@@ -48,10 +48,14 @@ public interface DoorEmployeeMapper {
     //点击门图标，显示门关联的人员的权限信息
 
     /**
-     *获取门关联人员权限信息（姓名、部门、开门时间，开门方式、人员门禁最后下发时间、下发状态）
-     * <查询的是周一的开门时间段>
+     *获取门关联人员相关联的指令的最新下发时间和状态
      */
-    List<Map> selectRelateEmpPermissionInfo(Map map);
+    List<Map> selectRelateEmpCommand(Map map);
+
+    /**
+     * 获取门关联的人员基本信息以及周一最早的打卡时间、打卡方式
+     */
+    List<Map> selectMondayPunchCardTimeAndEmpInfo(Map map);
 
     /**
      *查询有门禁权限的人员一周的开门时间段
@@ -68,4 +72,24 @@ public interface DoorEmployeeMapper {
      * 删除人员和门的关联通过rangeFlagId
      */
     int deleteByRangeFlagId(String rangeFlagId);
+
+    /**
+     * 删除人员和门的关联通过doorId和employeeId
+     */
+    int deleteByDoorIdAndEmployeeId(Map map);
+
+    /**
+     * 判断当前门当前人员信息是否在door_employee表中存在
+     */
+    String getDoorEmpByDoorIdAndEmpId(Map map);
+
+    /**
+     * 添加人员权限信息到door_employee表中
+     */
+    int insertEmpInfoToDoorEmployee(Map map);
+
+    /**
+     * 更新人员权限信息
+     */
+    int updateEmpInfoToDoorEmployee(Map map);
 }

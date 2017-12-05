@@ -12,6 +12,7 @@ public class DoorRecordCondition {
     private String punchCardType;
     private String punchCardTime;
     private String companyId;
+    private String deviceName;
 
     public String getCompanyId() {
         return companyId;
@@ -51,5 +52,13 @@ public class DoorRecordCondition {
 
     public void setPunchCardTime(String punchCardTime) {
         this.punchCardTime = punchCardTime;
+    }
+
+    public String getDeviceName() {
+        return deviceName;
+    }
+
+    public void setDeviceName(String deviceName) {
+        this.deviceName = deviceName;
     }
 }
