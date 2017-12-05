@@ -159,7 +159,7 @@ public class EntranceGuardController {
         return JSONObject.toJSONString(result);
     }
 
-    //TODO 门禁管理------“日志管理”
+    //TODO 门禁管理-------“日志管理”
     /**
      * 查看日志
      * @param requestParam
