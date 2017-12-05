@@ -296,7 +296,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
     public List<Map> queryRelateEmpPermissionInfo(Map relateEmpPermissionCondition) {
         //根据门的ID查询门关联的设备的ID
         Door doorObj = doorMapper.findAllByDoorId(relateEmpPermissionCondition.get("doorId").toString());
-        //进行door_employee表数据的删除和添加
+        //TODO 维护door_employee表进行door_employee表数据的删除和添加
         maintainDoorEmployee(doorObj);
 
         if(relateEmpPermissionCondition.get("empName")!=null&&!relateEmpPermissionCondition.get("empName").toString().isEmpty()){
@@ -335,21 +335,36 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
                         //设置下发时间
                         maps.get(i).put("lasttime",commandList.get(0).get("send_time").toString());
                         //判断指令的条数
-                        if(commandList.size()==1){  //删除人员权限
-                            maps.get(i).put("status",commandList.get(0).get("status").toString());
+                        if(commandList.size()==1){
+                            //获取action_code
+                            String actionCode = commandList.get(0).get("action_code").toString();
+                            if(actionCode.equals("2002")){//删除人员权限
+                                maps.get(i).put("status",commandList.get(0).get("status").toString());
+                                //放置删除指令特有的标志位
+                                maps.get(i).put("isDelCommand","1");
+                            }
                         }
-                        if(commandList.size()==2){  //下发、更新人员权限
-                            String firstStatus = commandList.get(0).get("status").toString();
-                            String secondStatus = commandList.get(1).get("status").toString();
+                        if(commandList.size()==2){
+                            //获取actionCode
+                            String firstActionCode = commandList.get(0).get("action_code").toString();
+                            String secondActionCode = commandList.get(1).get("action_code").toString();
 
-                            if(firstStatus.equals("2") && secondStatus.equals("2")){
-                                maps.get(i).put("status","2");
-                            }else if(firstStatus.equals("0") || secondStatus.equals("0")){
-                                maps.get(i).put("status","0");
-                            }else if(firstStatus.equals("1") || secondStatus.equals("1")){
-                                maps.get(i).put("status","1");
-                            }else if(firstStatus.equals("3") || secondStatus.equals("3")){
-                                maps.get(i).put("status","3");
+                            if((firstActionCode.equals("2001") && secondActionCode.equals("3001"))
+                                    ||firstActionCode.equals("3001") && secondActionCode.equals("2001")){ //下发、更新人员权限
+                                String firstStatus = commandList.get(0).get("status").toString();
+                                String secondStatus = commandList.get(1).get("status").toString();
+
+                                if(firstStatus.equals("2") && secondStatus.equals("2")){
+                                    maps.get(i).put("status","2");
+                                }else if(firstStatus.equals("0") || secondStatus.equals("0")){
+                                    maps.get(i).put("status","0");
+                                }else if(firstStatus.equals("1") || secondStatus.equals("1")){
+                                    maps.get(i).put("status","1");
+                                }else if(firstStatus.equals("3") || secondStatus.equals("3")){
+                                    maps.get(i).put("status","3");
+                                }
+
+                                maps.get(i).put("isDelCommand","0");
                             }
                         }
                     }
@@ -358,7 +373,6 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         }
         return maps;
     }
-
     /**
      * TODO 维护doorEmployee表
      * 判断当前门关联的人员的最新的一条指令是哪个（删除、下发人员）

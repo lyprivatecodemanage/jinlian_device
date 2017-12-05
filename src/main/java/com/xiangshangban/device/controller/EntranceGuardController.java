@@ -367,6 +367,8 @@ public class EntranceGuardController {
 
         //定义指令的状态
         String[] cmdStatusStr = {"待发送","下发中","下发成功","下发失败","删除人员权限","已回复"};
+        //(自定义)删除指令的状态
+        String[] delStatusStr = {"待发送","删除中","删除成功","删除失败"};
         //定义开门方式
         String[] openTypeStr = {"卡","个人密码","卡+个人密码","指纹","人脸","手机蓝牙","手机NFC"};
 
@@ -397,21 +399,37 @@ public class EntranceGuardController {
         List<Map> maps = iegs.queryRelateEmpPermissionInfo(relateEmpPermissionCondition);
         //对查询出的数据根据最后下发时间进行排序
         List<DoorPermissionEmp> permissionEmps = new ArrayList<>();
-       if(maps!=null && maps.size()>0){
+        if(maps!=null && maps.size()>0){
            //将开门方式和命令状态由数字更改为文字信息
            for(int i=0;i<maps.size();i++){
-               Object statusStr = maps.get(i).get("status");
+               //先判断是哪种指令(下发、删除)
+               String commandType = maps.get(i).get("isDelCommand").toString();
                Object openDoorType = maps.get(i).get("range_door_open_type");
-               for(int s=0;s<cmdStatusStr.length;s++){
-                   if(statusStr==null){
-                       maps.get(i).put("status","");
-                       continue;
-                   }
-                   if(statusStr.toString().equals(String.valueOf(s))){
-                       maps.get(i).put("status",cmdStatusStr[s].toString());
+
+               if(commandType.equals("1")){ //删除指令（使用删除指令的状态）
+                   Object statusStr = maps.get(i).get("status");
+                   for(int s=0;s<delStatusStr.length;s++){
+                       if(statusStr==null){
+                           maps.get(i).put("status","");
+                           continue;
+                       }
+                       if(statusStr.toString().equals(String.valueOf(s))){
+                           maps.get(i).put("status",delStatusStr[s].toString());
+                       }
                    }
                }
-
+               if(commandType.equals("0")){ //下发指令（使用下发指令的状态）
+                   Object statusStr = maps.get(i).get("status");
+                   for(int s=0;s<cmdStatusStr.length;s++){
+                       if(statusStr==null){
+                           maps.get(i).put("status","");
+                           continue;
+                       }
+                       if(statusStr.toString().equals(String.valueOf(s))){
+                           maps.get(i).put("status",cmdStatusStr[s].toString());
+                       }
+                   }
+               }
                //TODO 转换打卡方式（包含组合打卡方式）
                if(openDoorType!=null){
                    StringBuffer buffer = new StringBuffer();

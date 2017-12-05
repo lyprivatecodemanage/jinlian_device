@@ -227,7 +227,7 @@
     FROM
     (
     SELECT
-    N.*, D.device_name
+    N.*, D.device_name,company_id
     FROM
     (
     SELECT
@@ -239,8 +239,7 @@
     record_date,
     door_id,
     B.employee_name,
-    employee_department_name,
-    employee_company_id
+    employee_department_name
     FROM
     door_record A
     LEFT JOIN employee_ B ON A .employee_id = B.employee_id
@@ -265,7 +264,7 @@
         and S.employee_department_name like #{doorRecordCondition.department}
       </if>
       <if test="doorRecordCondition.companyId!=null and doorRecordCondition.companyId!=''">
-        and S.employee_company_id = #{doorRecordCondition.companyId}
+        and S.company_id = #{doorRecordCondition.companyId}
       </if>
       <if test="doorRecordCondition.punchCardType!=null and doorRecordCondition.punchCardType!=''">
         and S.record_type = #{doorRecordCondition.punchCardType}
