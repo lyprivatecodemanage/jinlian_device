@@ -27,4 +27,11 @@ public interface DoorCalendarMapper {
      * @return
      */
     List<DoorCalendar> selectDoorCalendarInfo(@Param("doorId") String doorId);
+
+    /**
+     * 查询是否有这一条门禁日历数据
+     * @param doorCalendar
+     * @return
+     */
+    DoorCalendar selectDoorCalendarExist(DoorCalendar doorCalendar);
 }

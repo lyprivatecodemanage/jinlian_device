@@ -1,16 +1,14 @@
 package com.xiangshangban.device.service.impl;
 
-import com.aliyun.oss.model.PutObjectResult;
+import com.xiangshangban.device.bean.OSSFile;
 import com.xiangshangban.device.common.utils.DateUtils;
+import com.xiangshangban.device.common.utils.OSSFileUtil;
+import com.xiangshangban.device.common.utils.PropertiesUtils;
 import com.xiangshangban.device.dao.ImagesMapper;
 import com.xiangshangban.device.dao.OSSFileMapper;
 import com.xiangshangban.device.service.OSSFileService;
-import com.xiangshangban.device.bean.OSSFile;
-import com.xiangshangban.device.common.utils.OSSFileUtil;
-import com.xiangshangban.device.common.utils.PropertiesUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;

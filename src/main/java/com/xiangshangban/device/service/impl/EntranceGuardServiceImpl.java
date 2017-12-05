@@ -398,7 +398,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         }
     }
 
-    //门禁配置---功能配置（身份验证失败次数、非法入侵、报警时长、密码、开门事件记录）
+    //门禁配置---功能配置（身份验证失败次数、非法入侵、报警时长、密码、开门事件记录，定时常开）
     @Override
     public void doorCommonSetupAdditional(String doorId, String countLimitAuthenticationFailed, String enableAlarm,
                                           String alarmTimeLength, String publicPassword1, String publicPassword2, String threatenPassword,
@@ -438,7 +438,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
 
         //判断某个门的定时常开时间区间信息是否存在
         List<DoorTimingKeepOpen> doorTimingKeepOpenList = doorTimingKeepOpenMapper.selectExistByDoorId(doorId);
-        if (doorTimingKeepOpenList != null){
+        if (doorTimingKeepOpenList.size() > 0){
             //有信息存在则删除该门的所有定时常开时间区间信息然后后面的时候重新添加
             doorTimingKeepOpenMapper.deleteByPrimaryKey(doorId);
         }
@@ -451,19 +451,21 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
                 String weekType = oneWeekTimeMap.get("weekType");
                 String startTime = oneWeekTimeMap.get("startTime");
                 String endTime = oneWeekTimeMap.get("endTime");
+                String isAllDay = oneWeekTimeMap.get("isAllDay");
+                String isDitto = oneWeekTimeMap.get("isDitto");
 
                 DoorTimingKeepOpen doorTimingKeepOpen = new DoorTimingKeepOpen();
                 doorTimingKeepOpen.setDoorId(doorId);
                 doorTimingKeepOpen.setDayOfWeek(weekType);
                 doorTimingKeepOpen.setTimingOpenStartTime(startTime);
                 doorTimingKeepOpen.setTimingOpenEndTime(endTime);
+                doorTimingKeepOpen.setIsAllDay(isAllDay);
+                doorTimingKeepOpen.setIsDitto(isDitto);
 
                 //更新门禁定时常开时间段
                 doorTimingKeepOpenMapper.insertSelective(doorTimingKeepOpen);
-
             }
         }
-
 
         //下发的门禁配置DATA数据结构
         Map<String, Object> doorSetupMap = new LinkedHashMap<String, Object>();
@@ -544,11 +546,11 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
             doorSettingMapper.updateByPrimaryKeySelective(doorSetting);
         }
 
-        ////遍历人员
+        //遍历人员
         for (String employeeId : employeeIdList) {
 
             //判断某个人的首卡常开时间区间信息是否存在
-            List<TimeRangePrivilegeEmployee> timeRangePrivilegeEmployeeList = timeRangePrivilegeEmployeeMapper.selectExitByEmployeeId(doorId);
+            List<TimeRangePrivilegeEmployee> timeRangePrivilegeEmployeeList = timeRangePrivilegeEmployeeMapper.selectExitByEmployeeId(employeeId);
             if (timeRangePrivilegeEmployeeList != null){
                 //有信息存在则删除该人的所有首卡常开时间区间信息然后后面的时候重新添加
                 timeRangePrivilegeEmployeeMapper.deleteByEmployeeId(employeeId);
@@ -559,28 +561,50 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
 
                 List<Map<String, String>> oneWeekTimeCollection = (List<Map<String, String>>) oneWeekTimeFirstCardList;
                 for (Map<String, String> oneWeekTimeMap : oneWeekTimeCollection) {
-                    String weekType = oneWeekTimeMap.get("weekType");
                     String startTime = oneWeekTimeMap.get("startTime");
                     String endTime = oneWeekTimeMap.get("endTime");
-                    String doorOpenType = oneWeekTimeMap.get("doorOpenType");
+                    String startWeekNumber = oneWeekTimeMap.get("startWeekNumber");
+                    String endWeekNumber = oneWeekTimeMap.get("endWeekNumber");
 
                     TimeRangePrivilegeEmployee timeRangePrivilegeEmployee = new TimeRangePrivilegeEmployee();
                     timeRangePrivilegeEmployee.setEmployeeId(employeeId);
                     timeRangePrivilegeEmployee.setDoorId(doorId);
-                    timeRangePrivilegeEmployee.setDayOfWeek(weekType);
                     timeRangePrivilegeEmployee.setRangeStartTime(startTime);
                     timeRangePrivilegeEmployee.setRangeEndTime(endTime);
-                    timeRangePrivilegeEmployee.setRangeDoorOpenType(doorOpenType);
+                    timeRangePrivilegeEmployee.setStartWeekNumber(startWeekNumber);
+                    timeRangePrivilegeEmployee.setEndWeekNumber(endWeekNumber);
                     timeRangePrivilegeEmployee.setRangeFlagId(FormatUtil.createUuid());
 
                     //更新首卡常开时间段
                     timeRangePrivilegeEmployeeMapper.insertSelective(timeRangePrivilegeEmployee);
-
                 }
             }
-
         }
-        
+
+        //重新组装数据（发给设备的格式）
+        List oneWeekTimeFirstCardListTemp = new ArrayList<>();
+        for (int i=0; i<oneWeekTimeFirstCardList.size(); i++) {
+            String startTime = ((List<Map<String, String>>) oneWeekTimeFirstCardList).get(i).get("startTime");
+            String endTime = ((List<Map<String, String>>) oneWeekTimeFirstCardList).get(i).get("endTime");
+            String startWeekString = ((List<Map<String, String>>) oneWeekTimeFirstCardList).get(i).get("startWeekNumber");
+            String endWeekString = ((List<Map<String, String>>) oneWeekTimeFirstCardList).get(i).get("endWeekNumber");
+            int startWeekNumber = Integer.parseInt(startWeekString);
+            int endWeekNumber = Integer.parseInt(endWeekString);
+
+            for (int j=0; j<(endWeekNumber-startWeekNumber+1); j++){
+                Map<String, String> oneWeekTimeFirstCardMap = new HashMap<String, String>();
+
+                oneWeekTimeFirstCardMap.put("weekType", String.valueOf((startWeekNumber + j)));
+                oneWeekTimeFirstCardMap.put("startTime", startTime);
+                oneWeekTimeFirstCardMap.put("endTime", endTime);
+                oneWeekTimeFirstCardMap.put("doorOpenType", "");
+
+                oneWeekTimeFirstCardListTemp.add(oneWeekTimeFirstCardMap);
+            }
+        }
+
+        System.out.println(JSON.toJSONString(oneWeekTimeFirstCardListTemp));
+
         //下发的门禁配置DATA数据结构
         Map<String, Object> firstCardSetupMap = new LinkedHashMap<String, Object>();
         firstCardSetupMap.put("employeeIdList", employeeIdList);
@@ -607,7 +631,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
 
         //获取完整的数据加协议封装格式
         RabbitMQSender rabbitMQSender = new RabbitMQSender();
-        Map<String, Object> userInformationAll =  rabbitMQSender.messagePackaging(doorCmdEmployeeInformation, "firstCardKeepDoorOpen", firstCardSetupMap, "C");
+        Map<String, Object> userInformationAll =  rabbitMQSender.messagePackaging(doorCmdEmployeeInformation, "firstCardKeepDoorOpen", oneWeekTimeFirstCardListTemp, "C");
         //命令状态设置为: 发送中
         doorCmdEmployeeInformation.setStatus("1");
         //设置md5校验值
@@ -644,14 +668,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
             doorSettingMapper.updateByPrimaryKeySelective(doorSetting);
         }
 
-        //判断某个门的门禁日历信息是否存在
-        List<DoorCalendar> doorCalendarList = doorCalendarMapper.selectByPrimaryKey(doorId);
-        if (doorCalendarList != null) {
-            //有信息存在则删除该门的所有门禁日历信息然后后面的时候重新添加
-            doorCalendarMapper.deleteByPrimaryKey(doorId);
-        }
-
-        //首卡常开时间判断及存入数据库
+        //门禁日历时间判断及存入数据库
         if (accessCalendar.size() > 0) {
 
             List<Map<String, String>> accessCalendarCollection = (List<Map<String, String>>) accessCalendar;
@@ -664,9 +681,14 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
                 doorCalendar.setCalendarDate(deviceCalendarDate);
                 doorCalendar.setWeatherOpenDoor(enableDoorOpenGlobal);
 
-                //更新门禁定时常开时间段
-                doorCalendarMapper.insertSelective(doorCalendar);
+                DoorCalendar doorCalendarExist = doorCalendarMapper.selectDoorCalendarExist(doorCalendar);
 
+                if (doorCalendarExist == null){
+                    //更新门禁定时常开时间段
+                    doorCalendarMapper.insertSelective(doorCalendar);
+                }else {
+                    doorCalendarMapper.updateByPrimaryKeySelective(doorCalendar);
+                }
             }
         }
 

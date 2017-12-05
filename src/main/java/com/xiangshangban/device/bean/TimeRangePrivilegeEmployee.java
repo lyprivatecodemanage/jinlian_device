@@ -3,8 +3,6 @@ package com.xiangshangban.device.bean;
 public class TimeRangePrivilegeEmployee {
     private String employeeId;
 
-    private String dayOfWeek;
-
     private String rangeStartTime;
 
     private String rangeEndTime;
@@ -15,20 +13,16 @@ public class TimeRangePrivilegeEmployee {
 
     private String doorId;
 
+    private String startWeekNumber;
+
+    private String endWeekNumber;
+
     public String getEmployeeId() {
         return employeeId;
     }
 
     public void setEmployeeId(String employeeId) {
         this.employeeId = employeeId;
-    }
-
-    public String getDayOfWeek() {
-        return dayOfWeek;
-    }
-
-    public void setDayOfWeek(String dayOfWeek) {
-        this.dayOfWeek = dayOfWeek;
     }
 
     public String getRangeStartTime() {
@@ -69,5 +63,21 @@ public class TimeRangePrivilegeEmployee {
 
     public void setDoorId(String doorId) {
         this.doorId = doorId;
+    }
+
+    public String getStartWeekNumber() {
+        return startWeekNumber;
+    }
+
+    public void setStartWeekNumber(String startWeekNumber) {
+        this.startWeekNumber = startWeekNumber;
+    }
+
+    public String getEndWeekNumber() {
+        return endWeekNumber;
+    }
+
+    public void setEndWeekNumber(String endWeekNumber) {
+        this.endWeekNumber = endWeekNumber;
     }
 }

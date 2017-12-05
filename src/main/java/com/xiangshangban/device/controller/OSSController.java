@@ -86,7 +86,7 @@ public class OSSController {
 	}
 
 	/**
-	 * 设备上传系统升级包或应用升级包专用接口
+	 * 设备上传应用升级包、警报图片及其它未知文件专用接口
 	 * @param file
 	 * @param fileType
 	 * @param appVersion
@@ -210,8 +210,75 @@ public class OSSController {
 					"其它文件第二个参数需要输入other，请重新输入";
 
 		}
-
 		return ossFile;
+	}
+
+	/**
+	 * 设备上传系统升级包文件专用接口
+	 * @param file1
+	 * @param file2
+	 * @return
+	 */
+	@Transactional
+	@RequestMapping(value = "/deviceOssUpdateSys",method= RequestMethod.POST)
+	public String deviceOssUpdateSys(@RequestParam(value="file1") MultipartFile file1,
+									 @RequestParam(value="file2") MultipartFile file2){
+
+		String funcDirectory = "";
+		String ossFile1 = "";
+		String ossFile2 = "";
+		String time = CalendarUtil.getCurrentTime();
+
+		//系统升级的文件放在这个文件夹下
+		funcDirectory = "device/update/system/" + time;
+
+		if (null != file1 && null != file2){
+			try {
+				//上传系统文件1
+				ossFile1 = appUpload(file1, "", funcDirectory);
+				//提取文件上传返回的数据
+				Map<String, String> ossFileResultMap1 = net.sf.json.JSONObject.fromObject(ossFile1);
+				String key1 = ossFileResultMap1.get("key");
+				String name1 = ossFileResultMap1.get("name");
+				String path1 = ossFileResultMap1.get("path");
+
+				DeviceUpdatePackSys deviceUpdatePackSys1 = new DeviceUpdatePackSys();
+				deviceUpdatePackSys1.setNewSysVerion(name1);
+				deviceUpdatePackSys1.setPath(path1);
+				deviceUpdatePackSys1.setCreateTime(time);
+				deviceUpdatePackSys1.setFileKey(key1);
+
+				//保存系统文件的信息到系统升级包信息表里
+				deviceUpdatePackSysMapper.insertSelective(deviceUpdatePackSys1);
+
+				/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+				//上传系统文件2
+				ossFile2 = appUpload(file2, "", funcDirectory);
+				//提取文件上传返回的数据
+				Map<String, String> ossFileResultMap2 = net.sf.json.JSONObject.fromObject(ossFile2);
+				String key2 = ossFileResultMap2.get("key");
+				String name2 = ossFileResultMap2.get("name");
+				String path2 = ossFileResultMap2.get("path");
+
+				DeviceUpdatePackSys deviceUpdatePackSys2 = new DeviceUpdatePackSys();
+				deviceUpdatePackSys2.setNewSysVerion(name2);
+				deviceUpdatePackSys2.setPath(path2);
+				deviceUpdatePackSys2.setCreateTime(time);
+				deviceUpdatePackSys2.setFileKey(key2);
+
+				//保存系统文件的信息到系统升级包信息表里
+				deviceUpdatePackSysMapper.insertSelective(deviceUpdatePackSys2);
+
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.out.println("上传系统升级包文件异常");
+			}
+		}else {
+			ossFile1 = "文件不能为空";
+		}
+
+		return ossFile1+"\n"+ossFile2;
 	}
 
 	// List里面的多个对象根据某个字段的值进行比较排序

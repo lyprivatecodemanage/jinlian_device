@@ -22,5 +22,5 @@ public interface DeviceUpdatePackSysMapper {
     /**
      * 非自动生成方法
      */
-    List<DeviceUpdatePackSys> selectAllByCreateTimeDesc();
+    List<DeviceUpdatePackSys> selectAllByLatestTime();
 }

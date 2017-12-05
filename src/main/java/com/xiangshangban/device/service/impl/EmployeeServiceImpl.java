@@ -77,7 +77,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
                 String departmentName = (String) employeeInfoMap.get("departmentName");
                 String entryTime = (String) employeeInfoMap.get("entryTime");
                 String probationaryExpired = (String) employeeInfoMap.get("probationaryExpired");
-                String employeePhone = (String) employeeInfoMap.get("employeePhone");
+                String employeePhone = (String) employeeInfoMap.get("loginName");
                 String employeeStatus = (String) employeeInfoMap.get("employeeStatus");
                 String companyId = (String) employeeInfoMap.get("companyId");
                 String companyName = (String) employeeInfoMap.get("companyName");
@@ -387,7 +387,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
                 }
 
                 returnData.setMessage("已执行删除设备上人员权限的操作");
-                returnData.setReturnCode("3000");
+                returnData.setReturnCode("4202");
                 return returnData;
 
             }catch (Exception e){

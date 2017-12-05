@@ -8,13 +8,8 @@ import com.github.pagehelper.PageHelper;
 import com.xiangshangban.device.bean.*;
 import com.xiangshangban.device.common.encode.MD5Util;
 import com.xiangshangban.device.common.rmq.RabbitMQSender;
-import com.xiangshangban.device.common.utils.CalendarUtil;
-import com.xiangshangban.device.common.utils.DateUtils;
-import com.xiangshangban.device.common.utils.FormatUtil;
-import com.xiangshangban.device.common.utils.ReturnCodeUtil;
 import com.xiangshangban.device.common.utils.*;
 import com.xiangshangban.device.dao.DoorMapper;
-import com.xiangshangban.device.common.utils.PageUtils;
 import com.xiangshangban.device.dao.DoorRecordMapper;
 import com.xiangshangban.device.dao.EmployeeMapper;
 import com.xiangshangban.device.dao.OSSFileMapper;
@@ -655,62 +650,68 @@ public class EntranceGuardController {
 
          /**测试数据
          *
-         {
-         "doorId": "001",
-         "loginEmployeeId": "897020EA96214392B28369F2B421E319",
-         "countLimitAuthenticationFailed": "5",
-         "enableAlarm": "0",
-         "alarmTimeLength": "60",
-         "publicPassword1": "110",
-         "publicPassword2": "120",
-         "threatenPassword": "130",
-         "deviceManagePassword": "18649866",
-         "enableDoorOpenRecord": "0",
-         "enableDoorKeepOpen": "1",
-         "enableFirstCardKeepOpen": "1",
-         "enableDoorCalendar": "1",
-         "employeeIdList": [
-         "897020EA96214392B28369F2B421E319",
-         "9C305EC5587745FF9F0D8198512264D6"
-         ],
-         "oneWeekTimeDoorKeepList": [
-         {
-         "weekType": "3",
-         "startTime": "08:00",
-         "endTime": "12:02"
-         },
-         {
-         "weekType": "3",
-         "startTime": "14:00",
-         "endTime": "18:10"
-         }
-         ],
-         "oneWeekTimeFirstCardList": [
-         {
-         "weekType": "4",
-         "startTime": "08:00",
-         "endTime": "12:02",
-         "doorOpenType": "234"
-         },
-         {
-         "weekType": "4",
-         "startTime": "14:00",
-         "endTime": "18:10",
-         "doorOpenType": "234"
-         }
-         ],
-         "accessCalendarList": [
-         {
-         "deviceCalendarDate": "2017-10-10",
-         "enableDoorOpenGlobal": "0"
-         },
-         {
-         "deviceCalendarDate": "2017-10-12",
-         "enableDoorOpenGlobal": "1"
-         }
-         ]
-         }
+          {
+          "doorId": "001",
+          "loginEmployeeId": "897020EA96214392B28369F2B421E319",
+          "countLimitAuthenticationFailed": "5",
+          "enableAlarm": "0",
+          "alarmTimeLength": "60",
+          "publicPassword1": "110",
+          "publicPassword2": "120",
+          "threatenPassword": "130",
+          "deviceManagePassword": "18649866",
+          "enableDoorOpenRecord": "0",
+          "enableDoorKeepOpen": "1",
+          "enableFirstCardKeepOpen": "1",
+          "enableDoorCalendar": "1",
+          "employeeIdList": [
+          "897020EA96214392B28369F2B421E319",
+          "9C305EC5587745FF9F0D8198512264D6"
+          ],
+          "oneWeekTimeDoorKeepList": [
+          {
+          "isAllDay": "1",
+          "weekType": "3",
+          "startTime": "08:00",
+          "endTime": "12:02",
+          "isDitto": "1"
+          },
+          {
+          "isAllDay": "1",
+          "weekType": "3",
+          "startTime": "14:00",
+          "endTime": "18:10",
+          "isDitto": "1"
+          }
+          ],
+          "oneWeekTimeFirstCardList": [
+          {
+          "startTime": "08:00",
+          "endTime": "12:02",
+          "startWeekNumber": "1",
+          "endWeekNumber": "7"
+          },
+          {
+          "startTime": "13:00",
+          "endTime": "16:00",
+          "startWeekNumber": "1",
+          "endWeekNumber": "7"
+          }
+          ],
+          "accessCalendarList": [
+          {
+          "deviceCalendarDate": "2017-10-10",
+          "enableDoorOpenGlobal": "0"
+          },
+          {
+          "deviceCalendarDate": "2017-10-12",
+          "enableDoorOpenGlobal": "1"
+          }
+          ]
+          }
          */
+
+        System.out.println("doorFeaturesSetup: "+doorFeaturesSetup);
 
         //解析数据
         Map<String, Object> setupMap = (Map<String, Object>)net.sf.json.JSONObject.fromObject(doorFeaturesSetup);
@@ -828,7 +829,7 @@ public class EntranceGuardController {
         }
 
         try {
-            //下发门禁配置---功能配置（密码、开门事件记录）
+            //下发门禁配置---功能配置（密码、开门事件记录，定时常开）
             iegs.doorCommonSetupAdditional(doorId, countLimitAuthenticationFailed, enableAlarm,
                     alarmTimeLength, publicPassword1, publicPassword2, threatenPassword,
                     deviceManagePassword, enableDoorOpenRecord, oneWeekTimeDoorKeepList,
@@ -1013,6 +1014,7 @@ public class EntranceGuardController {
                                                         @RequestParam(value="file") MultipartFile file){
 
         System.out.println("门禁记录id = "+id);
+        System.out.println("fileName******: "+file.getOriginalFilename());
 
         //回复设备
         Map<String, Object> resultData = new LinkedHashMap<String, Object>();
@@ -1056,7 +1058,7 @@ public class EntranceGuardController {
                 resultMessage = "上传的警报记录图片【"+key+"】没有与之匹配的记录id";
                 resultData.put("resultCode", resultCode);
                 resultData.put("resultMessage", resultMessage);
-                resultData.put("returnObj", "");
+                resultData.put("returnObj", new ArrayList<>());
             }
 
         }else {
@@ -1066,7 +1068,7 @@ public class EntranceGuardController {
             resultMessage = "上传的警报记录图片【"+file.getOriginalFilename()+"】已存在";
             resultData.put("resultCode", resultCode);
             resultData.put("resultMessage", resultMessage);
-            resultData.put("returnObj", "");
+            resultData.put("returnObj", new ArrayList<>());
         }
 
         //构造命令格式

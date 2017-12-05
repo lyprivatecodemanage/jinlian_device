@@ -9,6 +9,10 @@ public class DoorTimingKeepOpen {
 
     private String timingOpenEndTime;
 
+    private String isAllDay;
+
+    private String isDitto;
+
     public String getDoorId() {
         return doorId;
     }
@@ -39,5 +43,21 @@ public class DoorTimingKeepOpen {
 
     public void setTimingOpenEndTime(String timingOpenEndTime) {
         this.timingOpenEndTime = timingOpenEndTime;
+    }
+
+    public String getIsAllDay() {
+        return isAllDay;
+    }
+
+    public void setIsAllDay(String isAllDay) {
+        this.isAllDay = isAllDay;
+    }
+
+    public String getIsDitto() {
+        return isDitto;
+    }
+
+    public void setIsDitto(String isDitto) {
+        this.isDitto = isDitto;
     }
 }

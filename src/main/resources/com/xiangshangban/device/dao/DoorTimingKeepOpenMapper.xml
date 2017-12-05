@@ -6,9 +6,11 @@
     <result column="day_of_week" property="dayOfWeek" jdbcType="VARCHAR" />
     <result column="timing_open_start_time" property="timingOpenStartTime" jdbcType="VARCHAR" />
     <result column="timing_open_end_time" property="timingOpenEndTime" jdbcType="VARCHAR" />
+    <result column="is_all_day" property="isAllDay" jdbcType="VARCHAR" />
+    <result column="is_ditto" property="isDitto" jdbcType="VARCHAR" />
   </resultMap>
   <sql id="Base_Column_List" >
-    door_id, day_of_week, timing_open_start_time, timing_open_end_time
+    door_id, day_of_week, timing_open_start_time, timing_open_end_time, is_all_day, is_ditto
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
     select 
@@ -20,45 +22,57 @@
     delete from door_timing_keep_open
     where door_id = #{doorId,jdbcType=VARCHAR}
   </delete>
-  <insert id="insert" parameterType="com.xiangshangban.device.bean.DoorTimingKeepOpen">
-    insert into door_timing_keep_open (door_id, day_of_week, timing_open_start_time,
-      timing_open_end_time)
+  <insert id="insert" parameterType="com.xiangshangban.device.bean.DoorTimingKeepOpen" >
+    insert into door_timing_keep_open (door_id, day_of_week, timing_open_start_time, 
+      timing_open_end_time, is_all_day, is_ditto
+      )
     values (#{doorId,jdbcType=VARCHAR}, #{dayOfWeek,jdbcType=VARCHAR}, #{timingOpenStartTime,jdbcType=VARCHAR}, 
-      #{timingOpenEndTime,jdbcType=VARCHAR})
+      #{timingOpenEndTime,jdbcType=VARCHAR}, #{isAllDay,jdbcType=VARCHAR}, #{isDitto,jdbcType=VARCHAR}
+      )
   </insert>
-
-  <insert id="insertSelective" parameterType="com.xiangshangban.device.bean.DoorTimingKeepOpen">
+  <insert id="insertSelective" parameterType="com.xiangshangban.device.bean.DoorTimingKeepOpen" >
     insert into door_timing_keep_open
-    <trim prefix="(" suffix=")" suffixOverrides=",">
-      <if test="doorId != null">
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="doorId != null" >
         door_id,
       </if>
-      <if test="dayOfWeek != null">
+      <if test="dayOfWeek != null" >
         day_of_week,
       </if>
-      <if test="timingOpenStartTime != null">
+      <if test="timingOpenStartTime != null" >
         timing_open_start_time,
       </if>
-      <if test="timingOpenEndTime != null">
+      <if test="timingOpenEndTime != null" >
         timing_open_end_time,
       </if>
+      <if test="isAllDay != null" >
+        is_all_day,
+      </if>
+      <if test="isDitto != null" >
+        is_ditto,
+      </if>
     </trim>
-    <trim prefix="values (" suffix=")" suffixOverrides=",">
-      <if test="doorId != null">
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="doorId != null" >
         #{doorId,jdbcType=VARCHAR},
       </if>
-      <if test="dayOfWeek != null">
+      <if test="dayOfWeek != null" >
         #{dayOfWeek,jdbcType=VARCHAR},
       </if>
-      <if test="timingOpenStartTime != null">
+      <if test="timingOpenStartTime != null" >
         #{timingOpenStartTime,jdbcType=VARCHAR},
       </if>
-      <if test="timingOpenEndTime != null">
+      <if test="timingOpenEndTime != null" >
         #{timingOpenEndTime,jdbcType=VARCHAR},
+      </if>
+      <if test="isAllDay != null" >
+        #{isAllDay,jdbcType=VARCHAR},
+      </if>
+      <if test="isDitto != null" >
+        #{isDitto,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
-
   <update id="updateByPrimaryKeySelective" parameterType="com.xiangshangban.device.bean.DoorTimingKeepOpen" >
     update door_timing_keep_open
     <set >
@@ -71,6 +85,12 @@
       <if test="timingOpenEndTime != null" >
         timing_open_end_time = #{timingOpenEndTime,jdbcType=VARCHAR},
       </if>
+      <if test="isAllDay != null" >
+        is_all_day = #{isAllDay,jdbcType=VARCHAR},
+      </if>
+      <if test="isDitto != null" >
+        is_ditto = #{isDitto,jdbcType=VARCHAR},
+      </if>
     </set>
     where door_id = #{doorId,jdbcType=VARCHAR}
   </update>
@@ -78,9 +98,13 @@
     update door_timing_keep_open
     set day_of_week = #{dayOfWeek,jdbcType=VARCHAR},
       timing_open_start_time = #{timingOpenStartTime,jdbcType=VARCHAR},
-      timing_open_end_time = #{timingOpenEndTime,jdbcType=VARCHAR}
+      timing_open_end_time = #{timingOpenEndTime,jdbcType=VARCHAR},
+      is_all_day = #{isAllDay,jdbcType=VARCHAR},
+      is_ditto = #{isDitto,jdbcType=VARCHAR}
     where door_id = #{doorId,jdbcType=VARCHAR}
   </update>
+
+  <!--非自动生成-->
 
   <select id="selectExistByDoorId" resultMap="BaseResultMap" parameterType="java.lang.String" >
     select

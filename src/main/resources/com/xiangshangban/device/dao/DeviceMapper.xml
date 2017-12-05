@@ -129,7 +129,7 @@
   </insert>
   <update id="updateByPrimaryKeySelective" parameterType="com.xiangshangban.device.bean.Device" >
     update device_
-    <set >
+    <set>
       <if test="deviceName != null" >
         device_name = #{deviceName,jdbcType=VARCHAR},
       </if>
@@ -281,24 +281,46 @@
   <!--根据设备id查询该设备上传的最新的一条重启记录带上来的所有版本信息-->
   <select id="selectAllVersionInfoByDeviceId" parameterType="java.lang.String" resultType="java.util.Map">
     SELECT
-    rv.name,rv.value
+	A .*, B."name",
+	b."value"
     FROM
-    (
-    SELECT
-    T .reboot_id
-    FROM
-    (
-    SELECT
-    r.*, "row_number" () OVER (ORDER BY r.reboot_time DESC) rn
-    FROM
-    device_reboot_record r
+	device_reboot_record A
+    LEFT JOIN device_reboot_record_version b ON A .reboot_id = b.reboot_id
     WHERE
-    r.device_id = #{deviceId,jdbcType=VARCHAR}
-    ) T
-    WHERE
-    T .rn = 1
-    ) x
-    LEFT JOIN device_reboot_record_version rv ON (x.reboot_id = rv.reboot_id)
+	b."name" IN (
+		'characUuid',
+		'serviceUuid',
+		'major',
+		'minor',
+		'ibeaconUuid',
+		'bleModeMacaddr'
+	)
+    AND reboot_time = (
+	SELECT
+		MAX (T1.reboot_time)
+	FROM
+		(
+			SELECT
+				A .*, B."name",
+				b."value"
+			FROM
+				device_reboot_record A
+			LEFT JOIN device_reboot_record_version b ON A .reboot_id = b.reboot_id
+			WHERE
+				b."name" IN (
+					'characUuid',
+					'serviceUuid',
+					'major',
+					'minor',
+					'ibeaconUuid',
+					'bleModeMacaddr'
+				)
+			ORDER BY
+				reboot_time DESC
+		) T1
+	WHERE
+		T1.device_id = #{deviceId,jdbcType=VARCHAR}
+  )
   </select>
 
   <!--查出所有的设备的信息-->

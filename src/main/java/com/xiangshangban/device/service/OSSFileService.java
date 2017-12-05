@@ -15,7 +15,7 @@ public interface OSSFileService {
 	 * @return
 	 */
 	public OSSFile addOSSFile(String customerId, String directory, MultipartFile file);
-	
+
 	/**
 	 * 自动上传
 	 * @param customerId

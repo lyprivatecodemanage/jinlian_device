@@ -16,9 +16,8 @@ public interface IDeviceService {
     /**
      * 平台新增设备
      * @param deviceId
-     * @param macAddress
      */
-    String addDevice(String deviceId, String macAddress);
+    String addDevice(String deviceId);
 
     /**
      * 查找当前公司的设备信息(包括筛选功能，无参传入查询全部设备)
@@ -31,18 +30,6 @@ public interface IDeviceService {
      */
     List<Map<String, String>> findDeviceInformation(String companyId, String companyName, String deviceName,
                                                     String deviceId, String  isOnline, String activeStatus);
-
-    /**
-     * 平台管理员编辑当前设备的信息
-     * @param deviceId
-     * @param companyId
-     * @param deviceName
-     * @param devicePlace
-     * @param deviceUsages
-     * @return
-     */
-    void editorDeviceInformation(String deviceId, String companyId, String companyName, String deviceName,
-                                String devicePlace, String deviceUsages);
 
     /**
      * 下发重启命令，重启指定的设备

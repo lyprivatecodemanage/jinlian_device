@@ -192,6 +192,12 @@ public class EmployeeController {
 
             //提取门信息
             String doorId = (String) employeePermissionMap.get("doorId");
+            if (null == doorId){
+                System.out.println("必传参数字段不存在");
+                returnData.setMessage("必传参数字段不存在");
+                returnData.setReturnCode("3006");
+                return returnData;
+            }
             String doorName = (String) employeePermissionMap.get("doorName");
             List<Map<String, String>> employeeList = (List<Map<String,String>>) employeePermissionMap.get("employeeList");
 
@@ -228,62 +234,6 @@ public class EmployeeController {
 
             //遍历人员
             for (Map<String, String> employeeMap : employeeList) {
-
-//                System.out.println("employeeId = " + employeeMap.get("employeeId"));
-//
-//                Map<String, Object> httpData = new HashMap<String, Object>();
-//                httpData.put("employeeId", employeeMap.get("employeeId"));
-//
-//                /**
-//                 * 下发选定的人员的基本信息
-//                 */
-//                //根据人员id请求单个人员信息
-//                String employeeInfo = HttpRequestFactory.sendRequet(employeeInterfaceAddress, httpData);
-//                System.out.println("[*] HTTP send: 已发出请求");
-//                System.out.println("[*] employeeInfo: " + employeeInfo);
-//
-//                Map<String, String> employeeInfoMap = new HashMap<String, String>();
-//
-//                //取出需要的人员信息
-//                try {
-//                    employeeInfoMap = (Map<String, String>)JSONObject.fromObject(employeeInfo).get("data");
-//                }catch (Exception e){
-//                    System.out.println("人员模块不在线!");
-//                }
-//                String employeeId = employeeInfoMap.get("employeeId");
-//                String employeeNo = employeeInfoMap.get("employeeNo");
-//                String employeeName = employeeInfoMap.get("employeeName");
-//                String departmentId = employeeInfoMap.get("departmentId");
-//                String departmentName = employeeInfoMap.get("departmentName");
-//                String entryTime = employeeInfoMap.get("entryTime");
-//                String probationaryExpired = employeeInfoMap.get("probationaryExpired");
-//                String employeePhone = employeeInfoMap.get("employeePhone");
-//                String employeeStatus = employeeInfoMap.get("employeeStatus");
-//                String companyId = employeeInfoMap.get("companyId");
-//                String companyName = employeeInfoMap.get("companyName");
-//
-//                //增加人员信息到本地人员表
-//                Employee employee = new Employee();
-//                employee.setEmployeeId(employeeId);
-//                employee.setEmployeeNumber(employeeNo);
-//                employee.setEmployeeName(employeeName);
-//                employee.setEmployeeDepartmentId(departmentId);
-//                employee.setEmployeeDepartmentName(departmentName);
-//                employee.setEmployeeEntryTime(entryTime);
-//                employee.setEmployeeProbationaryExpired(probationaryExpired);
-//                employee.setEmployeePhone(employeePhone);
-//                employee.setEmployeeStatus(employeeStatus);
-//                employee.setUpdateTime(DateUtils.getDateTime());
-//                employee.setEmployeeCompanyId(companyId);
-//                employee.setEmployeeCompanyName(companyName);
-//
-//                //查询人员信息是否存在
-//                Employee employeeExit = employeeMapper.selectByPrimaryKey(employeeId);
-//                if (employeeExit == null){
-//                    employeeMapper.insertSelective(employee);
-//                }else {
-//                    employeeMapper.updateByPrimaryKeySelective(employee);
-//                }
 
                 //从本地查人员信息
                 Employee employeeLocal = employeeMapper.selectByPrimaryKey(employeeMap.get("employeeId"));

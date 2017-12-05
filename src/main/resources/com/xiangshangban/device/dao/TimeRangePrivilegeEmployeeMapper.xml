@@ -3,17 +3,17 @@
 <mapper namespace="com.xiangshangban.device.dao.TimeRangePrivilegeEmployeeMapper" >
   <resultMap id="BaseResultMap" type="com.xiangshangban.device.bean.TimeRangePrivilegeEmployee" >
     <id column="employee_id" property="employeeId" jdbcType="VARCHAR" />
-    <result column="employee_id" property="employeeId" jdbcType="VARCHAR" />
-    <result column="day_of_week" property="dayOfWeek" jdbcType="VARCHAR" />
     <result column="range_start_time" property="rangeStartTime" jdbcType="VARCHAR" />
     <result column="range_end_time" property="rangeEndTime" jdbcType="VARCHAR" />
     <result column="range_door_open_type" property="rangeDoorOpenType" jdbcType="VARCHAR" />
     <result column="range_flag_id" property="rangeFlagId" jdbcType="VARCHAR" />
     <result column="door_id" property="doorId" jdbcType="VARCHAR" />
+    <result column="start_week_number" property="startWeekNumber" jdbcType="VARCHAR" />
+    <result column="end_week_number" property="endWeekNumber" jdbcType="VARCHAR" />
   </resultMap>
   <sql id="Base_Column_List" >
-    employee_id, day_of_week, range_start_time, range_end_time, range_door_open_type, 
-    range_flag_id, door_id
+    employee_id, range_start_time, range_end_time, range_door_open_type, range_flag_id, 
+    door_id, start_week_number, end_week_number
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
     select 
@@ -26,21 +26,18 @@
     where employee_id = #{employeeId,jdbcType=VARCHAR}
   </delete>
   <insert id="insert" parameterType="com.xiangshangban.device.bean.TimeRangePrivilegeEmployee" >
-    insert into time_range_privilege_employee (employee_id, day_of_week, range_start_time, 
-      range_end_time, range_door_open_type, range_flag_id, 
-      door_id)
-    values (#{employeeId,jdbcType=VARCHAR}, #{dayOfWeek,jdbcType=VARCHAR}, #{rangeStartTime,jdbcType=VARCHAR}, 
-      #{rangeEndTime,jdbcType=VARCHAR}, #{rangeDoorOpenType,jdbcType=VARCHAR}, #{rangeFlagId,jdbcType=VARCHAR}, 
-      #{doorId,jdbcType=VARCHAR})
+    insert into time_range_privilege_employee (employee_id, range_start_time, range_end_time, 
+      range_door_open_type, range_flag_id, door_id, 
+      start_week_number, end_week_number)
+    values (#{employeeId,jdbcType=VARCHAR}, #{rangeStartTime,jdbcType=VARCHAR}, #{rangeEndTime,jdbcType=VARCHAR}, 
+      #{rangeDoorOpenType,jdbcType=VARCHAR}, #{rangeFlagId,jdbcType=VARCHAR}, #{doorId,jdbcType=VARCHAR}, 
+      #{startWeekNumber,jdbcType=VARCHAR}, #{endWeekNumber,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="com.xiangshangban.device.bean.TimeRangePrivilegeEmployee" >
     insert into time_range_privilege_employee
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="employeeId != null" >
         employee_id,
-      </if>
-      <if test="dayOfWeek != null" >
-        day_of_week,
       </if>
       <if test="rangeStartTime != null" >
         range_start_time,
@@ -57,13 +54,16 @@
       <if test="doorId != null" >
         door_id,
       </if>
+      <if test="startWeekNumber != null" >
+        start_week_number,
+      </if>
+      <if test="endWeekNumber != null" >
+        end_week_number,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="employeeId != null" >
         #{employeeId,jdbcType=VARCHAR},
-      </if>
-      <if test="dayOfWeek != null" >
-        #{dayOfWeek,jdbcType=VARCHAR},
       </if>
       <if test="rangeStartTime != null" >
         #{rangeStartTime,jdbcType=VARCHAR},
@@ -80,15 +80,17 @@
       <if test="doorId != null" >
         #{doorId,jdbcType=VARCHAR},
       </if>
+      <if test="startWeekNumber != null" >
+        #{startWeekNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="endWeekNumber != null" >
+        #{endWeekNumber,jdbcType=VARCHAR},
+      </if>
     </trim>
   </insert>
-
   <update id="updateByPrimaryKeySelective" parameterType="com.xiangshangban.device.bean.TimeRangePrivilegeEmployee" >
     update time_range_privilege_employee
     <set >
-      <if test="dayOfWeek != null" >
-        day_of_week = #{dayOfWeek,jdbcType=VARCHAR},
-      </if>
       <if test="rangeStartTime != null" >
         range_start_time = #{rangeStartTime,jdbcType=VARCHAR},
       </if>
@@ -104,19 +106,28 @@
       <if test="doorId != null" >
         door_id = #{doorId,jdbcType=VARCHAR},
       </if>
+      <if test="startWeekNumber != null" >
+        start_week_number = #{startWeekNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="endWeekNumber != null" >
+        end_week_number = #{endWeekNumber,jdbcType=VARCHAR},
+      </if>
     </set>
     where employee_id = #{employeeId,jdbcType=VARCHAR}
   </update>
   <update id="updateByPrimaryKey" parameterType="com.xiangshangban.device.bean.TimeRangePrivilegeEmployee" >
     update time_range_privilege_employee
-    set day_of_week = #{dayOfWeek,jdbcType=VARCHAR},
-      range_start_time = #{rangeStartTime,jdbcType=VARCHAR},
+    set range_start_time = #{rangeStartTime,jdbcType=VARCHAR},
       range_end_time = #{rangeEndTime,jdbcType=VARCHAR},
       range_door_open_type = #{rangeDoorOpenType,jdbcType=VARCHAR},
       range_flag_id = #{rangeFlagId,jdbcType=VARCHAR},
-      door_id = #{doorId,jdbcType=VARCHAR}
+      door_id = #{doorId,jdbcType=VARCHAR},
+      start_week_number = #{startWeekNumber,jdbcType=VARCHAR},
+      end_week_number = #{endWeekNumber,jdbcType=VARCHAR}
     where employee_id = #{employeeId,jdbcType=VARCHAR}
   </update>
+
+  <!--非自动生成-->
 
   <select id="selectExitByEmployeeId" resultMap="BaseResultMap" parameterType="java.lang.String" >
     select
@@ -132,15 +143,15 @@
 
   <!--根据门id查询首卡常开(开始结束星期、首卡常开人员ID以及开门时间段)-->
   <select id="selectFirstCardKeepOpenInfo" parameterType="String" resultType="map">
-   SELECT DISTINCT
-	employee_id,
-	COALESCE (range_start_time, '') AS range_start_time,
-	COALESCE (range_end_time, '') AS range_end_time,
-	COALESCE (start_week_number, '') AS start_week_number,
-	COALESCE (end_week_number, '') AS end_week_number
+    SELECT DISTINCT
+    employee_id,
+    COALESCE (range_start_time, '') AS range_start_time,
+    COALESCE (range_end_time, '') AS range_end_time,
+    COALESCE (start_week_number, '') AS start_week_number,
+    COALESCE (end_week_number, '') AS end_week_number
     FROM
-        time_range_privilege_employee
+    time_range_privilege_employee
     WHERE
-        door_id = #{doorId}
+    door_id = #{doorId}
   </select>
 </mapper>

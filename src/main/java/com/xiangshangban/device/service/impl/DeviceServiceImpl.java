@@ -61,13 +61,13 @@ public class DeviceServiceImpl implements IDeviceService {
     private EmployeeMapper employeeMapper;
 
     @Override
-    public String addDevice(String deviceId, String macAddress) {
+    public String addDevice(String deviceId) {
 
         Device device = new Device();
 
         //新增设备信息
         device.setDeviceId(deviceId);
-        device.setMacAddress(macAddress);
+        device.setActiveStatus("0");
 
         Device deviceExist = deviceMapper.selectByPrimaryKey(deviceId);
 
@@ -177,34 +177,6 @@ public class DeviceServiceImpl implements IDeviceService {
 
         return mapList;
 
-    }
-
-    @Override
-    public void editorDeviceInformation(String deviceId, String companyId, String companyName, String deviceName,
-                                       String devicePlace, String deviceUsages) {
-
-        Device device = new Device();
-        if (!"".equals(deviceId)){
-            device.setDeviceId(deviceId);
-        }
-        if (!"".equals(companyId)){
-            device.setCompanyId(companyId);
-        }
-        if (!"".equals(companyName) && !"请选择".equals(companyName)){
-            device.setCompanyName(companyName);
-        }
-        if (!"".equals(deviceName)){
-            device.setDeviceName(deviceName);
-        }
-        if (!"".equals(devicePlace)){
-            device.setDevicePlace(devicePlace);
-        }
-        if (!"".equals(deviceUsages)){
-            device.setDeviceUsages(deviceUsages);
-        }
-
-        //更新设备信息
-        deviceMapper.updateByPrimaryKeySelective(device);
     }
 
     @Override
@@ -534,19 +506,24 @@ public class DeviceServiceImpl implements IDeviceService {
             }
 
             //查询最新的下载包路径信息
-            DeviceUpdatePackSys deviceUpdatePackSys = deviceUpdatePackSysMapper.selectAllByCreateTimeDesc().get(0);
-
-            //查询路径，截取路径
-            String path = deviceUpdatePackSys.getPath();
-            path = path.substring(0, path.lastIndexOf("/")+1);
-            System.out.println("path: "+path);
+            List<DeviceUpdatePackSys> deviceUpdatePackSys = deviceUpdatePackSysMapper.selectAllByLatestTime();
 
             Map<String, String> mapHandOut = new HashMap<String, String>();
-            mapHandOut.put("newSysVerion", deviceUpdatePackSys.getNewSysVerion());
-            mapHandOut.put("isSameVesionUpdate", "");
-            mapHandOut.put("downloadTime", downloadTime);
-            mapHandOut.put("updateTime", updateTime);
-            mapHandOut.put("path", path);
+            if (deviceUpdatePackSys.size() > 0 && deviceUpdatePackSys.size() == 2 && deviceUpdatePackSys.size() < 3){
+                mapHandOut.put("newSysVerion", deviceUpdatePackSys.get(0).getNewSysVerion());
+                mapHandOut.put("isSameVesionUpdate", "");
+                mapHandOut.put("downloadTime", downloadTime);
+                mapHandOut.put("updateTime", updateTime);
+                mapHandOut.put("path1", deviceUpdatePackSys.get(0).getPath());
+                mapHandOut.put("path2", deviceUpdatePackSys.get(1).getPath());
+            }else {
+                mapHandOut.put("newSysVerion", "");
+                mapHandOut.put("isSameVesionUpdate", "");
+                mapHandOut.put("downloadTime", downloadTime);
+                mapHandOut.put("updateTime", updateTime);
+                mapHandOut.put("path1", "");
+                mapHandOut.put("path2", "");
+            }
 
             //构造命令格式
             DoorCmd doorCmdUpdateSystem = new DoorCmd();

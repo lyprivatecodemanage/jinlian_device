@@ -1,11 +1,12 @@
 package com.xiangshangban.device.dao;
 
 import com.xiangshangban.device.bean.TimeRangePrivilegeEmployee;
-import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
 import java.util.Map;
+
 @Mapper
 public interface TimeRangePrivilegeEmployeeMapper {
     int deleteByPrimaryKey(String employeeId);

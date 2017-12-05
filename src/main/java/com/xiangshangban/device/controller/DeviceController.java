@@ -91,8 +91,7 @@ public class DeviceController {
          * 测试数据
          {
          "role":"superAdmin",
-         "deviceId": "0f1a21d4e6fd3cb8",
-         "macAddress": "001062654135123"
+         "deviceId": "0f1a21d4e6fd3cb8"
          }
          */
 
@@ -103,7 +102,6 @@ public class DeviceController {
 
         String role = "";
         String deviceId = "";
-        String macAddress = "";
 
         //返回给前端的数据
         ReturnData returnData = new ReturnData();
@@ -111,7 +109,6 @@ public class DeviceController {
         try {
             role = mapJson.get("role");
             deviceId = mapJson.get("deviceId");
-            macAddress = mapJson.get("macAddress");
         } catch (Exception e) {
 
             System.out.println("必传参数字段为null");
@@ -120,7 +117,7 @@ public class DeviceController {
             return returnData;
         }
 
-        if (role == null || deviceId == null || macAddress == null) {
+        if (role == null || deviceId == null) {
             System.out.println("必传参数字段不存在");
             returnData.setMessage("必传参数字段不存在");
             returnData.setReturnCode("3006");
@@ -131,7 +128,7 @@ public class DeviceController {
         if ("superAdmin".equals(role)) {
             System.out.println("已匹配到【超级管理员】角色");
             try {
-                String returnCode = deviceService.addDevice(deviceId, macAddress);
+                String returnCode = deviceService.addDevice(deviceId);
 
                 if ("0".equals(returnCode)) {
                     returnData.setMessage("设备已存在");
@@ -267,17 +264,10 @@ public class DeviceController {
                 returnData.setTotalPages((String) map.get("totalPages"));
                 return returnData;
             } else {
-                if (!"".equals(companyId)){
-                    returnData.setData(mapListResult);
-                    returnData.setMessage("您的公司暂无已绑定的设备");
-                    returnData.setReturnCode("4203");
-                    return returnData;
-                }else {
-                    returnData.setData(mapListResult);
-                    returnData.setMessage("数据请求成功");
-                    returnData.setReturnCode("3000");
-                    return returnData;
-                }
+                returnData.setData(mapListResult);
+                returnData.setMessage("无符合条件的设备");
+                returnData.setReturnCode("4202");
+                return returnData;
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -288,25 +278,23 @@ public class DeviceController {
     }
 
     /**
-     * 平台管理员编辑当前设备的信息
+     * 编辑当前设备的信息（超级管理员）
      *
      * @param jsonString
      * @return
      */
     @Transactional
     @ResponseBody
-    @RequestMapping(value = "/editorDeviceInformation", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
-    public ReturnData editorDeviceInformation(@RequestBody String jsonString) {
+    @RequestMapping(value = "/editorDeviceInformationSuper", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    public ReturnData editorDeviceInformationSuper(@RequestBody String jsonString) {
 
         /**
          * 测试数据
          {
          "deviceId": "0f1a21d4e6fd3cb8",
-         "deviceName": "无敌的设备",
          "companyId": "FE0FB748F7A04BCAA3E4D736E3964B06",
          "companyName":"无敌的公司",
-         "devicePlace": "无敌的乐山新村",
-         "deviceUsages": "无敌的考勤"
+         "devicePlace": "无敌的乐山新村"
          }
          */
 
@@ -321,65 +309,127 @@ public class DeviceController {
         String deviceId = "";
         String companyId = "";
         String companyName = "";
-        String deviceName = "";
         String devicePlace = "";
-        String deviceUsages = "";
-
-//        try {
-//            companyId = mapJson.get("companyId");
-//        } catch (Exception e) {
-//            System.out.println("公司id为null");
-//            returnData.setMessage("请登录账号后再操作");
-//            returnData.setReturnCode("3006");
-//            return returnData;
-//        }
-
-//        try {
-//            deviceId = mapJson.get("deviceId");
-//            companyName = mapJson.get("companyName");
-//            deviceName = mapJson.get("deviceName");
-//            devicePlace = mapJson.get("devicePlace");
-//            deviceUsages = mapJson.get("deviceUsages");
-//        } catch (Exception e) {
-//            System.out.println("必传参数字段为null");
-//            returnData.setMessage("必传参数字段为null");
-//            returnData.setReturnCode("3006");
-//            return returnData;
-//        }
-
-//        if (deviceId == null
-//                || companyId == null
-//                || companyName == null
-//                || deviceName == null
-//                || devicePlace == null
-//                || deviceUsages == null) {
-//            System.out.println("必传参数字段不存在");
-//            returnData.setMessage("必传参数字段不存在");
-//            returnData.setReturnCode("3006");
-//            return returnData;
-//        }
-
-//        if ("".equals(deviceId)) {
-//            System.out.println("必传参数字段为空字符串");
-//            returnData.setMessage("必传参数字段为空字符串");
-//            returnData.setReturnCode("3006");
-//            return returnData;
-//        }
 
         try {
-            companyId = mapJson.get("companyId");
             deviceId = mapJson.get("deviceId");
+            companyId = mapJson.get("companyId");
             companyName = mapJson.get("companyName");
-            deviceName = mapJson.get("deviceName");
             devicePlace = mapJson.get("devicePlace");
-            deviceUsages = mapJson.get("deviceUsages");
         } catch (Exception e) {
+            System.out.println("必传参数字段为null");
+            returnData.setMessage("必传参数字段为null");
+            returnData.setReturnCode("3006");
+            return returnData;
+        }
 
+        if (deviceId == null
+                || companyId == null
+                || companyName == null
+                || devicePlace == null) {
+            System.out.println("必传参数字段不存在");
+            returnData.setMessage("必传参数字段不存在");
+            returnData.setReturnCode("3006");
+            return returnData;
+        }
+
+        if ("".equals(deviceId)) {
+            System.out.println("必传参数字段为空字符串");
+            returnData.setMessage("必传参数字段为空字符串");
+            returnData.setReturnCode("3006");
+            return returnData;
         }
 
         try {
-            deviceService.editorDeviceInformation(deviceId, companyId, companyName, deviceName,
-                    devicePlace, deviceUsages);
+            Device device = new Device();
+
+            device.setDeviceId(deviceId);
+            device.setCompanyId(companyId);
+            device.setCompanyName(companyName);
+            device.setDevicePlace(devicePlace);
+
+            //更新设备信息
+            deviceMapper.updateByPrimaryKeySelective(device);
+
+            returnData.setMessage("编辑信息成功");
+            returnData.setReturnCode("3000");
+            return returnData;
+        } catch (Exception e) {
+            e.printStackTrace();
+            returnData.setMessage("服务器错误");
+            returnData.setReturnCode("3001");
+            return returnData;
+        }
+    }
+
+    /**
+     * 编辑当前设备的信息（企业管理员）
+     *
+     * @param jsonString
+     * @return
+     */
+    @Transactional
+    @ResponseBody
+    @RequestMapping(value = "/editorDeviceInformationAdmin", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    public ReturnData editorDeviceInformationAdmin(@RequestBody String jsonString) {
+
+        /**
+         * 测试数据
+         {
+         "deviceId": "0f1a21d4e6fd3cb8",
+         "deviceName": "无敌的设备",
+         "deviceUsages": "无敌的考勤"
+         }
+         */
+
+        System.out.println(jsonString);
+
+        //提取数据
+        Map<String, String> mapJson = (Map<String, String>) net.sf.json.JSONObject.fromObject(jsonString);
+
+        //返回给前端的数据
+        ReturnData returnData = new ReturnData();
+
+        String deviceId = "";
+        String deviceName = "";
+        String deviceUsages = "";
+
+        try {
+            deviceId = mapJson.get("deviceId");
+            deviceName = mapJson.get("deviceName");
+            deviceUsages = mapJson.get("deviceUsages");
+        } catch (Exception e) {
+            System.out.println("必传参数字段为null");
+            returnData.setMessage("必传参数字段为null");
+            returnData.setReturnCode("3006");
+            return returnData;
+        }
+
+        if (deviceId == null
+                || deviceName == null
+                || deviceUsages == null) {
+            System.out.println("必传参数字段不存在");
+            returnData.setMessage("必传参数字段不存在");
+            returnData.setReturnCode("3006");
+            return returnData;
+        }
+
+        if ("".equals(deviceId)) {
+            System.out.println("必传参数字段为空字符串");
+            returnData.setMessage("必传参数字段为空字符串");
+            returnData.setReturnCode("3006");
+            return returnData;
+        }
+
+        try {
+            Device device = new Device();
+
+            device.setDeviceId(deviceId);
+            device.setDeviceName(deviceName);
+            device.setDeviceUsages(deviceUsages);
+
+            //更新设备信息
+            deviceMapper.updateByPrimaryKeySelective(device);
 
             returnData.setMessage("编辑信息成功");
             returnData.setReturnCode("3000");
@@ -1748,71 +1798,89 @@ public class DeviceController {
                                 deviceDoorBindCount = deviceDoorBindCount + 1;
                                 List<Map<String, String>> versionInfoList = deviceMapper.selectAllVersionInfoByDeviceId(deviceId);
 
-                                //判断该设备有没有上传蓝牙参数
-                                if (versionInfoList.size() > 0) {
-                                    System.out.println("versionInfoList: " + JSON.toJSONString(versionInfoList));
-                                    Map<String, String> mapTemp = new HashMap<String, String>();
-                                    String major = "";
-                                    String minor = "";
-                                    for (Map<String, String> versionInfoMap : versionInfoList) {
+                                System.out.println("versionInfoList: " + JSON.toJSONString(versionInfoList));
+                                Map<String, String> mapTemp = new HashMap<String, String>();
+                                String major = "";
+                                String minor = "";
+                                String uuidIbeacon = "";
+                                String characUuid = "";
+                                String serviceUuid = "";
+                                String moduleMac = "";
+                                for (Map<String, String> versionInfoMap : versionInfoList) {
 
-                                        System.out.println("versionInfoMap: " + JSON.toJSONString(versionInfoMap));
+                                    System.out.println("versionInfoMap: " + JSON.toJSONString(versionInfoMap));
 
-                                        String name = versionInfoMap.get("name");
-                                        if ("major".equals(name)) {
-                                            major = versionInfoMap.get("value");
-                                        } else if ("minor".equals(name)) {
-                                            minor = versionInfoMap.get("value");
-                                        } else if ("ibeaconUuid".equals(name)) {
-                                            mapTemp.put("uuidIbeacon", versionInfoMap.get("value"));
-                                        } else if ("characUuid".equals(name)) {
-                                            mapTemp.put("characUuid", versionInfoMap.get("value"));
-                                        } else if ("serviceUuid".equals(name)) {
-                                            mapTemp.put("serviceUuid", versionInfoMap.get("value"));
-                                        } else if ("bleModeMacaddr".equals(name)){
-                                            String moduleMac = versionInfoMap.get("value");
-                                            mapTemp.put("moduleMac", moduleMac);
+                                    String name = versionInfoMap.get("name");
+                                    if ("major".equals(name)) {
+                                        major = versionInfoMap.get("value");
+                                    } else if ("minor".equals(name)) {
+                                        minor = versionInfoMap.get("value");
+                                    } else if ("ibeaconUuid".equals(name)) {
+                                        uuidIbeacon = versionInfoMap.get("value");
+                                        mapTemp.put("uuidIbeacon", uuidIbeacon);
+                                    } else if ("characUuid".equals(name)) {
+                                        characUuid = versionInfoMap.get("value");
+                                        mapTemp.put("characUuid", characUuid);
+                                    } else if ("serviceUuid".equals(name)) {
+                                        serviceUuid = versionInfoMap.get("value");
+                                        mapTemp.put("serviceUuid", serviceUuid);
+                                    } else if ("bleModeMacaddr".equals(name)) {
+                                        moduleMac = versionInfoMap.get("value");
+                                        mapTemp.put("moduleMac", moduleMac);
 
-                                            //mac地址更新到设备信息表
-                                            Device device =deviceMapper.selectByPrimaryKey(deviceId);
-                                            if (device != null){
-                                                if (StringUtils.isEmpty(device.getMacAddress())){
-                                                    Device deviceTemp = new Device();
-                                                    deviceTemp.setDeviceId(deviceId);
-                                                    deviceTemp.setMacAddress(moduleMac);
-                                                    deviceMapper.updateByPrimaryKeySelective(deviceTemp);
-                                                }
+                                        //mac地址更新到设备信息表
+                                        Device device = deviceMapper.selectByPrimaryKey(deviceId);
+                                        if (device != null) {
+                                            if (StringUtils.isEmpty(device.getMacAddress())) {
+                                                Device deviceTemp = new Device();
+                                                deviceTemp.setDeviceId(deviceId);
+                                                deviceTemp.setMacAddress(moduleMac);
+                                                deviceMapper.updateByPrimaryKeySelective(deviceTemp);
                                             }
                                         }
                                     }
-                                    if (StringUtils.isNotEmpty(major) && StringUtils.isNotEmpty(minor)) {
-                                        mapTemp.put("deviceSeries", major + "-" + minor);
-                                    } else {
-                                        mapTemp.put("deviceSeries", "");
-                                    }
-
-                                    System.out.println("deviceId = " + deviceId);
-                                    //获取门名称
-                                    Door door = doorMapper.findAllByDeviceId(deviceId);
-                                    mapTemp.put("deviceId", deviceId);
-                                    mapTemp.put("deviceName", door.getDoorName());
-
-                                    //判断该人员有没有蓝牙id
-                                    Employee employeeExist = employeeMapper.selectByPrimaryKey(employeeId);
-                                    if (StringUtils.isEmpty(employeeExist.getBluetoothNo())){
-
-                                        returnData.setMessage("您还没有分配蓝牙开门参数，请联系管理员下发您的开门权限");
-                                        returnData.setReturnCode("4007");
-                                        return returnData;
-                                    }else {
-                                        //人员有蓝牙id，直接返给app端
-                                        bluetoothIdResult = employeeExist.getBluetoothNo();
-                                    }
-
-                                    bluetoothParameterList.add(mapTemp);
-                                } else {
-                                    System.out.println("没有查到设备【" + deviceId + "】的蓝牙参数数据");
                                 }
+
+                                //major,minor组拼
+                                if (StringUtils.isNotEmpty(major) && StringUtils.isNotEmpty(minor)) {
+                                    mapTemp.put("deviceSeries", major + "-" + minor);
+                                } else {
+                                    mapTemp.put("deviceSeries", "");
+                                }
+
+                                //判空
+                                if (StringUtils.isEmpty(uuidIbeacon)) {
+                                    mapTemp.put("uuidIbeacon", "");
+                                }
+                                if (StringUtils.isEmpty(characUuid)) {
+                                    mapTemp.put("characUuid", "");
+                                }
+                                if (StringUtils.isEmpty(serviceUuid)) {
+                                    mapTemp.put("serviceUuid", "");
+                                }
+                                if (StringUtils.isEmpty(moduleMac)) {
+                                    mapTemp.put("moduleMac", "");
+                                }
+
+                                System.out.println("deviceId = " + deviceId);
+                                //获取门名称
+                                Door door = doorMapper.findAllByDeviceId(deviceId);
+                                mapTemp.put("deviceId", deviceId);
+                                mapTemp.put("deviceName", door.getDoorName());
+
+                                //判断该人员有没有蓝牙id
+                                Employee employeeExist = employeeMapper.selectByPrimaryKey(employeeId);
+                                if (StringUtils.isEmpty(employeeExist.getBluetoothNo())) {
+
+                                    returnData.setMessage("您还没有分配蓝牙开门参数，请联系管理员下发您的开门权限");
+                                    returnData.setReturnCode("4007");
+                                    return returnData;
+                                } else {
+                                    //人员有蓝牙id，直接返给app端
+                                    bluetoothIdResult = employeeExist.getBluetoothNo();
+                                }
+
+                                bluetoothParameterList.add(mapTemp);
                             }else {
                                 System.out.println("设备【"+deviceId+"】没有绑定门");
                             }

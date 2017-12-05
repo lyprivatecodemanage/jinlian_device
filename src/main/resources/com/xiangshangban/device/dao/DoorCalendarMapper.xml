@@ -77,4 +77,13 @@
   <select id="selectDoorCalendarInfo" parameterType="String" resultMap="BaseResultMap">
     select * from door_calendar where door_id = #{doorId}
   </select>
+
+  <select id="selectDoorCalendarExist" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from door_calendar
+    where door_id = #{doorId,jdbcType=VARCHAR}
+    AND calendar_date = #{calendarDate,jdbcType=VARCHAR}
+    AND weather_open_door = #{weatherOpenDoor,jdbcType=VARCHAR}
+  </select>
 </mapper>

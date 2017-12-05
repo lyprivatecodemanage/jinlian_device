@@ -81,11 +81,18 @@
   </update>
 
   <!--非自动生成-->
-  <select id="selectAllByCreateTimeDesc" resultMap="BaseResultMap" parameterType="java.lang.String" >
-    select
+  <select id="selectAllByLatestTime" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    SELECT
     <include refid="Base_Column_List" />
-    from device_update_pack_sys
-    ORDER BY create_time DESC
+    FROM
+    device_update_pack_sys
+    WHERE
+    create_time = (
+    SELECT
+    MAX (create_time)
+    FROM
+    device_update_pack_sys
+    )
   </select>
 
 </mapper>

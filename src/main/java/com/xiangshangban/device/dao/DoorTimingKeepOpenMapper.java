@@ -1,16 +1,14 @@
 package com.xiangshangban.device.dao;
 
 import com.xiangshangban.device.bean.DoorTimingKeepOpen;
-
-import java.util.List;
-
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 @Mapper
 public interface DoorTimingKeepOpenMapper {
     int deleteByPrimaryKey(String doorId);
-
 
     int insert(DoorTimingKeepOpen record);
 
@@ -21,6 +19,10 @@ public interface DoorTimingKeepOpenMapper {
     int updateByPrimaryKeySelective(DoorTimingKeepOpen record);
 
     int updateByPrimaryKey(DoorTimingKeepOpen record);
+
+    /**
+     * 非自动生成
+     */
 
     List<DoorTimingKeepOpen> selectExistByDoorId(String doorId);
 
