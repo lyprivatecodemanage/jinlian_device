@@ -69,6 +69,7 @@ public class TemplateServiceImpl implements ITemplateService{
      * @param file 上传的Logo图片
      * @return
              {
+            "loginEmpId":"123",----->当前登录人的ID
             "deviceId":"1",
             "templateId":"2",-------->要进行更新的模板的ID
             "backImgList":[
@@ -86,6 +87,7 @@ public class TemplateServiceImpl implements ITemplateService{
     public Map modifyDeviceTemplateInfo(String templateInfo,MultipartFile file) {
 
         JSONObject jsonObject = JSONObject.parseObject(templateInfo);
+        Object loginEmpId = jsonObject.get("loginEmpId");
         Object deviceId = jsonObject.get("deviceId");
         Object templateId = jsonObject.get("templateId");
         Object backImgList = jsonObject.get("backImgList");
@@ -119,7 +121,7 @@ public class TemplateServiceImpl implements ITemplateService{
 
             if(tresult>0&&bresult>0&&iresult>0){
                 //添加新的自定义模板，代替删除的自定义模板
-                boolean operateResult = addNewPersonalTemplate(rdeviceId, templateItems, personalBackImgList, personalSalutationList, file);
+                boolean operateResult = addNewPersonalTemplate(loginEmpId,rdeviceId, templateItems, personalBackImgList, personalSalutationList, file);
                 //下发到设备
                 issueUpdateLaterTemplateInfo(String.valueOf(templateMapper.selectTemplateMaxPrimaryKey()),rdeviceId);
                 //查询设备那边的执行情况(睡眠一段时间,等待回复)
@@ -168,6 +170,7 @@ public class TemplateServiceImpl implements ITemplateService{
     public Map addDeviceTemplate(String templateInfo,MultipartFile file){
 
         JSONObject jsonObject = JSONObject.parseObject(templateInfo);
+        Object loginEmpId = jsonObject.get("loginEmpId");
         Object deviceId = jsonObject.get("deviceId");
         Object templateId = jsonObject.get("templateId");
         Object backImgList = jsonObject.get("backImgList");
@@ -195,7 +198,8 @@ public class TemplateServiceImpl implements ITemplateService{
             Template resultTemplate = templateMapper.confirmPersonalTemplate(rdeviceId);
 
             if(resultTemplate==null){
-                addNewPersonalTemplate(rdeviceId,templateItems,personalBackImgList,personalSalutationList,file);
+                //添加新的自定义模板
+                addNewPersonalTemplate(loginEmpId,rdeviceId,templateItems,personalBackImgList,personalSalutationList,file);
             }else{
                 //删除拥有的自定义模板（模板item、模板图片)，然后添加新的自定义模板
                 int tresult = templateMapper.deletePersonalTemplate(resultTemplate.getTemplateId());
@@ -204,7 +208,7 @@ public class TemplateServiceImpl implements ITemplateService{
 
                 if(tresult>0&&bresult>0&&iresult>0){
                     //添加新的自定义模板，代替删除的自定义模板
-                    boolean operateResult =  addNewPersonalTemplate(rdeviceId,templateItems,personalBackImgList,personalSalutationList,file);
+                    boolean operateResult =  addNewPersonalTemplate(loginEmpId,rdeviceId,templateItems,personalBackImgList,personalSalutationList,file);
                     //下发到设备
                     issueUpdateLaterTemplateInfo(String.valueOf(templateMapper.selectTemplateMaxPrimaryKey()),rdeviceId);
                     //查询设备那边的执行情况
@@ -487,7 +491,7 @@ public class TemplateServiceImpl implements ITemplateService{
     /**
      * TODO 添加（替换）自定义模板(公共方法)
      */
-    public boolean addNewPersonalTemplate(String rdeviceId, List<Map> templateItems, JSONArray personalBackImgList, JSONArray personalSalutationList, MultipartFile file) {
+    public boolean addNewPersonalTemplate(Object loginEmpId,String rdeviceId, List<Map> templateItems, JSONArray personalBackImgList, JSONArray personalSalutationList, MultipartFile file) {
         //添加新的自定义模板
         Map templateMap = new HashMap();
 
@@ -495,7 +499,7 @@ public class TemplateServiceImpl implements ITemplateService{
         templateMap.put("template_type", "0");
         templateMap.put("template_level", "2");
         templateMap.put("operate_time", DateUtils.getDateTime());
-        templateMap.put("operate_emp", "88F332DF5D2243BCB69B1CB14D3473CA");//后期要更改为当前登录人的ID
+        templateMap.put("operate_emp",loginEmpId.toString());//后期要更改为当前登录人的ID
         templateMap.put("device_id", rdeviceId);
         templateMap.put("roasting_time", "");
         templateMap.put("logo_flag", "1");

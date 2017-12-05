@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 
@@ -81,7 +82,7 @@ public class EntranceGuardController {
      * }
      */
     @PostMapping(value = "/basic/addDoor")
-    public String addDoor(@RequestBody String requestParam) {
+    public String addDoor(@RequestBody String requestParam,HttpServletRequest request){
 
         //绑定门的时候，同一个门只能绑定一个设备
         //①：查询当前添加的门对应的设备ID
@@ -91,6 +92,9 @@ public class EntranceGuardController {
         JSONObject jsonObject = JSONObject.parseObject(requestParam);
         Object doorName = jsonObject.get("doorName");
         Object deviceId = jsonObject.get("deviceId");
+        //获取当前登陆人的ID
+        String operateUserId = request.getHeader("accessUserId");
+
 
         Door door = new Door();
         door.setDoorName(doorName != null ? doorName.toString() : null);
@@ -98,7 +102,7 @@ public class EntranceGuardController {
         //查询主键的最大值
         door.setDoorId(String.valueOf(iegs.queryPrimaryKeyFromDoor() + 1));
         door.setOperateTime(DateUtils.getDateTime());
-        door.setOperateEmployee("1");//获取当前的登录人员ID
+        door.setOperateEmployee(operateUserId!=null && !operateUserId.isEmpty()?operateUserId:"默认员工");//获取当前的登录人员ID
         boolean result = iegs.addDoorInfo(door);
         return JSONArray.toJSONString(ReturnCodeUtil.addReturnCode(result));
     }
@@ -112,17 +116,19 @@ public class EntranceGuardController {
      * }
      */
     @PostMapping(value = "/basic/updateDoor")
-    public String updateDoor(@RequestBody String requestParam) {
+    public String updateDoor(@RequestBody String requestParam,HttpServletRequest request) {
         JSONObject jsonObject = JSONObject.parseObject(requestParam);
         Object doorName = jsonObject.get("doorName");
         Object deviceId = jsonObject.get("deviceId");
         Object doorId = jsonObject.get("doorId");
+        //获取当前登陆人的ID
+        String operateUserId = request.getHeader("accessUserId");
 
         Door door = new Door();
         door.setDoorName(doorName != null ? doorName.toString() : null);
         door.setDeviceId(deviceId != null ? deviceId.toString() : null);
         door.setDoorId(doorId != null ? doorId.toString() : null);
-        door.setOperateEmployee("1");//当前登录的人员的ID
+        door.setOperateEmployee(operateUserId!=null && !operateUserId.isEmpty()?operateUserId:"默认员工");//当前登录的人员的ID
 
         boolean result = iegs.updateDoorInfo(door);
         return JSONArray.toJSONString(ReturnCodeUtil.addReturnCode(result));
@@ -146,8 +152,8 @@ public class EntranceGuardController {
         Object companyId = jsonObject.get("companyId");
 
         Map doorMap = new HashMap();
-        doorMap.put("doorName", (jsonObject.get("doorName") == null || jsonObject.get("doorName").toString().isEmpty())? null : "%" + jsonObject.get("doorName").toString() + "%");
-        doorMap.put("companyId", (jsonObject.get("companyId") == null || jsonObject.get("companyId").toString().isEmpty())? null : jsonObject.get("companyId").toString());
+        doorMap.put("doorName", (doorName == null || doorName.toString().isEmpty())? null : "%" + doorName.toString() + "%");
+        doorMap.put("companyId", (companyId == null || companyId.toString().isEmpty())? null : companyId.toString());
         Page pageObj = null;
         if (page != null && !page.toString().isEmpty() && rows != null && !rows.toString().isEmpty()) {
             pageObj = PageHelper.startPage(Integer.parseInt(page.toString()), Integer.parseInt(rows.toString()));
