@@ -71,6 +71,39 @@ public class OSSController {
 		}
         return null;
     }
+
+	/**
+	 * 上传文件到OSS
+	 * @param file
+	 * @param companyId
+	 * @param funcDirectory 存储模块名称
+	 * @return
+	 */
+	@Transactional
+	@RequestMapping(value = "/uploadSysApp",method= RequestMethod.POST)
+	public String uploadSysApp(@RequestParam(value="file") MultipartFile file,
+							@RequestParam(value = "companyId") String companyId,
+							@RequestParam(value="funcDirectory") String funcDirectory){
+		String token = "未使用";
+//		String customerId = "C001";//公司编号，此编号实际应用时，应根据token去查询
+		String customerId = companyId;
+//		funcDirectory = "portrait";//portrait目录存储员工头像
+		if(StringUtils.isNotEmpty(token)){
+			if(!file.isEmpty()){
+				try {
+					OSSFile ossFile = oSSFileService.addOSSFile(customerId, funcDirectory, file);
+					//System.out.println(JSON.toJSONString(ossFile));
+					System.out.println("*********上传文件成功**********");
+					return JSON.toJSONString(ossFile);
+				}catch (Exception e){
+					e.printStackTrace();
+					System.out.println("*********上传文件失败**********");
+				}
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * 根据文件名获取全路径
 	 * @param key
@@ -137,7 +170,7 @@ public class OSSController {
 
 		}else if (fileType.equals("application")){
 			//应用升级的文件放在这个文件夹下
-			funcDirectory = "device/update/application";
+			funcDirectory = "device/update/application/"+appVersion;
 
 			try {
 				//上传文件到oss

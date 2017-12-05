@@ -30,4 +30,6 @@ public interface EmployeeMapper {
 
     //根据人员的ID查询人员的名称
     String selectEmpNameByEmpId(@Param("empId") String empId);
+
+    Employee selectByEmployeeIdAndCompanyId(@Param("employeeId") String employeeId, @Param("employeeCompanyId") String employeeCompanyId);
 }
