@@ -57,6 +57,12 @@ public class ReturnCodeUtil {
                 map.put("message","参数格式错误");
                 break;
             case 2:
+                map.put("returnCode","4204");
+                map.put("message","该门未绑定设备");
+                break;
+            case 3:
+                map.put("returnCode","4205");
+                map.put("message","未知的登录人ID");
                 break;
                 default:
                     break;

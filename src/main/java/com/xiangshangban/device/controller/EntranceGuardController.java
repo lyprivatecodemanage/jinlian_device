@@ -56,7 +56,7 @@ public class EntranceGuardController {
     //TODO 门禁管理-------“基础信息”
 
     /**
-     * 删除门信息
+     * 删除门信息（解除门和设备的绑定关系）
      *
      * @return "doorIdList": [
      * 001,------->门的ID
@@ -92,15 +92,27 @@ public class EntranceGuardController {
         //获取当前登录人的ID
         String operateUserId = request.getHeader("accessUserId");
 
-        Door door = new Door();
-        door.setDoorName(doorName != null ? doorName.toString() : null);
-        door.setDeviceId(deviceId != null ? deviceId.toString() : null);
-        //查询主键的最大值
-        door.setDoorId(String.valueOf(iEntranceGuardService.queryPrimaryKeyFromDoor() + 1));
-        door.setOperateTime(DateUtils.getDateTime());
-        door.setOperateEmployee(operateUserId);//获取当前的登录人员ID
-        boolean result = iEntranceGuardService.addDoorInfo(door);
-        return JSONArray.toJSONString(ReturnCodeUtil.addReturnCode(result));
+        Map resultMap = new HashMap();
+        if(deviceId!=null){
+            Door door = new Door();
+            door.setDoorName(doorName != null ? doorName.toString() : null);
+            door.setDeviceId(deviceId != null ? deviceId.toString() : null);
+            //查询主键的最大值
+            door.setDoorId(String.valueOf(iEntranceGuardService.queryPrimaryKeyFromDoor() + 1));
+            door.setOperateTime(DateUtils.getDateTime());
+            if(operateUserId==null){
+                //未知的登录人ID
+                resultMap = ReturnCodeUtil.addReturnCode(3);
+            }else{
+                door.setOperateEmployee(operateUserId!=null && !operateUserId.isEmpty()?operateUserId:"1");//获取当前的登录人员ID
+                boolean result = iEntranceGuardService.addDoorInfo(door);
+                resultMap = ReturnCodeUtil.addReturnCode(result);
+            }
+        }else{
+            //该门未绑定设备
+           resultMap = ReturnCodeUtil.addReturnCode(2);
+        }
+        return JSONObject.toJSONString( resultMap);
     }
 
     /**
@@ -119,15 +131,26 @@ public class EntranceGuardController {
         Object doorId = jsonObject.get("doorId");
         //获取当前登陆人的ID
         String operateUserId = request.getHeader("accessUserId");
+        Map resultMap = new HashMap();
 
-        Door door = new Door();
-        door.setDoorName(doorName != null ? doorName.toString() : null);
-        door.setDeviceId(deviceId != null ? deviceId.toString() : null);
-        door.setDoorId(doorId != null ? doorId.toString() : null);
-        door.setOperateEmployee(operateUserId!=null && !operateUserId.isEmpty()?operateUserId:"默认员工");//当前登录的人员的ID
-
-        boolean result = iEntranceGuardService.updateDoorInfo(door);
-        return JSONArray.toJSONString(ReturnCodeUtil.addReturnCode(result));
+        if(deviceId!=null){
+            Door door = new Door();
+            door.setDoorName(doorName != null ? doorName.toString() : null);
+            door.setDeviceId(deviceId != null ? deviceId.toString() : null);
+            door.setDoorId(doorId != null ? doorId.toString() : null);
+            if(operateUserId==null){
+                //未知的登录人ID
+                resultMap = ReturnCodeUtil.addReturnCode(3);
+            }else{
+                door.setOperateEmployee(operateUserId!=null && !operateUserId.isEmpty()?operateUserId:"1");//当前登录的人员的ID
+                boolean result = iEntranceGuardService.updateDoorInfo(door);
+                resultMap = ReturnCodeUtil.addReturnCode(result);
+            }
+        }else{
+            //该门未绑定设备
+            resultMap = ReturnCodeUtil.addReturnCode(2);
+        }
+        return JSONArray.toJSONString(resultMap);
     }
 
     /**
