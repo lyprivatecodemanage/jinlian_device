@@ -100,7 +100,7 @@ public class EntranceGuardController {
             //查询主键的最大值
             door.setDoorId(String.valueOf(iEntranceGuardService.queryPrimaryKeyFromDoor() + 1));
             door.setOperateTime(DateUtils.getDateTime());
-            if(operateUserId==null){
+            if(operateUserId==null|| operateUserId.isEmpty()){
                 //未知的登录人ID
                 resultMap = ReturnCodeUtil.addReturnCode(3);
             }else{
@@ -138,7 +138,7 @@ public class EntranceGuardController {
             door.setDoorName(doorName != null ? doorName.toString() : null);
             door.setDeviceId(deviceId != null ? deviceId.toString() : null);
             door.setDoorId(doorId != null ? doorId.toString() : null);
-            if(operateUserId==null){
+            if(operateUserId==null || operateUserId.isEmpty()){
                 //未知的登录人ID
                 resultMap = ReturnCodeUtil.addReturnCode(3);
             }else{

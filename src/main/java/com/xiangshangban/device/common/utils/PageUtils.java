@@ -58,10 +58,18 @@ public class PageUtils {
 
         }else{ //表明返回的时候不需要4203返回码，前端自动进行判断
 
-            if(oldMapList!=null && oldMapList.size()>0){
+            if((oldMapList!=null && oldMapList.size()>0) && (mapList!=null && mapList.size()>0)){
+                map.put("data",mapList);
+            }
+            if((oldMapList==null || oldMapList.size()==0) && (mapList!=null && mapList.size()>0)){
+                map.put("data",mapList);
+            }
+
+            if((oldMapList!=null && oldMapList.size()>0) && (mapList==null || mapList.size()==0)){
                 map.put("data",oldMapList);
             }
-            if(mapList!=null && mapList.size()>0){
+
+            if((oldMapList==null || oldMapList.size()==0) && (mapList==null || mapList.size()==0)){
                 map.put("data",mapList);
             }
             map.put("returnCode","3000");
