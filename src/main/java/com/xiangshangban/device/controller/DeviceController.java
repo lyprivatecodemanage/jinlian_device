@@ -1767,10 +1767,18 @@ public class DeviceController {
          }
          */
 
+//        System.out.println("------------" + jsonString);
+        String jsonUrlDecoderString = UrlUtil.getURLDecoderString(jsonString);
+//        System.out.println(jsonUrlDecoderString);
+        //去除数据的前缀名称
+        jsonUrlDecoderString = jsonUrlDecoderString.replace("employeeId=", "");
+        System.out.println("*************"+jsonUrlDecoderString);
+
         //提取数据
-        Map<String, String> appJsonMap = (Map<String, String>)net.sf.json.JSONObject.fromObject(jsonString);
+        Map<String, String> appJsonMap = (Map<String, String>)net.sf.json.JSONObject.fromObject(jsonUrlDecoderString);
         String employeeId = appJsonMap.get("employeeId");
 //        String companyId = request.getHeader("companyId");
+        System.out.println("===="+employeeId);
 
         //返回参数给app
         ReturnData returnData = new ReturnData();
