@@ -18,6 +18,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 /**
@@ -1756,7 +1757,19 @@ public class DeviceController {
     @Transactional
     @ResponseBody
     @RequestMapping(value = "/getBluetoothParameterListForApp", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
-    public ReturnData getBluetoothParameterListForApp(@RequestParam("employeeId") String employeeId) {
+    public ReturnData getBluetoothParameterListForApp(@RequestBody String jsonString, HttpServletRequest request) {
+
+        /**
+         * 测试数据
+         {
+         "employeeId":"40577C65D50D468E96D82648A525FBB8"
+         }
+         */
+
+        //提取数据
+        Map<String, String> appJsonMap = (Map<String, String>)net.sf.json.JSONObject.fromObject(jsonString);
+        String employeeId = appJsonMap.get("employeeId");
+//        String companyId = request.getHeader("companyId");
 
         //返回参数给app
         ReturnData returnData = new ReturnData();
