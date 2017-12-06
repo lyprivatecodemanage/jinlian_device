@@ -506,7 +506,7 @@ public class EntranceGuardController {
      * @param requestParam
      * @return
      * {
-     *     "empId":"400A6B8A0717481FB1B27B235F2ECBEB"-------------->人员ID
+     *     "empId":"400A6B8A0717481FB1B27B235F2ECBEB"--------------->人员ID
      * }
      */
     @PostMapping("/autho/getAWeekOpenTime")
