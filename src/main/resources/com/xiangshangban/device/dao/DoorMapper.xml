@@ -166,7 +166,7 @@
   </select>
 
   <!--查询door表主键的最大值-->
-  <select id="selectPrimaryKeyFromDoor" resultType="int">
+  <select id="selectPrimaryKeyFromDoor" resultType="String">
      select max(cast(door_id as integer)) from door_
   </select>
 </mapper>

@@ -65,5 +65,5 @@ public interface DoorMapper {
     /**
      * 查询door表主键的最大值
      */
-    int selectPrimaryKeyFromDoor();
+    String selectPrimaryKeyFromDoor();
 }

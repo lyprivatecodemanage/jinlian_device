@@ -29,7 +29,7 @@ public interface IEntranceGuardService {
     /**
      * 查询door_表主键的最大值
      */
-    int queryPrimaryKeyFromDoor();
+    String queryPrimaryKeyFromDoor();
 
     /**
      * 更新门信息

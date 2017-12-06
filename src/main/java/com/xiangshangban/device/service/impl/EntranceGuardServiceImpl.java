@@ -121,7 +121,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
      * @return
      */
     @Override
-    public int queryPrimaryKeyFromDoor() {
+    public String queryPrimaryKeyFromDoor() {
         return doorMapper.selectPrimaryKeyFromDoor();
     }
 
