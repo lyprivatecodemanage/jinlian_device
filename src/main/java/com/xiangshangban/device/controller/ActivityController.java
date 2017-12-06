@@ -14,12 +14,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 /**
  * author : Administrator
  * date: 2017/11/4 10:04
- * describe: TODO
+ * describe: TODO   主题部分（牵涉到上传图片的地方，提交的时候要采用form表单的形式提交:提交一个JSON样式的数据，外带上传的文件file）
  */
 @RestController
 @RequestMapping("/activity")
@@ -43,8 +44,8 @@ public class ActivityController {
      *      "companyId":"",
      *      "deviceId":"",
      *      "deviceName":"",
-     *     "page":"",
-     *     "rows":""
+     *      "page":"",
+     *      "rows":""
      * }
      *
      * 返回数据格式：
@@ -120,28 +121,28 @@ public class ActivityController {
      * 返回的参数
      * {
      "back_festival":[
-     {
-     "img_type":"back_festival_节气",
-     "img_url":"http://xiangshangban.oss-cn-hangzhou.aliyuncs.com/test%2Fsys%2Fdevice%2Ftemplate%2Ftemplate1%2F",
-     "id":"31",
-     "img_name":"festival.png"
-     }
+         {
+         "img_type":"back_festival_节气",
+         "img_url":"http://xiangshangban.oss-cn-hangzhou.aliyuncs.com/test%2Fsys%2Fdevice%2Ftemplate%2Ftemplate1%2F",
+         "id":"31",
+         "img_name":"festival.png"
+         }
      ],
      "back_visit":[
-     {
-     "img_type":"back_visit",
-     "img_url":"http://xiangshangban.oss-cn-hangzhou.aliyuncs.com/test%2Fsys%2Fdevice%2Ftemplate%2Ftemplate1%2F",
-     "id":"34",
-     "img_name":"unknownBack.png"
-     }
+         {
+         "img_type":"back_visit",
+         "img_url":"http://xiangshangban.oss-cn-hangzhou.aliyuncs.com/test%2Fsys%2Fdevice%2Ftemplate%2Ftemplate1%2F",
+         "id":"34",
+         "img_name":"unknownBack.png"
+         }
      ],
      "back_show":[
-     {
-     "img_type":"back_show",
-     "img_url":"http://xiangshangban.oss-cn-hangzhou.aliyuncs.com/test%2Fsys%2Fdevice%2Ftemplate%2Ftemplate1%2F",
-     "id":"33",
-     "img_name":"wooback.png"
-     }
+         {
+         "img_type":"back_show",
+         "img_url":"http://xiangshangban.oss-cn-hangzhou.aliyuncs.com/test%2Fsys%2Fdevice%2Ftemplate%2Ftemplate1%2F",
+         "id":"33",
+         "img_name":"wooback.png"
+         }
      ]
      }
      */
@@ -361,8 +362,10 @@ public class ActivityController {
      }
      */
     @PostMapping ("/addDeviceTemplate")
-    public String addDeviceTemplate(@RequestParam("templateInfo") String templateInfo, @RequestParam("file")MultipartFile file){
-        Map result = iTemplateService.addDeviceTemplate(templateInfo,file);
+    public String addDeviceTemplate(@RequestParam("request") HttpServletRequest request,
+                                    @RequestParam("templateInfo") String templateInfo,
+                                    @RequestParam("file")MultipartFile file){
+        Map result = iTemplateService.addDeviceTemplate(request,templateInfo,file);
         return JSONObject.toJSONString(ReturnCodeUtil.addReturnCode(result));
     }
 
@@ -390,16 +393,18 @@ public class ActivityController {
      *
      */
     @PostMapping("/refreshDeviceTemplate")
-    public String refreshDeviceTemplate(@RequestParam("templateInfo") String templateInfo, @RequestParam("file")MultipartFile file){
+    public String refreshDeviceTemplate(@RequestParam("request") HttpServletRequest request,
+                                        @RequestParam("templateInfo") String templateInfo,
+                                        @RequestParam("file")MultipartFile file){
         //更新模板信息
-        Map result= iTemplateService.modifyDeviceTemplateInfo(templateInfo,file);
+        Map result= iTemplateService.modifyDeviceTemplateInfo(request,templateInfo,file);
         return JSONObject.toJSONString(ReturnCodeUtil.addReturnCode(result));
     }
 
     /**
      * TODO 重置设备的模板（恢复成默认的主题：删除该设备所有的自定义模板？）
          {
-         "deviceId":"1"
+            "deviceId":"1"
          }
      */
     @PostMapping ("/resetDeviceTemplate")

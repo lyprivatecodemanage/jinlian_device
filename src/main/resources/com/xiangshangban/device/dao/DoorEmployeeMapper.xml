@@ -201,8 +201,8 @@
         (
             SELECT
                 action_code,
-                send_time,
-                status,
+                COALESCE (send_time,'') AS send_time,
+                COALESCE (status,'') AS status,
                 employee_id
             FROM
                 door_cmd
@@ -307,15 +307,16 @@
   <!--查询有门禁权限的人员的一周开门时间段-->
   <select id="selectAWeekOpenTime" parameterType="String" resultType="map">
    SELECT
-	X.*, P .door_open_start_time,
-	door_open_end_time
+	X.*,
+	COALESCE (P .door_open_start_time,'') AS door_open_start_time,
+	COALESCE (door_open_end_time,'') AS door_open_end_time
     FROM
         (
             SELECT
-                day_of_week,
-                range_start_time,
-                range_end_time,
-                range_door_open_type,
+                COALESCE (day_of_week,'') AS day_of_week,
+                COALESCE (range_start_time,'') AS range_start_time,
+                COALESCE (range_end_time,'') AS range_end_time,
+                COALESCE (range_door_open_type,'') AS range_door_open_type,
                 range_flag_id,
                 COALESCE (is_ditto, '') AS is_ditto,
                 is_all_day

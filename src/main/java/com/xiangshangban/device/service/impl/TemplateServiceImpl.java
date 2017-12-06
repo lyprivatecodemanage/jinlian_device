@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletRequest;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.*;
@@ -84,7 +85,7 @@ public class TemplateServiceImpl implements ITemplateService{
     }
      */
     @Override
-    public Map modifyDeviceTemplateInfo(String templateInfo,MultipartFile file) {
+    public Map modifyDeviceTemplateInfo(HttpServletRequest request,String templateInfo,MultipartFile file) {
 
         JSONObject jsonObject = JSONObject.parseObject(templateInfo);
         Object loginEmpId = jsonObject.get("loginEmpId");
@@ -106,8 +107,8 @@ public class TemplateServiceImpl implements ITemplateService{
             JSONArray personalBackImgList =JSONArray.parseArray(jsonObject.get("backImgList").toString());
             //用户设置的问候语数据
             JSONArray personalSalutationList =JSONArray.parseArray(jsonObject.get("salutationList").toString());
-            //公司logo名称
-            String logoName = jsonObject.get("companyLogoName").toString();
+            /*//公司logo名称
+            String logoName = jsonObject.get("companyLogoName").toString();*/
 
             //查询该自定义模板使用的标准模板ID
             String standardTemplateId = templateMapper.selectStandardTemplateIdByStyle(selectTemplateId);
@@ -167,15 +168,16 @@ public class TemplateServiceImpl implements ITemplateService{
       *
       *
      */
-    public Map addDeviceTemplate(String templateInfo,MultipartFile file){
+    public Map addDeviceTemplate(HttpServletRequest request,String templateInfo, MultipartFile file){
 
         JSONObject jsonObject = JSONObject.parseObject(templateInfo);
-        Object loginEmpId = jsonObject.get("loginEmpId");
         Object deviceId = jsonObject.get("deviceId");
         Object templateId = jsonObject.get("templateId");
         Object backImgList = jsonObject.get("backImgList");
         Object salutationList = jsonObject.get("salutationList");
         Object companyLogoName = jsonObject.get("companyLogoName");
+        //获取当前登录人的ID
+        String loginEmpId = request.getHeader("accessUserId");
 
         //返回给Controller层的数据
         Map result = null;
@@ -189,8 +191,8 @@ public class TemplateServiceImpl implements ITemplateService{
             JSONArray personalBackImgList =JSONArray.parseArray(jsonObject.get("backImgList").toString());
             //用户设置的问候语数据
             JSONArray personalSalutationList =JSONArray.parseArray(jsonObject.get("salutationList").toString());
-            //公司logo名称
-            String logoName = jsonObject.get("companyLogoName").toString();
+            /*//公司logo名称
+            String logoName = jsonObject.get("companyLogoName").toString();*/
 
             //查询选择的标准模板的板式信息(包含各个item的坐标以及关联的图片<文字修饰框、铃铛背景图>)
             List<Map> templateItems = templateMapper.selectStandardItemInfo(selectTemplateId);

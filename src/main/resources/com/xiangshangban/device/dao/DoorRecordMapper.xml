@@ -322,5 +322,4 @@
     ORDER BY
         record_date
   </select>
-
 </mapper>

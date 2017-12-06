@@ -346,4 +346,10 @@
     where employee_id = #{employeeId,jdbcType=VARCHAR}
     AND employee_company_id = #{employeeCompanyId,jdbcType=VARCHAR}
   </select>
+
+  <!--查询指定人员在职的公司ID-->
+  <select id="selectEmpOnTheJobCompanyId" parameterType="String">
+    select employee_company_id from employee_ where employee_id = #{loginEmpId} and employee_status = '0'
+  </select>
+
 </mapper>

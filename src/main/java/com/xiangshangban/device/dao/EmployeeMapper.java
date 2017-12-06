@@ -4,6 +4,7 @@ import com.xiangshangban.device.bean.Employee;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 public interface EmployeeMapper {
     int deleteByPrimaryKey(String employeeId);

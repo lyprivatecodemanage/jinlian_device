@@ -4,6 +4,7 @@ package com.xiangshangban.device.service;
 import com.xiangshangban.device.bean.Festival;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
@@ -19,14 +20,14 @@ public interface ITemplateService {
     /**
      * 更新设备的模板信息(背景图<以及展示的时间>、问候语以及展示的时间、公司Logo)
      */
-     Map modifyDeviceTemplateInfo(String templateInfo,MultipartFile file);
+     Map modifyDeviceTemplateInfo(HttpServletRequest request,String templateInfo,MultipartFile file);
 
      //TODO 添加
     /**
      * 给设备添加模板
      * （模板信息，背景图以及展示时间、问候语以及展示时间，公司Logo）
      */
-    Map addDeviceTemplate(String templateInfo,MultipartFile file);
+    Map addDeviceTemplate(HttpServletRequest request,String templateInfo, MultipartFile file);
 
     /**
      * 下发节日节气模板

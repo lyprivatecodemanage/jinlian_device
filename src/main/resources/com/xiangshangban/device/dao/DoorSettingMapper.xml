@@ -191,8 +191,20 @@
 
   <!--根据门的id查询门的设置信息-->
   <select id="selectDoorSettingInfo" parameterType="String" resultType="map">
-    select fault_count_authentication,alarm_time_length_trespass,first_publish_password,second_publish_password,threaten_publish_passwrod,
-    manager_password,enable_door_event_record,enable_door_keep_open,enable_first_card_keep_open,enable_door_calendar
-    from door_setting where door_id = #{doorId}
+   SELECT
+	COALESCE(fault_count_authentication,'') AS fault_count_authentication,
+	COALESCE(alarm_time_length_trespass,'') AS alarm_time_length_trespass,
+    COALESCE(first_publish_password,'') AS first_publish_password,
+    COALESCE(second_publish_password,'') AS second_publish_password,
+    COALESCE(threaten_publish_passwrod,'') AS threaten_publish_passwrod,
+    COALESCE(manager_password,'') AS manager_password,
+    COALESCE(enable_door_event_record,'') AS enable_door_event_record,
+    COALESCE(enable_door_keep_open,'') AS enable_door_keep_open,
+    COALESCE(enable_first_card_keep_open,'') AS enable_first_card_keep_open,
+    COALESCE(enable_door_calendar,'') AS enable_door_calendar
+  FROM
+      door_setting
+  WHERE
+      door_id = #{doorId}
   </select>
 </mapper>

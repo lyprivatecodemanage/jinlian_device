@@ -115,6 +115,16 @@
 
   <!--根据门的id查询门的定时常开信息-->
   <select id="selectKeepOpenInfo" parameterType="String" resultMap="BaseResultMap">
-    select * from door_timing_keep_open where door_id = #{doorId}
+   SELECT
+	door_id,
+	COALESCE (day_of_week, '') AS day_of_week,
+	COALESCE (timing_open_start_time, '') AS timing_open_start_time,
+	COALESCE (timing_open_end_time, '') AS timing_open_end_time,
+	COALESCE (is_all_day, '') AS is_all_day,
+	COALESCE (is_ditto, '') AS is_ditto
+  FROM
+      door_timing_keep_open
+  WHERE
+      door_id = #{doorId}
   </select>
 </mapper>

@@ -510,16 +510,17 @@ public class DeviceController {
     @ResponseBody
     @RequestMapping("/getAllDevice")
     public String getAllDeviceInfo(@RequestBody String jsonString) {
-
         //提取数据
         JSONObject jsonObject = JSONObject.parseObject(jsonString);
         String companyId = jsonObject.get("companyId") != null ? jsonObject.get("companyId").toString() : null;
         List<Map> maps = deviceService.queryAllDeviceInfo(companyId);
+
         //添加返回码
         Map result = ReturnCodeUtil.addReturnCode(maps);
         System.out.println(JSONObject.toJSONString(result));
         return JSONObject.toJSONString(result);
     }
+
 
     /**
      * 查询当前公司的所有门的信息（一个门信息列表）
