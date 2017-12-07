@@ -1,10 +1,12 @@
 package com.xiangshangban.device.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.xiangshangban.device.bean.*;
 import com.xiangshangban.device.common.utils.CalendarUtil;
 import com.xiangshangban.device.common.utils.DateUtils;
 import com.xiangshangban.device.common.utils.OSSFileUtil;
+import com.xiangshangban.device.common.utils.ReturnCodeUtil;
 import com.xiangshangban.device.dao.DeviceMapper;
 import com.xiangshangban.device.dao.DeviceUpdatePackAppMapper;
 import com.xiangshangban.device.dao.DeviceUpdatePackSysMapper;
@@ -404,6 +406,56 @@ public class OSSController {
 			returnInfo = String.valueOf(logoQrCodeId);
 		}
 		return returnInfo;
+	}
+
+	/*******************************************************************************
+	 * 					@TODO 设备端：上传应用包和升级包
+	 *******************************************************************************/
+	@PostMapping("/devicePackageOSSUpload")
+	public String deviceUploadPackage(@RequestParam("versionCode") String versionCode,
+									  @RequestParam("uploadResource")MultipartFile uploadResource) throws IOException {
+		//验证参数的完整性
+		Map result = new HashMap();
+		if((versionCode==null || versionCode.isEmpty()) ||(uploadResource==null || uploadResource.isEmpty())){
+			//参数异常
+			result = ReturnCodeUtil.addReturnCode(1);
+		}else{
+			//设置上传文件保存的路径
+			String  funcDirectory = "device/update/system/"+versionCode;
+			//上传
+			String filePath = oSSFileService.devicePackageUpload(funcDirectory,uploadResource);
+			if(filePath.trim().equals("false")){
+				//上传失败
+				result = ReturnCodeUtil.addReturnCode(Boolean.valueOf(filePath.trim()),"上传升级包（应用包）失败");
+			}else{
+				//上传成功，保存信息到本地
+				DeviceUpdatePackSys deviceUpdatePackSys = new DeviceUpdatePackSys();
+				deviceUpdatePackSys.setNewSysVerion(versionCode);
+				deviceUpdatePackSys.setPath(filePath.trim());
+				deviceUpdatePackSys.setCreateTime(DateUtils.getDateTime());
+
+				//根据路径查询当前本地数据库中是否已经存在该资源
+				String status = deviceUpdatePackSysMapper.verifyWhetherExistsResource(filePath.trim());
+				if(status==null || "".equals(status)){
+					//添加新的数据
+					int insertResult = deviceUpdatePackSysMapper.insert(deviceUpdatePackSys);
+
+					if(insertResult>0){
+						result = ReturnCodeUtil.addReturnCode(true,"上传文件成功，并保存信息至本地数据库");
+					}else{
+						result = ReturnCodeUtil.addReturnCode(false,"上传文件成功，保存至本地数据库失败");
+					}
+				}else{
+					//根据路径更新操作时间
+					Map map = new HashMap();
+					map.put("createTime",DateUtils.getDateTime());
+					map.put("path",filePath.trim());
+					deviceUpdatePackSysMapper.updateOperateTime(map);
+					result = ReturnCodeUtil.addReturnCode(true,"上传文件成功，并保存信息至本地数据库");
+				}
+			}
+		}
+		return JSONObject.toJSONString(result);
 	}
 }
 

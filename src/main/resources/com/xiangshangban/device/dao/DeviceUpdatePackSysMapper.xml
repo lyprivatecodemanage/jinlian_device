@@ -94,5 +94,20 @@
     device_update_pack_sys
     )
   </select>
+  <!--查询当前的数据库中是否存在指定的资源-->
+  <select id="verifyWhetherExistsResource" parameterType="Map" resultType="String">
+     select new_sys_verion from device_update_pack_sys
+     where path = #{path}
+  </select>
+  <!--上传相同的资源仅仅更新操作时间-->
+  <update id="updateOperateTime" parameterType="Map">
+    update device_update_pack_sys
+    <set >
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where path = #{path,jdbcType=VARCHAR}
+  </update>
 
 </mapper>

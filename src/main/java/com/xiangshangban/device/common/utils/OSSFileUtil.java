@@ -556,4 +556,71 @@ public class OSSFileUtil {
 		//返回文件保存路径
 		return returnFilePath;
 	}
+
+	/*****************************************************************
+     *						@TODO 设备部分上传应用包和升级包
+	 *****************************************************************/
+
+	/**
+	 *
+	 * @param directory
+	 * @param multipartFile
+	 * @return 上传资源的完整路径
+	 * @throws FileNotFoundException
+	 */
+	public String devicePackageUploadTransfer(String directory,MultipartFile multipartFile) throws FileNotFoundException {
+		//初始化OssClient
+		initialize();
+		String filePath = "";
+		if(multipartFile!=null){
+			//截取文件后缀
+			String extention = multipartFile.getOriginalFilename().substring(multipartFile.getOriginalFilename().lastIndexOf(".")+1);
+			//获取上传文件名
+			String fileName = multipartFile.getOriginalFilename().substring(0,multipartFile.getOriginalFilename().lastIndexOf("."));
+			//将multipartFile转换成file
+			CommonsMultipartFile commonsMultipartFile= (CommonsMultipartFile)multipartFile;
+			DiskFileItem diskFileItem = (DiskFileItem)commonsMultipartFile.getFileItem();
+			File file = diskFileItem.getStoreLocation();
+			//上传文件(返回上传的真实路径)
+			filePath = doDevicePackageUpload(directory,fileName,extention,file);
+		}
+		return filePath;
+	}
+
+	/**
+	 * 上传设备的升级包和应用包
+	 * @param directory
+	 * @param fileName
+	 * @param extension
+	 * @param file
+	 * @return
+	 * @throws FileNotFoundException
+	 */
+	public String doDevicePackageUpload(String directory,String fileName,String extension,File file) throws FileNotFoundException {
+		//创建文件头对象
+		ObjectMetadata objectMeta = new ObjectMetadata();
+		//设置文件长度
+		objectMeta.setContentLength(file.length());
+		//设置文件类型
+		objectMeta.setContentType(getFileType(extension));
+		//创建文件流对象
+		InputStream input = new FileInputStream(file);
+		//文件路径(区分系统文件目录和用户文件目录)
+		String filePath = SYS_FILE_LOCATION + "/"+directory+"/"+fileName+"."+extension;
+		try {
+			String ossEnvironment = PropertiesUtils.ossProperty("ossEnvironment");
+			filePath = ("test".equals(ossEnvironment)?"test/"+filePath:"prod/"+filePath);
+		} catch (IOException e) {
+			LOG.info("获取OSS环境属性错误");
+		}
+		//上传文件
+		PutObjectResult putObjectResult = client.putObject(OSS_BUCKET, filePath, input, objectMeta);
+		if(putObjectResult.getETag() != null && !"".equals(putObjectResult.getETag())){
+			//返回文件保存路径
+			return "http://"+OSS_BUCKET+"."+OSS_ENDPOINT+"/"+filePath;
+		}else{
+			//上传失败
+			return "false";
+		}
+	}
 }

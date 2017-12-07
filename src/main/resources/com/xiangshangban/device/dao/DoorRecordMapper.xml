@@ -310,16 +310,23 @@
 
   <!--APP接口:查询指定员工的打卡记录-->
   <select id="selectEmpPunchRecord" parameterType="map" resultType="map">
-   SELECT
-	record_type,
-	record_date
+  SELECT
+	X.*, D.door_name
     FROM
-        door_record
-    WHERE
-        employee_id = #{ empId }
-    AND record_type IN ('3', '5', '6', '7', '8')
-    AND record_date LIKE #{ recordDate }
-    ORDER BY
-        record_date
+        (
+            SELECT
+                door_id,
+                record_type,
+                record_date
+            FROM
+                door_record
+            WHERE
+                employee_id = #{empId}
+            AND record_type IN ('3', '5', '6', '7', '8')
+            AND record_date LIKE #{recordDate}
+            ORDER BY
+                record_date
+        ) X
+    LEFT JOIN door_ D ON X.door_id = D.door_id
   </select>
 </mapper>

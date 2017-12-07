@@ -14,6 +14,18 @@ public class ReturnCodeUtil {
      * @param result
      * @return
      */
+    public static Map addReturnCode(boolean result,String message){
+        Map map = new HashMap();
+        if(result){
+            map.put("returnCode","3000");
+            map.put("message",message);
+        }else{
+            map.put("returnCode","3001");
+            map.put("message",message);
+        }
+        return map;
+    }
+
     public static Map addReturnCode(boolean result){
         Map map = new HashMap();
         if(result){
@@ -54,7 +66,7 @@ public class ReturnCodeUtil {
         switch (flag){
             case 1:
                 map.put("returnCode","3007");
-                map.put("message","参数格式错误");
+                map.put("message","参数异常");
                 break;
             case 2:
                 map.put("returnCode","4204");

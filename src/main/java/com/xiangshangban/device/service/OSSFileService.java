@@ -63,4 +63,9 @@ public interface OSSFileService {
 	 * @throws IOException
 	 */
 	public int templateFileUpload(String directory, MultipartFile file,InputStream inputStream,String flag) throws IOException;
+
+	/*************************************************************
+	 * 				@TODO 设备部分上传升级包和应用包
+	 *************************************************************/
+	public String devicePackageUpload(String directory, MultipartFile file) throws IOException;
 }

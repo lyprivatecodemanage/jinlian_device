@@ -221,4 +221,22 @@ public class OSSFileServiceImpl implements OSSFileService {
 		}
 		return insertResult;
 	}
+
+
+	/*****************************************************************************
+	 *@TODO 设备部分上传升级包和应用包
+	 * @param directory 保存资源的路径
+	 * @param file 要上传的资源
+	 * @return 上传文件后的全路径
+	 */
+	@Override
+	public String devicePackageUpload(String directory, MultipartFile file) throws IOException {
+		//从配置文件中获取登录OSS的凭证
+		String accessId = PropertiesUtils.ossProperty("accessKey");
+		String accessKey = PropertiesUtils.ossProperty("securityKey");
+		OSSFileUtil client  = new OSSFileUtil(accessId,accessKey );
+		//定义上传后的完整路径（保存本地数据库的时候使用）
+		String wholePath = client.devicePackageUploadTransfer(directory,file);
+		return wholePath;
+	}
 }
