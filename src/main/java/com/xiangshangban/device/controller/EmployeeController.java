@@ -19,6 +19,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 /**
@@ -98,7 +99,7 @@ public class EmployeeController {
     @ResponseBody
     @Transactional
     @RequestMapping(value = "/handOutEmployeePermission", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
-    public ReturnData handOutEmployeePermission(@RequestBody String employeePermission){
+    public ReturnData handOutEmployeePermission(@RequestBody String employeePermission, HttpServletRequest request){
 
         /**测试数据
          {
@@ -239,7 +240,7 @@ public class EmployeeController {
             for (Map<String, String> employeeMap : employeeList) {
 
                 //从本地查人员信息
-                Employee employeeLocal = employeeMapper.selectByPrimaryKey(employeeMap.get("employeeId"));
+                Employee employeeLocal = employeeMapper.selectByEmployeeIdAndCompanyId(employeeMap.get("employeeId"), request.getHeader("companyId"));
 
                 if (employeeLocal == null){
                     System.out.println("人员信息不同步，未查到【"+employeeMap.get("employeeName")+"】的信息");
@@ -255,7 +256,7 @@ public class EmployeeController {
 
                     //下发基本信息时，给该人员分配自增长的蓝牙id
                     //判断该人员有没有蓝牙id
-                    Employee employeeExist = employeeMapper.selectByPrimaryKey(employeeId);
+                    Employee employeeExist = employeeMapper.selectByEmployeeIdAndCompanyId(employeeId, request.getHeader("companyId"));
                     if (StringUtils.isEmpty(employeeExist.getBluetoothNo())){
                         //人员没有蓝牙id，分配唯一的蓝牙id
                         EmployeeBluetoothCount employeeBluetoothCountExist = employeeBluetoothCountMapper.selectByPrimaryKey("1");

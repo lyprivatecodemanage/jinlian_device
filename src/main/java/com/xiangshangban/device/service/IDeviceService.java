@@ -29,7 +29,8 @@ public interface IDeviceService {
      * @return
      */
     List<Map<String, String>> findDeviceInformation(String companyId, String companyName, String deviceName,
-                                                    String deviceId, String  isOnline, String activeStatus);
+                                                    String deviceId, String  isOnline, String activeStatus,
+                                                    String employeeCompanyId);
 
     /**
      * 下发重启命令，重启指定的设备

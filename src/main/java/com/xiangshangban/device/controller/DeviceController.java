@@ -178,7 +178,7 @@ public class DeviceController {
     @Transactional
     @ResponseBody
     @RequestMapping(value = "/findDeviceInformation", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
-    public ReturnData findDeviceInformation(@RequestBody String jsonString) {
+    public ReturnData findDeviceInformation(@RequestBody String jsonString, HttpServletRequest request) {
 
         /**
          * 测试数据
@@ -253,7 +253,7 @@ public class DeviceController {
             System.out.println("page = " + Integer.valueOf(page) + "\n" + "rows = " + Integer.valueOf(rows));
             Page pageHelperResult = PageHelper.startPage(Integer.valueOf(page), Integer.valueOf(rows));
             List<Map<String, String>> mapListResult = deviceService.findDeviceInformation(companyId,
-                    companyName, deviceName, deviceId, isOnline, activeStatus);
+                    companyName, deviceName, deviceId, isOnline, activeStatus, request.getHeader("companyId"));
 
             if (mapListResult.size() > 0) {
                 Map map = PageUtils.doSplitPageOther(null, null, page, rows, pageHelperResult);
@@ -1897,7 +1897,7 @@ public class DeviceController {
                                 mapTemp.put("deviceName", door.getDoorName());
 
                                 //判断该人员有没有蓝牙id
-                                Employee employeeExist = employeeMapper.selectByPrimaryKey(employeeId);
+                                Employee employeeExist = employeeMapper.selectByEmployeeIdAndCompanyId(employeeId, companyId);
                                 if (StringUtils.isEmpty(employeeExist.getBluetoothNo())) {
 
                                     returnData.setMessage("您还没有分配蓝牙开门参数，请联系管理员下发您的开门权限");

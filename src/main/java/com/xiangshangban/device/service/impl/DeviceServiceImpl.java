@@ -84,7 +84,7 @@ public class DeviceServiceImpl implements IDeviceService {
 
     @Override
     public List<Map<String, String>> findDeviceInformation(String companyId, String companyName, String deviceName, String deviceId,
-                                      String isOnline, String activeStatus) {
+                                      String isOnline, String activeStatus, String employeeCompanyId) {
 
         Device device = new Device();
 
@@ -144,7 +144,7 @@ public class DeviceServiceImpl implements IDeviceService {
                 //查找人员姓名
                 String employeeId = map.get("operate_employee");
                 try {
-                    String employeeName = employeeMapper.selectByPrimaryKey(employeeId).getEmployeeName();
+                    String employeeName = employeeMapper.selectByEmployeeIdAndCompanyId(employeeId, employeeCompanyId).getEmployeeName();
                     map.put("operate_employee", employeeName);
                 }catch (Exception e){
                     System.out.println("根据人员id没有查到操作人【"+employeeId+"】的姓名");
