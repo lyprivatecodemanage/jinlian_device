@@ -1794,6 +1794,7 @@ public class DeviceController {
             if (StringUtils.isNotEmpty(employeeId)) {
                 //获取公司id
                 String companyId = request.getHeader("companyId");
+                System.out.println("***********************************************************************公司的id是："+companyId);
                 if (StringUtils.isNotEmpty(companyId)) {
                     //查出该公司的所有设备
                     List<Map> deviceList = deviceMapper.selectAllDevice(companyId);
@@ -1818,8 +1819,8 @@ public class DeviceController {
                             Door doorExist = doorMapper.findAllByDeviceId(deviceId);
                             if (doorExist != null) {
 
-                                //判断当前登录人员在该门的开门权限有效期是否过期，过期则不显示该门
-
+//                                //判断当前登录人员在该门的开门权限有效期是否过期，过期则不显示该门
+//                                doorEmployeePermissionMapper.selectEmployeePressionByLeftJoin(employeeId, companyId);
 
                                 //有绑定的设备和门，则计数加1
                                 deviceDoorBindCount = deviceDoorBindCount + 1;

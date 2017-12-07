@@ -31,10 +31,10 @@ public class ConnectionFactoryServiceImpl implements IConnectionFactoryService {
 
     public ConnectionFactoryServiceImpl(){
         System.out.println("创建MQ连接");
-        int i = 0;
+//        int i = 0;
         connection = new HashMap<String, CachingConnectionFactory>();
         useConn = new HashMap<String, CachingConnectionFactory>();
-        while (i < 10) {
+//        while (i < 10) {
             CachingConnectionFactory connectionFactory = new CachingConnectionFactory();
             connectionFactory.resetConnection();
             connectionFactory.setHost(host);
@@ -45,8 +45,8 @@ public class ConnectionFactoryServiceImpl implements IConnectionFactoryService {
             connectionFactory.setRequestedHeartBeat(180);
             connectionFactory.setCloseTimeout(10);
             connection.put(FormatUtil.createUuid(), connectionFactory);
-            i++;
-        }
+//            i++;
+//        }
         System.out.println("创建MQ连接完成");
     }
 
