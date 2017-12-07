@@ -74,7 +74,7 @@ public interface IEntranceGuardService {
      * @param relateEmpPermissionCondition
      * @return
      */
-   List<Map> queryRelateEmpPermissionInfo(Map relateEmpPermissionCondition);
+   List<Map> queryRelateEmpPermissionInfo(Map relateEmpPermissionCondition,String companyId);
 
     /**
      * 查询有门禁权限的人员一周的开门时间段

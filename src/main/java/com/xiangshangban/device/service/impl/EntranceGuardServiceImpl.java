@@ -293,11 +293,11 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
      * @return
      */
     @Override
-    public List<Map> queryRelateEmpPermissionInfo(Map relateEmpPermissionCondition) {
+    public List<Map> queryRelateEmpPermissionInfo(Map relateEmpPermissionCondition,String companyId) {
         //根据门的ID查询门关联的设备的ID
         Door doorObj = doorMapper.findAllByDoorId(relateEmpPermissionCondition.get("doorId").toString());
         //TODO 维护door_employee表进行door_employee表数据的删除和添加
-        maintainDoorEmployee(doorObj);
+        maintainDoorEmployee(doorObj,companyId);
 
         if(relateEmpPermissionCondition.get("empName")!=null&&!relateEmpPermissionCondition.get("empName").toString().isEmpty()){
             relateEmpPermissionCondition.put("empName","%"+relateEmpPermissionCondition.get("empName")+"%");
@@ -377,7 +377,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
      * TODO 维护doorEmployee表
      * 判断当前门关联的人员的最新的一条指令是哪个（删除、下发人员）
      */
-    public void maintainDoorEmployee(Door doorObj){
+    public void maintainDoorEmployee(Door doorObj,String companyId){
         //查询该门（设备）上所有人员的最新的指令是哪种指令
         Map allEmpMap = new HashMap();
         allEmpMap.put("employeeId",null);
@@ -433,8 +433,11 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
             //判断最新指令的类型和状态（删除人员/下发人员    <待发送、下发中、下发成功、下发失败>）
             for(String key:empCommandMap.keySet()){
                 int commandNum = empCommandMap.get(key).size();
-                //根据人员的ID查询人员的名称
-                String empName = employeeMapper.selectEmpNameByEmpId(key);
+                //根据人员的ID和公司的ID查询人员的名称
+                Map requestParam = new HashMap();
+                requestParam.put("empId",key);
+                requestParam.put("companyId",companyId);
+               /* String empName = employeeMapper.selectEmpNameByComIdAndEmpId(requestParam);*/
                 if(commandNum==1){
                     String actionCode = empCommandMap.get(key).get(0).get("actionCode").toString();
                     String status = empCommandMap.get(key).get(0).get("status").toString();

@@ -427,4 +427,8 @@
     AND employee_company_id = #{employeeCompanyId,jdbcType=VARCHAR}
   </update>
 
+  <!--根据公司的ID和人员的ID查询人员的名称-->
+  <select id="selectEmpNameByComIdAndEmpId" parameterType="Map" resultType="String">
+    select employee_name from employee_ where employee_id = #{empId} and employee_company_id = #{companyId}
+  </select>
 </mapper>

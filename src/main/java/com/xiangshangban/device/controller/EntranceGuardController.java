@@ -389,7 +389,7 @@ public class EntranceGuardController {
      * }
      */
     @PostMapping("/autho/getRelateEmpPermissionInfo")
-    public String getRelateEmpPermissionInfo(@RequestBody String requestParam){
+    public String getRelateEmpPermissionInfo(@RequestBody String requestParam,HttpServletRequest request){
 
         //定义指令的状态
         String[] cmdStatusStr = {"待发送","下发中","下发成功","下发失败","删除人员权限","已回复"};
@@ -409,6 +409,8 @@ public class EntranceGuardController {
         Object openType = jsonObject.get("openType");
         Object page = jsonObject.get("page");
         Object rows = jsonObject.get("rows");
+        //公司ID
+        String companyId = request.getHeader("companyId");
 
         Map relateEmpPermissionCondition = new HashMap();
         relateEmpPermissionCondition.put("doorId",doorId!=null?doorId.toString():null);
@@ -418,7 +420,7 @@ public class EntranceGuardController {
         relateEmpPermissionCondition.put("openType",openType!=null?openType.toString():null);
 
         //门关联的《员工姓名、部门、开门方式，开门时间》
-        List<Map> maps = iEntranceGuardService.queryRelateEmpPermissionInfo(relateEmpPermissionCondition);
+        List<Map> maps = iEntranceGuardService.queryRelateEmpPermissionInfo(relateEmpPermissionCondition,companyId);
         //对查询出的数据根据最后下发时间进行排序
         List<DoorPermissionEmp> permissionEmps = new ArrayList<>();
         if(maps!=null && maps.size()>0){
@@ -526,6 +528,8 @@ public class EntranceGuardController {
     }
 
     /**
+     *
+     * ----待修改----
      * 查询具有门禁权限的人员一周的开门时间
      * @param requestParam
      * @return
@@ -593,7 +597,10 @@ public class EntranceGuardController {
             }
 
             result =  ReturnCodeUtil.addReturnCode(weekInfo);
-            //通过人员的ID查询人员的名称
+            /**
+             * ----待修改----
+             *通过人员的ID查询人员的名称
+             */
             Employee employee = employeeMapper.selectByPrimaryKey(jsonObject.get("empId").toString());
 
             result.put("openType",openType);
@@ -650,7 +657,10 @@ public class EntranceGuardController {
         }
 
         if(!firstCardOpenFlag.isEmpty() && Integer.parseInt(firstCardOpenFlag)==1){
-            //获取该门首卡常开信息
+            /**
+             * ----待修改----
+             *获取该门首卡常开信息
+             */
             firstCardKeepOpen = iEntranceGuardService.queryFirstCardKeepOpenInfo(doorId!=null?doorId.toString():null);
         }
 
@@ -762,6 +772,7 @@ public class EntranceGuardController {
     //TODO 门禁管理-------------门禁记录
     //1)出入记录
     /**
+     * ----待修改----
      * {
      *     "empName":"",
      *     "companyId":"",------>当前登陆的企业管理员的所属公司ID
@@ -783,6 +794,7 @@ public class EntranceGuardController {
     // 2)门禁异常
 
     /**
+     * ----待修改----
      *{
      *     "empName":"",
      *     "companyId":"",----->当前登陆的管理员的所属公司ID
