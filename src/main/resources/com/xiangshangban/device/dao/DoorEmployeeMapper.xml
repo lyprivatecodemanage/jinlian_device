@@ -163,11 +163,11 @@
   <!--查询门的命令下发的时间-->
   <select id="selectSendTime" parameterType="String" resultType="String">
     SELECT
-    MAX (send_time) sendtime
+    COALESCE (MAX (send_time),'') AS sendtime
     FROM
     door_cmd
     WHERE
-    action_code IN ('2002','3001')
+    action_code IN ('2001','2002','3001')
     AND device_id = (
     SELECT
     device_id
@@ -245,8 +245,9 @@
       FROM
       (
       SELECT
-      X.*, Y.range_start_time,
-      range_end_time
+      X.*,
+      COALESCE (Y.range_start_time,'') AS range_start_time,
+      COALESCE (range_end_time,'') AS range_end_time
       FROM
       (
       SELECT

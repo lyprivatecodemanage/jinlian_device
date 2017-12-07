@@ -1051,6 +1051,8 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
             map.put("empId",empId.toString());
             map.put("recordDate",(searchTime==null || searchTime.toString().isEmpty())?"%"+DateUtils.getDate()+"%":"%"+searchTime+"%");
             punchCardRecord = doorRecordMapper.selectEmpPunchRecord(map);
+        }else{
+            System.out.println("APP---------->传递的员工参数为null !!!");
         }
         return punchCardRecord;
     }

@@ -351,7 +351,7 @@ public class EntranceGuardController {
                 Map outterMap = new HashedMap();
                 outterMap.put("doorName",key);
                 outterMap.put("relateInfo", realMap.get(key));
-                outterMap.put("sendTime",sentTimes);
+                outterMap.put("sendTime",sentTimes==null?"":sentTimes);
 
                 outterList.add(outterMap);
             }

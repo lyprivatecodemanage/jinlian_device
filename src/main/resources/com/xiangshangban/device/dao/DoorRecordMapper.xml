@@ -316,8 +316,8 @@
         (
             SELECT
                 door_id,
-                record_type,
-                record_date
+                COALESCE (record_type,'') AS record_type,
+                COALESCE (record_date,'') AS record_date
             FROM
                 door_record
             WHERE
