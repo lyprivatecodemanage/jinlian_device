@@ -50,7 +50,6 @@ public class ConnectionFactoryServiceImpl implements IConnectionFactoryService {
         System.out.println("创建MQ连接完成");
     }
 
-
     /**
      * 获取链接工厂
      * @return

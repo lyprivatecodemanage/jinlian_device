@@ -1447,7 +1447,6 @@ public class EntranceGuardController {
             }
 
             //根据时间进行排序
-
             for(int k=0;k<empPunchCardRecord.size();k++){
                 PersonalRecordForApp personalRecordForApp = new PersonalRecordForApp();
                 personalRecordForApp.setDoorName(empPunchCardRecord.get(k).get("door_name").toString().trim());
@@ -1481,7 +1480,5 @@ public class EntranceGuardController {
         return JSONObject.toJSONString(map);
     }
 }
-
-
 
 
