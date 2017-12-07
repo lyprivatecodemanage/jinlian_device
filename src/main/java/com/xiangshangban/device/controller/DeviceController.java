@@ -1952,4 +1952,69 @@ public class DeviceController {
         }
     }
 
+    /**
+     * 获取该公司的设备数量
+     * @param jsonString
+     * @return
+     */
+    @Transactional
+    @ResponseBody
+    @RequestMapping(value = "/getDeviceCount", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    public ReturnData getDeviceCount(@RequestBody String jsonString) {
+
+        /**
+         * 测试数据
+         {
+         "companyId": "A3789DSYAG7FA7"
+         }
+         */
+
+        System.out.println(jsonString);
+
+        //提取数据
+        Map<String, String> mapJson = (Map<String, String>) net.sf.json.JSONObject.fromObject(jsonString);
+
+        String companyId = "";
+
+        //返回给前端的数据
+        ReturnData returnData = new ReturnData();
+
+        try {
+            companyId = mapJson.get("companyId");
+        } catch (Exception e) {
+            System.out.println("必传参数字段为null");
+            returnData.setMessage("必传参数字段为null");
+            returnData.setReturnCode("3006");
+            return returnData;
+        }
+
+        if (companyId == null) {
+            System.out.println("必传参数字段不存在");
+            returnData.setMessage("必传参数字段不存在");
+            returnData.setReturnCode("3006");
+            return returnData;
+        }
+
+        if ("".equals(companyId)) {
+            System.out.println("必传参数字段为空字符串");
+            returnData.setMessage("必传参数字段为空字符串");
+            returnData.setReturnCode("3006");
+            return returnData;
+        }
+
+        try {
+            List<Map> deviceList = deviceMapper.selectAllDevice(companyId);
+
+            returnData.setData(String.valueOf(deviceList.size()));
+            returnData.setMessage("请求数据成功");
+            returnData.setReturnCode("3000");
+            return returnData;
+        } catch (Exception e) {
+            e.printStackTrace();
+            returnData.setMessage("服务器错误");
+            returnData.setReturnCode("3001");
+            return returnData;
+        }
+    }
+
 }

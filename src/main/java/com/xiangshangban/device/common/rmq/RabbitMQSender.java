@@ -55,7 +55,7 @@ public class RabbitMQSender {
 //            }
 //            template.convertAndSend(encry);
                template.convertAndSend(json);
-//            ConnectionFactoryServiceImpl.destoryConnection(templateutil.getKey());
+            //ConnectionFactoryServiceImpl.destoryConnection(templateutil.getKey());
         }else{
             System.out.println("RABBITMQ'S ERROR: can not intalialize the template.");
             return RabbitMQSender.ERROR;

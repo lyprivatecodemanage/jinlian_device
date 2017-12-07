@@ -152,6 +152,12 @@
 			<version>3.0.0</version>
 		</dependency>
 
+		<!--&lt;!&ndash;log4j2日志依赖&ndash;&gt;-->
+		<!--<dependency>-->
+			<!--<groupId>org.springframework.boot</groupId>-->
+			<!--<artifactId>spring-boot-starter-log4j2</artifactId>-->
+		<!--</dependency>-->
+
 	</dependencies>
 
 	<build>
