@@ -278,6 +278,7 @@
       range_flag_id
       ) Y ON X.range_flag_id = Y.range_flag_id
       ) S
+
       LEFT JOIN (
       SELECT DISTINCT
       employee_id,
@@ -285,7 +286,7 @@
       FROM
       time_range_common_employee
       WHERE
-      range_flag_id = (
+      range_flag_id in (
       SELECT
       range_flag_id
       FROM

@@ -23,9 +23,9 @@ public class ConnectionFactoryServiceImpl implements IConnectionFactoryService {
     private static String host = "192.168.0.242";
     private static String username = "test";
     private static String password = "123";
-//    private static String host = "106.15.90.200";
-//    private static String username = "jinnianmq";
-//    private static String password = "jinnian123456";
+    /*private static String host = "106.15.90.200";
+    private static String username = "jinnianmq";
+    private static String password = "jinnian123456";*/
     private static int port = 5672;
     private static String virtualHost= "/";
 
