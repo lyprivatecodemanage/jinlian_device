@@ -120,7 +120,7 @@
     S.*
     FROM
     (
-    SELECT
+    SELECT DISTINCT
     A .door_id,
     COALESCE(door_name,'') as door_name,
     COALESCE(operate_time,'') as operate_time,

@@ -633,7 +633,7 @@ public class EntranceGuardController {
         if(doorSetting!=null && doorSetting.size()>0){
             //完善数据
             for(int i=0;i<doorSetting.size();i++){
-                if(doorSetting.get(i).get("alarm_time_length_trespass")!=null){
+                if(doorSetting.get(i).get("alarm_time_length_trespass")!=null && !doorSetting.get(i).get("alarm_time_length_trespass").equals("0")){
                     doorSetting.get(i).put("alarmFlag","1");//报警
                 }else{
                     doorSetting.get(i).put("alarmFlag","0");//不报警
@@ -656,6 +656,8 @@ public class EntranceGuardController {
 
         //整理定时常开数据(根据星期进行分组)
         Map<String,List<Map>> keepOpenMap = new HashMap<>();
+
+
         //最终的定时常开数据
         List<Map> timingKeepOpenList = new ArrayList<>();
         if(doorTimingKeepOpens!= null && doorTimingKeepOpens.size()>0){
