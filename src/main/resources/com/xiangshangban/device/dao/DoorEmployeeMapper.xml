@@ -245,9 +245,8 @@
       FROM
       (
       SELECT
-      X.*,
-      COALESCE (Y.range_start_time,'') AS range_start_time,
-      COALESCE (range_end_time,'') AS range_end_time
+      X.*, COALESCE (Y.range_start_time, '') AS range_start_time,
+      COALESCE (range_end_time, '') AS range_end_time
       FROM
       (
       SELECT
@@ -279,11 +278,22 @@
       range_flag_id
       ) Y ON X.range_flag_id = Y.range_flag_id
       ) S
-      LEFT JOIN time_range_common_employee W ON S.range_start_time = W.range_start_time
-      AND S.range_end_time = W.range_end_time
-      AND S.range_flag_id = W.range_flag_id
+      LEFT JOIN (
+      SELECT DISTINCT
+      employee_id,
+      range_door_open_type
+      FROM
+      time_range_common_employee
       WHERE
-      W.day_of_week = '1'
+      range_flag_id = (
+      SELECT
+      range_flag_id
+      FROM
+      door_employee
+      WHERE
+      door_id = #{doorId}
+      )
+      ) W ON S.employee_id = W.employee_id
       ) Q
       <where>
           <if test="empName!=null and empName!=''">
