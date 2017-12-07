@@ -2,6 +2,9 @@ package com.xiangshangban.device.dao;
 
 import com.xiangshangban.device.bean.DoorEmployeePermission;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.Map;
 
 @Mapper
 public interface DoorEmployeePermissionMapper {
@@ -35,4 +38,9 @@ public interface DoorEmployeePermissionMapper {
      * @return
      */
     int deleteByRangeFlagId(String rangeFlagId);
+
+    /**
+     * 联查人和门关联表以及人员开门权限表
+     */
+    Map<String, String> selectEmployeePressionByLeftJoin(@Param("employeeId") String employeeId, @Param("doorId") String doorId);
 }

@@ -24,7 +24,6 @@ public class RabbitMQRecieverListener implements ApplicationListener<Application
     public void onApplicationEvent(ApplicationReadyEvent applicationReadyEvent) {
       try {
 
-//            RabbitMQReciever rabbitMQReciever = new RabbitMQReciever();
             rabbitMQReciever.startRabbitMqReceiver();
 
         } catch (InterruptedException e) {

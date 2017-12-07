@@ -110,4 +110,21 @@
     delete from door_employee_permission
     where range_flag_id = #{rangeFlagId,jdbcType=VARCHAR}
   </delete>
+
+  <select id="selectEmployeePressionByLeftJoin" resultType="java.util.Map" parameterType="java.lang.String" >
+    SELECT
+	A .employee_id as "employeeId",
+	A .employee_name as "employeeName",
+	A .door_id as "doorId",
+	A .door_name as "doorName",
+	A .range_flag_id as "rangeFlagId",
+	B.door_open_start_time as "doorOpenStartTime",
+	B.door_open_end_time as "doorOpenEndTime"
+    FROM
+	door_employee A
+    LEFT JOIN door_employee_permission B ON A .range_flag_id = B.range_flag_id
+    WHERE
+	A .employee_id = #{employeeId,jdbcType=VARCHAR}
+    AND A .door_id = #{doorId,jdbcType=VARCHAR}
+  </select>
 </mapper>

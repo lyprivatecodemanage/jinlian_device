@@ -26,7 +26,7 @@ public interface IEmployeeService {
                                      String isDitto);
 
     //人员人脸、指纹、卡号信息上传存储
-    Map<String, Object> saveEmployeeInputInfo(String employeeInputInfo, String deviceId, String style);
+    Map<String, Object> saveEmployeeInputInfo(String employeeInputInfo, String deviceId, String style, String companyId);
 
     //删除设备上的人员的所有关联信息（设备模块调用）
     ReturnData deleteEmployeeInformationDev(String employeeIdCollection);

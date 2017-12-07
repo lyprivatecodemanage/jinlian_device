@@ -69,6 +69,9 @@ public class EmployeeController {
     @Autowired
     private EmployeeBluetoothCountMapper employeeBluetoothCountMapper;
 
+    @Autowired
+    private DeviceMapper deviceMapper;
+
     /**
      * 人员模块人员信息同步（之所以是这个名字，是因为之前打算用协议包成命令记录下来同步的操作日志）
      * @param userInformation
@@ -730,6 +733,9 @@ public class EmployeeController {
         if (myMd5.equals(otherMd5)){
             System.out.println("MD5校验成功，数据完好无损");
 
+            //获取绑定该设备的公司的id
+            String companyId = deviceMapper.selectByPrimaryKey(deviceId).getCompanyId();
+
             Map<String, Map<String, String>> dataMap = (Map<String, Map<String, String>>) mapResult.get("data");
 
             if ("0".equals(style)){
@@ -742,7 +748,7 @@ public class EmployeeController {
                     List<Employee> employeeExistList = employeeMapper.selectByEmployeeNfc(employeeNfc);
                     if (employeeExistList == null || employeeExistList.size() == 0){
 
-                        return iEmployeeService.saveEmployeeInputInfo(jsonUrlDecoderString, deviceId, style);
+                        return iEmployeeService.saveEmployeeInputInfo(jsonUrlDecoderString, deviceId, style, companyId);
 
                     }else if (employeeExistList.size() > 0){
                         resultCode = "999";
@@ -765,8 +771,9 @@ public class EmployeeController {
                     //nfc空字符串，直接更新
                     Employee employee = new Employee();
                     employee.setEmployeeId(employeeId);
+                    employee.setEmployeeCompanyId(companyId);
                     employee.setEmployeeNfc(employeeNfc);
-                    employeeMapper.updateByPrimaryKeySelective(employee);
+                    employeeMapper.updateByEmployeeIdAndCompanyIdSelective(employee);
 
                     resultCode = "0";
                     resultMessage = "删除nfc成功";
@@ -779,7 +786,7 @@ public class EmployeeController {
             }else if ("1".equals(style)){
                 //人脸录入
 
-                return iEmployeeService.saveEmployeeInputInfo(jsonUrlDecoderString, deviceId, style);
+                return iEmployeeService.saveEmployeeInputInfo(jsonUrlDecoderString, deviceId, style, companyId);
 
             }
 

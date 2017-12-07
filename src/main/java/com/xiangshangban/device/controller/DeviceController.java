@@ -74,6 +74,9 @@ public class DeviceController {
     @Autowired
     private EmployeeMapper employeeMapper;
 
+    @Autowired
+    private DoorEmployeePermissionMapper doorEmployeePermissionMapper;
+
     /**
      * 平台新增设备，未绑定公司的设备
      *
@@ -342,7 +345,11 @@ public class DeviceController {
 
             device.setDeviceId(deviceId);
             device.setCompanyId(companyId);
-            device.setCompanyName(companyName);
+            if ("请选择".equals(companyName)){
+                device.setCompanyName("");
+            }else {
+                device.setCompanyName(companyName);
+            }
             device.setDevicePlace(devicePlace);
 
             //更新设备信息
@@ -1785,11 +1792,10 @@ public class DeviceController {
 
         try {
             if (StringUtils.isNotEmpty(employeeId)) {
-                //根据人员id查询公司id
-                Employee employee = employeeMapper.selectByPrimaryKey(employeeId);
-                if (employee != null) {
+                //获取公司id
+                String companyId = request.getHeader("companyId");
+                if (StringUtils.isNotEmpty(companyId)) {
                     //查出该公司的所有设备
-                    String companyId = employee.getEmployeeCompanyId();
                     List<Map> deviceList = deviceMapper.selectAllDevice(companyId);
 
                     //判断该公司是否有设备
@@ -1811,6 +1817,10 @@ public class DeviceController {
                             //查看设备有没有绑定门
                             Door doorExist = doorMapper.findAllByDeviceId(deviceId);
                             if (doorExist != null) {
+
+                                //判断当前登录人员在该门的开门权限有效期是否过期，过期则不显示该门
+
+
                                 //有绑定的设备和门，则计数加1
                                 deviceDoorBindCount = deviceDoorBindCount + 1;
                                 List<Map<String, String>> versionInfoList = deviceMapper.selectAllVersionInfoByDeviceId(deviceId);
@@ -1923,7 +1933,7 @@ public class DeviceController {
                     }
 
                 } else {
-                    returnData.setMessage("没有查到当前登录人员的信息");
+                    returnData.setMessage("无法获取当前登录人的公司信息");
                     returnData.setReturnCode("4007");
                     return returnData;
                 }

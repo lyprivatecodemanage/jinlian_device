@@ -240,7 +240,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
 
     //人员人脸、指纹、卡号信息上传存储
     @Override
-    public Map<String, Object> saveEmployeeInputInfo(String jsonString, String deviceId, String style) {
+    public Map<String, Object> saveEmployeeInputInfo(String jsonString, String deviceId, String style, String companyId) {
 
         //提取数据
         Map<String, Object> allMap = JSONObject.fromObject(jsonString);
@@ -252,6 +252,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
 
         Employee employee = new Employee();
         employee.setEmployeeId(employeeId);
+        employee.setEmployeeCompanyId(companyId);
         if ("1".equals(style)){
             try {
                 employee.setEmployeeFace(((Map<String, String>) userLabelMap.get("userFace")).get("faceData"));
@@ -269,59 +270,68 @@ public class EmployeeServiceImpl implements IEmployeeService {
             employee.setEmployeeNfc((String) userLabelMap.get("userNFC"));
         }
 
-        Employee employeeExist = employeeMapper.selectByPrimaryKey(employeeId);
+        //回复人员人脸、指纹、卡号信息上传
+        Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
+        Map<String, Object> resultData = new LinkedHashMap<String, Object>();
+
+        //查看人员是否存在
+        Employee employeeExist = employeeMapper.selectByEmployeeIdAndCompanyId(employeeId, companyId);
+
         if (employeeExist != null){
             //更新人员的指纹、人脸、卡号数据
-            employeeMapper.updateByPrimaryKeySelective(employee);
+            employeeMapper.updateByEmployeeIdAndCompanyIdSelective(employee);
 
-            //回复人员人脸、指纹、卡号信息上传
-            Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
-            Map<String, Object> resultData = new LinkedHashMap<String, Object>();
             resultCode = "0";
             resultMessage = "执行成功";
             resultData.put("resultCode", resultCode);
             resultData.put("resultMessage", resultMessage);
             resultData.put("returnObj", employeeId);
             resultMap.put("result", resultData);
-
-            //构造命令格式
-            DoorCmd doorCmdRecord = new DoorCmd();
-            doorCmdRecord.setServerId("001");
-            doorCmdRecord.setDeviceId(deviceId);
-            doorCmdRecord.setFileEdition("v1.3");
-            doorCmdRecord.setCommandMode("R");
-            doorCmdRecord.setCommandType("S");
-            doorCmdRecord.setCommandTotal("1");
-            doorCmdRecord.setCommandIndex("1");
-            doorCmdRecord.setSubCmdId("");
-            doorCmdRecord.setAction("UPDATE_USER_LABEL");
-            doorCmdRecord.setActionCode("2003");
-            doorCmdRecord.setSendTime(CalendarUtil.getCurrentTime());
-            doorCmdRecord.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
-            doorCmdRecord.setSuperCmdId(FormatUtil.createUuid());
-            doorCmdRecord.setData(JSON.toJSONString(resultMap));
-
-            //获取完整的数据加协议封装格式
-            RabbitMQSender rabbitMQSender = new RabbitMQSender();
-            Map<String, Object> doorRecordAll =  rabbitMQSender.messagePackaging(doorCmdRecord, "", resultData, "R");
-            //命令状态设置为: 已回复
-            doorCmdRecord.setStatus("5");
-            //设置md5校验值
-            doorCmdRecord.setMd5Check((String) doorRecordAll.get("MD5Check"));
-            //设置数据库的data字段
-            doorCmdRecord.setData(JSON.toJSONString(doorRecordAll.get("result")));
-            doorCmdRecord.setResultCode(resultCode);
-            doorCmdRecord.setResultMessage(resultMessage);
-            //命令数据存入数据库
-            entranceGuardService.insertCommand(doorCmdRecord);
-
-            System.out.println("人员指纹、人脸信息上传已回复");
-            return doorRecordAll;
+            System.out.println("人员指纹、人脸信息上传成功");
         }else {
+            resultCode = "999";
+            resultMessage = "该人员信息不存在";
+            resultData.put("resultCode", resultCode);
+            resultData.put("resultMessage", resultMessage);
+            resultData.put("returnObj", "");
+            resultMap.put("result", resultData);
 
             System.out.println("服务器没有设备端存在的该人员的信息");
-            return new HashMap<>();
         }
+
+        //构造命令格式
+        DoorCmd doorCmdRecord = new DoorCmd();
+        doorCmdRecord.setServerId("001");
+        doorCmdRecord.setDeviceId(deviceId);
+        doorCmdRecord.setFileEdition("v1.3");
+        doorCmdRecord.setCommandMode("R");
+        doorCmdRecord.setCommandType("S");
+        doorCmdRecord.setCommandTotal("1");
+        doorCmdRecord.setCommandIndex("1");
+        doorCmdRecord.setSubCmdId("");
+        doorCmdRecord.setAction("UPDATE_USER_LABEL");
+        doorCmdRecord.setActionCode("2003");
+        doorCmdRecord.setSendTime(CalendarUtil.getCurrentTime());
+        doorCmdRecord.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
+        doorCmdRecord.setSuperCmdId(FormatUtil.createUuid());
+        doorCmdRecord.setData(JSON.toJSONString(resultMap));
+
+        //获取完整的数据加协议封装格式
+        RabbitMQSender rabbitMQSender = new RabbitMQSender();
+        Map<String, Object> doorRecordAll =  rabbitMQSender.messagePackaging(doorCmdRecord, "", resultData, "R");
+        //命令状态设置为: 已回复
+        doorCmdRecord.setStatus("5");
+        //设置md5校验值
+        doorCmdRecord.setMd5Check((String) doorRecordAll.get("MD5Check"));
+        //设置数据库的data字段
+        doorCmdRecord.setData(JSON.toJSONString(doorRecordAll.get("result")));
+        doorCmdRecord.setResultCode(resultCode);
+        doorCmdRecord.setResultMessage(resultMessage);
+        //命令数据存入数据库
+        entranceGuardService.insertCommand(doorCmdRecord);
+
+        System.out.println("人员指纹、人脸信息上传已回复");
+        return doorRecordAll;
 
     }
 

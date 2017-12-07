@@ -4,7 +4,6 @@ import com.xiangshangban.device.bean.Employee;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
-import java.util.Map;
 
 public interface EmployeeMapper {
     int deleteByPrimaryKey(String employeeId);
@@ -32,6 +31,10 @@ public interface EmployeeMapper {
     //根据人员的ID查询人员的名称
     String selectEmpNameByEmpId(@Param("empId") String empId);
 
+    //查询指定人员在职的公司ID
     Employee selectByEmployeeIdAndCompanyId(@Param("employeeId") String employeeId,
                                             @Param("employeeCompanyId") String employeeCompanyId);
+
+    //按照人员id和公司id更新人员信息
+    int updateByEmployeeIdAndCompanyIdSelective(Employee employee);
 }

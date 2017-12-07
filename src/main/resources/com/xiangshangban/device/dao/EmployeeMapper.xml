@@ -352,4 +352,79 @@
     select employee_company_id from employee_ where employee_id = #{loginEmpId} and employee_status = '0'
   </select>
 
+  <!--按照人员id和公司id更新人员信息-->
+  <update id="updateByEmployeeIdAndCompanyIdSelective" parameterType="com.xiangshangban.device.bean.Employee">
+    update employee_
+    <set>
+      <if test="employeeNumber != null">
+        employee_number = #{employeeNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeName != null">
+        employee_name = #{employeeName,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeBirthday != null">
+        employee_birthday = #{employeeBirthday,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeEntryTime != null">
+        employee_entry_time = #{employeeEntryTime,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeProbationaryExpired != null">
+        employee_probationary_expired = #{employeeProbationaryExpired,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeContractExpired != null">
+        employee_contract_expired = #{employeeContractExpired,jdbcType=VARCHAR},
+      </if>
+      <if test="adminFlag != null">
+        admin_flag = #{adminFlag,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeImg != null">
+        employee_img = #{employeeImg,jdbcType=VARCHAR},
+      </if>
+      <if test="employeePhoto != null">
+        employee_photo = #{employeePhoto,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeFinger1 != null">
+        employee_finger1 = #{employeeFinger1,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeFinger2 != null">
+        employee_finger2 = #{employeeFinger2,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeFace != null">
+        employee_face = #{employeeFace,jdbcType=VARCHAR},
+      </if>
+      <if test="employeePhone != null">
+        employee_phone = #{employeePhone,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeNfc != null">
+        employee_nfc = #{employeeNfc,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeStatus != null">
+        employee_status = #{employeeStatus,jdbcType=VARCHAR},
+      </if>
+      <if test="transactionState != null">
+        transaction_state = #{transactionState,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null">
+        update_time = #{updateTime,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeCompanyName != null">
+        employee_company_name = #{employeeCompanyName,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeDepartmentId != null">
+        employee_department_id = #{employeeDepartmentId,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeDepartmentName != null">
+        employee_department_name = #{employeeDepartmentName,jdbcType=VARCHAR},
+      </if>
+      <if test="companyNo != null">
+        company_no = #{companyNo,jdbcType=VARCHAR},
+      </if>
+      <if test="bluetoothNo != null">
+        bluetooth_no = #{bluetoothNo,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where employee_id = #{employeeId,jdbcType=VARCHAR}
+    AND employee_company_id = #{employeeCompanyId,jdbcType=VARCHAR}
+  </update>
+
 </mapper>
