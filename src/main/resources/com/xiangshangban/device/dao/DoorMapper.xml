@@ -147,7 +147,7 @@
     WHERE
     company_id = #{companyId}
     ) A
-    LEFT JOIN door_ B ON A .device_id = B.device_id
+    INNER JOIN door_ B ON A .device_id = B.device_id
     ) C
     LEFT JOIN employee_ D ON C .company_id = D.employee_company_id
     AND C .operate_employee = D.employee_id
