@@ -522,7 +522,14 @@ public class EntranceGuardController {
                 }
             }
         }
-        result = PageUtils.doSplitPage(permissionEmps,newPermissionEmps,page,rows,null,1);
+        
+        if((permissionEmps == null || permissionEmps.size()== 0) && (newPermissionEmps == null || newPermissionEmps.size()== 0)){ //无数据
+            result.put("returnCode","4203");
+            result.put("message","当前列表为空");
+        }else{
+            result = PageUtils.doSplitPage(permissionEmps,newPermissionEmps,page,rows,null,1);
+        }
+        
         if(doorId!=null){
             //根据门的id查询门的名称
             Door door = doorMapper.selectByPrimaryKey(doorId.toString());
