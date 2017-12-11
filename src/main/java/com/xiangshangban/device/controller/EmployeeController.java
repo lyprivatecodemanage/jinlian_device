@@ -239,6 +239,14 @@ public class EmployeeController {
             //遍历人员
             for (Map<String, String> employeeMap : employeeList) {
 
+                //判断公司获取是否成功
+                if (StringUtils.isEmpty(request.getHeader("companyId"))){
+                    System.out.println("没有获取到当前登录人的公司信息");
+                    returnData.setMessage("没有获取到当前登录人的公司信息");
+                    returnData.setReturnCode("4007");
+                    return returnData;
+                }
+
                 //从本地查人员信息
                 Employee employeeLocal = employeeMapper.selectByEmployeeIdAndCompanyId(employeeMap.get("employeeId"), request.getHeader("companyId"));
 
