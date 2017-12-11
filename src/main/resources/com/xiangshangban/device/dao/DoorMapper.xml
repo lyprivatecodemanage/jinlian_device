@@ -117,35 +117,47 @@
   <!--根据门名称查询门信息-->
   <select id="getDoorInfo" parameterType="map" resultType="map">
     SELECT
-    S.*
+    W.door_id,
+    COALESCE (door_name, '') AS door_name,
+    COALESCE (operate_time, '') AS operate_time,
+    device_id,
+    company_id,
+    COALESCE (device_name, '') AS device_name,
+    operate_employee AS employee_id,
+    COALESCE (employee_name, '') AS employee_name
     FROM
     (
-    SELECT DISTINCT
-    A .door_id,
-    COALESCE(door_name,'') as door_name,
-    COALESCE(operate_time,'') as operate_time,
-    B.device_id,
-    COALESCE(device_name,'') as device_name,
-    company_id,
-    C .employee_id,
-    COALESCE(employee_name,'') as employee_name
+    SELECT
+    C .*, D.employee_name
     FROM
-    door_ A,
-    device_ B,
-    employee_ C
+    (
+    SELECT
+    A .*, B.door_id,
+    door_name,
+    operate_time,
+    operate_employee
+    FROM
+    (
+    SELECT
+    device_id,
+    device_name,
+    company_id
+    FROM
+    device_
     WHERE
-    A .device_id = B.device_id
-    AND A .operate_employee = C .employee_id
-    ) S
+    company_id = #{companyId}
+    ) A
+    LEFT JOIN door_ B ON A .device_id = B.device_id
+    ) C
+    LEFT JOIN employee_ D ON C .company_id = D.employee_company_id
+    AND C .operate_employee = D.employee_id
+    ) W
     <where>
       <if test="doorName!=null and doorName!=''">
-        and S.door_name like #{doorName}
-      </if>
-      <if test="companyId!=null and companyId!=''" >
-        and S.company_id = #{companyId}
+        and W.door_name like #{doorName}
       </if>
     </where>
-    order by S.operate_time desc
+    order by W.operate_time desc
   </select>
 
   <!--批量删除门信息-->

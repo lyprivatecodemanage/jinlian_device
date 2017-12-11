@@ -75,6 +75,7 @@ public class EntranceGuardController {
     }
 
     /**
+     * ----已修改----
      * 添加门信息
      * {
      *   "doorName":"超级大门",
@@ -105,7 +106,7 @@ public class EntranceGuardController {
                 //未知的登录人ID
                 resultMap = ReturnCodeUtil.addReturnCode(3);
             }else{
-                door.setOperateEmployee(operateUserId!=null && !operateUserId.isEmpty()?operateUserId:"1");//获取当前的登录人员ID
+                door.setOperateEmployee(operateUserId);//设置操作人
                 boolean result = iEntranceGuardService.addDoorInfo(door);
                 resultMap = ReturnCodeUtil.addReturnCode(result);
             }
@@ -132,18 +133,18 @@ public class EntranceGuardController {
         Object doorId = jsonObject.get("doorId");
         //获取当前登陆人的ID
         String operateUserId = request.getHeader("accessUserId");
-        Map resultMap = new HashMap();
+        Map resultMap;
 
         if(deviceId!=null){
             Door door = new Door();
             door.setDoorName(doorName != null ? doorName.toString() : null);
             door.setDeviceId(deviceId != null ? deviceId.toString() : null);
             door.setDoorId(doorId != null ? doorId.toString() : null);
-            if(operateUserId==null || operateUserId.isEmpty()){
+            if(operateUserId==null|| operateUserId.isEmpty()){
                 //未知的登录人ID
                 resultMap = ReturnCodeUtil.addReturnCode(3);
             }else{
-                door.setOperateEmployee(operateUserId!=null && !operateUserId.isEmpty()?operateUserId:"1");//当前登录的人员的ID
+                door.setOperateEmployee(operateUserId);//当前登录的人员的ID
                 boolean result = iEntranceGuardService.updateDoorInfo(door);
                 resultMap = ReturnCodeUtil.addReturnCode(result);
             }
@@ -155,6 +156,7 @@ public class EntranceGuardController {
     }
 
     /**
+     * ----已修改----（关联的人员需要添加公司的ID限制）
      * 查询门信息（根据门名称）
      * {
      * "page":"",----->当前页码
@@ -170,18 +172,21 @@ public class EntranceGuardController {
         Object page = jsonObject.get("page");
         Object rows = jsonObject.get("rows");
         Object companyId = jsonObject.get("companyId");
+        Map result;
 
-        Map doorMap = new HashMap();
-        doorMap.put("doorName", (doorName == null || doorName.toString().isEmpty())? null : "%" + doorName.toString() + "%");
-        doorMap.put("companyId", (companyId == null || companyId.toString().isEmpty())? null : companyId.toString());
-        Page pageObj = null;
-        if (page != null && !page.toString().isEmpty() && rows != null && !rows.toString().isEmpty()) {
-            pageObj = PageHelper.startPage(Integer.parseInt(page.toString()), Integer.parseInt(rows.toString()));
+        if(companyId!=null){
+            Map doorMap = new HashMap();
+            doorMap.put("doorName", (doorName == null || doorName.toString().isEmpty())? null : "%" + doorName.toString() + "%");
+            doorMap.put("companyId", (companyId == null || companyId.toString().isEmpty())? null : companyId.toString());
+            Page pageObj = null;
+            if (page != null && !page.toString().isEmpty() && rows != null && !rows.toString().isEmpty()) {
+                pageObj = PageHelper.startPage(Integer.parseInt(page.toString()), Integer.parseInt(rows.toString()));
+            }
+            List<Map> maps = iEntranceGuardService.queryAllDoorInfo(doorMap);
+            result = PageUtils.doSplitPage(null, maps, page, rows, pageObj,2);
+        }else{
+            result = ReturnCodeUtil.addReturnCode(1);
         }
-
-        List<Map> maps = iEntranceGuardService.queryAllDoorInfo(doorMap);
-        Map result = PageUtils.doSplitPage(null, maps, page, rows, pageObj,2);
-
         return JSONObject.toJSONString(result);
     }
 
@@ -222,7 +227,7 @@ public class EntranceGuardController {
 
     //TODO 门禁管理--------“授权中心”
     /**
-
+     * ----待修改----
      * 获取当前公司的门信息（包括关联的人员信息）
      * @param requestParam
      * @return
@@ -376,6 +381,7 @@ public class EntranceGuardController {
     }
 
     /**
+     * ----待修改----
      * 查询门关联的用户的权限信息（员工姓名、部门、开门方式，开门时间、设备指令下发时间、状态）
      * @return  String doorId,String empName,String deptName,String openType,String issueState,String page,String rows
      * {
@@ -455,12 +461,13 @@ public class EntranceGuardController {
                    }
                }
                //TODO 转换打卡方式（包含组合打卡方式）
-               if(openDoorType!=null){
+               if(openDoorType!=null&&!"".equals(openDoorType)){
                    StringBuffer buffer = new StringBuffer();
                    //遍历打卡方式
                    for(int d = 0;d<openDoorType.toString().trim().length();d++){
                        //判断每一个字符的数值
                        Character c = openDoorType.toString().trim().charAt(d);
+
 
                        for(int t=0;t<openTypeStr.length;t++){
                            if(c.toString().equals(String.valueOf(t))){
@@ -468,6 +475,7 @@ public class EntranceGuardController {
                            }
                        }
                    }
+                   System.out.println("-----------------"+buffer.toString()+"------------------");
                    maps.get(i).put("range_door_open_type",buffer.toString().substring(0,buffer.toString().length()-1));
                }else{
                    maps.get(i).put("range_door_open_type","");
@@ -658,7 +666,7 @@ public class EntranceGuardController {
 
         if(!firstCardOpenFlag.isEmpty() && Integer.parseInt(firstCardOpenFlag)==1){
             /**
-             * ----待修改----
+             * ----待修改----（查询人员的时候要根据门所在公司的ID进行人员信息的查询）
              *获取该门首卡常开信息
              */
             firstCardKeepOpen = iEntranceGuardService.queryFirstCardKeepOpenInfo(doorId!=null?doorId.toString():null);
@@ -666,7 +674,6 @@ public class EntranceGuardController {
 
         //整理定时常开数据(根据星期进行分组)
         Map<String,List<Map>> keepOpenMap = new HashMap<>();
-
 
         //最终的定时常开数据
         List<Map> timingKeepOpenList = new ArrayList<>();
@@ -1436,6 +1443,7 @@ public class EntranceGuardController {
          {
          "empId":"897020EA96214392B28369F2B421E319",----->员工ID
          "searchTime":"2017-11-21"--------->搜索时间(不传的时候查询当天)
+         "companyId":"xafaf13232"---------->公司ID（备用字段，添加公司切换的时候使用）
          }
      ****************************************************/
 

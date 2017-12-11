@@ -47,4 +47,15 @@ public class Door {
     public void setOperateEmployee(String operateEmployee) {
         this.operateEmployee = operateEmployee;
     }
+
+    @Override
+    public String toString() {
+        return "Door{" +
+                "doorId='" + doorId + '\'' +
+                ", doorName='" + doorName + '\'' +
+                ", deviceId='" + deviceId + '\'' +
+                ", operateTime='" + operateTime + '\'' +
+                ", operateEmployee='" + operateEmployee + '\'' +
+                '}';
+    }
 }
