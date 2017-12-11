@@ -31,4 +31,7 @@ public interface DeviceHeartbeatMapper {
                                                @Param("averageCpuTemper") float averageCpuTemper,
                                                @Param("cpuUserUnilizationCondition") String cpuUserUnilizationCondition,
                                                @Param("cpuTemperCondition") String cpuTemperCondition);
+
+    //查询最新的一条心跳信息的时间根据设备id
+    Map<String, String> selectLatestTimeByDeviceId(String deviceId);
 }

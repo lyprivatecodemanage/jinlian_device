@@ -480,6 +480,12 @@ public class EmployeeController {
 
                     }else if (immediatelyDownload.equals("1")){
 
+                        //修改设备的激活状态
+                        Device device = new Device();
+                        device.setDeviceId(deviceId);
+                        device.setActiveStatus("2");//使用中
+                        deviceMapper.updateByPrimaryKeySelective(device);
+
                         /**
                          * 人员基本信息
                          */

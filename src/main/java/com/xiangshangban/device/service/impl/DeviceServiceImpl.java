@@ -68,6 +68,7 @@ public class DeviceServiceImpl implements IDeviceService {
         //新增设备信息
         device.setDeviceId(deviceId);
         device.setDeviceName("设备未命名");
+        device.setIsOnline("1");
         device.setActiveStatus("0");
 
         Device deviceExist = deviceMapper.selectByPrimaryKey(deviceId);

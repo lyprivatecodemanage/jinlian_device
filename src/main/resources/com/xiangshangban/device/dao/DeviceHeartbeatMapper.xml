@@ -364,4 +364,24 @@
 	;
   </select>
 
+  <select id="selectLatestTimeByDeviceId" resultMap="java.util.Map" parameterType="java.lang.String" >
+    SELECT
+	T .*
+    FROM
+	(
+		SELECT
+			device_heartbeat.device_id AS "deviceId",
+			device_heartbeat. TIME AS "time",
+			ROW_NUMBER () OVER (ORDER BY "time" DESC) rn
+		FROM
+			device_heartbeat
+		LEFT JOIN device_ ON (
+			device_.device_id = device_heartbeat.device_id
+		)
+		WHERE
+			device_heartbeat.device_id = #{deviceId,jdbcType=VARCHAR}
+	) T
+    WHERE
+	rn IN (1)
+  </select>
 </mapper>
