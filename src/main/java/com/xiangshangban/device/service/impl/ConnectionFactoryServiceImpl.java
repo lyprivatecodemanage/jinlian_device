@@ -23,13 +23,13 @@ public class ConnectionFactoryServiceImpl implements IConnectionFactoryService {
     //本地环境
 //    private static String host = "192.168.0.118";
     //测试环境
-//    private static String host = "192.168.0.242";
-//    private static String username = "test";
-//    private static String password = "123";
+    private static String host = "192.168.0.242";
+    private static String username = "test";
+    private static String password = "123";
     //真实环境
-    private static String host = "106.14.63.175";
-    private static String username = "jinnianmq";
-    private static String password = "jinnian-123456";
+//    private static String host = "106.14.63.175";
+//    private static String username = "jinnianmq";
+//    private static String password = "jinnian-123456";
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     private static int port = 5672;

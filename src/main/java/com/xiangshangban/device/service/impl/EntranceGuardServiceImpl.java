@@ -528,7 +528,8 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
     public void doorCommonSetupAdditional(String doorId, String countLimitAuthenticationFailed, String enableAlarm,
                                           String alarmTimeLength, String publicPassword1, String publicPassword2, String threatenPassword,
                                           String deviceManagePassword, String enableDoorOpenRecord, List oneWeekTimeDoorKeepList,
-                                          String enableDoorKeepOpen, String enableFirstCardKeepOpen, String enableDoorCalendar) {
+                                          String enableDoorKeepOpen, String enableFirstCardKeepOpen, String enableDoorCalendar,
+                                          String operatorEmployeeId) {
 
         //获取设备id
         Door doorInfo = doorMapper.findAllByDoorId(doorId);
@@ -626,6 +627,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         doorCmdEmployeeInformation.setSubCmdId("");
         doorCmdEmployeeInformation.setAction("UPDATE_ACCESS_CONTROL_SETTING");
         doorCmdEmployeeInformation.setActionCode("3003");
+        doorCmdEmployeeInformation.setOperateEmployeeId(operatorEmployeeId);
 
         doorCmdEmployeeInformation.setSendTime(CalendarUtil.getCurrentTime());
         doorCmdEmployeeInformation.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
@@ -649,7 +651,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
 
     //门禁配置---功能配置（首卡常开权限）
     @Override
-    public void handOutFirstCard(String doorId, String enableFirstCardKeepOpen, List<String> employeeIdList, List oneWeekTimeFirstCardList) {
+    public void handOutFirstCard(String doorId, String enableFirstCardKeepOpen, List<String> employeeIdList, List oneWeekTimeFirstCardList, String operatorEmployeeId) {
 
         //获取设备id
         Door doorInfo = doorMapper.findAllByDoorId(doorId);
@@ -748,6 +750,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         doorCmdEmployeeInformation.setSubCmdId("");
         doorCmdEmployeeInformation.setAction("UPDATE_FIRST_CARD_NORMAL_OPENED");
         doorCmdEmployeeInformation.setActionCode("3004");
+        doorCmdEmployeeInformation.setOperateEmployeeId(operatorEmployeeId);
 
         doorCmdEmployeeInformation.setSendTime(CalendarUtil.getCurrentTime());
         doorCmdEmployeeInformation.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
@@ -771,7 +774,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
 
     //门禁配置---功能配置（门禁日历）
     @Override
-    public void handOutDoorCalendar(String doorId, String enableDoorCalendar, List accessCalendar) {
+    public void handOutDoorCalendar(String doorId, String enableDoorCalendar, List accessCalendar, String operatorEmployeeId) {
 
         //获取设备id
         Door doorInfo = doorMapper.findAllByDoorId(doorId);
@@ -830,6 +833,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         doorCmdEmployeeInformation.setSubCmdId("");
         doorCmdEmployeeInformation.setAction("UPDATE_ACCESS_CALENDER");
         doorCmdEmployeeInformation.setActionCode("3005");
+        doorCmdEmployeeInformation.setOperateEmployeeId(operatorEmployeeId);
 
         doorCmdEmployeeInformation.setSendTime(CalendarUtil.getCurrentTime());
         doorCmdEmployeeInformation.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));

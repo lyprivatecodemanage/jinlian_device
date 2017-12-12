@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
@@ -72,6 +73,9 @@ public class EmployeeController {
 
     @Autowired
     private DeviceMapper deviceMapper;
+
+    @Autowired
+    private OSSController ossController;
 
     /**
      * 人员模块人员信息同步（之所以是这个名字，是因为之前打算用协议包成命令记录下来同步的操作日志）
@@ -173,6 +177,8 @@ public class EmployeeController {
          }
          */
 
+        String operatorEmployeeId = request.getHeader("accessUserId");
+
         System.out.println(employeePermission);
 
         //解析json字符串
@@ -221,6 +227,7 @@ public class EmployeeController {
             doorCmdEmployeeInformation.setSubCmdId("");
             doorCmdEmployeeInformation.setAction("UPDATE_USER_INFO");
             doorCmdEmployeeInformation.setActionCode("2001");
+            doorCmdEmployeeInformation.setOperateEmployeeId(operatorEmployeeId);
 
             //下发人员门禁权限
             //构造命令格式
@@ -235,6 +242,7 @@ public class EmployeeController {
             doorCmdEmployeePermission.setSubCmdId("");
             doorCmdEmployeePermission.setAction("UPDATE_USER_ACCESS_CONTROL");
             doorCmdEmployeePermission.setActionCode("3001");
+            doorCmdEmployeeInformation.setOperateEmployeeId(operatorEmployeeId);
 
             //遍历人员
             for (Map<String, String> employeeMap : employeeList) {
@@ -573,7 +581,7 @@ public class EmployeeController {
     @ResponseBody
     @Transactional
     @RequestMapping(value = "/deleteEmployeeInformationDev", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
-    public ReturnData deleteEmployeeInformationDev(@RequestBody String employeeIdCollection){
+    public ReturnData deleteEmployeeInformationDev(@RequestBody String employeeIdCollection, HttpServletRequest request){
 
         /**测试数据
          *
@@ -585,7 +593,9 @@ public class EmployeeController {
          }
          */
 
-        return iEmployeeService.deleteEmployeeInformationDev(employeeIdCollection);
+        String operatorEmployeeId = request.getHeader("accessUserId");
+
+        return iEmployeeService.deleteEmployeeInformationDev(employeeIdCollection, operatorEmployeeId);
 
     }
 
@@ -597,7 +607,7 @@ public class EmployeeController {
     @ResponseBody
     @Transactional
     @RequestMapping(value = "/deleteEmployeeInformationEmp", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
-    public void deleteEmployeeInformationEmp(@RequestBody String employeeIdCollection){
+    public void deleteEmployeeInformationEmp(@RequestBody String employeeIdCollection, HttpServletRequest request){
 
         /**测试数据
          *
@@ -609,7 +619,9 @@ public class EmployeeController {
          }
          */
 
-        iEmployeeService.deleteEmployeeInformationEmp(employeeIdCollection);
+        String operatorEmployeeId = request.getHeader("accessUserId");
+
+        iEmployeeService.deleteEmployeeInformationEmp(employeeIdCollection, operatorEmployeeId);
 
     }
 
@@ -685,7 +697,7 @@ public class EmployeeController {
     @RequestMapping(value = "/saveEmployeeInputInfo", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     public Map<String, Object> saveEmployeeInputInfo(@RequestParam(name = "userInfo") String userInfo,
                                                      @RequestParam(name = "style") String style,
-                                                     @RequestParam(name = "file") String file){
+                                                     @RequestParam(name = "file") MultipartFile file){
 
         /**
          * 测试数据
@@ -800,6 +812,21 @@ public class EmployeeController {
 
             }else if ("1".equals(style)){
                 //人脸录入
+
+//                //提取人员id
+//                Map<String, Object> allMapTemp = JSONObject.fromObject(jsonUrlDecoderString);
+//                Map<String, Object> dataMapTemp = (Map<String, Object>) allMapTemp.get("data");
+//                Map<String, Object> userLabelMapTemp = (Map<String, Object>) dataMapTemp.get("userLabel");
+//                String employeeId = (String) userLabelMapTemp.get("userId");
+//
+//                //存储上传的人脸图片
+//                try {
+//                    //versionCode随便填就行，但不能为空，人脸图片上传时没有实际作用
+//                    ossController.deviceUploadPackage("v1.9", file, "facePhoto", employeeId);
+//                } catch (IOException e) {
+//                    System.out.println("人脸图片上传IO异常");
+//                    e.printStackTrace();
+//                }
 
                 return iEmployeeService.saveEmployeeInputInfo(jsonUrlDecoderString, deviceId, style, companyId);
 

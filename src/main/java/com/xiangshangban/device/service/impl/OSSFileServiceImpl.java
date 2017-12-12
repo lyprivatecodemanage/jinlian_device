@@ -230,13 +230,13 @@ public class OSSFileServiceImpl implements OSSFileService {
 	 * @return 上传文件后的全路径
 	 */
 	@Override
-	public String devicePackageUpload(String directory, MultipartFile file) throws IOException {
+	public String devicePackageUpload(String directory, MultipartFile file, String fileType) throws IOException {
 		//从配置文件中获取登录OSS的凭证
 		String accessId = PropertiesUtils.ossProperty("accessKey");
 		String accessKey = PropertiesUtils.ossProperty("securityKey");
 		OSSFileUtil client  = new OSSFileUtil(accessId,accessKey );
 		//定义上传后的完整路径（保存本地数据库的时候使用）
-		String wholePath = client.devicePackageUploadTransfer(directory,file);
+		String wholePath = client.devicePackageUploadTransfer(directory,file,fileType);
 		return wholePath;
 	}
 }

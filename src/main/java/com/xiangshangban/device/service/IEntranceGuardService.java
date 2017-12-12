@@ -123,13 +123,15 @@ public interface IEntranceGuardService {
     void doorCommonSetupAdditional(String doorId, String countLimitAuthenticationFailed, String enableAlarm,
                                    String alarmTimeLength, String publicPassword1, String publicPassword2, String threatenPassword,
                                    String deviceManagePassword, String enableDoorOpenRecord, List oneWeekTimeDoorKeepList,
-                                   String enableDoorKeepOpen, String enableFirstCardKeepOpen, String enableDoorCalendar);
+                                   String enableDoorKeepOpen, String enableFirstCardKeepOpen, String enableDoorCalendar,
+                                   String operatorEmployeeId);
 
     //门禁配置---功能配置（首卡权限配置）
-    void handOutFirstCard(String doorId, String enableFirstCardKeepOpen, List<String> employeeIdList, List oneWeekTimeFirstCardList);
+    void handOutFirstCard(String doorId, String enableFirstCardKeepOpen, List<String> employeeIdList, List oneWeekTimeFirstCardList,
+                          String operatorEmployeeId);
 
     //门禁配置---功能配置（门禁日历）
-    void handOutDoorCalendar(String doorId, String enableDoorCalendar, List accessCalendar);
+    void handOutDoorCalendar(String doorId, String enableDoorCalendar, List accessCalendar, String operatorEmployeeId);
 
     //门禁记录上传存储
     void doorRecordSave(String doorRecordMap);

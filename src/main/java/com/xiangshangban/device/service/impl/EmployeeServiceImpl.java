@@ -331,6 +331,23 @@ public class EmployeeServiceImpl implements IEmployeeService {
         //命令数据存入数据库
         entranceGuardService.insertCommand(doorCmdRecord);
 
+//        //上传的是人脸信息时，同步该人员的人脸、指纹信息到其它有权限的设备上
+//        if ("1".equals(style)){
+//            //1.同步该人员的人脸、指纹信息到人员表（一个人对多个公司）
+//            Employee employeeTemp = new Employee();
+//            employeeTemp.setEmployeeId(employeeId);
+//            employeeTemp.setEmployeeFace(((Map<String, String>) userLabelMap.get("userFace")).get("faceData"));
+//            if (StringUtils.isNotEmpty((String) userLabelMap.get("userFinger1"))){
+//                employeeTemp.setEmployeeFinger1((String) userLabelMap.get("userFinger1"));
+//            }
+//            if (StringUtils.isNotEmpty((String) userLabelMap.get("userFinger1"))){
+//                employeeTemp.setEmployeeFinger2((String) userLabelMap.get("userFinger2"));
+//            }
+//            employeeMapper.updateByPrimaryKeySelective(employeeTemp);
+//            //2.同步该人员的人脸、指纹信息到其它有权限的设备上
+//
+//        }
+
         System.out.println("人员指纹、人脸信息上传已回复");
         return doorRecordAll;
 
@@ -342,7 +359,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
      * @return
      */
     @Override
-    public ReturnData deleteEmployeeInformationDev(String employeeIdCollection) {
+    public ReturnData deleteEmployeeInformationDev(String employeeIdCollection, String operatorEmployeeId) {
 
         Map<String, Object> employeeIdMap = (Map<String, Object>)JSONObject.fromObject(employeeIdCollection);
         List<String> employeeIdList = (List<String>)employeeIdMap.get("employeeIdList");
@@ -369,6 +386,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
                 doorCmdDeleteEmployee.setSubCmdId("");
                 doorCmdDeleteEmployee.setAction("DELETE_USER_INFO");
                 doorCmdDeleteEmployee.setActionCode("2002");
+                doorCmdDeleteEmployee.setOperateEmployeeId(operatorEmployeeId);
 
                 //删除每个人都要产生一条命令
                 for (String employeeId : employeeIdList){
@@ -420,7 +438,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
      * @return
      */
     @Override
-    public ReturnData deleteEmployeeInformationEmp(String employeeIdCollection) {
+    public ReturnData deleteEmployeeInformationEmp(String employeeIdCollection, String operatorEmployeeId) {
 
         //提取数据
         Map<String, Object> employeeIdMap = (Map<String, Object>)JSONObject.fromObject(employeeIdCollection);
@@ -448,6 +466,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
                     doorCmdDeleteEmployee.setSubCmdId("");
                     doorCmdDeleteEmployee.setAction("DELETE_USER_INFO");
                     doorCmdDeleteEmployee.setActionCode("2002");
+                    doorCmdDeleteEmployee.setOperateEmployeeId(operatorEmployeeId);
 
                     //删除每个人都要产生一条命令
                     for (String employeeId : employeeIdList) {

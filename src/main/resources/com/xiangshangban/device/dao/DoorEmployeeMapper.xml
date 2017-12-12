@@ -357,7 +357,9 @@
                     door_employee
                 WHERE
                     employee_id = #{empId}
-                AND door_id = #{doorId}
+                <if test="doorId!=null and doorId!=''">
+                  AND door_id = #{doorId}
+                </if>
             )
             ORDER BY
                 range_start_time DESC

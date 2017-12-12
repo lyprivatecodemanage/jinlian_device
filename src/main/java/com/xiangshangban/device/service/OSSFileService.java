@@ -67,5 +67,5 @@ public interface OSSFileService {
 	/*************************************************************
 	 * 				@TODO 设备部分上传升级包和应用包
 	 *************************************************************/
-	public String devicePackageUpload(String directory, MultipartFile file) throws IOException;
+	public String devicePackageUpload(String directory, MultipartFile file, String fileType) throws IOException;
 }

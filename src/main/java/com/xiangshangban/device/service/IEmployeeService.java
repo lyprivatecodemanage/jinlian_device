@@ -29,10 +29,10 @@ public interface IEmployeeService {
     Map<String, Object> saveEmployeeInputInfo(String employeeInputInfo, String deviceId, String style, String companyId);
 
     //删除设备上的人员的所有关联信息（设备模块调用）
-    ReturnData deleteEmployeeInformationDev(String employeeIdCollection);
+    ReturnData deleteEmployeeInformationDev(String employeeIdCollection, String operatorEmployeeId);
 
     //删除设备上的人员的所有关联信息（人员模块调用）
-    ReturnData deleteEmployeeInformationEmp(String employeeIdCollection);
+    ReturnData deleteEmployeeInformationEmp(String employeeIdCollection, String operatorEmployeeId);
 
     //批量下发存为草稿的人员信息和人员权限信息
     void multipleHandOutEmployeePermission(String doorId);

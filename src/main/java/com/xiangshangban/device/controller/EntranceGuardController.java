@@ -560,10 +560,12 @@ public class EntranceGuardController {
         //定义开门方式
       /*  String[] openTypeStr = {"卡","个人密码","卡+个人密码","指纹","人脸","手机蓝牙","手机NFC"};*/
         JSONObject jsonObject = JSONObject.parseObject(requestParam);
+        Object empId = jsonObject.get("empId");
+        Object doorId = jsonObject.get("doorId");
         String companyId = request.getHeader("companyId");
         Map result = null;
         if(jsonObject!=null && jsonObject.size()>0){
-            List<Map> aWeekTimeList = iEntranceGuardService.queryAWeekOpenTime(jsonObject.get("empId").toString().trim(),jsonObject.get("doorId").toString().trim());
+            List<Map> aWeekTimeList = iEntranceGuardService.queryAWeekOpenTime(empId.toString().trim(),(doorId!=null && !doorId.toString().isEmpty())?doorId.toString().trim():null);
 
             if(aWeekTimeList!=null&&aWeekTimeList.size()>0){
                 //获取该人员的有效的开门时间
@@ -864,7 +866,7 @@ public class EntranceGuardController {
      * @param doorFeaturesSetup
      */
     @PostMapping("/handOutDoorFeaturesSetup")
-    public ReturnData handOutDoorFeaturesSetup(@RequestBody String doorFeaturesSetup){
+    public ReturnData handOutDoorFeaturesSetup(@RequestBody String doorFeaturesSetup, HttpServletRequest request){
 
          /**测试数据
          *
@@ -928,6 +930,8 @@ public class EntranceGuardController {
           ]
           }
          */
+
+        String operatorEmployeeId = request.getHeader("accessUserId");
 
         System.out.println("doorFeaturesSetup: "+doorFeaturesSetup);
 
@@ -1051,13 +1055,14 @@ public class EntranceGuardController {
             iEntranceGuardService.doorCommonSetupAdditional(doorId, countLimitAuthenticationFailed, enableAlarm,
                     alarmTimeLength, publicPassword1, publicPassword2, threatenPassword,
                     deviceManagePassword, enableDoorOpenRecord, oneWeekTimeDoorKeepList,
-                    enableDoorKeepOpen, enableFirstCardKeepOpen, enableDoorCalendar);
+                    enableDoorKeepOpen, enableFirstCardKeepOpen, enableDoorCalendar, operatorEmployeeId);
 
             //下发门禁配置---功能配置（首卡常开权限）
-            iEntranceGuardService.handOutFirstCard(doorId, enableFirstCardKeepOpen, employeeIdList, oneWeekTimeFirstCardList);
+            iEntranceGuardService.handOutFirstCard(doorId, enableFirstCardKeepOpen, employeeIdList, oneWeekTimeFirstCardList,
+                    operatorEmployeeId);
 
             //下发门禁配置---功能配置（门禁日历）
-            iEntranceGuardService.handOutDoorCalendar(doorId, enableDoorCalendar, accessCalendarList);
+            iEntranceGuardService.handOutDoorCalendar(doorId, enableDoorCalendar, accessCalendarList, operatorEmployeeId);
 
             //记录操作人和操作时间，更新到设备日志表里
             Door doorExist = doorMapper.selectByPrimaryKey(doorId);

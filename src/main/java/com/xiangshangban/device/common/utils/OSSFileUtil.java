@@ -568,21 +568,29 @@ public class OSSFileUtil {
 	 * @return 上传资源的完整路径
 	 * @throws FileNotFoundException
 	 */
-	public String devicePackageUploadTransfer(String directory,MultipartFile multipartFile) throws FileNotFoundException {
+	public String devicePackageUploadTransfer(String directory,MultipartFile multipartFile,String fileType) throws FileNotFoundException {
 		//初始化OssClient
 		initialize();
 		String filePath = "";
 		if(multipartFile!=null){
 			//截取文件后缀
 			String extention = multipartFile.getOriginalFilename().substring(multipartFile.getOriginalFilename().lastIndexOf(".")+1);
-			//获取上传文件名
-			String fileName = multipartFile.getOriginalFilename().substring(0,multipartFile.getOriginalFilename().lastIndexOf("."));
+
+			String fileName = "";
+			//判断文件类型
+			if ("facePhoto".equals(fileType)){
+				fileName = DateUtils.getDateTime();
+			}else {
+				//获取上传文件名
+				fileName = multipartFile.getOriginalFilename().substring(0,multipartFile.getOriginalFilename().lastIndexOf("."));
+			}
+
 			//将multipartFile转换成file
 			CommonsMultipartFile commonsMultipartFile= (CommonsMultipartFile)multipartFile;
 			DiskFileItem diskFileItem = (DiskFileItem)commonsMultipartFile.getFileItem();
 			File file = diskFileItem.getStoreLocation();
 			//上传文件(返回上传的真实路径)
-			filePath = doDevicePackageUpload(directory,fileName,extention,file);
+			filePath = doDevicePackageUpload(directory,fileName,extention,file,fileType);
 		}
 		return filePath;
 	}
@@ -596,7 +604,7 @@ public class OSSFileUtil {
 	 * @return
 	 * @throws FileNotFoundException
 	 */
-	public String doDevicePackageUpload(String directory,String fileName,String extension,File file) throws FileNotFoundException {
+	public String doDevicePackageUpload(String directory,String fileName,String extension,File file,String fileType) throws FileNotFoundException {
 		//创建文件头对象
 		ObjectMetadata objectMeta = new ObjectMetadata();
 		//设置文件长度
@@ -605,8 +613,16 @@ public class OSSFileUtil {
 		objectMeta.setContentType(getFileType(extension));
 		//创建文件流对象
 		InputStream input = new FileInputStream(file);
-		//文件路径(区分系统文件目录和用户文件目录)
-		String filePath = SYS_FILE_LOCATION + "/"+directory+"/"+fileName+"."+extension;
+
+		String filePath = "";
+		//判读文件上传类型
+		if ("facePhoto".equals(fileType)){
+			filePath = USER_FILE_LOCATION + "/"+directory+"/"+fileName+"."+extension;
+		}else {
+			//文件路径(区分系统文件目录和用户文件目录)
+			filePath = SYS_FILE_LOCATION + "/"+directory+"/"+fileName+"."+extension;
+		}
+
 		try {
 			String ossEnvironment = PropertiesUtils.ossProperty("ossEnvironment");
 			filePath = ("test".equals(ossEnvironment)?"test/"+filePath:"prod/"+filePath);

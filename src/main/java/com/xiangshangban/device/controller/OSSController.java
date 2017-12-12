@@ -413,17 +413,30 @@ public class OSSController {
 	 *******************************************************************************/
 	@PostMapping("/devicePackageOSSUpload")
 	public String deviceUploadPackage(@RequestParam("versionCode") String versionCode,
-									  @RequestParam("uploadResource")MultipartFile uploadResource) throws IOException {
+									  @RequestParam("uploadResource")MultipartFile uploadResource,
+									  @RequestParam("fileType") String fileType,
+									  @RequestParam("employeeId") String employeeId) throws IOException {
+		/**
+		 * fileType：facePhoto时为人脸图片上传，为任意其它字符串时为系统升级包上传
+		 */
 		//验证参数的完整性
 		Map result = new HashMap();
 		if((versionCode==null || versionCode.isEmpty()) ||(uploadResource==null || uploadResource.isEmpty())){
 			//参数异常
 			result = ReturnCodeUtil.addReturnCode(1);
 		}else{
-			//设置上传文件保存的路径
-			String  funcDirectory = "device/update/system/"+versionCode;
+
+			String funcDirectory = "";
+			//判断文件类型
+			if ("facePhoto".equals(fileType)){
+				funcDirectory = "FacePhotoLibrary/"+employeeId;
+			}else {
+				//设置上传文件保存的路径
+				funcDirectory = "device/update/system/"+versionCode;
+			}
+
 			//上传
-			String filePath = oSSFileService.devicePackageUpload(funcDirectory,uploadResource);
+			String filePath = oSSFileService.devicePackageUpload(funcDirectory,uploadResource,fileType);
 			if(filePath.trim().equals("false")){
 				//上传失败
 				result = ReturnCodeUtil.addReturnCode(Boolean.valueOf(filePath.trim()),"上传升级包（应用包）失败");
