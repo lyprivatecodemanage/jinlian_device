@@ -142,9 +142,9 @@
   </delete>
 
   <!--根据门id查询首卡常开(开始结束星期、首卡常开人员ID以及开门时间段)-->
-  <select id="selectFirstCardKeepOpenInfo" parameterType="String" resultType="map">
-  SELECT
-	S.*, E.employee_name
+  <select id="selectFirstCardKeepOpenInfo" parameterType="Map" resultType="map">
+    SELECT
+	  S.*, E.employee_name
     FROM
         (
             SELECT
@@ -158,6 +158,9 @@
             WHERE
                 door_id = #{doorId}
         ) S
-    INNER JOIN employee_ E ON S.employee_id = E.employee_id ORDER BY S.range_start_time
+    INNER JOIN employee_ E ON S.employee_id = E.employee_id
+    AND E.employee_company_id = #{companyId}
+    ORDER BY
+        S.range_start_time
   </select>
 </mapper>

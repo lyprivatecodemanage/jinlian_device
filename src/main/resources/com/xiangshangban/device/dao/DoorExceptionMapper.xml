@@ -113,11 +113,19 @@
     FROM
     door_record A
     LEFT JOIN employee_ B ON A .employee_id = B.employee_id
+    <if test="doorRecordCondition.companyId!=null and doorRecordCondition.companyId!=''">
+      AND B.employee_company_id = #{doorRecordCondition.companyId}
+    </if>
     AND A .employee_id IN (
     SELECT
     employee_id
     FROM
     employee_
+    <where>
+      <if test="doorRecordCondition.companyId!=null and doorRecordCondition.companyId!=''">
+        employee_company_id = #{doorRecordCondition.companyId}
+      </if>
+    </where>
     )
     WHERE
     A .record_type IN (

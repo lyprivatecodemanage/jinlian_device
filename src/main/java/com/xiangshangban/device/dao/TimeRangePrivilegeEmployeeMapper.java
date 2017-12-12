@@ -26,8 +26,9 @@ public interface TimeRangePrivilegeEmployeeMapper {
 
     //根据人员id删除查到的数据
     int deleteByEmployeeId(String employeeId);
+
     /**
      * 根据门的id查询首卡常开信息
      */
-    List<Map> selectFirstCardKeepOpenInfo(@Param("doorId") String doorId);
+    List<Map> selectFirstCardKeepOpenInfo(Map map);
 }

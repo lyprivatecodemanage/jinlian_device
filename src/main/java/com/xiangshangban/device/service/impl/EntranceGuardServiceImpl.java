@@ -146,7 +146,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
                 currDoor.setOperateEmployee(door.getOperateEmployee());
             }
 
-            currDoor.setOperateTime(new SimpleDateFormat("yyyy-MM-dd HH-mm-ss").format(new Date().getTime()));
+            currDoor.setOperateTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date().getTime()));
 
             int i = doorMapper.updateByPrimaryKey(currDoor);
             if(i>0){
@@ -330,6 +330,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
                     Map requestParam = new HashMap();
                     requestParam.put("employeeId",employee_id.toString());
                     requestParam.put("deviceId",doorObj.getDeviceId());
+                    //TODO 获取下发时间
                     List<Map> commandList = doorEmployeeMapper.selectRelateEmpCommand(requestParam);
                     if(commandList!=null && commandList.size()>0){
                         //设置下发时间
@@ -381,7 +382,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         //查询该门（设备）上所有人员的最新的指令是哪种指令
         Map allEmpMap = new HashMap();
         allEmpMap.put("employeeId",null);
-        allEmpMap.put("deviceId",doorObj.getDeviceId());
+        allEmpMap.put("deviceId",doorObj==null?null:doorObj.getDeviceId());
         List<Map> commandList = doorEmployeeMapper.selectRelateEmpCommand(allEmpMap);
 
         if(commandList!=null && commandList.size()>0){
@@ -402,33 +403,10 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
                     innerMap.put("actionCode",commandList.get(i).get("action_code").toString());
                     innerMap.put("sendTime",commandList.get(i).get("send_time"));
                     innerMap.put("status",commandList.get(i).get("status"));
-
                     list.add(innerMap);
-
                     empCommandMap.put(key,list);
                 }
             }
-            /*{
-                "emp1":[  ------------------->更新指令
-                     {
-                         "actionCode":"",
-                         "sendTime":"",
-                         "status":""
-                     },
-                     {
-                          "actionCode":"",
-                         "sendTime":"",
-                         "status":""
-                     }
-              ],
-                "emp2":[ ---------------------->删除指令
-                    {
-                        "actionCode":"",
-                         "sendTime":"",
-                         "status":""
-                    }
-              ]
-            }*/
 
             //判断最新指令的类型和状态（删除人员/下发人员    <待发送、下发中、下发成功、下发失败>）
             for(String key:empCommandMap.keySet()){
@@ -437,7 +415,6 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
                 Map requestParam = new HashMap();
                 requestParam.put("empId",key);
                 requestParam.put("companyId",companyId);
-               /* String empName = employeeMapper.selectEmpNameByComIdAndEmpId(requestParam);*/
                 if(commandNum==1){
                     String actionCode = empCommandMap.get(key).get(0).get("actionCode").toString();
                     String status = empCommandMap.get(key).get(0).get("status").toString();
@@ -452,44 +429,6 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
                         }
                     }
                 }
-               /* if(commandNum==2){ //下发人员权限
-                    String actionCodeFirst = empCommandMap.get(key).get(0).get("actionCode").toString();
-                    String actionCodeSecond = empCommandMap.get(key).get(1).get("actionCode").toString();
-                    String firstStatus = empCommandMap.get(key).get(0).get("status").toString();
-                    String secondStatus = empCommandMap.get(key).get(1).get("status").toString();
-                    if((actionCodeFirst.equals("2001") && actionCodeSecond.equals("3001"))
-                            || actionCodeFirst.equals("3001") && actionCodeSecond.equals("2001")){ //下发人员
-
-                        //判断指令的状态
-                        if(firstStatus.equals("2") && secondStatus.equals("2")){
-                            //先判断当前门当前人员在door_employee表中是否存在
-                            Map existsMap = new HashMap();
-                            existsMap.put("doorId",doorObj.getDoorId());
-                            existsMap.put("employeeId",key);
-                            String doorEmpByDoorIdAndEmpId = doorEmployeeMapper.getDoorEmpByDoorIdAndEmpId(existsMap);
-                            if(doorEmpByDoorIdAndEmpId!=null && !doorEmpByDoorIdAndEmpId.isEmpty()){
-                                //更新该人员信息到door_employee表中
-                                Map updateMap = new HashMap();
-                                updateMap.put("employee_id",key);
-                                updateMap.put("employee_name",empName);
-                                updateMap.put("door_id",doorObj.getDoorId());
-                                updateMap.put("door_name",doorObj.getDoorName());
-                                updateMap.put("range_flag_id",FormatUtil.createUuid());
-
-                                doorEmployeeMapper.updateEmpInfoToDoorEmployee(updateMap);
-                            }else{
-                                //添加该人员的信息到door_employee表中
-                                Map insertMap = new HashMap();
-                                insertMap.put("employee_id",key);
-                                insertMap.put("employee_name",empName);
-                                insertMap.put("door_id",doorObj.getDoorId());
-                                insertMap.put("door_name",doorObj.getDoorName());
-                                insertMap.put("range_flag_id",FormatUtil.createUuid());
-                                doorEmployeeMapper.insertEmpInfoToDoorEmployee(insertMap);
-                            }
-                        }
-                    }
-                }*/
             }
         }
     }
@@ -500,8 +439,11 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
      * @return
      */
     @Override
-    public List<Map> queryAWeekOpenTime(String empId) {
-        List<Map> maps = doorEmployeeMapper.selectAWeekOpenTime(empId);
+    public List<Map> queryAWeekOpenTime(String empId,String doorId) {
+        Map param = new HashMap();
+        param.put("empId",empId);
+        param.put("doorId",doorId);
+        List<Map> maps = doorEmployeeMapper.selectAWeekOpenTime(param);
         return maps;
     }
 
@@ -522,8 +464,11 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
      * @return
      */
     @Override
-    public List<Map> queryFirstCardKeepOpenInfo(String doorId) {
-        List<Map> maps = timeRangePrivilegeEmployeeMapper.selectFirstCardKeepOpenInfo(doorId);
+    public List<Map> queryFirstCardKeepOpenInfo(String doorId,String companyId) {
+        Map param  = new HashMap();
+        param.put("doorId",doorId);
+        param.put("companyId",companyId);
+        List<Map> maps = timeRangePrivilegeEmployeeMapper.selectFirstCardKeepOpenInfo(param);
         return maps;
     }
 

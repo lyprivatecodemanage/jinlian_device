@@ -81,7 +81,7 @@ public interface IEntranceGuardService {
      * @param empId
      * @return
      */
-   List<Map> queryAWeekOpenTime(String empId);
+   List<Map> queryAWeekOpenTime(String empId,String doorId);
 
 
     /**
@@ -96,7 +96,7 @@ public interface IEntranceGuardService {
      * @param doorId
      * @return
      */
-    List<Map> queryFirstCardKeepOpenInfo(String doorId);
+    List<Map> queryFirstCardKeepOpenInfo(String doorId,String companyId);
 
     /**
      * 根据门的id查询门禁日历信息

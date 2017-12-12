@@ -74,7 +74,7 @@ public class ReturnCodeUtil {
                 break;
             case 3:
                 map.put("returnCode","4205");
-                map.put("message","未知的登录人ID");
+                map.put("message","未知的登录人(公司)ID");
                 break;
                 default:
                     break;

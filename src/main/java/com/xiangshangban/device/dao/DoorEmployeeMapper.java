@@ -60,7 +60,7 @@ public interface DoorEmployeeMapper {
     /**
      *查询有门禁权限的人员一周的开门时间段
      */
-    List<Map> selectAWeekOpenTime(@Param("empId") String empId);
+    List<Map> selectAWeekOpenTime(Map map);
 
     /**
      *通过人员id和门id查询
