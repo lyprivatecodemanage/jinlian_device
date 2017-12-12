@@ -340,7 +340,7 @@ public class ActivityController {
      *****************************************************************************************/
 
     /**
-     * TODO 添加自定义的模板
+     * TODO 添加自定义的模板（Logo（上传）/背景图/问候语）
      *
      {
      "deviceId":"1", ------->要进行模板添加的设备
@@ -362,7 +362,7 @@ public class ActivityController {
      }
      */
     @PostMapping ("/addDeviceTemplate")
-    public String addDeviceTemplate(@RequestParam("request") HttpServletRequest request,
+    public String addDeviceTemplate(HttpServletRequest request,
                                     @RequestParam("templateInfo") String templateInfo,
                                     @RequestParam("file")MultipartFile file){
         Map result = iTemplateService.addDeviceTemplate(request,templateInfo,file);

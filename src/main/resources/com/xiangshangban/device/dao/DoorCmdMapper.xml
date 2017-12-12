@@ -398,43 +398,61 @@
 
   <!--日志管理部分-->
   <!--1:按条件搜索日志信息-->
-  <select id="selectLogCommand" parameterType="map" resultType="map">
+  <select id="selectLogCommand" parameterType="Map" resultType="map">
     SELECT
-    S.super_cmd_id,
-    COALESCE(send_time,'') AS send_time,
-    COALESCE(status,'') AS status,
-    COALESCE(company_name,'') AS company_name,
-    COALESCE(device_name,'') AS device_name,
-    COALESCE(C .employee_name,'') AS employee_name
+    W.super_cmd_id,
+    action_code,
+    COALESCE (send_time, '') AS send_time,
+    COALESCE (status, '') AS status,
+    COALESCE (device_name, '') AS device_name,
+    COALESCE (employee_name, '') AS employee_name
     FROM
     (
     SELECT
-    A .super_cmd_id,
-    operate_employee_id,
+    S.super_cmd_id,
+    action_code,
     send_time,
     status,
-    B.company_name,
+    device_name,
+    C .employee_name
+    FROM
+    (
+    SELECT
+    A .*, B.company_id,
+    company_name,
     device_name
     FROM
-    door_cmd A
-    LEFT JOIN device_ B ON A .device_id = B.device_id
+    (
+    SELECT
+    device_id,
+    super_cmd_id,
+    action_code,
+    operate_employee_id,
+    send_time,
+    status
+    FROM
+    door_cmd
     WHERE
-    A .action_code IN ('3003', '3004', '3005')
-    AND A .status != '6'
-    <if test="companyName!=null and companyName!=''">
-      and B.company_name like #{companyName}
-    </if>
-    <if test="deviceName!=null and deviceName!=''">
-      and B.device_name like #{deviceName}
-    </if>
+    action_code IN ('3003', '3004', '3005')
+    AND status NOT IN ('4', '5', '6')
+    ) A
+    LEFT JOIN device_ B ON A .device_id = B.device_id
     ) S
-    left join employee_ C on S.operate_employee_id = C.employee_id
+    LEFT JOIN employee_ C ON S.operate_employee_id = C .employee_id
+    AND S.company_id = C .employee_company_id
+    ) W
     <where>
-      <if test="time!=null and time!=''">
-         send_time like #{time}
+      <if test="companyId!=null and companyId!=''">
+        W.company_id = #{companyId}
+      </if>
+      <if test="operateCommand!=null and operateCommand!=''">
+        and W.action_code = #{operateCommand}
+      </if>
+      <if test="deviceName!=null and deviceName!=''">
+        and W.device_name like #{deviceName}
       </if>
     </where>
-    order by send_time desc
+    ORDER BY W.send_time DESC
   </select>
 
   <!--２：删除日志信息-->

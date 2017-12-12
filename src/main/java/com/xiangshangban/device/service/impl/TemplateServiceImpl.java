@@ -70,7 +70,6 @@ public class TemplateServiceImpl implements ITemplateService{
      * @param file 上传的Logo图片
      * @return
              {
-            "loginEmpId":"123",----->当前登录人的ID
             "deviceId":"1",
             "templateId":"2",-------->要进行更新的模板的ID
             "backImgList":[
@@ -80,25 +79,24 @@ public class TemplateServiceImpl implements ITemplateService{
             "salutationList":[
                 {"content":"上午","startTime":"2017-11-010 08:00","endTime":"2017-11-10 12:00"},
                 {"content":"下午","startTime":"2017-11-010 12:00","endTime":"2017-11-1018:00"}
-            ],
-            "companyLogoName":"20171110Logo"
+            ]
     }
      */
     @Override
     public Map modifyDeviceTemplateInfo(HttpServletRequest request,String templateInfo,MultipartFile file) {
 
         JSONObject jsonObject = JSONObject.parseObject(templateInfo);
-        Object loginEmpId = jsonObject.get("loginEmpId");
         Object deviceId = jsonObject.get("deviceId");
         Object templateId = jsonObject.get("templateId");
         Object backImgList = jsonObject.get("backImgList");
         Object salutationList = jsonObject.get("salutationList");
-        Object companyLogoName = jsonObject.get("companyLogoName");
+        //获取当前登录人的ID
+        String loginEmpId = request.getHeader("accessUserId");
 
         //返回给Controller层的数据
         Map result = null;
         //数据完善的时候进行添加自定义模板操作
-        if(deviceId!=null&&templateId!=null&&backImgList!=null&&salutationList!=null&&companyLogoName!=null){
+        if(deviceId!=null&&templateId!=null&&backImgList!=null&&salutationList!=null){
             //设备ID
             String rdeviceId =  jsonObject.get("deviceId").toString();
             //用户要更新的自定义模板的ID
@@ -115,7 +113,7 @@ public class TemplateServiceImpl implements ITemplateService{
             //查询自定义模板使用的标准模板的板式信息(包含各个item的坐标以及关联的图片<文字修饰框、铃铛背景图>)
             List<Map> templateItems = templateMapper.selectStandardItemInfo(standardTemplateId);
 
-            //删除原本的自定义模板（模板item、模板图片)，然后然后将用户更改的新的数据，和使用的标准模板信息整合成新的自定义模板，仍然使用原本自定义模板的Id
+            //删除原本的自定义模板（模板item、模板图片)，然后将用户更改的新的数据，和使用的标准模板信息整合成新的自定义模板，仍然使用原本自定义模板的Id
             int tresult = templateMapper.deletePersonalTemplate(selectTemplateId);
             int bresult = templateMapper.deleteBackgroundImage(selectTemplateId);
             int iresult = templateItemsMapper.deletePersonalTemplateItemInfo(selectTemplateId);
@@ -134,9 +132,9 @@ public class TemplateServiceImpl implements ITemplateService{
                 //查询该指令的执行情况
                 String commandResult = doorCmdMapper.selectDoorCmdResultCode();
                 if(commandResult.equals("0")&&operateResult){//执行成功
-                    ReturnCodeUtil.addReturnCode(true);
+                   result =  ReturnCodeUtil.addReturnCode(true);
                 }else{
-                    ReturnCodeUtil.addReturnCode(false);
+                   result =  ReturnCodeUtil.addReturnCode(false);
                 }
             }
         }else{
@@ -162,8 +160,7 @@ public class TemplateServiceImpl implements ITemplateService{
                  "salutationList":[
                      {"content":"上午","startTime":"2017-11-04 08:00","endTime":"2017-11-04 12:00"},
                      {"content":"下午","startTime":"2017-11-04 12:00","endTime":"2017-11-04 18:00"}
-                 ],
-                 "companyLogoName":"logoName"--------------->用户上传的公司Logo名称
+                 ]
              }
       *
       *
@@ -193,6 +190,9 @@ public class TemplateServiceImpl implements ITemplateService{
             JSONArray personalSalutationList =JSONArray.parseArray(jsonObject.get("salutationList").toString());
             /*//公司logo名称
             String logoName = jsonObject.get("companyLogoName").toString();*/
+            //声明添加新模板后的结果
+            boolean operateResult = false;
+
 
             //查询选择的标准模板的板式信息(包含各个item的坐标以及关联的图片<文字修饰框、铃铛背景图>)
             List<Map> templateItems = templateMapper.selectStandardItemInfo(selectTemplateId);
@@ -201,7 +201,7 @@ public class TemplateServiceImpl implements ITemplateService{
 
             if(resultTemplate==null){
                 //添加新的自定义模板
-                addNewPersonalTemplate(loginEmpId,rdeviceId,templateItems,personalBackImgList,personalSalutationList,file);
+                operateResult = addNewPersonalTemplate(loginEmpId,rdeviceId,templateItems,personalBackImgList,personalSalutationList,file);
             }else{
                 //删除拥有的自定义模板（模板item、模板图片)，然后添加新的自定义模板
                 int tresult = templateMapper.deletePersonalTemplate(resultTemplate.getTemplateId());
@@ -210,24 +210,24 @@ public class TemplateServiceImpl implements ITemplateService{
 
                 if(tresult>0&&bresult>0&&iresult>0){
                     //添加新的自定义模板，代替删除的自定义模板
-                    boolean operateResult =  addNewPersonalTemplate(loginEmpId,rdeviceId,templateItems,personalBackImgList,personalSalutationList,file);
-                    //下发到设备
-                    issueUpdateLaterTemplateInfo(String.valueOf(templateMapper.selectTemplateMaxPrimaryKey()),rdeviceId);
-                    //查询设备那边的执行情况
-                    try {
-                        Thread.sleep(3000);
-                    }catch(Exception e){
-                        e.printStackTrace();
-                    }
-                    //查询该指令的执行情况
-                    String commandResult = doorCmdMapper.selectDoorCmdResultCode();
-                    if(commandResult.equals("0")&&operateResult){//执行成功
-                        ReturnCodeUtil.addReturnCode(true);
-                    }else{
-                        ReturnCodeUtil.addReturnCode(false);
-                    }
-                    result = ReturnCodeUtil.addReturnCode(operateResult);
+                    operateResult =  addNewPersonalTemplate(loginEmpId,rdeviceId,templateItems,personalBackImgList,personalSalutationList,file);
                 }
+            }
+            //下发到设备
+            issueUpdateLaterTemplateInfo(String.valueOf(templateMapper.selectTemplateMaxPrimaryKey()),rdeviceId);
+            //查询设备那边的执行情况
+            try {
+                //等待三秒钟
+                Thread.sleep(3000);
+                //查询该指令的执行情况(“--待修改--”实时的反应状态到列表中)
+                String commandResult = doorCmdMapper.selectDoorCmdResultCode();
+                if(commandResult.equals("0")&&operateResult){//执行成功
+                    result = ReturnCodeUtil.addReturnCode(true);
+                }else{
+                    result = ReturnCodeUtil.addReturnCode(false);
+                }
+            }catch(Exception e){
+                e.printStackTrace();
             }
         }else{
             //返回参数错误提示
@@ -493,20 +493,21 @@ public class TemplateServiceImpl implements ITemplateService{
     /**
      * TODO 添加（替换）自定义模板(公共方法)
      */
-    public boolean addNewPersonalTemplate(Object loginEmpId,String rdeviceId, List<Map> templateItems, JSONArray personalBackImgList, JSONArray personalSalutationList, MultipartFile file) {
+    public boolean addNewPersonalTemplate(String loginEmpId,String rdeviceId, List<Map> templateItems, JSONArray personalBackImgList, JSONArray personalSalutationList, MultipartFile file) {
         //添加新的自定义模板
         Map templateMap = new HashMap();
 
-        templateMap.put("template_id", templateMapper.selectTemplateMaxPrimaryKey() + 1);
+        templateMap.put("template_id", (templateMapper.selectTemplateMaxPrimaryKey()==null ||
+                templateMapper.selectTemplateMaxPrimaryKey().isEmpty())?"1":Integer.parseInt(templateMapper.selectTemplateMaxPrimaryKey())+1);
         templateMap.put("template_type", "0");
         templateMap.put("template_level", "2");
         templateMap.put("operate_time", DateUtils.getDateTime());
-        templateMap.put("operate_emp",loginEmpId.toString());//后期要更改为当前登录人的ID
+        templateMap.put("operate_emp",loginEmpId);
         templateMap.put("device_id", rdeviceId);
         templateMap.put("roasting_time", "");
         templateMap.put("logo_flag", "1");
         templateMap.put("solutation_flag", "1");
-        templateMap.put("festival_name", "");
+        templateMap.put("festival_flag", "");
         templateMap.put("template_style", templateItems.get(0).get("template_style"));
         templateMap.put("is_use", "1");
         templateMap.put("is_standard", "0");
@@ -517,15 +518,17 @@ public class TemplateServiceImpl implements ITemplateService{
         //TODO ②：向background_image_template表中添加数据（设置背景图）
         int insertBackImageResult = 0;
         for (int i = 0; i < personalBackImgList.size(); i++) {
-            JSONObject backJSONobj = JSONObject.parseObject(personalBackImgList.get(i).toString());
+            JSONObject backJSONObj = JSONObject.parseObject(personalBackImgList.get(i).toString());
             Map backgroundImageMap = new HashMap();
-            backgroundImageMap.put("id", templateMapper.selectBackgroundImageTemplatePrimaryKey() + 1);
-            backgroundImageMap.put("img_id", backJSONobj.get("imgId"));
+            //
+            backgroundImageMap.put("id",(templateMapper.selectBackgroundImageTemplatePrimaryKey()==null ||
+                    templateMapper.selectBackgroundImageTemplatePrimaryKey().isEmpty())?"1":Integer.parseInt(templateMapper.selectTemplateMaxPrimaryKey())+1);
+            backgroundImageMap.put("img_id", backJSONObj.get("imgId"));
             backgroundImageMap.put("template_id", templateMapper.selectTemplateMaxPrimaryKey());
-            backgroundImageMap.put("broad_start_date", backJSONobj.get("startTime").toString().split(" ")[0]);
-            backgroundImageMap.put("broad_start_time", backJSONobj.get("startTime").toString().split(" ")[1]);
-            backgroundImageMap.put("broad_end_date", backJSONobj.get("endTime").toString().split(" ")[0]);
-            backgroundImageMap.put("broad_end_time", backJSONobj.get("endTime").toString().split(" ")[1]);
+            backgroundImageMap.put("broad_start_date", backJSONObj.get("startTime").toString().split(" ")[0]);
+            backgroundImageMap.put("broad_start_time", backJSONObj.get("startTime").toString().split(" ")[1]);
+            backgroundImageMap.put("broad_end_date", backJSONObj.get("endTime").toString().split(" ")[0]);
+            backgroundImageMap.put("broad_end_time", backJSONObj.get("endTime").toString().split(" ")[1]);
 
             insertBackImageResult =  templateMapper.insertIntoBackImage(backgroundImageMap);
         }

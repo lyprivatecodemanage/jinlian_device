@@ -196,17 +196,15 @@ public class EntranceGuardController {
      * @param requestParam
      * @return
      * {
-     *     "companyName":"无敌的公司",----->企业名称
      *     "deviceName":"无敌的设备",----------------------------------->设备名称
-     *     "operateType":"1",----------------->操作类型ID
-     *     "time":"2017-11-20 18:00",--------->时间
+     *     "operateCommand":"1",----------------->操作指令
      *     "page":"1",------------->当前页码
      *     "rows":"10"------------->每一页显示的行数
      * }
      */
     @PostMapping("/log/getLogCommand")
-    public String getLogoCommand(@RequestBody String requestParam){
-        Map logs = iEntranceGuardService.queryLogCommand(requestParam);
+    public String getLogoCommand(@RequestBody String requestParam,HttpServletRequest request){
+        Map logs = iEntranceGuardService.queryLogCommand(requestParam,request.getHeader("companyId"));
         return JSONObject.toJSONString(logs);
     }
 

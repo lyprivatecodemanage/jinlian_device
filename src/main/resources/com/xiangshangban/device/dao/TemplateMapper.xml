@@ -279,7 +279,7 @@
   </select>
 
   <!--查询template表中的主键最大值-->
-  <select id="selectTemplateMaxPrimaryKey" resultType="int">
+  <select id="selectTemplateMaxPrimaryKey" resultType="String">
     select max(cast(template_id as integer)) from template_
   </select>
 
@@ -361,12 +361,12 @@
    INSERT INTO template_
     VALUES
         (
-            #{ template_id },#{ template_type },#{ template_level }, #{ operate_time },#{ operate_emp },#{ device_id },#{ roasting_time },#{ logo_flag },#{ solutation_flag },#{ festival_name },#{ template_style },#{ is_use },#{ is_standard }
+            #{ template_id },#{ template_type },#{ template_level }, #{ operate_time },#{ operate_emp },#{ device_id },#{ roasting_time },#{ logo_flag },#{ solutation_flag },#{ festival_flag },#{ template_style },#{ is_use },#{ is_standard }
         )
   </insert>
 
   <!--查询background_image_template表主键的最大值-->
-  <select id="selectBackgroundImageTemplatePrimaryKey" resultType="int">
+  <select id="selectBackgroundImageTemplatePrimaryKey" resultType="String">
     select max(cast(id as INTEGER )) from background_image_template
   </select>
 

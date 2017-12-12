@@ -76,7 +76,7 @@ public interface TemplateMapper {
      * 查询template表中主键的最大值
      * @return
      */
-    int selectTemplateMaxPrimaryKey();
+    String selectTemplateMaxPrimaryKey();
 
     /**
      * 向template_表中添加自定义模板
@@ -86,7 +86,7 @@ public interface TemplateMapper {
     /**
      * 查询background_image_template中添加数据主键的最大值
      */
-    int selectBackgroundImageTemplatePrimaryKey();
+    String selectBackgroundImageTemplatePrimaryKey();
 
     /**
      * 向background_image_template中添加数据（设置自定义模板的背景图）
