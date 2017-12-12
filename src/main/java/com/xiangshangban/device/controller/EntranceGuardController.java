@@ -618,7 +618,7 @@ public class EntranceGuardController {
 
                 result =  ReturnCodeUtil.addReturnCode(weekInfo);
                 /**
-                 * ----已修改----
+                 * ----已修改-----
                  *通过人员的ID和公司的ID查询人员的名称
                  */
                 if(companyId!=null && !companyId.isEmpty()){
