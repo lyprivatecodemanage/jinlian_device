@@ -4,6 +4,7 @@ import com.xiangshangban.device.bean.DeviceHeartbeat;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
 import java.util.Map;
 
 @Mapper
@@ -33,5 +34,5 @@ public interface DeviceHeartbeatMapper {
                                                @Param("cpuTemperCondition") String cpuTemperCondition);
 
     //查询最新的一条心跳信息的时间根据设备id
-    Map<String, String> selectLatestTimeByDeviceId(String deviceId);
+    List<Map<String, String>> selectLatestTimeByDeviceId(String deviceId);
 }

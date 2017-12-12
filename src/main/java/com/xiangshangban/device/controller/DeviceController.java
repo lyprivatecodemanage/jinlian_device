@@ -178,7 +178,6 @@ public class DeviceController {
      * @param jsonString
      * @return
      */
-    @Transactional
     @ResponseBody
     @RequestMapping(value = "/findDeviceInformation", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     public ReturnData findDeviceInformation(@RequestBody String jsonString, HttpServletRequest request) {
@@ -518,7 +517,6 @@ public class DeviceController {
     /**
      * 查询当前公司的所有设备信息（一个设备信息列表）
      */
-    @Transactional
     @ResponseBody
     @RequestMapping("/getAllDevice")
     public String getAllDeviceInfo(@RequestBody String jsonString) {
@@ -537,7 +535,6 @@ public class DeviceController {
     /**
      * 查询当前公司的所有门的信息（一个门信息列表）
      */
-    @Transactional
     @ResponseBody
     @RequestMapping("/getAllDoorInfoByCompanyId")
     public List<Door> getAllDoorInfoByCompanyId(@RequestBody String jsonString) {
@@ -812,7 +809,6 @@ public class DeviceController {
      *
      * @param jsonString
      */
-    @Transactional
     @ResponseBody
     @RequestMapping("/getDeviceHeartBeat")
     public ReturnData getDeviceHeartBeat(@RequestBody String jsonString) {
@@ -1250,7 +1246,6 @@ public class DeviceController {
      *
      * @param jsonString
      */
-    @Transactional
     @ResponseBody
     @RequestMapping(value = "/getDeviceSetting", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     public ReturnData getDeviceSetting(@RequestBody String jsonString) {
@@ -1390,7 +1385,6 @@ public class DeviceController {
      *
      * @param jsonString
      */
-    @Transactional
     @ResponseBody
     @RequestMapping(value = "/getDeviceAppUpdate", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     public Map<String, Object> getDeviceAppUpdate(@RequestBody String jsonString) {
@@ -1539,7 +1533,6 @@ public class DeviceController {
      *
      * @param jsonString
      */
-    @Transactional
     @ResponseBody
     @RequestMapping(value = "/getBluetoothParameterList", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     public Map<String, Object> getBluetoothParameterList(@RequestBody String jsonString) {
@@ -1962,7 +1955,6 @@ public class DeviceController {
      * @param jsonString
      * @return
      */
-    @Transactional
     @ResponseBody
     @RequestMapping(value = "/getDeviceCount", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     public ReturnData getDeviceCount(@RequestBody String jsonString) {

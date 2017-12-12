@@ -68,7 +68,7 @@ public class DeviceServiceImpl implements IDeviceService {
         //新增设备信息
         device.setDeviceId(deviceId);
         device.setDeviceName("设备未命名");
-        device.setIsOnline("1");
+        device.setIsOnline("0");
         device.setActiveStatus("0");
 
         Device deviceExist = deviceMapper.selectByPrimaryKey(deviceId);
@@ -111,9 +111,9 @@ public class DeviceServiceImpl implements IDeviceService {
                 }else {
                     String isOnlineTemp = map.get("is_online");
 
-                    if (isOnlineTemp.equals("0")){
+                    if (isOnlineTemp.equals("1")){
                         map.put("is_online", "在线");
-                    }else if (isOnline.equals("1")){
+                    }else if (isOnlineTemp.equals("0")){
                         map.put("is_online", "离线");
                     }else{
                         map.put("is_online", "无状态");

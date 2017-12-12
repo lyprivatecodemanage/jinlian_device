@@ -364,7 +364,7 @@
 	;
   </select>
 
-  <select id="selectLatestTimeByDeviceId" resultMap="java.util.Map" parameterType="java.lang.String" >
+  <select id="selectLatestTimeByDeviceId" resultType="java.util.Map" parameterType="java.lang.String" >
     SELECT
 	T .*
     FROM

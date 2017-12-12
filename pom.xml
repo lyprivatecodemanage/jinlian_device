@@ -44,6 +44,16 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+			<exclusions>
+				<exclusion>
+					<artifactId>log4j-over-slf4j</artifactId>
+					<groupId>org.slf4j</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>org.springframework.boot</artifactId>
+					<groupId>spring-boot-starter-logging</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 
@@ -138,6 +148,7 @@
 			<version>1.3.1</version>
 		</dependency>
 
+		<!--热部署有问题-->
 		<!--<dependency>-->
 		<!--<groupId>org.springframework.boot</groupId>-->
 		<!--<artifactId>spring-boot-devtools</artifactId>-->
@@ -152,11 +163,11 @@
 			<version>3.0.0</version>
 		</dependency>
 
-		<!--&lt;!&ndash;log4j2日志依赖&ndash;&gt;-->
-		<!--<dependency>-->
-			<!--<groupId>org.springframework.boot</groupId>-->
-			<!--<artifactId>spring-boot-starter-log4j2</artifactId>-->
-		<!--</dependency>-->
+		<!--log4j2日志依赖-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-log4j2</artifactId>
+		</dependency>
 
 	</dependencies>
 

@@ -23,13 +23,13 @@ public class ConnectionFactoryServiceImpl implements IConnectionFactoryService {
     //本地环境
 //    private static String host = "192.168.0.118";
     //测试环境
-//    private static String host = "192.168.0.242";
-//    private static String username = "test";
-//    private static String password = "123";
+    private static String host = "192.168.0.242";
+    private static String username = "test";
+    private static String password = "123";
     //真实环境
-    private static String host = "106.15.90.200";
-    private static String username = "jinnianmq";
-    private static String password = "jinnian123456";
+//    private static String host = "106.15.90.200";
+//    private static String username = "jinnianmq";
+//    private static String password = "jinnian123456";
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     private static int port = 5672;
@@ -40,7 +40,7 @@ public class ConnectionFactoryServiceImpl implements IConnectionFactoryService {
         int i = 0;
         connection = new HashMap<String, CachingConnectionFactory>();
         useConn = new HashMap<String, CachingConnectionFactory>();
-        while (i < 10) {
+        while (i < 1) {
             CachingConnectionFactory connectionFactory = new CachingConnectionFactory();
             connectionFactory.resetConnection();
             connectionFactory.setHost(host);
