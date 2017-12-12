@@ -142,7 +142,7 @@
       FROM
       device_
       WHERE
-      company_id = 'F19CEEFAAC7043C9B470A06FEA8F53F9'
+      company_id = #{companyId}
       ) B ON A .device_id = B.device_id
       ) C
       LEFT JOIN door_employee D ON C .door_id = D.door_id
