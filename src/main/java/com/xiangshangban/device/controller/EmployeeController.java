@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -686,18 +687,16 @@ public class EmployeeController {
 //    }
 
     /**
-     * 人员人脸、指纹、卡号信息上传存储(HTTP POST)
+     * 人员人脸、指纹、卡号信息上传存储(HTTP POST)(人脸更新独立出来了，方法在下面,人脸删除和其它的保留了)
      * @param userInfo    人员信息
      * @param style   校验类型
-     * @param file        文件
      * @return
      */
     @ResponseBody
     @Transactional
     @RequestMapping(value = "/saveEmployeeInputInfo", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     public Map<String, Object> saveEmployeeInputInfo(@RequestParam(name = "userInfo") String userInfo,
-                                                     @RequestParam(name = "style") String style,
-                                                     @RequestParam(name = "file") MultipartFile file){
+                                                     @RequestParam(name = "style") String style){
 
         /**
          * 测试数据
@@ -811,22 +810,193 @@ public class EmployeeController {
                 }
 
             }else if ("1".equals(style)){
+                //此处执行人脸特征值删除，而人脸特征值更新及上传人脸图片抽离到了下面的saveEmployeeFace方法里了
+
+                return iEmployeeService.saveEmployeeInputInfo(jsonUrlDecoderString, deviceId, style, companyId);
+
+            }
+
+            //构造命令格式
+            DoorCmd doorCmdRecord = new DoorCmd();
+            doorCmdRecord.setServerId("001");
+            doorCmdRecord.setDeviceId(deviceId);
+            doorCmdRecord.setFileEdition("v1.3");
+            doorCmdRecord.setCommandMode("R");
+            doorCmdRecord.setCommandType("S");
+            doorCmdRecord.setCommandTotal("1");
+            doorCmdRecord.setCommandIndex("1");
+            doorCmdRecord.setSubCmdId("");
+            doorCmdRecord.setAction("UPDATE_USER_LABEL");
+            doorCmdRecord.setActionCode("2003");
+            doorCmdRecord.setSendTime(CalendarUtil.getCurrentTime());
+            doorCmdRecord.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
+            doorCmdRecord.setSuperCmdId(FormatUtil.createUuid());
+            doorCmdRecord.setData(JSON.toJSONString(resultMap));
+
+            //获取完整的数据加协议封装格式
+            RabbitMQSender rabbitMQSender = new RabbitMQSender();
+            Map<String, Object> doorRecordAll =  rabbitMQSender.messagePackaging(doorCmdRecord, "", resultData, "R");
+            //命令状态设置为: 已回复
+            doorCmdRecord.setStatus("5");
+            //设置md5校验值
+            doorCmdRecord.setMd5Check((String) doorRecordAll.get("MD5Check"));
+            //设置数据库的data字段
+            doorCmdRecord.setData(JSON.toJSONString(doorRecordAll.get("result")));
+            doorCmdRecord.setResultCode(resultCode);
+            doorCmdRecord.setResultMessage(resultMessage);
+            //命令数据存入数据库
+            entranceGuardService.insertCommand(doorCmdRecord);
+
+            return doorRecordAll;
+
+        }else {
+            System.out.println("MD5校验失败，数据已被修改");
+
+            //回复人员人脸、指纹、卡号信息上传
+            resultCode = "6";
+            resultMessage = "MD5校验失败";
+            resultData.put("resultCode", resultCode);
+            resultData.put("resultMessage", resultMessage);
+            resultData.put("returnObj", "");
+            resultMap.put("result", resultData);
+
+            //构造命令格式
+            DoorCmd doorCmdRecord = new DoorCmd();
+            doorCmdRecord.setServerId("001");
+            doorCmdRecord.setDeviceId(deviceId);
+            doorCmdRecord.setFileEdition("v1.3");
+            doorCmdRecord.setCommandMode("R");
+            doorCmdRecord.setCommandType("S");
+            doorCmdRecord.setCommandTotal("1");
+            doorCmdRecord.setCommandIndex("1");
+            doorCmdRecord.setSubCmdId("");
+            doorCmdRecord.setAction("UPDATE_USER_LABEL");
+            doorCmdRecord.setActionCode("2003");
+            doorCmdRecord.setSendTime(CalendarUtil.getCurrentTime());
+            doorCmdRecord.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
+            doorCmdRecord.setSuperCmdId(FormatUtil.createUuid());
+            doorCmdRecord.setData(JSON.toJSONString(resultMap));
+
+            //获取完整的数据加协议封装格式
+            RabbitMQSender rabbitMQSender = new RabbitMQSender();
+            Map<String, Object> doorRecordAll =  rabbitMQSender.messagePackaging(doorCmdRecord, "", resultData, "R");
+            //命令状态设置为: 已回复
+            doorCmdRecord.setStatus("5");
+            //设置md5校验值
+            doorCmdRecord.setMd5Check((String) doorRecordAll.get("MD5Check"));
+            //设置数据库的data字段
+            doorCmdRecord.setData(JSON.toJSONString(doorRecordAll.get("result")));
+            doorCmdRecord.setResultCode(resultCode);
+            doorCmdRecord.setResultMessage(resultMessage);
+            //命令数据存入数据库
+            entranceGuardService.insertCommand(doorCmdRecord);
+
+            System.out.println("人员指纹、人脸信息上传已回复");
+            return doorRecordAll;
+
+        }
+
+    }
+
+    /**
+     * 人员人脸信息上传存储(HTTP POST)
+     * @param userInfo    人员信息
+     * @param style   校验类型
+     * @param file        文件
+     * @return
+     */
+    @ResponseBody
+    @Transactional
+    @RequestMapping(value = "/saveEmployeeFace", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    public Map<String, Object> saveEmployeeFace(@RequestParam(name = "userInfo") String userInfo,
+                                                     @RequestParam(name = "style") String style,
+                                                     @RequestParam(name = "file") MultipartFile file){
+
+        /**
+         * 测试数据
+         {
+         "MD5Check": "5886C3A93092AA583242FE54FF2F4F73",
+         "commandIndex": "1",
+         "commandMode": "C",
+         "commandTotal": "1",
+         "commandType": "Single",
+         "deviceId": "0f1a21d4e6fd3cb8",
+         "fileEdition": "v1.3",
+         "outOfTime": "2017-11-06 17:36:07",
+         "sendTime": "2017-11-09 17:36:07",
+         "serverId": "001",
+         "command": {
+         "ACTION": "UPDATE_USER_LABEL",
+         "ACTIONCode": "2003",
+         "subCMDID": "",
+         "superCMDID": "555555555555555555555555555555"
+         },
+         "data": {
+         "userLabel": {
+         "userId": "1_20081",
+         "userFace": "RlBNHIfGErJpwnUUadRDhxSt28I2Fa",
+         "userFinger1": "RlBNHIfGErJpwnUUadRDhxSt28I2Fa/cxeVVculERrdrUsOmNqhZwlU4qs6HlphzasX2OG/ax2XZsOHD93qqzM3527Do0FgZdQoNqHmzaE34urHjQaibY1IBeF1qykMom2LLwwjdYclHWb9xUkPXsalfBAdyrWDIRRV3eYTZ32PMgmbVo1IDuLBs5YTHsG5vAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+         "userFinger2": "RlBNHIfGErJpwnUUadRDhxSt28I2Fa/cxeVVculERrdrUsOmNqhZwlU4qs6HlphzasX2OG/ax2XZsOHD93qqzM3527Do0FgZdQoNqHmzaE34urHjQaibY1IBeF1qykMom2LLwwjdYclHWb9xUkPXsalfBAdyrWDIRRV3eYTZ32PMgmbVo1IDuLBs5YTHsG5vAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+         "userNFC": "123456789"
+         }
+         }
+         }
+         */
+
+        System.out.println("------------"+userInfo);
+        String jsonUrlDecoderString = UrlUtil.getURLDecoderString(userInfo);
+//        System.out.println(jsonUrlDecoderString);
+        //去除数据的前缀名称
+//        jsonUrlDecoderString = jsonUrlDecoderString.replace("userInfo=", "");
+        System.out.println(jsonUrlDecoderString);
+
+        Map<String, Object> mapResult = (Map<String, Object>) JSONObject.fromObject(jsonUrlDecoderString);
+
+        String deviceId = (String) mapResult.get("deviceId");
+
+        //回复人员人脸、指纹、卡号信息上传
+        Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
+        Map<String, Object> resultData = new LinkedHashMap<String, Object>();
+        String resultCode = "";
+        String resultMessage = "";
+
+        //md5校验
+        //获取对方的md5
+        String otherMd5 = (String) mapResult.get("MD5Check");
+        mapResult.remove("MD5Check");
+        String messageCheck = JSON.toJSONString(mapResult);
+        System.out.println("messageCheck: "+messageCheck);
+        //生成我的md5
+        String myMd5 = MD5Util.encryptPassword(messageCheck, "XC9EO5GKOIVRMBQ2YE8X");
+        System.out.println("myMd5 = " + myMd5);
+        //双方的md5比较判断
+        if (myMd5.equals(otherMd5)){
+            System.out.println("MD5校验成功，数据完好无损");
+
+            //获取绑定该设备的公司的id
+            String companyId = deviceMapper.selectByPrimaryKey(deviceId).getCompanyId();
+
+            Map<String, Map<String, String>> dataMap = (Map<String, Map<String, String>>) mapResult.get("data");
+
+            if ("1".equals(style)){
                 //人脸录入
 
-//                //提取人员id
-//                Map<String, Object> allMapTemp = JSONObject.fromObject(jsonUrlDecoderString);
-//                Map<String, Object> dataMapTemp = (Map<String, Object>) allMapTemp.get("data");
-//                Map<String, Object> userLabelMapTemp = (Map<String, Object>) dataMapTemp.get("userLabel");
-//                String employeeId = (String) userLabelMapTemp.get("userId");
-//
-//                //存储上传的人脸图片
-//                try {
-//                    //versionCode随便填就行，但不能为空，人脸图片上传时没有实际作用
-//                    ossController.deviceUploadPackage("v1.9", file, "facePhoto", employeeId);
-//                } catch (IOException e) {
-//                    System.out.println("人脸图片上传IO异常");
-//                    e.printStackTrace();
-//                }
+                //提取人员id
+                Map<String, Object> allMapTemp = JSONObject.fromObject(jsonUrlDecoderString);
+                Map<String, Object> dataMapTemp = (Map<String, Object>) allMapTemp.get("data");
+                Map<String, Object> userLabelMapTemp = (Map<String, Object>) dataMapTemp.get("userLabel");
+                String employeeId = (String) userLabelMapTemp.get("userId");
+
+                //存储上传的人脸图片
+                try {
+                    if (null != file){
+                        //versionCode随便填就行，但不能为空，人脸图片上传时没有实际作用
+                        ossController.deviceUploadPackage("v1.9", file, "facePhoto", employeeId);
+                    }
+                } catch (IOException e) {
+                    System.out.println("人脸图片上传IO异常");
+                    e.printStackTrace();
+                }
 
                 return iEmployeeService.saveEmployeeInputInfo(jsonUrlDecoderString, deviceId, style, companyId);
 
