@@ -42,13 +42,12 @@ public interface IEntranceGuardService {
     List<Map> queryAllDoorInfo(Map map);
 
     //TODO 日志管理
-
     /**
      * 条件查询日志
      * @param requestParam
      * @return
      */
-    Map queryLogCommand(String requestParam,String companyId);
+    Map queryLogCommand(String requestParam);
     /**
      * 批量删除日志
      */

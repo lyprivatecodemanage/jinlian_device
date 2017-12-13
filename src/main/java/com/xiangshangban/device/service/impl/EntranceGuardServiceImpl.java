@@ -174,22 +174,25 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
      * 按条件查询日志信息
      * @return
      * {
+     *     "companyName":"无敌的公司",----->企业名称
      *     "deviceName":"无敌的设备",----------------------------------->设备名称
-     *     "operateCommand":"1",----------------->操作指令
+     *     "operateType":"1",----------------->操作类型ID<预留的搜索条件：暂时不需要>
+     *     "time":"2017-11-20 18:00",--------->时间
      *     "page":"1",------------->当前页码
      *     "rows":"10"------------->每一页显示的行数
      * }
      */
     @Override
-    public Map queryLogCommand(String requestParam,String companyId) {
+    public Map queryLogCommand(String requestParam) {
         //定义操作内容
-        String[] operateStr ={"待发送","下发中","下发成功","下发失败"};
+        String[] operateStr ={"待发送","下发中","下发成功","下发失败","删除人员权限","已回复"};
 
         com.alibaba.fastjson.JSONObject jsonObject = com.alibaba.fastjson.JSONObject.parseObject(requestParam);
         Map map = new HashMap();
+        map.put("companyName",jsonObject.get("companyName")!=null?"%"+jsonObject.get("companyName").toString()+"%":null);
         map.put("deviceName",jsonObject.get("deviceName")!=null?"%"+jsonObject.get("deviceName").toString()+"%":null);
-        map.put("operateCommand",jsonObject.get("operateCommand")!=null?jsonObject.get("operateCommand").toString():null);
-        map.put("companyId",(companyId!=null && !companyId.isEmpty())?companyId:null);
+       /* map.put("operateType",jsonObject.get("operateType")!=null?jsonObject.get("operateType").toString():null);*/
+        map.put("time",jsonObject.get("time")!=null?"%"+jsonObject.get("time").toString()+"%":null);
 
         Object page = jsonObject.get("page");
         Object rows = jsonObject.get("rows");
@@ -203,15 +206,14 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         //将没有的字段设置为“”
         for(int i=0;i<logs.size();i++){
             logs.get(i).put("super_cmd_id",logs.get(i).get("super_cmd_id")==null?"":logs.get(i).get("super_cmd_id"));
-            logs.get(i).put("action_code",logs.get(i).get("action_code")==null?"":logs.get(i).get("action_code"));
             logs.get(i).put("send_time",logs.get(i).get("send_time")==null?"":logs.get(i).get("send_time"));
             logs.get(i).put("status",logs.get(i).get("status")==null?"":logs.get(i).get("status"));
-            /*logs.get(i).put("company_name",logs.get(i).get("company_name")==null?"":logs.get(i).get("company_name"));*/
+            logs.get(i).put("company_name",logs.get(i).get("company_name")==null?"":logs.get(i).get("company_name"));
             logs.get(i).put("device_name",logs.get(i).get("device_name")==null?"":logs.get(i).get("device_name"));
             logs.get(i).put("employee_name",logs.get(i).get("employee_name")==null?"":logs.get(i).get("employee_name"));
         }
 
-        //完善数据结构(更改下发的状态为文字)
+        //完善数据结构
         for(int i=0;i<logs.size();i++){
             String status = logs.get(i).get("status").toString();
             for(int j=0;j<operateStr.length;j++){
@@ -220,32 +222,18 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
                 }
             }
         }
+
         List outterLogList = new ArrayList();
         //更改返回的数据的字段名称，方便识别
         for(int i=0;i<logs.size();i++){
             Map innerMap = new HashMap();
-            //获取指令类型
-            Object cmdType = logs.get(i).get("action_code");
             innerMap.put("logId",logs.get(i).get("super_cmd_id"));
-           /* innerMap.put("companyName",logs.get(i).get("company_name"));*/
+            innerMap.put("companyName",logs.get(i).get("company_name"));
             innerMap.put("deviceName",logs.get(i).get("device_name"));
-            //设置指令类型
-            if(cmdType!=null){
-                if(cmdType.toString().trim().equals("3003")){
-                    innerMap.put("operateCommand","门禁系统设置");
-                }
-                if(cmdType.toString().trim().equals("3004")){
-                    innerMap.put("operateCommand","首卡常开");
-                }
-                if(cmdType.toString().trim().equals("3005")){
-                    innerMap.put("operateCommand","门禁日历");
-                }
-            }else{
-                innerMap.put("operateCommand","");
-            }
+            innerMap.put("operateType",logs.get(i).get("数据"));//暂时固定：后期要更改
             innerMap.put("operateEmployee",logs.get(i).get("employee_name"));
             innerMap.put("time",logs.get(i).get("send_time"));
-            innerMap.put("status",logs.get(i).get("status"));
+            innerMap.put("operateContent",logs.get(i).get("status"));
 
             outterLogList.add(innerMap);
         }
@@ -342,7 +330,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
                     Map requestParam = new HashMap();
                     requestParam.put("employeeId",employee_id.toString());
                     requestParam.put("deviceId",doorObj.getDeviceId());
-                    //TODO 获取下发时间
+                    //TODO 获取下发时间(---此处要更改（可能该设备上关联的人员还没有进行下发操作，查询指令信息时查询不到的，所以说就没有“isDelCommand标志”）----)
                     List<Map> commandList = doorEmployeeMapper.selectRelateEmpCommand(requestParam);
                     if(commandList!=null && commandList.size()>0){
                         //设置下发时间

@@ -196,15 +196,17 @@ public class EntranceGuardController {
      * @param requestParam
      * @return
      * {
+     *     "companyName":"无敌的公司",----->企业名称
      *     "deviceName":"无敌的设备",----------------------------------->设备名称
-     *     "operateCommand":"1",----------------->操作指令
+     *     "operateType":"1",----------------->操作类型ID
+     *     "time":"2017-11-20 18:00",--------->时间
      *     "page":"1",------------->当前页码
      *     "rows":"10"------------->每一页显示的行数
      * }
      */
     @PostMapping("/log/getLogCommand")
-    public String getLogoCommand(@RequestBody String requestParam,HttpServletRequest request){
-        Map logs = iEntranceGuardService.queryLogCommand(requestParam,request.getHeader("companyId"));
+    public String getLogoCommand(@RequestBody String requestParam){
+        Map logs = iEntranceGuardService.queryLogCommand(requestParam);
         return JSONObject.toJSONString(logs);
     }
 
@@ -432,7 +434,7 @@ public class EntranceGuardController {
         if(maps!=null && maps.size()>0){
            //将开门方式和命令状态由数字更改为文字信息
            for(int i=0;i<maps.size();i++){
-               //先判断是哪种指令(下发、删除)
+               //先判断是哪种指令(下发、删除) TODO    ========此处要更改（可能获取不到isDelCommand报NULLPointerException）==========
                String commandType = maps.get(i).get("isDelCommand").toString();
                Object openDoorType = maps.get(i).get("range_door_open_type");
 
