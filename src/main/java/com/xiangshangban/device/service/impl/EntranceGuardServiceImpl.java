@@ -881,7 +881,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
             doorRecord.setRecordType(recordMap.get("attType"));
 
             try {
-                String doorId = doorMapper.findDoorIdByDeviceId(recordMap.get("deviceId")).getDoorId();
+                String doorId = doorMapper.findDoorIdByDeviceId((String) doorRecordMapTemp.get("deviceId")).getDoorId();
                 doorRecord.setDoorId(doorId);
             }catch (Exception e){
                 System.out.println("门禁记录上传：该设备还未关联门，将不记录门id");
