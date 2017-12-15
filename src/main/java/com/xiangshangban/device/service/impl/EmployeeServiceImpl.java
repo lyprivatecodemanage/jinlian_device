@@ -3,19 +3,19 @@ package com.xiangshangban.device.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.xiangshangban.device.bean.*;
 import com.xiangshangban.device.common.rmq.RabbitMQSender;
-import com.xiangshangban.device.common.utils.CalendarUtil;
-import com.xiangshangban.device.common.utils.DateUtils;
-import com.xiangshangban.device.common.utils.FormatUtil;
-import com.xiangshangban.device.common.utils.HttpRequestFactory;
+import com.xiangshangban.device.common.utils.*;
 import com.xiangshangban.device.dao.*;
 import com.xiangshangban.device.service.IEmployeeService;
 import com.xiangshangban.device.service.IEntranceGuardService;
+import com.xiangshangban.device.service.OSSFileService;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.*;
 
 /**d
@@ -61,6 +61,12 @@ public class EmployeeServiceImpl implements IEmployeeService {
 
     @Autowired
     private DoorEmployeePermissionMapper doorEmployeePermissionMapper;
+
+    @Autowired
+    OSSFileService oSSFileService;
+
+    @Autowired
+    DeviceUpdatePackSysMapper deviceUpdatePackSysMapper;
 
     //人员模块人员信息同步
     @Override
@@ -345,6 +351,10 @@ public class EmployeeServiceImpl implements IEmployeeService {
 //            }
 //            employeeMapper.updateByPrimaryKeySelective(employeeTemp);
 //            //2.同步该人员的人脸、指纹信息到其它有权限的设备上
+//            List<Map> deviceList = deviceMapper.selectAllDevice(companyId);
+//            for (Map<String, String> map : deviceList) {
+//                map.get("");
+//            }
 //
 //        }
 
@@ -670,6 +680,66 @@ public class EmployeeServiceImpl implements IEmployeeService {
             doorCmdEmployeePermission.setActionCode("3001");
         }
 
+    }
+
+    @Override
+    public String deviceUploadPackage(String versionCode, MultipartFile uploadResource,
+                                      String fileType, String employeeId) throws IOException {
+        /**
+         * fileType：facePhoto时为人脸图片上传，为任意其它字符串时为系统升级包上传
+         */
+        //验证参数的完整性
+        Map result = new HashMap();
+        if((versionCode==null || versionCode.isEmpty()) ||(uploadResource==null || uploadResource.isEmpty())){
+            //参数异常
+            result = ReturnCodeUtil.addReturnCode(1);
+        }else{
+
+            String funcDirectory = "";
+            //判断文件类型
+            if ("facePhoto".equals(fileType)){
+                funcDirectory = "FacePhotoLibrary/"+employeeId;
+            }else {
+                //设置上传文件保存的路径
+                funcDirectory = "device/update/system/"+versionCode;
+            }
+
+            //上传
+            String filePath = oSSFileService.devicePackageUpload(funcDirectory,uploadResource,fileType);
+            if(filePath.trim().equals("false")){
+                //上传失败
+                result = ReturnCodeUtil.addReturnCode(Boolean.valueOf(filePath.trim()),"上传升级包（应用包）失败");
+            }else{
+                if (!"facePhoto".equals(fileType)){
+                    //上传成功，保存信息到本地
+                    DeviceUpdatePackSys deviceUpdatePackSys = new DeviceUpdatePackSys();
+                    deviceUpdatePackSys.setNewSysVerion(versionCode);
+                    deviceUpdatePackSys.setPath(filePath.trim());
+                    deviceUpdatePackSys.setCreateTime(DateUtils.getDateTime());
+
+                    //根据路径查询当前本地数据库中是否已经存在该资源
+                    String status = deviceUpdatePackSysMapper.verifyWhetherExistsResource(filePath.trim());
+                    if(status==null || "".equals(status)){
+                        //添加新的数据
+                        int insertResult = deviceUpdatePackSysMapper.insert(deviceUpdatePackSys);
+
+                        if(insertResult>0){
+                            result = ReturnCodeUtil.addReturnCode(true,"上传文件成功，并保存信息至本地数据库");
+                        }else{
+                            result = ReturnCodeUtil.addReturnCode(false,"上传文件成功，保存至本地数据库失败");
+                        }
+                    }else{
+                        //根据路径更新操作时间
+                        Map map = new HashMap();
+                        map.put("createTime",DateUtils.getDateTime());
+                        map.put("path",filePath.trim());
+                        deviceUpdatePackSysMapper.updateOperateTime(map);
+                        result = ReturnCodeUtil.addReturnCode(true,"上传文件成功，并保存信息至本地数据库");
+                    }
+                }
+            }
+        }
+        return com.alibaba.fastjson.JSONObject.toJSONString(result);
     }
 
     public static void main(String[] args) {

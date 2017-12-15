@@ -255,6 +255,12 @@ public class DeviceController {
         }
 
         try {
+            if (StringUtils.isEmpty(request.getHeader("companyId"))){
+                returnData.setMessage("无符合条件的设备");
+                returnData.setReturnCode("4202");
+                return returnData;
+            }
+
             LOGGER.info("page = " + Integer.valueOf(page) + "\n" + "rows = " + Integer.valueOf(rows));
             Page pageHelperResult = PageHelper.startPage(Integer.valueOf(page), Integer.valueOf(rows));
             List<Map<String, String>> mapListResult = deviceService.findDeviceInformation(companyId,

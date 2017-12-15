@@ -2,7 +2,9 @@ package com.xiangshangban.device.service;
 
 import com.xiangshangban.device.bean.Employee;
 import com.xiangshangban.device.bean.ReturnData;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -42,4 +44,7 @@ public interface IEmployeeService {
 
     //同步不同设备上，有开门权限的人员的权限信息
     void synchronizeEmployeePermissionForDevices(String employeeId);
+
+    String deviceUploadPackage(String versionCode, MultipartFile uploadResource,
+                               String fileType, String employeeId) throws IOException;
 }

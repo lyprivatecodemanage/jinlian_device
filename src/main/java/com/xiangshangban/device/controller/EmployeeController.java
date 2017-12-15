@@ -12,6 +12,7 @@ import com.xiangshangban.device.dao.*;
 import com.xiangshangban.device.service.IEmployeeService;
 import com.xiangshangban.device.service.IEntranceGuardService;
 import net.sf.json.JSONObject;
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -991,54 +992,64 @@ public class EmployeeController {
                 try {
                     if (null != file){
                         //versionCode随便填就行，但不能为空，人脸图片上传时没有实际作用
-                        ossController.deviceUploadPackage("v1.9", file, "facePhoto", employeeId);
+                        iEmployeeService.deviceUploadPackage("v1.9", file, "facePhoto", employeeId);
                     }
                 } catch (IOException e) {
                     System.out.println("人脸图片上传IO异常");
                     e.printStackTrace();
+
+                    //回复人员人脸图片上传
+                    resultCode = "999";
+                    resultMessage = "人脸图片上传IO异常，FileNotFound";
+                    resultData.put("resultCode", resultCode);
+                    resultData.put("resultMessage", resultMessage);
+                    resultData.put("returnObj", "");
+                    resultMap.put("result", resultData);
+
+                    //构造命令格式
+                    DoorCmd doorCmdRecord = new DoorCmd();
+                    doorCmdRecord.setServerId("001");
+                    doorCmdRecord.setDeviceId(deviceId);
+                    doorCmdRecord.setFileEdition("v1.3");
+                    doorCmdRecord.setCommandMode("R");
+                    doorCmdRecord.setCommandType("S");
+                    doorCmdRecord.setCommandTotal("1");
+                    doorCmdRecord.setCommandIndex("1");
+                    doorCmdRecord.setSubCmdId("");
+                    doorCmdRecord.setAction("UPDATE_USER_LABEL");
+                    doorCmdRecord.setActionCode("2003");
+                    doorCmdRecord.setSendTime(CalendarUtil.getCurrentTime());
+                    doorCmdRecord.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
+                    doorCmdRecord.setSuperCmdId(FormatUtil.createUuid());
+                    doorCmdRecord.setData(JSON.toJSONString(resultMap));
+
+                    //获取完整的数据加协议封装格式
+                    RabbitMQSender rabbitMQSender = new RabbitMQSender();
+                    Map<String, Object> doorRecordAll =  rabbitMQSender.messagePackaging(doorCmdRecord, "", resultData, "R");
+                    //命令状态设置为: 已回复
+                    doorCmdRecord.setStatus("5");
+                    //设置md5校验值
+                    doorCmdRecord.setMd5Check((String) doorRecordAll.get("MD5Check"));
+                    //设置数据库的data字段
+                    doorCmdRecord.setData(JSON.toJSONString(doorRecordAll.get("result")));
+                    doorCmdRecord.setResultCode(resultCode);
+                    doorCmdRecord.setResultMessage(resultMessage);
+                    //命令数据存入数据库
+                    entranceGuardService.insertCommand(doorCmdRecord);
+
+                    return doorRecordAll;
                 }
 
                 return iEmployeeService.saveEmployeeInputInfo(jsonUrlDecoderString, deviceId, style, companyId);
 
+            }else {
+                System.out.println("人员信息上传，类型传递错误");
+                return new HashedMap();
             }
-
-            //构造命令格式
-            DoorCmd doorCmdRecord = new DoorCmd();
-            doorCmdRecord.setServerId("001");
-            doorCmdRecord.setDeviceId(deviceId);
-            doorCmdRecord.setFileEdition("v1.3");
-            doorCmdRecord.setCommandMode("R");
-            doorCmdRecord.setCommandType("S");
-            doorCmdRecord.setCommandTotal("1");
-            doorCmdRecord.setCommandIndex("1");
-            doorCmdRecord.setSubCmdId("");
-            doorCmdRecord.setAction("UPDATE_USER_LABEL");
-            doorCmdRecord.setActionCode("2003");
-            doorCmdRecord.setSendTime(CalendarUtil.getCurrentTime());
-            doorCmdRecord.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
-            doorCmdRecord.setSuperCmdId(FormatUtil.createUuid());
-            doorCmdRecord.setData(JSON.toJSONString(resultMap));
-
-            //获取完整的数据加协议封装格式
-            RabbitMQSender rabbitMQSender = new RabbitMQSender();
-            Map<String, Object> doorRecordAll =  rabbitMQSender.messagePackaging(doorCmdRecord, "", resultData, "R");
-            //命令状态设置为: 已回复
-            doorCmdRecord.setStatus("5");
-            //设置md5校验值
-            doorCmdRecord.setMd5Check((String) doorRecordAll.get("MD5Check"));
-            //设置数据库的data字段
-            doorCmdRecord.setData(JSON.toJSONString(doorRecordAll.get("result")));
-            doorCmdRecord.setResultCode(resultCode);
-            doorCmdRecord.setResultMessage(resultMessage);
-            //命令数据存入数据库
-            entranceGuardService.insertCommand(doorCmdRecord);
-
-            return doorRecordAll;
-
         }else {
             System.out.println("MD5校验失败，数据已被修改");
 
-            //回复人员人脸、指纹、卡号信息上传
+            //回复人员人脸图片上传
             resultCode = "6";
             resultMessage = "MD5校验失败";
             resultData.put("resultCode", resultCode);
