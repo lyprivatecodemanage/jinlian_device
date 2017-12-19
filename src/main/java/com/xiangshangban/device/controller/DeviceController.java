@@ -555,16 +555,21 @@ public class DeviceController {
      */
     @ResponseBody
     @RequestMapping("/getAllDevice")
-    public String getAllDeviceInfo(@RequestBody String jsonString) {
-        //提取数据
-        JSONObject jsonObject = JSONObject.parseObject(jsonString);
-        String companyId = jsonObject.get("companyId") != null ? jsonObject.get("companyId").toString() : null;
-        List<Map> maps = deviceService.queryAllDeviceInfo(companyId);
-
-        //添加返回码
-        Map result = ReturnCodeUtil.addReturnCode(maps);
-//        LOGGER.info(JSONObject.toJSONString(result));
-        return JSONObject.toJSONString(result);
+    public String getAllDeviceInfo(HttpServletRequest request) {
+        //获取公司ID
+        String companyId = request.getHeader("companyId");
+        //返回给前端的数据
+        Map resultMap = new HashMap();
+        if(companyId!=null && !companyId.isEmpty()){
+            List<Map> maps = deviceService.queryAllDeviceInfo(companyId);
+            //添加返回码
+            resultMap = ReturnCodeUtil.addReturnCode(maps);
+            //LOGGER.info(JSONObject.toJSONString(result));
+        }else{
+            //未知的公司ID和人员ID
+            resultMap = ReturnCodeUtil.addReturnCode(3);
+        }
+        return JSONObject.toJSONString(resultMap);
     }
 
 

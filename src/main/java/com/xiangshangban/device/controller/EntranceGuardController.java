@@ -95,27 +95,28 @@ public class EntranceGuardController {
         Object deviceId = jsonObject.get("deviceId");
         //获取当前登录人的ID
         String operateUserId = request.getHeader("accessUserId");
-
+        //返回给前端的数据
         Map resultMap = new HashMap();
-        if(deviceId!=null){
-            Door door = new Door();
-            door.setDoorName(doorName != null ? doorName.toString() : null);
-            door.setDeviceId(deviceId != null ? deviceId.toString() : null);
-            //查询主键的最大值
-            String doorPrimary = iEntranceGuardService.queryPrimaryKeyFromDoor();
-            door.setDoorId((doorPrimary ==null || doorPrimary.isEmpty())?"1":String.valueOf(Integer.parseInt(doorPrimary)+1));
-            door.setOperateTime(DateUtils.getDateTime());
-            if(operateUserId==null|| operateUserId.isEmpty()){
-                //未知的登录人ID
-                resultMap = ReturnCodeUtil.addReturnCode(3);
-            }else{
+
+        if(operateUserId!=null && !operateUserId.toString().trim().isEmpty()){
+            if(deviceId!=null){
+                Door door = new Door();
+                door.setDoorName(doorName != null ? doorName.toString() : null);
+                door.setDeviceId(deviceId != null ? deviceId.toString() : null);
+                //查询主键的最大值
+                String doorPrimary = iEntranceGuardService.queryPrimaryKeyFromDoor();
+                door.setDoorId((doorPrimary ==null || doorPrimary.isEmpty())?"1":String.valueOf(Integer.parseInt(doorPrimary)+1));
+                door.setOperateTime(DateUtils.getDateTime());
                 door.setOperateEmployee(operateUserId);//设置操作人
                 boolean result = iEntranceGuardService.addDoorInfo(door);
                 resultMap = ReturnCodeUtil.addReturnCode(result);
+                }else{
+                //该门未绑定设备
+                resultMap = ReturnCodeUtil.addReturnCode(2);
             }
         }else{
-            //该门未绑定设备
-           resultMap = ReturnCodeUtil.addReturnCode(2);
+            //未知的登录人ID和公司ID
+            resultMap = ReturnCodeUtil.addReturnCode(3);
         }
         return JSONObject.toJSONString( resultMap);
     }
@@ -136,27 +137,29 @@ public class EntranceGuardController {
         Object doorId = jsonObject.get("doorId");
         //获取当前登陆人的ID
         String operateUserId = request.getHeader("accessUserId");
-        Map resultMap;
+        //返回给前端的数据
+        Map resultMap = new HashMap();
 
-        if(deviceId!=null){
-            Door door = new Door();
-            door.setDoorName(doorName != null ? doorName.toString() : null);
-            door.setDeviceId(deviceId != null ? deviceId.toString() : null);
-            door.setDoorId(doorId != null ? doorId.toString() : null);
-            if(operateUserId==null|| operateUserId.isEmpty()){
-                //未知的登录人ID
-                resultMap = ReturnCodeUtil.addReturnCode(3);
-            }else{
+        if(operateUserId!=null && !operateUserId.toString().trim().isEmpty()){
+            if(deviceId!=null){
+                Door door = new Door();
+                door.setDoorName(doorName != null ? doorName.toString() : null);
+                door.setDeviceId(deviceId != null ? deviceId.toString() : null);
+                door.setDoorId(doorId != null ? doorId.toString() : null);
                 door.setOperateEmployee(operateUserId);//当前登录的人员的ID
                 boolean result = iEntranceGuardService.updateDoorInfo(door);
                 resultMap = ReturnCodeUtil.addReturnCode(result);
+                }else{
+                //该门未绑定设备
+                resultMap = ReturnCodeUtil.addReturnCode(2);
             }
         }else{
-            //该门未绑定设备
-            resultMap = ReturnCodeUtil.addReturnCode(2);
+            //未知的登录人ID和公司ID
+            resultMap = ReturnCodeUtil.addReturnCode(3);
         }
         return JSONArray.toJSONString(resultMap);
     }
+
 
     /**
      * ----已修改----（关联的人员需要添加公司的ID限制）
@@ -165,7 +168,6 @@ public class EntranceGuardController {
      * "page":"",----->当前页码
      * "rows":"",----->每一页要显示的行数
      * "doorName":"" ------>搜索时的门名称
-     * "companyId":""
      * }
      */
     @PostMapping(value = "/basic/selectDoor")
@@ -174,10 +176,10 @@ public class EntranceGuardController {
         Object doorName = jsonObject.get("doorName");
         Object page = jsonObject.get("page");
         Object rows = jsonObject.get("rows");
-        Object companyId = jsonObject.get("companyId");
-        Map result;
+        String companyId = request.getHeader("companyId");
+        Map resultMap = new HashMap();
 
-        if(companyId!=null){
+        if(companyId!=null && !companyId.isEmpty()){
             Map doorMap = new HashMap();
             doorMap.put("doorName", (doorName == null || doorName.toString().isEmpty())? null : "%" + doorName.toString() + "%");
             doorMap.put("companyId", (companyId == null || companyId.toString().isEmpty())? null : companyId.toString());
@@ -186,31 +188,40 @@ public class EntranceGuardController {
                 pageObj = PageHelper.startPage(Integer.parseInt(page.toString()), Integer.parseInt(rows.toString()));
             }
             List<Map> maps = iEntranceGuardService.queryAllDoorInfo(doorMap);
-            result = PageUtils.doSplitPage(null, maps, page, rows, pageObj,2);
+            resultMap = PageUtils.doSplitPage(null, maps, page, rows, pageObj,2);
         }else{
-            result = ReturnCodeUtil.addReturnCode(1);
+            //未知的公司ID和人员ID
+            resultMap = ReturnCodeUtil.addReturnCode(3);
         }
-        return JSONObject.toJSONString(result);
+        return JSONObject.toJSONString(resultMap);
     }
 
     //TODO 门禁管理-------“日志管理”
     /**
+     * ---后续更改的---
      * 查看各个企业的日志
      * @param requestParam
      * @return
      * {
-     *     "companyName":"无敌的公司",----->企业名称
      *     "deviceName":"无敌的设备",----------------------------------->设备名称
-     *     "operateType":"1",----------------->操作类型ID
-     *     "time":"2017-11-20 18:00",--------->时间
+     *     "operateCommand":"1",----------------->操作指令
      *     "page":"1",------------->当前页码
      *     "rows":"10"------------->每一页显示的行数
      * }
      */
     @PostMapping("/log/getLogCommand")
-    public String getLogoCommand(@RequestBody String requestParam){
-        Map logs = iEntranceGuardService.queryLogCommand(requestParam);
-        return JSONObject.toJSONString(logs);
+    public String getLogoCommand(@RequestBody String requestParam,HttpServletRequest request){
+        //获取公司ID
+        String companyId = request.getHeader("companyId");
+        //返回给前端的数据
+        Map resultMap = new HashMap();
+        if(companyId!=null && !companyId.isEmpty()){
+            resultMap = iEntranceGuardService.queryLogCommand(requestParam,companyId);
+        }else{
+            //未知的公司ID和人员的ID
+            resultMap = ReturnCodeUtil.addReturnCode(3);
+        }
+        return JSONObject.toJSONString(resultMap);
     }
 
     /**
@@ -238,148 +249,153 @@ public class EntranceGuardController {
      *     "page":"1",
      *     "rows":"10",
      *     "doorName":"超级大门"
-     *     "companyId":""----->公司Id
      * }
      */
     @PostMapping("/autho/queryDoor")
-    public  String queryDoor(@RequestBody String requestParam) {
+    public  String queryDoor(@RequestBody String requestParam,HttpServletRequest request) {
 
         JSONObject jsonObject = JSONObject.parseObject(requestParam);
         Object doorName = jsonObject.get("doorName");
-        Object companyId = jsonObject.get("companyId");
         Object page = jsonObject.get("page");
         Object rows = jsonObject.get("rows");
 
-        Map doorEmployeeMap = new HashMap();
-
-        doorEmployeeMap.put("doorName",doorName != null ? doorName.toString() : null);
-        doorEmployeeMap.put("companyId",companyId != null ? companyId.toString() : null);
-
-        //查询门关联的数据
-        List<Map> maps = iEntranceGuardService.authoQueryAllDoor(doorEmployeeMap);
-        /**
-         * 格式化数据的样式
-         * {"一号门":{"relateNFC":1,"relateFace":1,"relatePhone":1,door_id=1},"二号门":{"relateNFC":2,"relateFace":1,"relatePhone":2,door_id=2}}
-         */
-        List<Map> outterList = new ArrayList<Map>();
-        List<Map> newInfo = new ArrayList<Map>();
+        //获取当前登录人公司的ID
+        String  companyId = request.getHeader("companyId");
         //最后返回给前端展示的结果
-        Map result  = null;
+        Map result  = new HashMap();
 
-        if(maps!=null && maps.size()>0){
-            Map dataItem;
-            List<Map> innerList;
-            Map innerMap;
-            Map<String, List<Map>> resultMap = new HashMap<String, List<Map>>();
-            Map<String, Map<String, String>> realMap = new HashMap<String, Map<String, String>>();
-            List<String> keyList = new ArrayList<String>();
+        if(companyId!=null && !companyId.isEmpty()){
+            Map doorEmployeeMap = new HashMap();
+            doorEmployeeMap.put("doorName",doorName != null ? doorName.toString() : null);
+            doorEmployeeMap.put("companyId",companyId != null ? companyId.toString() : null);
 
-            //根据门名称对数据进行分组
-            for (int i = 0; i < maps.size(); i++) {
-                //maps集合中的每一个map
-                dataItem = maps.get(i);
-                //如果拥有对应的key的话，去取出该key对应的List<Map>
-                if (resultMap.containsKey(dataItem.get("door_name"))) {
-                    //获取该List<Map>然后向其中添加一个map
-                    resultMap.get(dataItem.get("door_name")).add(dataItem);
-                } else {
-                    List<Map> list = new ArrayList<Map>();
-                    list.add(dataItem);
-                    resultMap.put(dataItem.get("door_name").toString(), list);
-                }
-                //保存key值
-                keyList.add(dataItem.get("door_name").toString());
-            }
-            //去除重复的key
-            List newList = new ArrayList(new TreeSet(keyList));
+            //查询门关联的数据
+            List<Map> maps = iEntranceGuardService.authoQueryAllDoor(doorEmployeeMap);
             /**
-             * 计算关联数据的数量
-             * 一号门=[{employee_nfc=32rrwef, door_name=一号门, door_id=1, employee_face=fsdfsdsfs, employee_phone=12121}]
+             * 格式化数据的样式
+             * {"一号门":{"relateNFC":1,"relateFace":1,"relatePhone":1,door_id=1},"二号门":{"relateNFC":2,"relateFace":1,"relatePhone":2,door_id=2}}
              */
-            for (int j = 0; j < newList.size(); j++) {
+            List<Map> outterList = new ArrayList<Map>();
+            List<Map> newInfo = new ArrayList<Map>();
 
-                //关联信息的数量
-                int relatePhone = 0;
-                int relateFace = 0;
-                int relateNFC = 0;
-                String doorId = "";
-                innerList = resultMap.get(newList.get(j));
+            if(maps!=null && maps.size()>0){
+                Map dataItem;
+                List<Map> innerList;
+                Map innerMap;
+                Map<String, List<Map>> resultMap = new HashMap<String, List<Map>>();
+                Map<String, Map<String, String>> realMap = new HashMap<String, Map<String, String>>();
+                List<String> keyList = new ArrayList<String>();
 
-                //遍历当前门关联的所有人员信息
-                for (int k = 0; k < innerList.size(); k++) {
-                    /**
-                     * innerMap数据样式：{employee_nfc=32rrwef, door_name=一号门, door_id=1, employee_face=fsdfsdsfs, employee_phone=12121}
-                     * ---->获取其中的一个人
-                     */
-                    innerMap = innerList.get(k);
-                    //关联手机号数量
-                    if (innerMap.get("employee_phone") != null && !innerMap.get("employee_phone").toString().isEmpty()) {
-                        relatePhone++;
+                //根据门名称对数据进行分组
+                for (int i = 0; i < maps.size(); i++) {
+                    //maps集合中的每一个map
+                    dataItem = maps.get(i);
+                    //如果拥有对应的key的话，去取出该key对应的List<Map>
+                    if (resultMap.containsKey(dataItem.get("door_name"))) {
+                        //获取该List<Map>然后向其中添加一个map
+                        resultMap.get(dataItem.get("door_name")).add(dataItem);
+                    } else {
+                        List<Map> list = new ArrayList<Map>();
+                        list.add(dataItem);
+                        resultMap.put(dataItem.get("door_name").toString(), list);
                     }
-                    //关联人脸数量
-                    if (innerMap.get("employee_face") != null && !innerMap.get("employee_face").toString().isEmpty()) {
-                        relateFace++;
-                    }
-                    //关联NFC数量
-                    if (innerMap.get("employee_nfc") != null && !innerMap.get("employee_nfc").toString().isEmpty()) {
-                        relateNFC++;
-                    }
-                    if (innerMap.get("door_id") != null && !innerMap.get("door_id").toString().isEmpty()) {
-                        doorId = innerMap.get("door_id").toString();
-                    }
+                    //保存key值
+                    keyList.add(dataItem.get("door_name").toString());
                 }
+                //去除重复的key
+                List newList = new ArrayList(new TreeSet(keyList));
+                /**
+                 * 计算关联数据的数量
+                 * 一号门=[{employee_nfc=32rrwef, door_name=一号门, door_id=1, employee_face=fsdfsdsfs, employee_phone=12121}]
+                 */
+                for (int j = 0; j < newList.size(); j++) {
 
-                //包装数据
-                if (realMap.containsKey(newList.get(j).toString())) {
-                    if (realMap.get(newList.get(j)).get("relatePhone") != null) {
-                        realMap.get(newList.get(j)).put("relatePhone", String.valueOf(relatePhone));
-                    }
-                    if (realMap.get(newList.get(j)).get("relateFace") != null) {
-                        realMap.get(newList.get(j)).put("relateFace", String.valueOf(relateFace));
-                    }
-                    if (realMap.get(newList.get(j)).get("relateNFC") != null) {
-                        realMap.get(newList.get(j)).put("relateNFC",String.valueOf(relateNFC));
-                    }
-                    if(realMap.get(newList.get(j)).get("doorId") != null){
-                        realMap.get(newList.get(j)).put("doorId",doorId);
-                    }
-                } else {
-                    Map<String, String> map = new HashMap<String, String>();
-                    map.put("doorId", doorId);
-                    map.put("relatePhone", String.valueOf(relatePhone));
-                    map.put("relateFace", String.valueOf(relateFace));
-                    map.put("relateNFC", String.valueOf(relateNFC));
-                    realMap.put(newList.get(j).toString(), map);
-                }
-            }
-            //拼接每一扇门的人员指令下发时间
-            for(String key:realMap.keySet()){
-                String sentTimes = iEntranceGuardService.querySendTime(realMap.get(key).get("doorId"));
+                    //关联信息的数量
+                    int relatePhone = 0;
+                    int relateFace = 0;
+                    int relateNFC = 0;
+                    String doorId = "";
+                    innerList = resultMap.get(newList.get(j));
 
-                Map outterMap = new HashedMap();
-                outterMap.put("doorName",key);
-                outterMap.put("relateInfo", realMap.get(key));
-                outterMap.put("sendTime",sentTimes==null?"":sentTimes);
-
-                outterList.add(outterMap);
-            }
-            //进行分页操作
-            if(outterList!=null&&outterList.size()>0){
-                //进行分页操作
-                if (page != null && !page.toString().isEmpty() && rows != null && !rows.toString().isEmpty()) {
-                    int pageIndex = Integer.parseInt(page.toString());
-                    int pageSize = Integer.parseInt(rows.toString());
-
-                    for (int i = ((pageIndex - 1) * pageSize); i < (pageSize * pageIndex); i++) {
-                        if(i==outterList.size()){
-                            break;
+                    //遍历当前门关联的所有人员信息
+                    for (int k = 0; k < innerList.size(); k++) {
+                        /**
+                         * innerMap数据样式：{employee_nfc=32rrwef, door_name=一号门, door_id=1, employee_face=fsdfsdsfs, employee_phone=12121}
+                         * ---->获取其中的一个人
+                         */
+                        innerMap = innerList.get(k);
+                        //关联手机号数量
+                        if (innerMap.get("employee_phone") != null && !innerMap.get("employee_phone").toString().isEmpty()) {
+                            relatePhone++;
                         }
-                        newInfo.add(outterList.get(i));
+                        //关联人脸数量
+                        if (innerMap.get("employee_face") != null && !innerMap.get("employee_face").toString().isEmpty()) {
+                            relateFace++;
+                        }
+                        //关联NFC数量
+                        if (innerMap.get("employee_nfc") != null && !innerMap.get("employee_nfc").toString().isEmpty()) {
+                            relateNFC++;
+                        }
+                        if (innerMap.get("door_id") != null && !innerMap.get("door_id").toString().isEmpty()) {
+                            doorId = innerMap.get("door_id").toString();
+                        }
+                    }
+
+                    //包装数据
+                    if (realMap.containsKey(newList.get(j).toString())) {
+                        if (realMap.get(newList.get(j)).get("relatePhone") != null) {
+                            realMap.get(newList.get(j)).put("relatePhone", String.valueOf(relatePhone));
+                        }
+                        if (realMap.get(newList.get(j)).get("relateFace") != null) {
+                            realMap.get(newList.get(j)).put("relateFace", String.valueOf(relateFace));
+                        }
+                        if (realMap.get(newList.get(j)).get("relateNFC") != null) {
+                            realMap.get(newList.get(j)).put("relateNFC",String.valueOf(relateNFC));
+                        }
+                        if(realMap.get(newList.get(j)).get("doorId") != null){
+                            realMap.get(newList.get(j)).put("doorId",doorId);
+                        }
+                    } else {
+                        Map<String, String> map = new HashMap<String, String>();
+                        map.put("doorId", doorId);
+                        map.put("relatePhone", String.valueOf(relatePhone));
+                        map.put("relateFace", String.valueOf(relateFace));
+                        map.put("relateNFC", String.valueOf(relateNFC));
+                        realMap.put(newList.get(j).toString(), map);
+                    }
+                }
+                //拼接每一扇门的人员指令下发时间
+                for(String key:realMap.keySet()){
+                    String sentTimes = iEntranceGuardService.querySendTime(realMap.get(key).get("doorId"));
+
+                    Map outterMap = new HashedMap();
+                    outterMap.put("doorName",key);
+                    outterMap.put("relateInfo", realMap.get(key));
+                    outterMap.put("sendTime",sentTimes==null?"":sentTimes);
+
+                    outterList.add(outterMap);
+                }
+                //进行分页操作
+                if(outterList!=null&&outterList.size()>0){
+                    //进行分页操作
+                    if (page != null && !page.toString().isEmpty() && rows != null && !rows.toString().isEmpty()) {
+                        int pageIndex = Integer.parseInt(page.toString());
+                        int pageSize = Integer.parseInt(rows.toString());
+
+                        for (int i = ((pageIndex - 1) * pageSize); i < (pageSize * pageIndex); i++) {
+                            if(i==outterList.size()){
+                                break;
+                            }
+                            newInfo.add(outterList.get(i));
+                        }
                     }
                 }
             }
+            result  = PageUtils.doSplitPage(outterList,newInfo,page,rows,null,1);
+        }else{
+            //未知的公司ID和人员ID
+            result = ReturnCodeUtil.addReturnCode(3);
         }
-        result  = PageUtils.doSplitPage(outterList,newInfo,page,rows,null,1);
         return JSONArray.toJSONString(result);
     }
 
@@ -408,7 +424,7 @@ public class EntranceGuardController {
         String[] openTypeStr = {"卡","个人密码","卡+个人密码","指纹","人脸","手机蓝牙","手机NFC"};
 
         //定义最终返回的数据结果集
-        Map result = new HashedMap();
+        Map resultMap = new HashedMap();
 
         JSONObject jsonObject = JSONObject.parseObject(requestParam);
         Object doorId = jsonObject.get("doorId");
@@ -420,131 +436,137 @@ public class EntranceGuardController {
         Object rows = jsonObject.get("rows");
         //公司ID
         String companyId = request.getHeader("companyId");
-        //--打印测试--
-        System.out.println("getRelateEmpPermissionInfo(查询的门的Id)==============="+doorId+"==================");
 
-        Map relateEmpPermissionCondition = new HashMap();
-        relateEmpPermissionCondition.put("doorId",doorId!=null?doorId.toString():null);
-        relateEmpPermissionCondition.put("empName",empName!=null?empName.toString():null);
-        relateEmpPermissionCondition.put("deptName",deptName!=null?deptName.toString():null);
-        relateEmpPermissionCondition.put("openTime",openTime!=null?openTime.toString():null);
-        relateEmpPermissionCondition.put("openType",openType!=null?openType.toString():null);
+        if(companyId!=null && !companyId.isEmpty()){
+            //--打印测试--
+            System.out.println("getRelateEmpPermissionInfo(查询的门的Id)==============="+doorId+"==================");
 
-        //门关联的《员工姓名、部门、开门方式，开门时间，下发状态，下发时间》
-        List<Map> maps = iEntranceGuardService.queryRelateEmpPermissionInfo(relateEmpPermissionCondition,companyId);
-        //对查询出的数据根据最后下发时间进行排序
-        List<DoorPermissionEmp> permissionEmps = new ArrayList<>();
-        if(maps!=null && maps.size()>0){
-           //将开门方式和命令状态由数字更改为文字信息
-           for(int i=0;i<maps.size();i++){
-               //先判断是哪种指令(下发、删除) TODO    ========此处要更改（可能获取不到isDelCommand报NULLPointerException）==========
-               String commandType = maps.get(i).get("isDelCommand").toString();
-               Object openDoorType = maps.get(i).get("range_door_open_type");
+            Map relateEmpPermissionCondition = new HashMap();
+            relateEmpPermissionCondition.put("doorId",doorId!=null?doorId.toString():null);
+            relateEmpPermissionCondition.put("empName",empName!=null?empName.toString():null);
+            relateEmpPermissionCondition.put("deptName",deptName!=null?deptName.toString():null);
+            relateEmpPermissionCondition.put("openTime",openTime!=null?openTime.toString():null);
+            relateEmpPermissionCondition.put("openType",openType!=null?openType.toString():null);
 
-               if(commandType.equals("1")){ //删除指令（使用删除指令的状态）
-                   Object statusStr = maps.get(i).get("status");
-                   for(int s=0;s<delStatusStr.length;s++){
-                       if(statusStr==null){
-                           maps.get(i).put("status","");
-                           continue;
-                       }
-                       if(statusStr.toString().equals(String.valueOf(s))){
-                           maps.get(i).put("status",delStatusStr[s].toString());
-                       }
-                   }
-               }
-               if(commandType.equals("0")){ //下发指令（使用下发指令的状态）
-                   Object statusStr = maps.get(i).get("status");
-                   for(int s=0;s<cmdStatusStr.length;s++){
-                       if(statusStr==null){
-                           maps.get(i).put("status","");
-                           continue;
-                       }
-                       if(statusStr.toString().equals(String.valueOf(s))){
-                           maps.get(i).put("status",cmdStatusStr[s].toString());
-                       }
-                   }
-               }
-               //TODO 转换打卡方式（包含组合打卡方式）
-               if(openDoorType!=null&&!"".equals(openDoorType)){
-                   StringBuffer buffer = new StringBuffer();
-                   //遍历打卡方式
-                   for(int d = 0;d<openDoorType.toString().trim().length();d++){
-                       //判断每一个字符的数值
-                       Character c = openDoorType.toString().trim().charAt(d);
-
-
-                       for(int t=0;t<openTypeStr.length;t++){
-                           if(c.toString().equals(String.valueOf(t))){
-                               buffer.append(openTypeStr[t].toString()+"-");
-                           }
-                       }
-                   }
-                   System.out.println("-----------------"+buffer.toString()+"------------------");
-                   maps.get(i).put("range_door_open_type",buffer.toString().substring(0,buffer.toString().length()-1));
-               }else{
-                   maps.get(i).put("range_door_open_type","");
-               }
-               maps.get(i).put("day_of_week","1");
-           }
-
+            //门关联的《员工姓名、部门、开门方式，开门时间，下发状态，下发时间》
+            List<Map> maps = iEntranceGuardService.queryRelateEmpPermissionInfo(relateEmpPermissionCondition,companyId);
             //对查询出的数据根据最后下发时间进行排序
-           for(int x = 0;x<maps.size();x++){
-               DoorPermissionEmp doorPermissionEmp = new DoorPermissionEmp();
-               doorPermissionEmp.setDay_of_week(maps.get(x).get("day_of_week") != null?maps.get(x).get("day_of_week").toString():"");
-               doorPermissionEmp.setRange_door_open_type(maps.get(x).get("range_door_open_type")!= null?maps.get(x).get("range_door_open_type").toString():"");
-               doorPermissionEmp.setStatus(maps.get(x).get("status")!= null?maps.get(x).get("status").toString():"");
-               doorPermissionEmp.setLasttime(maps.get(x).get("lasttime")!= null?maps.get(x).get("lasttime").toString():"");
-               doorPermissionEmp.setRange_end_time(maps.get(x).get("range_end_time")!= null?maps.get(x).get("range_end_time").toString():"");
-               doorPermissionEmp.setRange_start_time(maps.get(x).get("range_start_time")!= null?maps.get(x).get("range_start_time").toString():"");
-               doorPermissionEmp.setEmployee_department_name(maps.get(x).get("employee_department_name")!= null?maps.get(x).get("employee_department_name").toString():"");
-               doorPermissionEmp.setEmployee_id(maps.get(x).get("employee_id")!= null?maps.get(x).get("employee_id").toString():"");
-               doorPermissionEmp.setEmployee_name(maps.get(x).get("employee_name")!= null?maps.get(x).get("employee_name").toString():"");
+            List<DoorPermissionEmp> permissionEmps = new ArrayList<>();
+            if(maps!=null && maps.size()>0){
+                //将开门方式和命令状态由数字更改为文字信息
+                for(int i=0;i<maps.size();i++){
+                    //先判断是哪种指令(下发、删除) TODO    ========此处要更改（可能获取不到isDelCommand报NULLPointerException）==========
+                    String commandType = maps.get(i).get("isDelCommand").toString();
+                    Object openDoorType = maps.get(i).get("range_door_open_type");
 
-               permissionEmps.add(doorPermissionEmp);
-           }
-
-           Collections.sort(permissionEmps, new Comparator<DoorPermissionEmp>() {
-               @Override
-               public int compare(DoorPermissionEmp o1, DoorPermissionEmp o2) {
-                   return (o2.getLasttime()+o2.getEmployee_name()).compareTo((o1.getLasttime()+o1.getEmployee_name()));
-               }
-           });
-       }
-        List<DoorPermissionEmp> newPermissionEmps = new ArrayList<>();
-        //进行分页操作
-        if(permissionEmps!=null&&permissionEmps.size()>0){
-            //进行分页操作
-            if (page != null && !page.toString().isEmpty() && rows != null && !rows.toString().isEmpty()) {
-                int pageIndex = Integer.parseInt(page.toString());
-                int pageSize = Integer.parseInt(rows.toString());
-
-                for (int i = ((pageIndex - 1) * pageSize); i < (pageSize * pageIndex); i++) {
-                    if(i==permissionEmps.size()){
-                        break;
+                    if(commandType.equals("1")){ //删除指令（使用删除指令的状态）
+                        Object statusStr = maps.get(i).get("status");
+                        for(int s=0;s<delStatusStr.length;s++){
+                            if(statusStr==null){
+                                maps.get(i).put("status","");
+                                continue;
+                            }
+                            if(statusStr.toString().equals(String.valueOf(s))){
+                                maps.get(i).put("status",delStatusStr[s].toString());
+                            }
+                        }
                     }
-                    newPermissionEmps.add(permissionEmps.get(i));
+                    if(commandType.equals("0")){ //下发指令（使用下发指令的状态）
+                        Object statusStr = maps.get(i).get("status");
+                        for(int s=0;s<cmdStatusStr.length;s++){
+                            if(statusStr==null){
+                                maps.get(i).put("status","");
+                                continue;
+                            }
+                            if(statusStr.toString().equals(String.valueOf(s))){
+                                maps.get(i).put("status",cmdStatusStr[s].toString());
+                            }
+                        }
+                    }
+                    //TODO 转换打卡方式（包含组合打卡方式）
+                    if(openDoorType!=null&&!"".equals(openDoorType)){
+                        StringBuffer buffer = new StringBuffer();
+                        //遍历打卡方式
+                        for(int d = 0;d<openDoorType.toString().trim().length();d++){
+                            //判断每一个字符的数值
+                            Character c = openDoorType.toString().trim().charAt(d);
+
+
+                            for(int t=0;t<openTypeStr.length;t++){
+                                if(c.toString().equals(String.valueOf(t))){
+                                    buffer.append(openTypeStr[t].toString()+"-");
+                                }
+                            }
+                        }
+                        System.out.println("-----------------"+buffer.toString()+"------------------");
+                        maps.get(i).put("range_door_open_type",buffer.toString().substring(0,buffer.toString().length()-1));
+                    }else{
+                        maps.get(i).put("range_door_open_type","");
+                    }
+                    maps.get(i).put("day_of_week","1");
+                }
+
+                //对查询出的数据根据最后下发时间进行排序
+                for(int x = 0;x<maps.size();x++){
+                    DoorPermissionEmp doorPermissionEmp = new DoorPermissionEmp();
+                    doorPermissionEmp.setDay_of_week(maps.get(x).get("day_of_week") != null?maps.get(x).get("day_of_week").toString():"");
+                    doorPermissionEmp.setRange_door_open_type(maps.get(x).get("range_door_open_type")!= null?maps.get(x).get("range_door_open_type").toString():"");
+                    doorPermissionEmp.setStatus(maps.get(x).get("status")!= null?maps.get(x).get("status").toString():"");
+                    doorPermissionEmp.setLasttime(maps.get(x).get("lasttime")!= null?maps.get(x).get("lasttime").toString():"");
+                    doorPermissionEmp.setRange_end_time(maps.get(x).get("range_end_time")!= null?maps.get(x).get("range_end_time").toString():"");
+                    doorPermissionEmp.setRange_start_time(maps.get(x).get("range_start_time")!= null?maps.get(x).get("range_start_time").toString():"");
+                    doorPermissionEmp.setEmployee_department_name(maps.get(x).get("employee_department_name")!= null?maps.get(x).get("employee_department_name").toString():"");
+                    doorPermissionEmp.setEmployee_id(maps.get(x).get("employee_id")!= null?maps.get(x).get("employee_id").toString():"");
+                    doorPermissionEmp.setEmployee_name(maps.get(x).get("employee_name")!= null?maps.get(x).get("employee_name").toString():"");
+
+                    permissionEmps.add(doorPermissionEmp);
+                }
+
+                Collections.sort(permissionEmps, new Comparator<DoorPermissionEmp>() {
+                    @Override
+                    public int compare(DoorPermissionEmp o1, DoorPermissionEmp o2) {
+                        return (o2.getLasttime()+o2.getEmployee_name()).compareTo((o1.getLasttime()+o1.getEmployee_name()));
+                    }
+                });
+            }
+            List<DoorPermissionEmp> newPermissionEmps = new ArrayList<>();
+            //进行分页操作
+            if(permissionEmps!=null&&permissionEmps.size()>0){
+                //进行分页操作
+                if (page != null && !page.toString().isEmpty() && rows != null && !rows.toString().isEmpty()) {
+                    int pageIndex = Integer.parseInt(page.toString());
+                    int pageSize = Integer.parseInt(rows.toString());
+
+                    for (int i = ((pageIndex - 1) * pageSize); i < (pageSize * pageIndex); i++) {
+                        if(i==permissionEmps.size()){
+                            break;
+                        }
+                        newPermissionEmps.add(permissionEmps.get(i));
+                    }
                 }
             }
-        }
-        if((permissionEmps == null || permissionEmps.size()== 0) && (newPermissionEmps == null || newPermissionEmps.size()== 0)){ //无数据
-            result.put("returnCode","4203");
-            result.put("message","当前列表为空");
-        }else{
-            result = PageUtils.doSplitPage(permissionEmps,newPermissionEmps,page,rows,null,1);
-        }
-        if(doorId!=null){
-            //根据门的id查询门的名称
-            Door door = doorMapper.selectByPrimaryKey(doorId.toString());
-            if(door!=null){
-                result.put("doorId",doorId);
-                result.put("doorName",door.getDoorName());
+            if((permissionEmps == null || permissionEmps.size()== 0) && (newPermissionEmps == null || newPermissionEmps.size()== 0)){ //无数据
+                resultMap.put("returnCode","4203");
+                resultMap.put("message","当前列表为空");
             }else{
-                result.put("doorId","");
-                result.put("doorName","");
+                resultMap = PageUtils.doSplitPage(permissionEmps,newPermissionEmps,page,rows,null,1);
             }
+            if(doorId!=null){
+                //根据门的id查询门的名称
+                Door door = doorMapper.selectByPrimaryKey(doorId.toString());
+                if(door!=null){
+                    resultMap.put("doorId",doorId);
+                    resultMap.put("doorName",door.getDoorName());
+                }else{
+                    resultMap.put("doorId","");
+                    resultMap.put("doorName","");
+                }
+            }
+        }else{
+            //未知的公司ID和人员ID
+            resultMap = ReturnCodeUtil.addReturnCode(3);
         }
-        return JSONArray.toJSONString(result);
+        return JSONArray.toJSONString(resultMap);
     }
 
     /**
@@ -595,7 +617,8 @@ public class EntranceGuardController {
         Object empId = jsonObject.get("empId");
         Object doorId = jsonObject.get("doorId");
         String companyId = request.getHeader("companyId");
-        Map result = null;
+        Map result = new HashMap();
+
         if(jsonObject!=null && jsonObject.size()>0){
             List<Map> aWeekTimeList = iEntranceGuardService.queryAWeekOpenTime(empId.toString().trim(),(doorId!=null && !doorId.toString().isEmpty())?doorId.toString().trim():null);
 
@@ -691,7 +714,8 @@ public class EntranceGuardController {
         JSONObject jsonObject = JSONObject.parseObject(requestParam);
         Object doorId = jsonObject.get("doorId");
         String companyId = request.getHeader("companyId");
-        Map result;
+        //最终返回给前端的数据
+        Map resultMap = new HashMap();
 
         if(doorId!=null && !doorId.toString().isEmpty()){
             //获取该门的设置信息
@@ -840,12 +864,12 @@ public class EntranceGuardController {
             map.put("firstCardKeepOpen",firstCardKeepOpenMap);
             map.put("doorCalendar",doorCalendars);
 
-            result = ReturnCodeUtil.addReturnCode(map);
+            resultMap = ReturnCodeUtil.addReturnCode(map);
         }else{
-            result = ReturnCodeUtil.addReturnCode(1);
+            resultMap = ReturnCodeUtil.addReturnCode(1);
         }
 
-        return JSONArray.toJSONString(result);
+        return JSONArray.toJSONString(resultMap);
     }
 
     //TODO 门禁管理-------------门禁记录
@@ -854,7 +878,6 @@ public class EntranceGuardController {
      * ----已修改----
      * {
      *     "empName":"",
-     *     "companyId":"",------>当前登陆的企业管理员的所属公司ID
      *     "deviceName":"",
      *     "dept":"",
      *     "recordType":"",
@@ -865,9 +888,18 @@ public class EntranceGuardController {
      *
      */
     @PostMapping("/record/getInOutRecord")
-    public String getInOutRecord(@RequestBody String requestParam){
-        Map doorRecordAndException = getDoorRecordAndException(requestParam,0);
-        return JSONArray.toJSONString(doorRecordAndException);
+    public String getInOutRecord(@RequestBody String requestParam,HttpServletRequest request){
+        //获取公司ID
+        String companyId  = request.getHeader("companyId");
+        //返回给前端的数据
+        Map resultMap = new HashMap();
+        if(companyId!=null && !companyId.isEmpty()){
+            resultMap = getDoorRecordAndException(requestParam,companyId,0);
+        }else{
+            //未知的公司ID和人员ID
+            resultMap = ReturnCodeUtil.addReturnCode(3);
+        }
+        return JSONArray.toJSONString(resultMap);
     }
 
     // 2)门禁异常
@@ -876,7 +908,6 @@ public class EntranceGuardController {
      * ----已修改----
      *{
      *     "empName":"",
-     *     "companyId":"",----->当前登陆的管理员的所属公司ID
      *     "deviceName":"",
      *     "dept":"",
      *     "alarmType":"",
@@ -886,9 +917,18 @@ public class EntranceGuardController {
      *}
      */
     @PostMapping("/record/getDoorException")
-    public String getDoorException(@RequestBody String requestParam){
-        Map doorRecordAndException = getDoorRecordAndException(requestParam,1);
-        return JSONArray.toJSONString(doorRecordAndException);
+    public String getDoorException(@RequestBody String requestParam,HttpServletRequest request){
+        //获取公司ID
+        String companyId  = request.getHeader("companyId");
+        //返回给前端的数据
+        Map resultMap = new HashMap();
+        if(companyId!=null && !companyId.isEmpty()){
+            resultMap =  getDoorRecordAndException(requestParam,companyId,1);
+        }else{
+            //未知的公司ID和人员ID
+            resultMap = ReturnCodeUtil.addReturnCode(3);
+        }
+        return JSONArray.toJSONString(resultMap);
     }
 
     //TODO 门禁管理------------门禁系统设置下发
@@ -1444,7 +1484,7 @@ public class EntranceGuardController {
     }
 
     //TODO 获取门禁记录和门禁异常
-    public Map getDoorRecordAndException(String requestParam,int flag) {
+    public Map getDoorRecordAndException(String requestParam,String companyId,int flag) {
         //定义记录类型
         String[] recordTypeName = {"公共密码开锁", "胁迫密码开锁", "个人密码开锁", "卡开锁", "卡+个人密码开锁", "指纹开锁", "人脸开锁", "手机蓝牙开锁",
                 "手机NFC开锁", "延时开锁", "定时常开开锁", "定时常开关锁", "首卡常开开锁", "首开常开到时关锁", "首开常开首卡关锁", "远程限时开锁",
@@ -1457,7 +1497,6 @@ public class EntranceGuardController {
             Object recordTime = jsonObject.get(flag==0?"recordTime":"alarmTime");
             Object deviceName = jsonObject.get("deviceName");
             Object empName = jsonObject.get("empName");
-            Object companyId = jsonObject.get("companyId");
             Object dept = jsonObject.get("dept");
             Object page = jsonObject.get("page");
             Object rows = jsonObject.get("rows");
@@ -1465,7 +1504,7 @@ public class EntranceGuardController {
             DoorRecordCondition doorRecordCondition = new DoorRecordCondition();
 
             doorRecordCondition.setName(empName != null ? empName.toString() : null);
-            doorRecordCondition.setCompanyId(companyId != null ? companyId.toString() : null);
+            doorRecordCondition.setCompanyId(companyId);
             doorRecordCondition.setDepartment(dept != null ? dept.toString() : null);
             doorRecordCondition.setPunchCardType(recordType != null ? recordType.toString() : null);
             doorRecordCondition.setPunchCardTime(recordTime != null ? recordTime.toString() : null);

@@ -47,7 +47,8 @@ public interface IEntranceGuardService {
      * @param requestParam
      * @return
      */
-    Map queryLogCommand(String requestParam);
+    Map queryLogCommand(String requestParam,String companyId);
+
     /**
      * 批量删除日志
      */
