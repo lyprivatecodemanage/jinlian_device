@@ -50,4 +50,9 @@ public interface DoorCmdMapper {
      * 查询更新模板指令的执行情况(result_code)
      */
     String selectDoorCmdResultCode();
+
+    /**
+     * 查询某个人最新的一条下发命令（下发命令同一时间会有两条，删除命令同一时间一条）
+     */
+    List<DoorCmd> selectDoorCmdLatestByEmployeeId(String employeeId);
 }

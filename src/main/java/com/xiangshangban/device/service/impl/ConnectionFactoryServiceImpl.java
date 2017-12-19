@@ -16,8 +16,8 @@ public class ConnectionFactoryServiceImpl implements IConnectionFactoryService {
 
 //    private static final Log LOG = LogFactory.getLog(ConnectionFactoryServiceImpl.class);
 
-    private static Map<String,CachingConnectionFactory> connection;//空闲的连接
-    private static Map<String,CachingConnectionFactory> useConn; //使用中的连接
+    public static Map<String,CachingConnectionFactory> connection;//空闲的连接
+    public static Map<String,CachingConnectionFactory> useConn; //使用中的连接
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //本地环境
@@ -36,11 +36,12 @@ public class ConnectionFactoryServiceImpl implements IConnectionFactoryService {
     private static String virtualHost= "/";
 
     static {
-        System.out.println("创建MQ连接");
+        System.out.println("连接池初始化20个MQ连接");
         int i = 0;
         connection = new HashMap<String, CachingConnectionFactory>();
         useConn = new HashMap<String, CachingConnectionFactory>();
-        while (i < 10) {
+        //连接池最大连接数
+        while (i < 20) {
             CachingConnectionFactory connectionFactory = new CachingConnectionFactory();
             connectionFactory.resetConnection();
             connectionFactory.setHost(host);
@@ -53,7 +54,7 @@ public class ConnectionFactoryServiceImpl implements IConnectionFactoryService {
             connection.put(FormatUtil.createUuid(), connectionFactory);
             i++;
         }
-        System.out.println("创建MQ连接完成");
+        System.out.println("初始化20个MQ连接完成");
     }
 
     /**
@@ -61,7 +62,8 @@ public class ConnectionFactoryServiceImpl implements IConnectionFactoryService {
      * @return
      */
     public static Connection getConnectionFactory(){
-        CachingConnectionFactory connectionFactory = new CachingConnectionFactory() ;
+
+        //从空闲的连接里获取连接
         Connection conn = new Connection();
         for (Map.Entry<String,CachingConnectionFactory> entry : connection.entrySet()) {
             conn.setConnectionFactory(entry.getValue());
@@ -71,37 +73,33 @@ public class ConnectionFactoryServiceImpl implements IConnectionFactoryService {
             break;
         }
 
+        //如果没有空闲的连接了
         if(conn.getKey() == null){
-            connectionFactory = new CachingConnectionFactory() ;
-            connectionFactory.resetConnection();
-            connectionFactory.setHost(host);
-            connectionFactory.setPort(port);
-            connectionFactory.setUsername(username);
-            connectionFactory.setPassword(password);
-            connectionFactory.setRequestedHeartBeat(180);
-            connectionFactory.setCloseTimeout(10);
-            conn.setConnectionFactory(connectionFactory);
-            conn.setKey(FormatUtil.createUuid());
-            useConn.put(conn.getKey(), connectionFactory);
+//            //释放所有使用中的连接
+//            for (Map.Entry<String,CachingConnectionFactory> entryTemp : useConn.entrySet()){
+//                useConn.get(entryTemp.getKey()).destroy();
+//            }
+//            useConn.clear();
+            System.out.println("没有空闲的连接了.............................................................");
         }
         return conn;
     }
 
-    //释放连接
-    public static void destoryConnection(String key){
-        useConn.get(key).destroy();
-        useConn.remove(key);
-        if(key.length()<3){
-            CachingConnectionFactory connectionFactory = new CachingConnectionFactory() ;
-            connectionFactory.resetConnection();
-            connectionFactory.setHost(host);
-            connectionFactory.setPort(port);
-            connectionFactory.setUsername(username);
-            connectionFactory.setPassword(password);
-            connectionFactory.setRequestedHeartBeat(180);
-            connectionFactory.setCloseTimeout(10);
-            connection.put(FormatUtil.createUuid(), connectionFactory);
-        }
-    }
+//    //释放连接（废弃不用）
+//    public static void destoryConnection(String key){
+//        useConn.get(key).destroy();
+//        useConn.remove(key);
+//        if(key.length()<3){
+//            CachingConnectionFactory connectionFactory = new CachingConnectionFactory() ;
+//            connectionFactory.resetConnection();
+//            connectionFactory.setHost(host);
+//            connectionFactory.setPort(port);
+//            connectionFactory.setUsername(username);
+//            connectionFactory.setPassword(password);
+//            connectionFactory.setRequestedHeartBeat(180);
+//            connectionFactory.setCloseTimeout(10);
+//            connection.put(FormatUtil.createUuid(), connectionFactory);
+//        }
+//    }
 
 }

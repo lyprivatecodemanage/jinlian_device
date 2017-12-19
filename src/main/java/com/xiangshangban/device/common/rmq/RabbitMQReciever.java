@@ -101,7 +101,7 @@ public class RabbitMQReciever {
 
         System.out.println(" [*] 绑定 交换器 ["+EXCHANGE_NAME+"] 到 ["+QUEUE_NAME+"] 队列通过 routingKey [" + routingKey + "]");
 
-        System.out.println(" [*] 消息监听中... To exit press CTRL+C");
+//        System.out.println(" [*] 消息监听中... To exit press CTRL+C");
 
         Consumer consumer = new DefaultConsumer(channel) {
             @Override
@@ -131,7 +131,7 @@ public class RabbitMQReciever {
 //                    System.out.println("我的MD5 = " + myMd5);
                         //双方的md5比较判断
                         if (myMd5.equals(otherMd5)){
-                            System.out.println("MD5校验成功，数据完好无损");
+//                            System.out.println("MD5校验成功，数据完好无损");
 
                             //CRC16校验deviceId
                             if (deviceService.checkCrc16DeviceId(deviceId)){
@@ -152,6 +152,7 @@ public class RabbitMQReciever {
                             }
 
                         }else {
+                            System.out.println("我的MD5 = " + myMd5);
                             System.out.println("MD5校验失败，数据已被修改");
                         }
 
@@ -174,7 +175,7 @@ public class RabbitMQReciever {
                                 doorCmd.setStatus("2");
                             }
 
-                            //改变该这条命令的状态
+                            //改变这条命令的状态
                             doorCmdMapper.updateBySuperCmdIdSelective(doorCmd);
                         }
                     }

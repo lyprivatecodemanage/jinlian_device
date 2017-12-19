@@ -83,7 +83,7 @@ public class DeviceServiceImpl implements IDeviceService {
             return "1";
         }else {
             deviceMapper.updateByPrimaryKeySelective(device);
-            System.out.println("设备已存在");
+//            System.out.println("设备已存在");
             return "0";
         }
 
@@ -112,7 +112,7 @@ public class DeviceServiceImpl implements IDeviceService {
                 if (map.get("is_online") == null || "".equals(map.get("is_online"))){
 
                     map.put("is_online", "无状态");
-                    System.out.println(map.get("device_id")+"设备离线状态为空");
+//                    System.out.println(map.get("device_id")+"设备离线状态为空");
                 }else {
                     String isOnlineTemp = map.get("is_online");
 
@@ -129,7 +129,7 @@ public class DeviceServiceImpl implements IDeviceService {
                 if (map.get("active_status") == null || "".equals(map.get("active_status"))){
 
                     map.put("active_status", "无状态");
-                    System.out.println(map.get("device_id")+"设备激活状态为空");
+//                    System.out.println(map.get("device_id")+"设备激活状态为空");
                 }else {
                     String activeStatusTemp = map.get("active_status");
 
@@ -154,7 +154,7 @@ public class DeviceServiceImpl implements IDeviceService {
                     String employeeName = employeeMapper.selectByEmployeeIdAndCompanyId(employeeId, employeeCompanyId).getEmployeeName();
                     map.put("operate_employee", employeeName);
                 }catch (Exception e){
-                    System.out.println("根据人员id没有查到操作人【"+employeeId+"】的姓名");
+//                    System.out.println("根据人员id没有查到操作人【"+employeeId+"】的姓名");
                     map.put("operate_employee", "暂无操作人记录");
                 }
 
@@ -162,11 +162,11 @@ public class DeviceServiceImpl implements IDeviceService {
                 try {
                     String operateTime = map.get("operate_time");
                     if (StringUtils.isEmpty(operateTime)){
-                        System.out.println("当前设备【"+deviceId+"】没有查到操作时间记录");
+//                        System.out.println("当前设备【"+deviceId+"】没有查到操作时间记录");
                         map.put("operate_time", "暂无操作时间记录");
                     }
                 }catch (Exception e){
-                    System.out.println("当前设备【"+deviceId+"】没有查到操作时间记录");
+//                    System.out.println("当前设备【"+deviceId+"】没有查到操作时间记录");
                     map.put("operate_time", "暂无操作时间记录");
                 }
 
@@ -184,47 +184,6 @@ public class DeviceServiceImpl implements IDeviceService {
 
         return mapList;
 
-    }
-
-    @Transactional
-    @Override
-    public String rebootDevice(String deviceId) {
-
-        //创建命令id
-        String superCmdId = FormatUtil.createUuid();
-
-        //构造命令格式
-        DoorCmd doorCmdRebootDevice = new DoorCmd();
-        doorCmdRebootDevice.setServerId(serverId);
-        doorCmdRebootDevice.setDeviceId(deviceId);
-        doorCmdRebootDevice.setFileEdition("v1.3");
-        doorCmdRebootDevice.setCommandMode("C");
-        doorCmdRebootDevice.setCommandType("single");
-        doorCmdRebootDevice.setCommandTotal("1");
-        doorCmdRebootDevice.setCommandIndex("1");
-        doorCmdRebootDevice.setSubCmdId("");
-        doorCmdRebootDevice.setAction("REBOOT_DEVICE");
-        doorCmdRebootDevice.setActionCode("1007");
-        doorCmdRebootDevice.setSendTime(CalendarUtil.getCurrentTime());
-        doorCmdRebootDevice.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
-        doorCmdRebootDevice.setSuperCmdId(superCmdId);
-        doorCmdRebootDevice.setData("");
-
-        //获取完整的数据加协议封装格式
-        RabbitMQSender rabbitMQSender = new RabbitMQSender();
-        Map<String, Object> doorCmdPackageAll =  rabbitMQSender.messagePackaging(doorCmdRebootDevice, "", "", "NULLDATA");
-        //命令状态设置为: 发送中
-        doorCmdRebootDevice.setStatus("1");
-        //设置md5校验值
-        doorCmdRebootDevice.setMd5Check((String) doorCmdPackageAll.get("MD5Check"));
-        //设置数据库的data字段
-        doorCmdRebootDevice.setData(JSON.toJSONString(doorCmdPackageAll.get("data")));
-        //命令数据存入数据库
-        entranceGuardService.insertCommand(doorCmdRebootDevice);
-        //立即下发数据到MQ
-        rabbitMQSender.sendMessage(deviceId, doorCmdPackageAll);
-
-        return superCmdId;
     }
 
     public List<Map> queryAllDeviceInfo(String companyId) {
@@ -403,7 +362,7 @@ public class DeviceServiceImpl implements IDeviceService {
         entranceGuardService.insertCommand(doorCmdRecord);
         //立即下发回复数据到MQ
         rabbitMQSender.sendMessage(deviceId, doorRecordAll);
-        System.out.println("重启记录已回复");
+//        System.out.println("重启记录已回复");
     }
 
     @Override
@@ -479,7 +438,7 @@ public class DeviceServiceImpl implements IDeviceService {
         entranceGuardService.insertCommand(doorCmdRecord);
         //立即下发回复数据到MQ
         rabbitMQSender.sendMessage(deviceId, doorRecordAll);
-        System.out.println("运行日志上传已回复");
+//        System.out.println("运行日志上传已回复");
     }
 
     /**
@@ -668,7 +627,7 @@ public class DeviceServiceImpl implements IDeviceService {
 
         //比对双方的Crc16
         if (myCrc16.equals(otherCrc16)){
-            System.out.println("CRC16校验成功，数据完好无损");
+//            System.out.println("CRC16校验成功，数据完好无损");
             return true;
         }else {
             System.out.println("CRC16校验失败，数据已被修改");

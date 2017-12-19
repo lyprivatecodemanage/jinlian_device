@@ -15,8 +15,6 @@ public interface DoorEmployeeMapper {
 
     int insertSelective(DoorEmployee record);
 
-    DoorEmployee selectByPrimaryKey(String employeeId);
-
     int updateByPrimaryKeySelective(DoorEmployee record);
 
     int updateByPrimaryKey(DoorEmployee record);
@@ -92,4 +90,9 @@ public interface DoorEmployeeMapper {
      * 更新人员权限信息
      */
     int updateEmpInfoToDoorEmployee(Map map);
+
+    /**
+     * 查询某个人在那些门上有开门权限
+     */
+    List<DoorEmployee> selectByPrimaryKey(String employeeId);
 }

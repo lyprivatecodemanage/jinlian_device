@@ -12,7 +12,6 @@ import com.xiangshangban.device.dao.*;
 import com.xiangshangban.device.service.IEmployeeService;
 import com.xiangshangban.device.service.IEntranceGuardService;
 import net.sf.json.JSONObject;
-import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -184,16 +183,10 @@ public class EmployeeController {
 
         String operatorEmployeeId = request.getHeader("accessUserId");
 
-        System.out.println(employeePermission);
+//        System.out.println(employeePermission);
 
         //解析json字符串
         Map<String, Object> employeePermissionCollection = (Map<String, Object>) JSONObject.fromObject(employeePermission);
-
-//        try {
-//
-//        }catch (Exception e){
-//
-//        }
 
         //返回给前端的数据
         ReturnData returnData = new ReturnData();
@@ -323,13 +316,17 @@ public class EmployeeController {
                     String entryTime = employeeLocal.getEmployeeEntryTime();
                     String probationaryExpired = employeeLocal.getEmployeeProbationaryExpired();
                     String employeePhone = employeeLocal.getEmployeePhone();
-                    String blueboothId = employeeLocal.getBluetoothNo();
 
                     String birthday = employeeLocal.getEmployeeBirthday();
                     String contractExpired = employeeLocal.getEmployeeContractExpired();
                     String adminFlag = employeeLocal.getAdminFlag();
                     String userImg = employeeLocal.getEmployeeImg();
                     String userPhoto = employeeLocal.getEmployeePhoto();
+
+                    String userFace = employeeLocal.getEmployeeFace();
+                    String userFinger1 = employeeLocal.getEmployeeFinger1();
+                    String userFinger2 = employeeLocal.getEmployeeFinger2();
+                    String userNFC = employeeLocal.getEmployeeNfc();
 
                     //组装人员数据DATA
                     Map<String, Object> userInformation = new LinkedHashMap<String, Object>();
@@ -345,11 +342,11 @@ public class EmployeeController {
                     userInformation.put("adminFlag", adminFlag);
                     userInformation.put("userImg", userImg);
                     userInformation.put("userPhoto", userPhoto);
-                    userInformation.put("userFinger1", "");
-                    userInformation.put("userFinger2", "");
-                    userInformation.put("userFace", "");
+                    userInformation.put("userFinger1", userFinger1);
+                    userInformation.put("userFinger2", userFinger2);
+                    userInformation.put("userFace", userFace);
                     userInformation.put("userPhone", employeePhone);
-                    userInformation.put("userNFC", "");
+                    userInformation.put("userNFC", userNFC);
                     userInformation.put("bluetoothId", bluetoothIdResult);
 
                     /**
@@ -516,6 +513,7 @@ public class EmployeeController {
                         entranceGuardService.insertCommand(doorCmdEmployeeInformation);
                         //立即下发数据到MQ
                         rabbitMQSender.sendMessage(deviceId, userInformationAll);
+                        System.out.println("基本信息："+JSON.toJSONString(userInformationAll));
 
                         /**
                          * 人员开门权限
@@ -532,6 +530,7 @@ public class EmployeeController {
                         entranceGuardService.insertCommand(doorCmdEmployeePermission);
                         //立即下发数据到MQ
                         rabbitMQSender.sendMessage(deviceId, userPermissionAll);
+                        System.out.println("开门权限信息："+JSON.toJSONString(userInformationAll));
                     }
                 }
             }
@@ -733,12 +732,13 @@ public class EmployeeController {
          }
          */
 
-        System.out.println("------------"+userInfo);
+//        System.out.println("------------"+userInfo);
         String jsonUrlDecoderString = UrlUtil.getURLDecoderString(userInfo);
 //        System.out.println(jsonUrlDecoderString);
         //去除数据的前缀名称
 //        jsonUrlDecoderString = jsonUrlDecoderString.replace("userInfo=", "");
         System.out.println(jsonUrlDecoderString);
+        System.out.println("style: "+style);
 
         Map<String, Object> mapResult = (Map<String, Object>) JSONObject.fromObject(jsonUrlDecoderString);
 
@@ -755,13 +755,12 @@ public class EmployeeController {
         String otherMd5 = (String) mapResult.get("MD5Check");
         mapResult.remove("MD5Check");
         String messageCheck = JSON.toJSONString(mapResult);
-        System.out.println("messageCheck: "+messageCheck);
+//        System.out.println("messageCheck: "+messageCheck);
         //生成我的md5
         String myMd5 = MD5Util.encryptPassword(messageCheck, "XC9EO5GKOIVRMBQ2YE8X");
-        System.out.println("myMd5 = " + myMd5);
         //双方的md5比较判断
         if (myMd5.equals(otherMd5)){
-            System.out.println("MD5校验成功，数据完好无损");
+//            System.out.println("MD5校验成功，数据完好无损");
 
             //获取绑定该设备的公司的id
             String companyId = deviceMapper.selectByPrimaryKey(deviceId).getCompanyId();
@@ -854,6 +853,7 @@ public class EmployeeController {
             return doorRecordAll;
 
         }else {
+            System.out.println("myMd5 = " + myMd5);
             System.out.println("MD5校验失败，数据已被修改");
 
             //回复人员人脸、指纹、卡号信息上传
@@ -895,7 +895,7 @@ public class EmployeeController {
             //命令数据存入数据库
             entranceGuardService.insertCommand(doorCmdRecord);
 
-            System.out.println("人员指纹、人脸信息上传已回复");
+//            System.out.println("人员指纹、人脸信息上传已回复");
             return doorRecordAll;
 
         }
@@ -947,12 +947,13 @@ public class EmployeeController {
          }
          */
 
-        System.out.println("------------"+userInfo);
+//        System.out.println("------------"+userInfo);
         String jsonUrlDecoderString = UrlUtil.getURLDecoderString(userInfo);
 //        System.out.println(jsonUrlDecoderString);
         //去除数据的前缀名称
 //        jsonUrlDecoderString = jsonUrlDecoderString.replace("userInfo=", "");
         System.out.println(jsonUrlDecoderString);
+        System.out.println("style: "+style);
 
         Map<String, Object> mapResult = (Map<String, Object>) JSONObject.fromObject(jsonUrlDecoderString);
 
@@ -969,13 +970,12 @@ public class EmployeeController {
         String otherMd5 = (String) mapResult.get("MD5Check");
         mapResult.remove("MD5Check");
         String messageCheck = JSON.toJSONString(mapResult);
-        System.out.println("messageCheck: "+messageCheck);
+//        System.out.println("messageCheck: "+messageCheck);
         //生成我的md5
         String myMd5 = MD5Util.encryptPassword(messageCheck, "XC9EO5GKOIVRMBQ2YE8X");
-        System.out.println("myMd5 = " + myMd5);
         //双方的md5比较判断
         if (myMd5.equals(otherMd5)){
-            System.out.println("MD5校验成功，数据完好无损");
+//            System.out.println("MD5校验成功，数据完好无损");
 
             //获取绑定该设备的公司的id
             String companyId = deviceMapper.selectByPrimaryKey(deviceId).getCompanyId();
@@ -1000,60 +1000,57 @@ public class EmployeeController {
                 } catch (IOException e) {
                     System.out.println("人脸图片上传IO异常");
                     e.printStackTrace();
-
-                    //回复人员人脸图片上传
-                    resultCode = "999";
-                    resultMessage = "人脸图片上传IO异常，FileNotFound";
-                    resultData.put("resultCode", resultCode);
-                    resultData.put("resultMessage", resultMessage);
-                    resultData.put("returnObj", "");
-                    resultMap.put("result", resultData);
-
-                    //构造命令格式
-                    DoorCmd doorCmdRecord = new DoorCmd();
-                    doorCmdRecord.setServerId("001");
-                    doorCmdRecord.setDeviceId(deviceId);
-                    doorCmdRecord.setFileEdition("v1.3");
-                    doorCmdRecord.setCommandMode("R");
-                    doorCmdRecord.setCommandType("S");
-                    doorCmdRecord.setCommandTotal("1");
-                    doorCmdRecord.setCommandIndex("1");
-                    doorCmdRecord.setSubCmdId("");
-                    doorCmdRecord.setAction("UPDATE_USER_LABEL");
-                    doorCmdRecord.setActionCode("2003");
-                    doorCmdRecord.setSendTime(CalendarUtil.getCurrentTime());
-                    doorCmdRecord.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
-                    doorCmdRecord.setSuperCmdId(FormatUtil.createUuid());
-                    doorCmdRecord.setData(JSON.toJSONString(resultMap));
-
-                    //获取完整的数据加协议封装格式
-                    RabbitMQSender rabbitMQSender = new RabbitMQSender();
-                    Map<String, Object> doorRecordAll =  rabbitMQSender.messagePackaging(doorCmdRecord, "", resultData, "R");
-                    //命令状态设置为: 已回复
-                    doorCmdRecord.setStatus("5");
-                    //设置md5校验值
-                    doorCmdRecord.setMd5Check((String) doorRecordAll.get("MD5Check"));
-                    //设置数据库的data字段
-                    doorCmdRecord.setData(JSON.toJSONString(doorRecordAll.get("result")));
-                    doorCmdRecord.setResultCode(resultCode);
-                    doorCmdRecord.setResultMessage(resultMessage);
-                    //命令数据存入数据库
-                    entranceGuardService.insertCommand(doorCmdRecord);
-
-                    return doorRecordAll;
                 }
 
                 return iEmployeeService.saveEmployeeInputInfo(jsonUrlDecoderString, deviceId, style, companyId);
 
-            }else {
-                System.out.println("人员信息上传，类型传递错误");
-                return new HashedMap();
             }
 
+            resultCode = "999";
+            resultMessage = "类型错误";
+            resultData.put("resultCode", resultCode);
+            resultData.put("resultMessage", resultMessage);
+            resultData.put("returnObj", "");
+            resultMap.put("result", resultData);
+
+            //构造命令格式
+            DoorCmd doorCmdRecord = new DoorCmd();
+            doorCmdRecord.setServerId(serverId);
+            doorCmdRecord.setDeviceId(deviceId);
+            doorCmdRecord.setFileEdition("v1.3");
+            doorCmdRecord.setCommandMode("R");
+            doorCmdRecord.setCommandType("S");
+            doorCmdRecord.setCommandTotal("1");
+            doorCmdRecord.setCommandIndex("1");
+            doorCmdRecord.setSubCmdId("");
+            doorCmdRecord.setAction("UPDATE_USER_LABEL");
+            doorCmdRecord.setActionCode("2003");
+            doorCmdRecord.setSendTime(CalendarUtil.getCurrentTime());
+            doorCmdRecord.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
+            doorCmdRecord.setSuperCmdId(FormatUtil.createUuid());
+            doorCmdRecord.setData(JSON.toJSONString(resultMap));
+
+            //获取完整的数据加协议封装格式
+            RabbitMQSender rabbitMQSender = new RabbitMQSender();
+            Map<String, Object> doorRecordAll =  rabbitMQSender.messagePackaging(doorCmdRecord, "", resultData, "R");
+            //命令状态设置为: 已回复
+            doorCmdRecord.setStatus("5");
+            //设置md5校验值
+            doorCmdRecord.setMd5Check((String) doorRecordAll.get("MD5Check"));
+            //设置数据库的data字段
+            doorCmdRecord.setData(JSON.toJSONString(doorRecordAll.get("result")));
+            doorCmdRecord.setResultCode(resultCode);
+            doorCmdRecord.setResultMessage(resultMessage);
+            //命令数据存入数据库
+            entranceGuardService.insertCommand(doorCmdRecord);
+
+            return doorRecordAll;
+
         }else {
+            System.out.println("myMd5 = " + myMd5);
             System.out.println("MD5校验失败，数据已被修改");
 
-            //回复人员人脸图片上传
+            //回复人员人脸、指纹、卡号信息上传
             resultCode = "6";
             resultMessage = "MD5校验失败";
             resultData.put("resultCode", resultCode);
@@ -1092,7 +1089,7 @@ public class EmployeeController {
             //命令数据存入数据库
             entranceGuardService.insertCommand(doorCmdRecord);
 
-            System.out.println("人员指纹、人脸信息上传已回复");
+//            System.out.println("人员指纹、人脸信息上传已回复");
             return doorRecordAll;
 
         }

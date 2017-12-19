@@ -16,6 +16,7 @@ import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -74,6 +75,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
      * 添加命令到命令表
      * @param doorCmd
      */
+    @Transactional
     @Override
     public void insertCommand(DoorCmd doorCmd) {
 
@@ -437,6 +439,24 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
     }
 
     /**
+     * 根据门的ID查询门的名称
+     * @param doorId
+     * @return
+     */
+    @Override
+    public String queryDoorNameByDoorId(String doorId) {
+        Door door = doorMapper.selectByPrimaryKey(doorId);
+        if(door!=null){
+            return door.getDoorName();
+        }else{
+            return null;
+        }
+    }
+
+
+
+
+    /**
      *查询具有门禁权限的人员一周的开门时间段
      * @param empId
      * @return
@@ -733,7 +753,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
             }
         }
 
-        System.out.println(JSON.toJSONString(oneWeekTimeFirstCardListTemp));
+//        System.out.println(JSON.toJSONString(oneWeekTimeFirstCardListTemp));
 
         //下发的门禁配置DATA数据结构
         Map<String, Object> firstCardSetupMap = new LinkedHashMap<String, Object>();
@@ -957,7 +977,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         insertCommand(doorCmdRecord);
         //立即下发回复数据到MQ
         rabbitMQSender.sendMessage(deviceId, doorRecordAll);
-        System.out.println("门禁记录上传已回复MQ");
+//        System.out.println("门禁记录上传已回复MQ");
     }
 
     /**

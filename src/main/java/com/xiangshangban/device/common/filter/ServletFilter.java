@@ -44,7 +44,7 @@ public class ServletFilter implements Filter{
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        System.out.println("进来了");
+//        System.out.println("进来了");
     }
 
     @Override
@@ -68,7 +68,7 @@ public class ServletFilter implements Filter{
         res.setHeader("Access-Control-Allow-Headers", req.getHeader("Access-Control-Request-Headers"));
 
         chain.doFilter(req, res);
-        System.out.println("嘻嘻嘻");
+//        System.out.println("嘻嘻嘻");
     }
 
     @Override

@@ -423,8 +423,8 @@
         bluetooth_no = #{bluetoothNo,jdbcType=VARCHAR},
       </if>
     </set>
-    where employee_id = #{employeeId,jdbcType=VARCHAR}
-    AND employee_company_id = #{employeeCompanyId,jdbcType=VARCHAR}
+    where employee_id = #{employeeId}
+    AND employee_company_id = #{employeeCompanyId}
   </update>
 
   <!--根据公司的ID和人员的ID查询人员的名称-->

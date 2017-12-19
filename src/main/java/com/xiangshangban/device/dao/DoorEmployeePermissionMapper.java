@@ -26,13 +26,6 @@ public interface DoorEmployeePermissionMapper {
     */
 
     /**
-     * 查询当前人员的开门权限是否有效
-     * @param employeeId
-     * @return
-     */
-    DoorEmployeePermission selectEffectivePermissionByEmployeeId(String employeeId);
-
-    /**
      * 根据rangeFlagId删除所有数据
      * @param rangeFlagId
      * @return
@@ -42,5 +35,6 @@ public interface DoorEmployeePermissionMapper {
     /**
      * 联查人和门关联表以及人员开门权限表
      */
-    Map<String, String> selectEmployeePressionByLeftJoin(@Param("employeeId") String employeeId, @Param("doorId") String doorId);
+    Map<String, String> selectEmployeePressionByLeftJoin(@Param("employeeId") String employeeId,
+                                                         @Param("doorId") String doorId);
 }

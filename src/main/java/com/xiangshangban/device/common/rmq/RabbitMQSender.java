@@ -8,6 +8,8 @@ import com.xiangshangban.device.common.utils.RabbitTemplateUtil;
 import com.xiangshangban.device.service.impl.ConnectionFactoryServiceImpl;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -32,6 +34,7 @@ public class RabbitMQSender {
      * @param message
      * @throws Exception
      */
+    @Transactional(propagation= Propagation.NEVER)
     public String sendMessage(String queueName,Object message) {
 
         //动态队列名称
@@ -54,6 +57,10 @@ public class RabbitMQSender {
 //            template.convertAndSend(encry);
             template.convertAndSend(json);
 //            ConnectionFactoryServiceImpl.destoryConnection(templateutil.getKey());
+            //使用完的连接放回空闲连接池
+            ConnectionFactoryServiceImpl.connection.put(templateutil.getKey(),ConnectionFactoryServiceImpl.useConn.get(templateutil.getKey()));
+            //从使用中连接池移除本次的连接
+            ConnectionFactoryServiceImpl.useConn.remove(templateutil.getKey());
         }else{
             System.out.println("RABBITMQ'S ERROR: can not intalialize the template.");
             return RabbitMQSender.ERROR;
@@ -147,12 +154,12 @@ public class RabbitMQSender {
         protocolMap.put("command", commandMap);
 
         String md5check = JSON.toJSONString(protocolMap);
-        System.out.println(md5check);
+//        System.out.println(md5check);
         String md5 = "";
         try {
             md5 = MD5Util.encryptPassword(md5check, "XC9EO5GKOIVRMBQ2YE8X");
-            System.out.println("md5值 = " + md5);
         } catch (Exception e) {
+            System.out.println("md5值 = " + md5);
             System.out.println("数据MD5出错:" + e.getMessage());
         }
 

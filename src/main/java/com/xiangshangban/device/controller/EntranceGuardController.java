@@ -408,7 +408,7 @@ public class EntranceGuardController {
         String[] openTypeStr = {"卡","个人密码","卡+个人密码","指纹","人脸","手机蓝牙","手机NFC"};
 
         //定义最终返回的数据结果集
-        Map result = null;
+        Map result = new HashedMap();
 
         JSONObject jsonObject = JSONObject.parseObject(requestParam);
         Object doorId = jsonObject.get("doorId");
@@ -545,6 +545,35 @@ public class EntranceGuardController {
             }
         }
         return JSONArray.toJSONString(result);
+    }
+
+    /**
+     * 根据门的Id查询门的名称
+     * 请求参数
+     * {
+     *     "doorId":"1"
+     * }
+     *
+     * 返回数据：
+     * {
+     *     "doorName":"xxx"
+     * }
+     */
+    @PostMapping("/autho/getDoorName")
+    public String getDoorName(@RequestBody String requestParam){
+        JSONObject jsonObject = JSONObject.parseObject(requestParam);
+        //门的ID
+        Object doorId = jsonObject.get("doorId");
+        //返回给前端的数据
+        Map  resultMap = new HashMap();
+        if(doorId!=null && !doorId.toString().isEmpty()){
+            Map realData = new HashMap();
+            realData.put("doorName",iEntranceGuardService.queryDoorNameByDoorId(doorId.toString().trim()));
+            resultMap = ReturnCodeUtil.addReturnCode(realData);
+        }else{
+            resultMap = ReturnCodeUtil.addReturnCode(1);
+        }
+        return JSONObject.toJSONString(resultMap);
     }
 
     /**
@@ -936,7 +965,7 @@ public class EntranceGuardController {
 
         String operatorEmployeeId = request.getHeader("accessUserId");
 
-        System.out.println("doorFeaturesSetup: "+doorFeaturesSetup);
+//        System.out.println("doorFeaturesSetup: "+doorFeaturesSetup);
 
         //解析数据
         Map<String, Object> setupMap = (Map<String, Object>)net.sf.json.JSONObject.fromObject(doorFeaturesSetup);
@@ -1142,9 +1171,9 @@ public class EntranceGuardController {
          }
          */
 
-        System.out.println("--------------"+jsonString);
+//        System.out.println("--------------"+jsonString);
         String jsonUrlDecoderString = UrlUtil.getURLDecoderString(jsonString);
-        System.out.println(jsonUrlDecoderString);
+//        System.out.println(jsonUrlDecoderString);
         //去除数据的前缀名称
         jsonUrlDecoderString = jsonUrlDecoderString.replace("alarmData=", "");
 //        System.out.println(jsonUrlDecoderString);
@@ -1165,11 +1194,11 @@ public class EntranceGuardController {
         String messageCheck = JSON.toJSONString(mapResult);
         //生成我的md5
         String myMd5 = MD5Util.encryptPassword(messageCheck, "XC9EO5GKOIVRMBQ2YE8X");
-        System.out.println("myMd5="+myMd5);
         //双方的md5比较判断
         if (myMd5.equals(otherMd5)){
-            System.out.println("MD5校验成功，数据完好无损");
+//            System.out.println("MD5校验成功，数据完好无损");
         }else {
+            System.out.println("myMd5="+myMd5);
             System.out.println("MD5校验失败，数据已被修改");
         }
 
@@ -1239,8 +1268,8 @@ public class EntranceGuardController {
                                                         @RequestParam(value = "eventPhotoCombinationId") String eventPhotoCombinationId,
                                                         @RequestParam(value="file") MultipartFile file){
 
-        System.out.println("门禁记录id = "+id);
-        System.out.println("fileName******: "+file.getOriginalFilename());
+//        System.out.println("门禁记录id = "+id);
+//        System.out.println("fileName******: "+file.getOriginalFilename());
 
         //回复设备
         Map<String, Object> resultData = new LinkedHashMap<String, Object>();
@@ -1264,7 +1293,7 @@ public class EntranceGuardController {
             doorRecord.setEventPhotoGroupId(eventPhotoCombinationId);
             DoorRecord doorRecordExist = doorRecordMapper.selectByPrimaryKey(id);
             if (doorRecordExist != null){
-                System.out.println("上传的警报记录图片【"+key+"】已成功");
+//                System.out.println("上传的警报记录图片【"+key+"】已成功");
                 doorRecordMapper.updateByPrimaryKeySelective(doorRecord);
 
                 //回复设备

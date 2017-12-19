@@ -75,121 +75,46 @@ public class EmployeeServiceImpl implements IEmployeeService {
     @Override
     public void employeeCommandGenerate(List<Map<String, Object>> employeeInfoCollection) {
 
-//        if (action.equals("UPDATE_USER_INFO")){
+        for (Map<String, Object> employeeInfoMap : employeeInfoCollection) {
 
-            for (Map<String, Object> employeeInfoMap : employeeInfoCollection) {
+            String employeeId = (String) employeeInfoMap.get("employeeId");
+            String employeeNo = (String) employeeInfoMap.get("employeeNo");
+            String employeeName = (String) employeeInfoMap.get("employeeName");
+            String departmentId = (String) employeeInfoMap.get("departmentId");
+            String departmentName = (String) employeeInfoMap.get("departmentName");
+            String entryTime = (String) employeeInfoMap.get("entryTime");
+            String probationaryExpired = (String) employeeInfoMap.get("probationaryExpired");
+            String employeePhone = (String) employeeInfoMap.get("loginName");
+            String employeeStatus = (String) employeeInfoMap.get("employeeStatus");
+            String companyId = (String) employeeInfoMap.get("companyId");
+            String companyName = (String) employeeInfoMap.get("companyName");
+            String companyNo = (String) employeeInfoMap.get("companyNo");
 
-                String employeeId = (String) employeeInfoMap.get("employeeId");
-                String employeeNo = (String) employeeInfoMap.get("employeeNo");
-                String employeeName = (String) employeeInfoMap.get("employeeName");
-                String departmentId = (String) employeeInfoMap.get("departmentId");
-                String departmentName = (String) employeeInfoMap.get("departmentName");
-                String entryTime = (String) employeeInfoMap.get("entryTime");
-                String probationaryExpired = (String) employeeInfoMap.get("probationaryExpired");
-                String employeePhone = (String) employeeInfoMap.get("loginName");
-                String employeeStatus = (String) employeeInfoMap.get("employeeStatus");
-                String companyId = (String) employeeInfoMap.get("companyId");
-                String companyName = (String) employeeInfoMap.get("companyName");
-                String companyNo = (String) employeeInfoMap.get("companyNo");
+            //增加人员信息到本地人员表
+            Employee employee = new Employee();
+            employee.setEmployeeId(employeeId);
+            employee.setEmployeeNumber(employeeNo);
+            employee.setEmployeeName(employeeName);
+            employee.setEmployeeDepartmentId(departmentId);
+            employee.setEmployeeDepartmentName(departmentName);
+            employee.setEmployeeEntryTime(entryTime);
+            employee.setEmployeeProbationaryExpired(probationaryExpired);
+            employee.setEmployeePhone(employeePhone);
+            employee.setEmployeeStatus(employeeStatus);
+            employee.setUpdateTime(DateUtils.getDateTime());
+            employee.setEmployeeCompanyId(companyId);
+            employee.setEmployeeCompanyName(companyName);
+            employee.setCompanyNo(companyNo);
 
-                //增加人员信息到本地人员表
-                Employee employee = new Employee();
-                employee.setEmployeeId(employeeId);
-                employee.setEmployeeNumber(employeeNo);
-                employee.setEmployeeName(employeeName);
-                employee.setEmployeeDepartmentId(departmentId);
-                employee.setEmployeeDepartmentName(departmentName);
-                employee.setEmployeeEntryTime(entryTime);
-                employee.setEmployeeProbationaryExpired(probationaryExpired);
-                employee.setEmployeePhone(employeePhone);
-                employee.setEmployeeStatus(employeeStatus);
-                employee.setUpdateTime(DateUtils.getDateTime());
-                employee.setEmployeeCompanyId(companyId);
-                employee.setEmployeeCompanyName(companyName);
-                employee.setCompanyNo(companyNo);
-
-                //查询人员信息是否存在
-                Employee employeeExit = employeeMapper.selectByEmployeeIdAndCompanyId(employeeId, companyId);
+            //查询人员信息是否存在
+            Employee employeeExit = employeeMapper.selectByEmployeeIdAndCompanyId(employeeId, companyId);
 //                Employee employeeExit = employeeMapper.selectByPrimaryKey(employeeId);
-                if (employeeExit == null){
-                    employeeMapper.insertSelective(employee);
-                }else {
-                    employeeMapper.updateByPrimaryKeySelective(employee);
-                }
-
-//                //DATA JSON字符串
-//                String dataJsonString = JSON.toJSONString(employee);
-//
-//                //获取人员和设备关联的信息
-//                String doorId = doorEmployeeMapper.selectByPrimaryKey(employeeId).getDoorId();
-//                String deviceId = doorMapper.selectByPrimaryKey(doorId).getDeviceId();
-//
-//                //生成一条人员修改命令
-//                DoorCmd doorCmd = new DoorCmd();
-//                //协议格式
-//                doorCmd.setServerId("");
-//                doorCmd.setDeviceId(deviceId);
-//                doorCmd.setFileEdition("v1.3");
-//                doorCmd.setCommandMode("C");
-//                doorCmd.setCommandType("single");
-//                doorCmd.setCommandTotal("1");
-//                doorCmd.setCommandIndex("1");
-//                doorCmd.setSendTime(CalendarUtil.getCurrentTime());
-//                doorCmd.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
-//                doorCmd.setSuperCmdId("");
-//                doorCmd.setSubCmdId("");
-//                doorCmd.setAction(action);
-//                doorCmd.setActionCode("2001");
-//                doorCmd.setData(dataJsonString);
-//                doorCmd.setStatus("0");
-//                doorCmd.setEmployeeId(employeeId);
-//
-//                System.out.println("[*] CMD: " + JSON.toJSONString(doorCmd));
-
-//                //发送命令到MQ
-//                RabbitMQSender rabbitMQSender = new RabbitMQSender();
-//                rabbitMQSender.sendMessage(downloadQueueName, JSON.toJSONString(doorCmd));
-
-                //储存人员修改命令到命令表里
-//                doorCmdMapper.insert(doorCmd);
-
+            if (employeeExit == null) {
+                employeeMapper.insertSelective(employee);
+            } else {
+                employeeMapper.updateByPrimaryKeySelective(employee);
             }
-
-//        }else if (action.equals("DELETE_USER_INFO")){
-
-//            //DATA JSON字符串
-//            String dataJsonString = JSON.toJSONString(employeeIdCollection);
-//
-//            //获取人员和设备关联的信息
-//            String doorId = doorEmployeeMapper.selectByPrimaryKey(employeeIdCollection.get(0)).getDoorId();
-//            String deviceId = doorMapper.selectByPrimaryKey(doorId).getDeviceId();
-//
-//            //生成一条人员删除命令
-//            DoorCmd doorCmd = new DoorCmd();
-//            //协议格式
-//            doorCmd.setServerId("");
-//            doorCmd.setDeviceId(deviceId);
-//            doorCmd.setFileEdition("v1.3");
-//            doorCmd.setCommandMode("C");
-//            doorCmd.setCommandType("single");
-//            doorCmd.setCommandTotal("1");
-//            doorCmd.setCommandIndex("1");
-//            doorCmd.setSendTime(CalendarUtil.getCurrentTime());
-//            doorCmd.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
-//            doorCmd.setSuperCmdId("");
-//            doorCmd.setSubCmdId("");
-//            doorCmd.setAction(action);
-//            doorCmd.setActionCode("2002");
-//            doorCmd.setData(dataJsonString);
-//            doorCmd.setStatus("0");
-//            doorCmd.setEmployeeId(employeeId);
-//
-//            System.out.println("[*] CMD: " + JSON.toJSONString(doorCmd));
-//
-//            //储存人员修改命令到命令表里
-//            doorCmdMapper.insert(doorCmd);
-
-//        }
+        }
     }
 
     /**
@@ -265,7 +190,8 @@ public class EmployeeServiceImpl implements IEmployeeService {
         employee.setEmployeeCompanyId(companyId);
         if ("1".equals(style)){
             try {
-                employee.setEmployeeFace(((Map<String, String>) userLabelMap.get("userFace")).get("faceData"));
+                System.out.println("人脸信息: "+JSON.toJSONString(userLabelMap.get("userFace")));
+                employee.setEmployeeFace(JSON.toJSONString(userLabelMap.get("userFace")));
             }catch (Exception e){
                 employee.setEmployeeFace("");
             }
@@ -283,11 +209,13 @@ public class EmployeeServiceImpl implements IEmployeeService {
         //回复人员人脸、指纹、卡号信息上传
         Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
         Map<String, Object> resultData = new LinkedHashMap<String, Object>();
+        System.out.println("employeeId: "+employeeId+"     companyId: "+companyId);
 
         //查看人员是否存在
         Employee employeeExist = employeeMapper.selectByEmployeeIdAndCompanyId(employeeId, companyId);
 
         if (employeeExist != null){
+            System.out.println("employee: "+JSON.toJSONString(employee));
             //更新人员的指纹、人脸、卡号数据
             employeeMapper.updateByEmployeeIdAndCompanyIdSelective(employee);
 
@@ -297,7 +225,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
             resultData.put("resultMessage", resultMessage);
             resultData.put("returnObj", employeeId);
             resultMap.put("result", resultData);
-            System.out.println("人员指纹、人脸信息上传成功");
+//            System.out.println("人员指纹、人脸信息上传成功");
         }else {
             resultCode = "999";
             resultMessage = "该人员信息不存在";
@@ -340,28 +268,12 @@ public class EmployeeServiceImpl implements IEmployeeService {
         //命令数据存入数据库
         entranceGuardService.insertCommand(doorCmdRecord);
 
-//        //上传的是人脸信息时，同步该人员的人脸、指纹信息到其它有权限的设备上
-//        if ("1".equals(style)){
-//            //1.同步该人员的人脸、指纹信息到人员表（一个人对多个公司）
-//            Employee employeeTemp = new Employee();
-//            employeeTemp.setEmployeeId(employeeId);
-//            employeeTemp.setEmployeeFace(((Map<String, String>) userLabelMap.get("userFace")).get("faceData"));
-//            if (StringUtils.isNotEmpty((String) userLabelMap.get("userFinger1"))){
-//                employeeTemp.setEmployeeFinger1((String) userLabelMap.get("userFinger1"));
-//            }
-//            if (StringUtils.isNotEmpty((String) userLabelMap.get("userFinger1"))){
-//                employeeTemp.setEmployeeFinger2((String) userLabelMap.get("userFinger2"));
-//            }
-//            employeeMapper.updateByPrimaryKeySelective(employeeTemp);
-//            //2.同步该人员的人脸、指纹信息到其它有权限的设备上
-//            List<Map> deviceList = deviceMapper.selectAllDevice(companyId);
-//            for (Map<String, String> map : deviceList) {
-//                map.get("");
-//            }
-//
-//        }
-//
-        System.out.println("人员指纹、人脸信息上传已回复");
+        //同步人脸信息到其它设备
+        if ("1".equals(style)){
+            synchronizeEmployeePermissionForDevices(jsonString, employeeId);
+        }
+
+//        System.out.println("人员指纹、人脸信息上传已回复");
         return doorRecordAll;
 
     }
@@ -593,96 +505,163 @@ public class EmployeeServiceImpl implements IEmployeeService {
 
     }
 
-    //同步不同设备上，有开门权限的人员的权限信息
+    //同步不同设备上，有开门权限的人员的基本信息
     @Override
-    public void synchronizeEmployeePermissionForDevices(String employeeId) {
+    public void synchronizeEmployeePermissionForDevices(String jsonString, String employeeId) {
 
-        //查询该人员的有效时间是否过期
-        DoorEmployeePermission doorEmployeePermission = doorEmployeePermissionMapper.selectByPrimaryKey(employeeId);
+        //提取数据
+        Map<String, Object> allMap = JSONObject.fromObject(jsonString);
+        Map<String, Object> dataMap = (Map<String, Object>) allMap.get("data");
+        Map<String, Object> userLabelMap = (Map<String, Object>) dataMap.get("userLabel");
 
-        if (doorEmployeePermission != null){
-
+        //1.同步该人员的人脸、指纹信息到人员表（一个人对多个公司）
+        Employee employeeTemp = new Employee();
+        employeeTemp.setEmployeeId(employeeId);
+        try {
+            employeeTemp.setEmployeeFace(JSON.toJSONString(userLabelMap.get("userFace")));
+        }catch (Exception e){
+            employeeTemp.setEmployeeFace((String) userLabelMap.get("userFace"));
         }
-
-        //从本地查人员信息
-        Employee employeeLocal = employeeMapper.selectByPrimaryKey(employeeId);
-
-        if (employeeLocal == null){
-            System.out.println("人员信息不同步，未查到【"+employeeLocal.getEmployeeName()+"】的信息");
-        }else {
-            String employeeName = employeeLocal.getEmployeeName();
-            String employeeNo = employeeLocal.getEmployeeNumber();
-            String departmentId = employeeLocal.getEmployeeDepartmentId();
-            String departmentName = employeeLocal.getEmployeeDepartmentName();
-            String entryTime = employeeLocal.getEmployeeEntryTime();
-            String probationaryExpired = employeeLocal.getEmployeeProbationaryExpired();
-            String employeePhone = employeeLocal.getEmployeePhone();
-            String blueboothId = employeeLocal.getBluetoothNo();
-
-            String birthday = employeeLocal.getEmployeeBirthday();
-            String contractExpired = employeeLocal.getEmployeeContractExpired();
-            String adminFlag = employeeLocal.getAdminFlag();
-            String userImg = employeeLocal.getEmployeeImg();
-            String userPhoto = employeeLocal.getEmployeePhoto();
-
-            String userFinger1 = employeeLocal.getEmployeeFinger1();
-            String userFinger2 = employeeLocal.getEmployeeFinger2();
-            String userFace = employeeLocal.getEmployeeFace();
-            String userNFC = employeeLocal.getEmployeeNfc();
-
-            //组装人员数据DATA
-            Map<String, Object> userInformation = new LinkedHashMap<String, Object>();
-            userInformation.put("userId", employeeId);
-            userInformation.put("userCode", employeeNo);
-            userInformation.put("userName", employeeName);
-            userInformation.put("userDeptId", departmentId);
-            userInformation.put("userDeptName", departmentName);
-            userInformation.put("birthday", birthday);
-            userInformation.put("entryTime", entryTime);
-            userInformation.put("probationaryExpired", probationaryExpired);
-            userInformation.put("contractExpired", contractExpired);
-            userInformation.put("adminFlag", adminFlag);
-            userInformation.put("userImg", userImg);
-            userInformation.put("userPhoto", userPhoto);
-            userInformation.put("userFinger1", userFinger1);
-            userInformation.put("userFinger2", userFinger2);
-            userInformation.put("userFace", userFace);
-            userInformation.put("userPhone", employeePhone);
-            userInformation.put("userNFC", userNFC);
-            userInformation.put("bluetoothId", blueboothId);
-
-            //查询该人员在哪些设备上有开门权限
-
-
-            //下发人员基本信息
-            //构造命令格式
-            DoorCmd doorCmdEmployeeInformation = new DoorCmd();
-            doorCmdEmployeeInformation.setServerId(serverId);
-//            doorCmdEmployeeInformation.setDeviceId(deviceId);
-            doorCmdEmployeeInformation.setFileEdition("v1.3");
-            doorCmdEmployeeInformation.setCommandMode("C");
-            doorCmdEmployeeInformation.setCommandType("single");
-            doorCmdEmployeeInformation.setCommandTotal("1");
-            doorCmdEmployeeInformation.setCommandIndex("1");
-            doorCmdEmployeeInformation.setSubCmdId("");
-            doorCmdEmployeeInformation.setAction("UPDATE_USER_INFO");
-            doorCmdEmployeeInformation.setActionCode("2001");
-
-            //下发人员门禁权限
-            //构造命令格式
-            DoorCmd doorCmdEmployeePermission = new DoorCmd();
-            doorCmdEmployeePermission.setServerId(serverId);
-//            doorCmdEmployeePermission.setDeviceId(deviceId);
-            doorCmdEmployeePermission.setFileEdition("v1.3");
-            doorCmdEmployeePermission.setCommandMode("C");
-            doorCmdEmployeePermission.setCommandType("single");
-            doorCmdEmployeePermission.setCommandTotal("1");
-            doorCmdEmployeePermission.setCommandIndex("1");
-            doorCmdEmployeePermission.setSubCmdId("");
-            doorCmdEmployeePermission.setAction("UPDATE_USER_ACCESS_CONTROL");
-            doorCmdEmployeePermission.setActionCode("3001");
+        if (StringUtils.isNotEmpty((String) userLabelMap.get("userFinger1"))) {
+            employeeTemp.setEmployeeFinger1((String) userLabelMap.get("userFinger1"));
         }
+        if (StringUtils.isNotEmpty((String) userLabelMap.get("userFinger1"))) {
+            employeeTemp.setEmployeeFinger2((String) userLabelMap.get("userFinger2"));
+        }
+        employeeMapper.updateByPrimaryKeySelective(employeeTemp);
 
+        //2.同步该人员的人脸、指纹信息到其它有权限的设备上
+        List<DoorEmployee> doorEmployeeList = doorEmployeeMapper.selectByPrimaryKey(employeeId);
+        for (DoorEmployee doorEmployee : doorEmployeeList) {
+            Door door = doorMapper.selectByPrimaryKey(doorEmployee.getDoorId());
+            String deviceId = door.getDeviceId();
+            //删除门时会删除对应关系，需要判断
+            if (StringUtils.isEmpty(deviceId)){
+                System.out.println("同步人脸信息时，门【"+door.getDoorId()+"】和设备的关联关系不存在");
+                return;
+            }
+            String companyId = deviceMapper.selectByPrimaryKey(deviceId).getCompanyId();
+            if (StringUtils.isEmpty(companyId)){
+                System.out.println("同步人脸信息时，设备【"+deviceId+"】和公司的关联关系不存在");
+                return;
+            }
+
+            //向每一个有权限的设备下发该设备对应公司的该人员的信息
+            //查询该人员的有效时间是否过期
+            Map<String, String> doorEmployeePermission = doorEmployeePermissionMapper.selectEmployeePressionByLeftJoin(employeeId, door.getDoorId());
+
+            //这个人有开门权限设置
+            if (doorEmployeePermission != null){
+                String startTime = doorEmployeePermission.get("doorOpenStartTime");
+                String endTime = doorEmployeePermission.get("doorOpenEndTime");
+                String nowTime = DateUtils.getDateTime();
+
+                //这个人的开门权限时间有效
+                Boolean timeEffective = DateUtils.isBetweenTwoTime(startTime, endTime, nowTime);
+
+                //这个人的最后一条下发的命令信息
+                List<DoorCmd> doorCmdList = doorCmdMapper.selectDoorCmdLatestByEmployeeId(employeeId);
+                //找不到最后一条命令就不同步
+                if (doorCmdList.size() == 0){
+                    return;
+                }
+                //最新的下发命令不是下发该人员的信息就不同步
+                for (DoorCmd doorCmd : doorCmdList) {
+                    String actionCode = doorCmd.getActionCode();
+                    if (!"2001".equals(actionCode) || !"3001".equals(actionCode)){
+                        return;
+                    }
+                }
+
+                //权限有效并且往设备下发过该人员
+                if (timeEffective){
+                    //获取要下发的这个人的基本信息
+                    Employee employeeLocal = employeeMapper.selectByEmployeeIdAndCompanyId(employeeId, companyId);
+
+                    if (employeeLocal == null){
+                        System.out.println("人员信息不同步，未查到【"+employeeLocal.getEmployeeName()+"】的信息");
+                        return;
+                    }else {
+                        String employeeName = employeeLocal.getEmployeeName();
+                        String employeeNo = employeeLocal.getEmployeeNumber();
+                        String departmentId = employeeLocal.getEmployeeDepartmentId();
+                        String departmentName = employeeLocal.getEmployeeDepartmentName();
+                        String entryTime = employeeLocal.getEmployeeEntryTime();
+                        String probationaryExpired = employeeLocal.getEmployeeProbationaryExpired();
+                        String employeePhone = employeeLocal.getEmployeePhone();
+                        String blueboothId = employeeLocal.getBluetoothNo();
+
+                        String birthday = employeeLocal.getEmployeeBirthday();
+                        String contractExpired = employeeLocal.getEmployeeContractExpired();
+                        String adminFlag = employeeLocal.getAdminFlag();
+                        String userImg = employeeLocal.getEmployeeImg();
+                        String userPhoto = employeeLocal.getEmployeePhoto();
+
+                        String userFinger1 = employeeLocal.getEmployeeFinger1();
+                        String userFinger2 = employeeLocal.getEmployeeFinger2();
+                        String userFace = employeeLocal.getEmployeeFace();
+                        String userNFC = employeeLocal.getEmployeeNfc();
+
+                        //组装人员数据DATA
+                        Map<String, Object> userInformation = new LinkedHashMap<String, Object>();
+                        userInformation.put("userId", employeeId);
+                        userInformation.put("userCode", employeeNo);
+                        userInformation.put("userName", employeeName);
+                        userInformation.put("userDeptId", departmentId);
+                        userInformation.put("userDeptName", departmentName);
+                        userInformation.put("birthday", birthday);
+                        userInformation.put("entryTime", entryTime);
+                        userInformation.put("probationaryExpired", probationaryExpired);
+                        userInformation.put("contractExpired", contractExpired);
+                        userInformation.put("adminFlag", adminFlag);
+                        userInformation.put("userImg", userImg);
+                        userInformation.put("userPhoto", userPhoto);
+                        userInformation.put("userFinger1", userFinger1);
+                        userInformation.put("userFinger2", userFinger2);
+                        userInformation.put("userFace", userFace);
+                        userInformation.put("userPhone", employeePhone);
+                        userInformation.put("userNFC", userNFC);
+                        userInformation.put("bluetoothId", blueboothId);
+
+                        //下发人员基本信息
+                        //构造命令格式
+                        DoorCmd doorCmdEmployeeInformation = new DoorCmd();
+                        doorCmdEmployeeInformation.setServerId(serverId);
+                        doorCmdEmployeeInformation.setDeviceId(deviceId);
+                        doorCmdEmployeeInformation.setFileEdition("v1.3");
+                        doorCmdEmployeeInformation.setCommandMode("C");
+                        doorCmdEmployeeInformation.setCommandType("single");
+                        doorCmdEmployeeInformation.setCommandTotal("1");
+                        doorCmdEmployeeInformation.setCommandIndex("1");
+                        doorCmdEmployeeInformation.setSubCmdId("");
+                        doorCmdEmployeeInformation.setAction("UPDATE_USER_INFO");
+                        doorCmdEmployeeInformation.setActionCode("2001");
+
+                        doorCmdEmployeeInformation.setSendTime(CalendarUtil.getCurrentTime());
+                        doorCmdEmployeeInformation.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
+                        doorCmdEmployeeInformation.setSuperCmdId(FormatUtil.createUuid());
+                        doorCmdEmployeeInformation.setData(JSON.toJSONString(userInformation));
+                        doorCmdEmployeeInformation.setEmployeeId("synchronization:"+employeeId);
+
+                        //获取完整的数据加协议封装格式
+                        RabbitMQSender rabbitMQSender = new RabbitMQSender();
+                        Map<String, Object> userInformationAll =  rabbitMQSender.messagePackaging(doorCmdEmployeeInformation, "userInfo", userInformation, "C");
+                        //命令状态设置为: 发送中
+                        doorCmdEmployeeInformation.setStatus("1");
+                        //设置md5校验值
+                        doorCmdEmployeeInformation.setMd5Check((String) userInformationAll.get("MD5Check"));
+                        //设置数据库的data字段
+                        doorCmdEmployeeInformation.setData(JSON.toJSONString(userInformationAll.get("data")));
+                        //命令数据存入数据库
+                        entranceGuardService.insertCommand(doorCmdEmployeeInformation);
+                        //立即下发数据到MQ
+                        rabbitMQSender.sendMessage(deviceId, userInformationAll);
+
+                        System.out.println("【"+employeeId+"】的人脸信息已向【"+deviceId+"】设备发出同步操作");
+                    }
+                }
+            }
+        }
     }
 
     @Override

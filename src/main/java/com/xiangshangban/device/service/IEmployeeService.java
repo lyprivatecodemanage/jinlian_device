@@ -42,8 +42,8 @@ public interface IEmployeeService {
     //根据人员id查找人的信息
     Employee findEmployeeById(String empId);
 
-    //同步不同设备上，有开门权限的人员的权限信息
-    void synchronizeEmployeePermissionForDevices(String employeeId);
+    //同步不同设备上，有开门权限的人员的权限信息（重新下发这个人的信息）
+    void synchronizeEmployeePermissionForDevices(String jsonString, String employeeId);
 
     String deviceUploadPackage(String versionCode, MultipartFile uploadResource,
                                String fileType, String employeeId) throws IOException;

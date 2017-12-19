@@ -48,7 +48,7 @@ public class DeviceOnlineStatusTimer {
     public void check() {
 
 //        System.out.println("hello!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-        System.out.println("****************************开始检测所有设备的在线状态****************************");
+//        System.out.println("****************************开始检测所有设备的在线状态****************************");
 
         //检查所有设备是否在线
         List<Device> deviceList = deviceMapper.selectAllDeviceInfoByNone();
@@ -73,24 +73,24 @@ public class DeviceOnlineStatusTimer {
                     if (intervalMillisecond < 90000){
                         deviceTemp.setIsOnline("1");//设备在线
                         deviceMapper.updateByPrimaryKeySelective(deviceTemp);
-                        System.out.println("【"+device.getDeviceId()+"】设备在线中.......................");
+//                        System.out.println("【"+device.getDeviceId()+"】设备在线中.......................");
                     }else {
                         deviceTemp.setIsOnline("0");//设备离线
                         deviceMapper.updateByPrimaryKeySelective(deviceTemp);
-                        System.out.println("【"+device.getDeviceId()+"】设备不在线");
+//                        System.out.println("【"+device.getDeviceId()+"】设备不在线");
                     }
                 }else {
                     //一条心跳信息都没有的设备也是离线状态
                     deviceTemp.setIsOnline("0");//设备离线
                     deviceMapper.updateByPrimaryKeySelective(deviceTemp);
-                    System.out.println("【"+device.getDeviceId()+"】设备不在线");
+//                    System.out.println("【"+device.getDeviceId()+"】设备不在线");
                 }
             }catch (Exception e){
                 e.printStackTrace();
                 System.out.println("设备在线状态检查出错");
             }
         }
-        System.out.println("****************************设备在线状态检测结束****************************");
+//        System.out.println("****************************设备在线状态检测结束****************************");
     }
 
 }

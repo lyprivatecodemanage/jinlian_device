@@ -463,4 +463,21 @@
         )
     AND action_code = '4001'
   </select>
+
+  <select id="selectDoorCmdLatestByEmployeeId" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    SELECT
+    <include refid="Base_Column_List" />
+    FROM
+    door_cmd
+    WHERE
+    employee_id = #{employeeId,jdbcType=VARCHAR}
+    AND send_time = (
+    SELECT
+    MAX (send_time)
+    FROM
+    door_cmd
+    WHERE
+    employee_id = #{employeeId,jdbcType=VARCHAR}
+    )
+  </select>
 </mapper>

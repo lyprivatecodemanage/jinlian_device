@@ -33,12 +33,6 @@ public interface IDeviceService {
                                                     String employeeCompanyId);
 
     /**
-     * 下发重启命令，重启指定的设备
-     * @param deviceId
-     */
-    String rebootDevice(String deviceId);
-
-    /**
      * 查询所有的设备信息
      * @param companyId
      * @return
