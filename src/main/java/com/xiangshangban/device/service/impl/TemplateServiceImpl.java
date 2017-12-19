@@ -34,6 +34,12 @@ import java.util.*;
 
 public class TemplateServiceImpl implements ITemplateService{
 
+    @Value("${serverId}")
+    String serverId;
+
+    @Value("${rabbitmq.download.queue.name}")
+    String downloadQueueName;
+
     @Autowired
     private TemplateMapper templateMapper;
 
@@ -57,9 +63,6 @@ public class TemplateServiceImpl implements ITemplateService{
 
     @Autowired
     private FestivalMapper festivalMapper;
-
-    @Value("${rabbitmq.download.queue.name}")
-    String downloadQueueName;
 
     /************************************************************
      *                           TODO 设备端接口
@@ -738,7 +741,7 @@ public class TemplateServiceImpl implements ITemplateService{
     public void issueTemplateInfoCore(String deviceId,List<Map> templates){
         //构造命令格式
         DoorCmd doorCmdUpdateDeviceTemplate = new DoorCmd();
-        doorCmdUpdateDeviceTemplate.setServerId("001");
+        doorCmdUpdateDeviceTemplate.setServerId(serverId);
         doorCmdUpdateDeviceTemplate.setDeviceId(deviceId);
         doorCmdUpdateDeviceTemplate.setFileEdition("v1.3");
         doorCmdUpdateDeviceTemplate.setCommandMode("C");

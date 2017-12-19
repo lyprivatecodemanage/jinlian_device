@@ -35,6 +35,9 @@ public class EntranceGuardController {
     @Value("${command.timeout.seconds}")
     String commandTimeoutSeconds;
 
+    @Value("${serverId}")
+    String serverId;
+
     @Autowired
     private IEntranceGuardService iEntranceGuardService;
 
@@ -1189,7 +1192,7 @@ public class EntranceGuardController {
 
         //构造命令格式
         DoorCmd doorCmdRecord = new DoorCmd();
-        doorCmdRecord.setServerId("001");
+        doorCmdRecord.setServerId(serverId);
         doorCmdRecord.setDeviceId(deviceId);
         doorCmdRecord.setFileEdition("v1.3");
         doorCmdRecord.setCommandMode("R");
@@ -1296,7 +1299,7 @@ public class EntranceGuardController {
 
         //构造命令格式
         DoorCmd doorCmdRecord = new DoorCmd();
-        doorCmdRecord.setServerId("001");
+        doorCmdRecord.setServerId(serverId);
         doorCmdRecord.setDeviceId(deviceId);
         doorCmdRecord.setFileEdition("v1.3");
         doorCmdRecord.setCommandMode("R");

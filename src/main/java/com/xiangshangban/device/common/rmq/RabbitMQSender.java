@@ -26,8 +26,6 @@ public class RabbitMQSender {
 //    @Value("${rabbitmq.download.exchange.name}")
 //    private String downloadExchangeName;
 
-    private ConnectionFactoryServiceImpl connectionFactoryImpl = new ConnectionFactoryServiceImpl();
-
     /**
      * 发送消息
      * @param queueName
@@ -54,8 +52,8 @@ public class RabbitMQSender {
 //                System.out.println("数据加密出错:"+e.getMessage());
 //            }
 //            template.convertAndSend(encry);
-               template.convertAndSend(json);
-            //ConnectionFactoryServiceImpl.destoryConnection(templateutil.getKey());
+            template.convertAndSend(json);
+//            ConnectionFactoryServiceImpl.destoryConnection(templateutil.getKey());
         }else{
             System.out.println("RABBITMQ'S ERROR: can not intalialize the template.");
             return RabbitMQSender.ERROR;
@@ -74,7 +72,7 @@ public class RabbitMQSender {
 
         String exchange = "download";
 
-        Connection conn = connectionFactoryImpl.getConnectionFactory();
+        Connection conn = ConnectionFactoryServiceImpl.getConnectionFactory();
         ConnectionFactory connectionFactory = conn.getConnectionFactory();
 
         if( null == connectionFactory) {

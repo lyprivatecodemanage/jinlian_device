@@ -34,6 +34,9 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
     @Value("${command.timeout.seconds}")
     String commandTimeoutSeconds;
 
+    @Value("${serverId}")
+    String serverId;
+
     @Autowired
     private DoorMapper doorMapper;
 
@@ -617,7 +620,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         //下发门禁常规设置
         //构造命令格式
         DoorCmd doorCmdEmployeeInformation = new DoorCmd();
-        doorCmdEmployeeInformation.setServerId("001");
+        doorCmdEmployeeInformation.setServerId(serverId);
         doorCmdEmployeeInformation.setDeviceId(deviceId);
         doorCmdEmployeeInformation.setFileEdition("v1.3");
         doorCmdEmployeeInformation.setCommandMode("C");
@@ -740,7 +743,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         //下发门禁常规设置
         //构造命令格式
         DoorCmd doorCmdEmployeeInformation = new DoorCmd();
-        doorCmdEmployeeInformation.setServerId("001");
+        doorCmdEmployeeInformation.setServerId(serverId);
         doorCmdEmployeeInformation.setDeviceId(deviceId);
         doorCmdEmployeeInformation.setFileEdition("v1.3");
         doorCmdEmployeeInformation.setCommandMode("C");
@@ -823,7 +826,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         //下发门禁常规设置
         //构造命令格式
         DoorCmd doorCmdEmployeeInformation = new DoorCmd();
-        doorCmdEmployeeInformation.setServerId("001");
+        doorCmdEmployeeInformation.setServerId(serverId);
         doorCmdEmployeeInformation.setDeviceId(deviceId);
         doorCmdEmployeeInformation.setFileEdition("v1.3");
         doorCmdEmployeeInformation.setCommandMode("C");
@@ -924,7 +927,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
 
         //构造命令格式
         DoorCmd doorCmdRecord = new DoorCmd();
-        doorCmdRecord.setServerId("001");
+        doorCmdRecord.setServerId(serverId);
         doorCmdRecord.setDeviceId(deviceId);
         doorCmdRecord.setFileEdition("v1.3");
         doorCmdRecord.setCommandMode("R");

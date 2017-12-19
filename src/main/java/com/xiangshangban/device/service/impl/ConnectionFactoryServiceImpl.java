@@ -35,12 +35,12 @@ public class ConnectionFactoryServiceImpl implements IConnectionFactoryService {
     private static int port = 5672;
     private static String virtualHost= "/";
 
-    public ConnectionFactoryServiceImpl(){
+    static {
         System.out.println("创建MQ连接");
         int i = 0;
         connection = new HashMap<String, CachingConnectionFactory>();
         useConn = new HashMap<String, CachingConnectionFactory>();
-        while (i < 1) {
+        while (i < 10) {
             CachingConnectionFactory connectionFactory = new CachingConnectionFactory();
             connectionFactory.resetConnection();
             connectionFactory.setHost(host);
@@ -60,7 +60,7 @@ public class ConnectionFactoryServiceImpl implements IConnectionFactoryService {
      * 获取链接工厂
      * @return
      */
-    public Connection getConnectionFactory(){
+    public static Connection getConnectionFactory(){
         CachingConnectionFactory connectionFactory = new CachingConnectionFactory() ;
         Connection conn = new Connection();
         for (Map.Entry<String,CachingConnectionFactory> entry : connection.entrySet()) {

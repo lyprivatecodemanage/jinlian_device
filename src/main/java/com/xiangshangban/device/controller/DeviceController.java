@@ -41,6 +41,9 @@ public class DeviceController {
     @Value("${command.timeout.seconds}")
     String commandTimeoutSeconds;
 
+    @Value("${serverId}")
+    String serverId;
+
     @Autowired
     private IDeviceService deviceService;
 
@@ -88,7 +91,6 @@ public class DeviceController {
      *
      * @param jsonString
      */
-    @Transactional
     @ResponseBody
     @RequestMapping(value = "/addDevice", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     public ReturnData addDevice(@RequestBody String jsonString) {
@@ -464,7 +466,6 @@ public class DeviceController {
      *
      * @param jsonString
      */
-    @Transactional
     @ResponseBody
     @RequestMapping(value = "/rebootDevice", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     public ReturnData rebootDevice(@RequestBody String jsonString) {
@@ -780,7 +781,7 @@ public class DeviceController {
 
             //构造命令格式
             DoorCmd doorCmdRecord = new DoorCmd();
-            doorCmdRecord.setServerId("001");
+            doorCmdRecord.setServerId(serverId);
             doorCmdRecord.setDeviceId(deviceId);
             doorCmdRecord.setFileEdition("v1.3");
             doorCmdRecord.setCommandMode("R");
@@ -1203,7 +1204,7 @@ public class DeviceController {
 
                 //构造命令格式
                 DoorCmd doorCmdBindDevice = new DoorCmd();
-                doorCmdBindDevice.setServerId("001");
+                doorCmdBindDevice.setServerId(serverId);
                 doorCmdBindDevice.setDeviceId(deviceId);
                 doorCmdBindDevice.setFileEdition("v1.3");
                 doorCmdBindDevice.setCommandMode("C");
@@ -1503,7 +1504,7 @@ public class DeviceController {
 
             //构造命令格式
             DoorCmd doorCmdRecord = new DoorCmd();
-            doorCmdRecord.setServerId("001");
+            doorCmdRecord.setServerId(serverId);
             doorCmdRecord.setDeviceId(deviceId);
             doorCmdRecord.setFileEdition("v1.3");
             doorCmdRecord.setCommandMode("R");
@@ -1730,7 +1731,7 @@ public class DeviceController {
 
             //构造命令格式
             DoorCmd doorCmdRecord = new DoorCmd();
-            doorCmdRecord.setServerId("001");
+            doorCmdRecord.setServerId(serverId);
             doorCmdRecord.setDeviceId(deviceId);
             doorCmdRecord.setFileEdition("v1.3");
             doorCmdRecord.setCommandMode("R");

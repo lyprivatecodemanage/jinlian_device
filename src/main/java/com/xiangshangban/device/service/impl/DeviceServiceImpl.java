@@ -15,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -32,6 +33,9 @@ public class DeviceServiceImpl implements IDeviceService {
 
     @Value("${command.timeout.seconds}")
     String commandTimeoutSeconds;
+
+    @Value("${serverId}")
+    String serverId;
 
     @Autowired
     private DeviceMapper deviceMapper;
@@ -60,6 +64,7 @@ public class DeviceServiceImpl implements IDeviceService {
     @Autowired
     private EmployeeMapper employeeMapper;
 
+    @Transactional
     @Override
     public String addDevice(String deviceId) {
 
@@ -181,6 +186,7 @@ public class DeviceServiceImpl implements IDeviceService {
 
     }
 
+    @Transactional
     @Override
     public String rebootDevice(String deviceId) {
 
@@ -189,7 +195,7 @@ public class DeviceServiceImpl implements IDeviceService {
 
         //构造命令格式
         DoorCmd doorCmdRebootDevice = new DoorCmd();
-        doorCmdRebootDevice.setServerId("001");
+        doorCmdRebootDevice.setServerId(serverId);
         doorCmdRebootDevice.setDeviceId(deviceId);
         doorCmdRebootDevice.setFileEdition("v1.3");
         doorCmdRebootDevice.setCommandMode("C");
@@ -241,7 +247,7 @@ public class DeviceServiceImpl implements IDeviceService {
 
         //构造命令格式
         DoorCmd doorCmdBindDevice = new DoorCmd();
-        doorCmdBindDevice.setServerId("001");
+        doorCmdBindDevice.setServerId(serverId);
         doorCmdBindDevice.setDeviceId(deviceId);
         doorCmdBindDevice.setFileEdition("v1.3");
         doorCmdBindDevice.setCommandMode("C");
@@ -276,7 +282,7 @@ public class DeviceServiceImpl implements IDeviceService {
 
         //构造命令格式
         DoorCmd doorCmdUnBindDevice = new DoorCmd();
-        doorCmdUnBindDevice.setServerId("001");
+        doorCmdUnBindDevice.setServerId(serverId);
         doorCmdUnBindDevice.setDeviceId(deviceId);
         doorCmdUnBindDevice.setFileEdition("v1.3");
         doorCmdUnBindDevice.setCommandMode("C");
@@ -367,7 +373,7 @@ public class DeviceServiceImpl implements IDeviceService {
 
         //构造命令格式
         DoorCmd doorCmdRecord = new DoorCmd();
-        doorCmdRecord.setServerId("001");
+        doorCmdRecord.setServerId(serverId);
         doorCmdRecord.setDeviceId(deviceId);
         doorCmdRecord.setFileEdition("v1.3");
         doorCmdRecord.setCommandMode("R");
@@ -443,7 +449,7 @@ public class DeviceServiceImpl implements IDeviceService {
 
         //构造命令格式
         DoorCmd doorCmdRecord = new DoorCmd();
-        doorCmdRecord.setServerId("001");
+        doorCmdRecord.setServerId(serverId);
         doorCmdRecord.setDeviceId(deviceId);
         doorCmdRecord.setFileEdition("v1.3");
         doorCmdRecord.setCommandMode("R");
@@ -541,7 +547,7 @@ public class DeviceServiceImpl implements IDeviceService {
 
             //构造命令格式
             DoorCmd doorCmdUpdateSystem = new DoorCmd();
-            doorCmdUpdateSystem.setServerId("001");
+            doorCmdUpdateSystem.setServerId(serverId);
             doorCmdUpdateSystem.setDeviceId(deviceId);
             doorCmdUpdateSystem.setFileEdition("v1.3");
             doorCmdUpdateSystem.setCommandMode("C");
@@ -612,7 +618,7 @@ public class DeviceServiceImpl implements IDeviceService {
 
             //构造命令格式
             DoorCmd doorCmdUpdateSystem = new DoorCmd();
-            doorCmdUpdateSystem.setServerId("001");
+            doorCmdUpdateSystem.setServerId(serverId);
             doorCmdUpdateSystem.setDeviceId(deviceId);
             doorCmdUpdateSystem.setFileEdition("v1.3");
             doorCmdUpdateSystem.setCommandMode("C");

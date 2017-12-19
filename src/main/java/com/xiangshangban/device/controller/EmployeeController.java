@@ -43,6 +43,9 @@ public class EmployeeController {
     @Value("${command.timeout.seconds}")
     String commandTimeoutSeconds;
 
+    @Value("${serverId}")
+    String serverId;
+
     @Autowired
     private IEmployeeService iEmployeeService;
 
@@ -219,7 +222,7 @@ public class EmployeeController {
             //下发人员基本信息
             //构造命令格式
             DoorCmd doorCmdEmployeeInformation = new DoorCmd();
-            doorCmdEmployeeInformation.setServerId("001");
+            doorCmdEmployeeInformation.setServerId(serverId);
             doorCmdEmployeeInformation.setDeviceId(deviceId);
             doorCmdEmployeeInformation.setFileEdition("v1.3");
             doorCmdEmployeeInformation.setCommandMode("C");
@@ -234,7 +237,7 @@ public class EmployeeController {
             //下发人员门禁权限
             //构造命令格式
             DoorCmd doorCmdEmployeePermission = new DoorCmd();
-            doorCmdEmployeePermission.setServerId("001");
+            doorCmdEmployeePermission.setServerId(serverId);
             doorCmdEmployeePermission.setDeviceId(deviceId);
             doorCmdEmployeePermission.setFileEdition("v1.3");
             doorCmdEmployeePermission.setCommandMode("C");
@@ -655,7 +658,7 @@ public class EmployeeController {
 //
 //        //构造删除人员开门时间的命令格式
 //        DoorCmd doorCmdDeleteEmployee = new DoorCmd();
-//        doorCmdDeleteEmployee.setServerId("001");
+//        doorCmdDeleteEmployee.setServerId(serverId);
 //        doorCmdDeleteEmployee.setDeviceId(deviceId);
 //        doorCmdDeleteEmployee.setFileEdition("v1.3");
 //        doorCmdDeleteEmployee.setCommandMode("C");
@@ -819,7 +822,7 @@ public class EmployeeController {
 
             //构造命令格式
             DoorCmd doorCmdRecord = new DoorCmd();
-            doorCmdRecord.setServerId("001");
+            doorCmdRecord.setServerId(serverId);
             doorCmdRecord.setDeviceId(deviceId);
             doorCmdRecord.setFileEdition("v1.3");
             doorCmdRecord.setCommandMode("R");
@@ -863,7 +866,7 @@ public class EmployeeController {
 
             //构造命令格式
             DoorCmd doorCmdRecord = new DoorCmd();
-            doorCmdRecord.setServerId("001");
+            doorCmdRecord.setServerId(serverId);
             doorCmdRecord.setDeviceId(deviceId);
             doorCmdRecord.setFileEdition("v1.3");
             doorCmdRecord.setCommandMode("R");
@@ -1046,6 +1049,7 @@ public class EmployeeController {
                 System.out.println("人员信息上传，类型传递错误");
                 return new HashedMap();
             }
+
         }else {
             System.out.println("MD5校验失败，数据已被修改");
 
@@ -1059,7 +1063,7 @@ public class EmployeeController {
 
             //构造命令格式
             DoorCmd doorCmdRecord = new DoorCmd();
-            doorCmdRecord.setServerId("001");
+            doorCmdRecord.setServerId(serverId);
             doorCmdRecord.setDeviceId(deviceId);
             doorCmdRecord.setFileEdition("v1.3");
             doorCmdRecord.setCommandMode("R");
