@@ -43,4 +43,6 @@ public interface EmployeeMapper {
      * 按照人员Id和公司的id查询人员的名称
      */
     String selectEmpNameByComIdAndEmpId(Map map);
+
+    List<Employee> temp();
 }

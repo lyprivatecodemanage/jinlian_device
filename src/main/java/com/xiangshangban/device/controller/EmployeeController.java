@@ -12,6 +12,7 @@ import com.xiangshangban.device.dao.*;
 import com.xiangshangban.device.service.IEmployeeService;
 import com.xiangshangban.device.service.IEntranceGuardService;
 import net.sf.json.JSONObject;
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -1103,12 +1104,28 @@ public class EmployeeController {
     @RequestMapping(value = "/test", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     public void test(){
 
-        DoorCmd doorCmd = doorCmdMapper.selectByPrimaryKey("");
+//        DoorCmd doorCmd = doorCmdMapper.selectByPrimaryKey("");
+//
+//        System.out.println("[*] 测试接口");
+////        System.out.println(JSON.toJSONString(doorCmd.getData()));
+//
+//        System.out.println(JSONObject.fromObject(doorCmd.getData()));
 
-        System.out.println("[*] 测试接口");
-//        System.out.println(JSON.toJSONString(doorCmd.getData()));
+        List<Employee> employeeList = employeeMapper.temp();
+        System.out.println(JSON.toJSONString(employeeList));
 
-        System.out.println(JSONObject.fromObject(doorCmd.getData()));
+        for (Employee employee : employeeList) {
+            String employeeId = employee.getEmployeeId();
+            String employeeName = employee.getEmployeeName();
+            String employeeCompanyId = employee.getEmployeeCompanyId();
+            String employeeFace = employee.getEmployeeFace();
+
+            Map<String, Object> userFace = new HashedMap();
+            userFace.put("faceName", employeeName);
+            userFace.put("faceData", employeeFace);
+
+            System.out.println("userFace: "+JSON.toJSONString(userFace));
+        }
 
     }
 

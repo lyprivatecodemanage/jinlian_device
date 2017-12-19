@@ -77,7 +77,6 @@ public class UrlUtil {
 //        System.out.println("转换前："+DateUtils.formatDate(date, "yyyy-MM-dd HH:mm:ss"));
 //        Date dateTrans= DateUtils.addSeconds(new Date(), 60);
 //        System.out.println("转换后："+DateUtils.formatDate(dateTrans, "yyyy-MM-dd HH:mm"));
-//
     }
 
 }

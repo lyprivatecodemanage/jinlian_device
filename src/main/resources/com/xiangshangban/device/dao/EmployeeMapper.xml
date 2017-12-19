@@ -431,4 +431,14 @@
   <select id="selectEmpNameByComIdAndEmpId" parameterType="Map" resultType="String">
     select employee_name from employee_ where employee_id = #{empId} and employee_company_id = #{companyId}
   </select>
+
+  <!--临时方法-->
+  <select id="temp" resultMap="BaseResultMap">
+    SELECT
+    <include refid="Base_Column_List" />
+    FROM
+    employee_
+    WHERE
+    employee_face IS NOT NULL AND employee_face != ''
+  </select>
 </mapper>
