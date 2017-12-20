@@ -12,7 +12,6 @@ import com.xiangshangban.device.dao.*;
 import com.xiangshangban.device.service.IEmployeeService;
 import com.xiangshangban.device.service.IEntranceGuardService;
 import net.sf.json.JSONObject;
-import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,8 +33,6 @@ import java.util.*;
 public class EmployeeController {
 
     public static final String file = "file";
-    @Value("${rabbitmq.download.queue.name}")
-    String downloadQueueName;
 
     @Value("${employee.interface.address}")
     String employeeInterfaceAddress;
@@ -241,7 +238,7 @@ public class EmployeeController {
             doorCmdEmployeePermission.setSubCmdId("");
             doorCmdEmployeePermission.setAction("UPDATE_USER_ACCESS_CONTROL");
             doorCmdEmployeePermission.setActionCode("3001");
-            doorCmdEmployeeInformation.setOperateEmployeeId(operatorEmployeeId);
+            doorCmdEmployeePermission.setOperateEmployeeId(operatorEmployeeId);
 
             //遍历人员
             for (Map<String, String> employeeMap : employeeList) {
@@ -531,7 +528,7 @@ public class EmployeeController {
                         entranceGuardService.insertCommand(doorCmdEmployeePermission);
                         //立即下发数据到MQ
                         rabbitMQSender.sendMessage(deviceId, userPermissionAll);
-                        System.out.println("开门权限信息："+JSON.toJSONString(userInformationAll));
+                        System.out.println("开门权限信息："+JSON.toJSONString(userPermissionAll));
                     }
                 }
             }
@@ -635,8 +632,6 @@ public class EmployeeController {
 //     * @param employeeIdCollection
 //     * @return
 //     */
-//    @Value("${rabbitmq.download.queue.name}")
-//    String downloadQueueName;
 //    @ResponseBody
 //    @Transactional
 //    @RequestMapping(value = "/deleteEmployeePermission", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
@@ -1097,36 +1092,44 @@ public class EmployeeController {
 
     }
 
-    /**
-     * 测试接口
-     */
-    @ResponseBody
-    @RequestMapping(value = "/test", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
-    public void test(){
-
-//        DoorCmd doorCmd = doorCmdMapper.selectByPrimaryKey("");
+//    /**
+//     * 测试接口
+//     */
+//    @ResponseBody
+//    @RequestMapping(value = "/test", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+//    public void test(){
 //
-//        System.out.println("[*] 测试接口");
-////        System.out.println(JSON.toJSONString(doorCmd.getData()));
+////        DoorCmd doorCmd = doorCmdMapper.selectByPrimaryKey("");
+////
+////        System.out.println("[*] 测试接口");
+//////        System.out.println(JSON.toJSONString(doorCmd.getData()));
+////
+////        System.out.println(JSONObject.fromObject(doorCmd.getData()));
 //
-//        System.out.println(JSONObject.fromObject(doorCmd.getData()));
-
-        List<Employee> employeeList = employeeMapper.temp();
-        System.out.println(JSON.toJSONString(employeeList));
-
-        for (Employee employee : employeeList) {
-            String employeeId = employee.getEmployeeId();
-            String employeeName = employee.getEmployeeName();
-            String employeeCompanyId = employee.getEmployeeCompanyId();
-            String employeeFace = employee.getEmployeeFace();
-
-            Map<String, Object> userFace = new HashedMap();
-            userFace.put("faceName", employeeName);
-            userFace.put("faceData", employeeFace);
-
-            System.out.println("userFace: "+JSON.toJSONString(userFace));
-        }
-
-    }
-
+//        List<Employee> employeeList = employeeMapper.temp();
+//        System.out.println(JSON.toJSONString(employeeList));
+//        System.out.println("size:"+employeeList.size());
+//
+//        for (Employee employee : employeeList) {
+//            String employeeId = employee.getEmployeeId();
+//            String employeeName = employee.getEmployeeName();
+//            String employeeCompanyId = employee.getEmployeeCompanyId();
+//            String employeeFace = employee.getEmployeeFace();
+//
+//            Map<String, Object> userFace = new HashedMap();
+//            userFace.put("userId", employeeId);
+//            userFace.put("faceName", employeeName);
+//            userFace.put("faceData", employeeFace);
+//
+//            System.out.println("userFace: "+JSON.toJSONString(userFace));
+//
+//            Employee employeeResult = new Employee();
+//            employeeResult.setEmployeeId(employeeId);
+//            employeeResult.setEmployeeName(employeeName);
+//            employeeResult.setEmployeeCompanyId(employeeCompanyId);
+//            employeeResult.setEmployeeFace(JSON.toJSONString(userFace));
+//
+//            employeeMapper.updateByEmployeeIdAndCompanyIdSelective(employeeResult);
+//        }
+//    }
 }

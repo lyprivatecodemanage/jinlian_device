@@ -426,7 +426,6 @@
     FROM
     device_
     WHERE
-    <!--is_unbind != '1' AND -->
     company_id = #{companyId}
     ) A
     INNER JOIN door_cmd B ON A .device_id = B.device_id

@@ -28,9 +28,6 @@ import java.util.*;
 @Service
 public class EntranceGuardServiceImpl implements IEntranceGuardService {
 
-    @Value("${rabbitmq.download.queue.name}")
-    String downloadQueueName;
-
     @Value("${command.timeout.seconds}")
     String commandTimeoutSeconds;
 

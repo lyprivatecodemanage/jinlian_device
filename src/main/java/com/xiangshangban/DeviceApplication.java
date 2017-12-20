@@ -61,7 +61,7 @@ public class DeviceApplication {
 		resolver.setDefaultEncoding("UTF-8");
 		resolver.setResolveLazily(true);//resolveLazily属性启用是为了推迟文件解析，以在在UploadAction中捕获文件大小异常
 		resolver.setMaxInMemorySize(1);
-        resolver.setMaxUploadSize(50*1024*1024);//上传文件大小 50M 50*1024*1024
+        resolver.setMaxUploadSize(200*1024*1024);//上传文件大小 200M 200*1024*1024
         return resolver;
 	}
 

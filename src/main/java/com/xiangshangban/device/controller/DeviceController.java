@@ -35,9 +35,6 @@ public class DeviceController {
 
     private static final Logger LOGGER = Logger.getLogger(DeviceController.class);
 
-    @Value("${rabbitmq.download.queue.name}")
-    String downloadQueueName;
-
     @Value("${command.timeout.seconds}")
     String commandTimeoutSeconds;
 
@@ -1938,6 +1935,13 @@ public class DeviceController {
 
                                 //判断该人员有没有蓝牙id
                                 Employee employeeExist = employeeMapper.selectByEmployeeIdAndCompanyId(employeeId, companyId);
+                                if (null == employeeExist){
+                                    System.out.println("人员信息不同步，未查到您的信息");
+                                    returnData.setMessage("人员信息不同步，未查到您的信息");
+                                    returnData.setReturnCode("4007");
+                                    return returnData;
+                                }
+
                                 if (StringUtils.isEmpty(employeeExist.getBluetoothNo())) {
 
                                     returnData.setMessage("您还没有分配蓝牙开门参数，请联系管理员下发您的开门权限");

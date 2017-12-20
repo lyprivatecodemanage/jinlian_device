@@ -40,8 +40,6 @@ public class RabbitMQSender {
         //动态队列名称
         queueName = "device."+queueName+".download";
 
-        System.out.println("已向【"+queueName+"】队列发送消息.....................................");
-
         RabbitTemplateUtil templateutil = this.getRabbitMQTemplate(queueName);
         RabbitTemplate template = templateutil.getTemplate();
         //DESEncode.encrypt(JSON.toJSONString(message));
@@ -61,6 +59,8 @@ public class RabbitMQSender {
             ConnectionFactoryServiceImpl.connection.put(templateutil.getKey(),ConnectionFactoryServiceImpl.useConn.get(templateutil.getKey()));
             //从使用中连接池移除本次的连接
             ConnectionFactoryServiceImpl.useConn.remove(templateutil.getKey());
+
+            System.out.println("已向【"+queueName+"】队列发送消息.....................................");
         }else{
             System.out.println("RABBITMQ'S ERROR: can not intalialize the template.");
             return RabbitMQSender.ERROR;

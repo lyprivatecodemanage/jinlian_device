@@ -28,9 +28,6 @@ import java.util.*;
 @Service
 public class DeviceServiceImpl implements IDeviceService {
 
-    @Value("${rabbitmq.download.queue.name}")
-    String downloadQueueName;
-
     @Value("${command.timeout.seconds}")
     String commandTimeoutSeconds;
 

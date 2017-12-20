@@ -37,9 +37,6 @@ public class TemplateServiceImpl implements ITemplateService{
     @Value("${serverId}")
     String serverId;
 
-    @Value("${rabbitmq.download.queue.name}")
-    String downloadQueueName;
-
     @Autowired
     private TemplateMapper templateMapper;
 

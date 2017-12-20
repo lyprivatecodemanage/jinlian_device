@@ -75,11 +75,6 @@ public class ConnectionFactoryServiceImpl implements IConnectionFactoryService {
 
         //如果没有空闲的连接了
         if(conn.getKey() == null){
-//            //释放所有使用中的连接
-//            for (Map.Entry<String,CachingConnectionFactory> entryTemp : useConn.entrySet()){
-//                useConn.get(entryTemp.getKey()).destroy();
-//            }
-//            useConn.clear();
             System.out.println("没有空闲的连接了.............................................................");
         }
         return conn;

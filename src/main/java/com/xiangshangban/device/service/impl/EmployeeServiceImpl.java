@@ -26,9 +26,6 @@ import java.util.*;
 @Service
 public class EmployeeServiceImpl implements IEmployeeService {
 
-    @Value("${rabbitmq.download.queue.name}")
-    String downloadQueueName;
-
     @Value("${employee.interface.address}")
     String employeeInterfaceAddress;
 
@@ -268,10 +265,10 @@ public class EmployeeServiceImpl implements IEmployeeService {
         //命令数据存入数据库
         entranceGuardService.insertCommand(doorCmdRecord);
 
-        //同步人脸信息到其它设备
-        if ("1".equals(style)){
-            synchronizeEmployeePermissionForDevices(jsonString, employeeId);
-        }
+//        //同步人脸信息到其它设备
+//        if ("1".equals(style)){
+//            synchronizeEmployeePermissionForDevices(jsonString, employeeId);
+//        }
 
 //        System.out.println("人员指纹、人脸信息上传已回复");
         return doorRecordAll;
@@ -668,7 +665,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
     public String deviceUploadPackage(String versionCode, MultipartFile uploadResource,
                                       String fileType, String employeeId) throws IOException {
         /**
-         * fileType：facePhoto时为人脸图片上传，为任意其它字符串时为系统升级包上传
+         * fileType：facePhoto时为人脸图片上传，为任意其它字符串时为系统升级包上传（系统升级不再在此处处理）
          */
         //验证参数的完整性
         Map result = new HashMap();

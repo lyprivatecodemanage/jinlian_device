@@ -409,81 +409,19 @@ public class OSSController {
 	}
 
 	/*******************************************************************************
-	 * 					@TODO 设备端：上传应用升级包及人脸照片
+	 * 					@TODO 设备端：上传设备apk升级包
 	 *******************************************************************************/
-	@PostMapping("/deviceUploadPackage")
-	public String deviceUploadPackage(@RequestParam("versionCode") String versionCode,
-									  @RequestParam("uploadResource")MultipartFile uploadResource,
-									  @RequestParam("fileType") String fileType,
-									  @RequestParam("employeeId") String employeeId) throws IOException {
+	@PostMapping("/deviceUploadPackageApp")
+	public String deviceUploadPackageApp(@RequestParam("versionCode") String versionCode,
+										 @RequestParam("uploadResource") MultipartFile uploadResource,
+										 @RequestParam("fileType") String fileType) throws IOException {
 		/**
-		 * fileType：facePhoto时为人脸图片上传，为任意其它字符串时为系统升级包上传
+		 * fileType：facePhoto时为人脸图片上传，为system时为系统升级包上传，为application时为应用升级包上传
 		 */
-		//验证参数的完整性
-		Map result = new HashMap();
-		if((versionCode==null || versionCode.isEmpty()) ||(uploadResource==null || uploadResource.isEmpty())){
-			//参数异常
-			result = ReturnCodeUtil.addReturnCode(1);
-		}else{
-
-			String funcDirectory = "";
-			//判断文件类型
-			if ("facePhoto".equals(fileType)){
-				funcDirectory = "FacePhotoLibrary/"+employeeId;
-			}else {
-				//设置上传文件保存的路径
-				funcDirectory = "device/update/system/"+versionCode;
-			}
-
-			//上传
-			String filePath = oSSFileService.devicePackageUpload(funcDirectory,uploadResource,fileType);
-			if(filePath.trim().equals("false")){
-				//上传失败
-				result = ReturnCodeUtil.addReturnCode(Boolean.valueOf(filePath.trim()),"上传升级包（应用包）失败");
-			}else{
-				if (!"facePhoto".equals(fileType)){
-					//上传成功，保存信息到本地
-					DeviceUpdatePackSys deviceUpdatePackSys = new DeviceUpdatePackSys();
-					deviceUpdatePackSys.setNewSysVerion(versionCode);
-					deviceUpdatePackSys.setPath(filePath.trim());
-					deviceUpdatePackSys.setCreateTime(DateUtils.getDateTime());
-
-					//根据路径查询当前本地数据库中是否已经存在该资源
-					String status = deviceUpdatePackSysMapper.verifyWhetherExistsResource(filePath.trim());
-					if(status==null || "".equals(status)){
-						//添加新的数据
-						int insertResult = deviceUpdatePackSysMapper.insert(deviceUpdatePackSys);
-
-						if(insertResult>0){
-							result = ReturnCodeUtil.addReturnCode(true,"上传文件成功，并保存信息至本地数据库");
-						}else{
-							result = ReturnCodeUtil.addReturnCode(false,"上传文件成功，保存至本地数据库失败");
-						}
-					}else{
-						//根据路径更新操作时间
-						Map map = new HashMap();
-						map.put("createTime",DateUtils.getDateTime());
-						map.put("path",filePath.trim());
-						deviceUpdatePackSysMapper.updateOperateTime(map);
-						result = ReturnCodeUtil.addReturnCode(true,"上传文件成功，并保存信息至本地数据库");
-					}
-				}
-			}
+		if (!"application".equals(fileType)){
+			return "此接口只支持设备apk升级包上传";
 		}
-		return JSONObject.toJSONString(result);
-	}
 
-	/*******************************************************************************
-	 * 					@TODO 设备端：上传系统升级包
-	 *******************************************************************************/
-	@PostMapping("/deviceUploadPackageSys")
-	public String deviceUploadPackageSys(@RequestParam("versionCode") String versionCode,
-										 @RequestParam("uploadResource")MultipartFile uploadResource,
-										 @RequestParam("fileType") String fileType,
-										 @RequestParam("employeeId") String employeeId) throws IOException {
-		/**
-		 * fileType：facePhoto时为人脸图片上传，为任意其它字符串时为系统升级包上传
-		 */
 		//验证参数的完整性
 		Map result = new HashMap();
 		if((versionCode==null || versionCode.isEmpty()) ||(uploadResource==null || uploadResource.isEmpty())){
@@ -492,47 +430,40 @@ public class OSSController {
 		}else{
 
 			String funcDirectory = "";
+
 			//判断文件类型
-			if ("facePhoto".equals(fileType)){
-				funcDirectory = "FacePhotoLibrary/"+employeeId;
+			if ("application".equals(fileType)){
+				funcDirectory = "device/update/application";
 			}else {
 				//设置上传文件保存的路径
 				funcDirectory = "device/update/system/"+versionCode;
 			}
 
 			//上传
-			String filePath = oSSFileService.devicePackageUpload(funcDirectory,uploadResource,fileType);
+			String filePath = oSSFileService.devicePackageUpload(funcDirectory, uploadResource, fileType);
 			if(filePath.trim().equals("false")){
 				//上传失败
 				result = ReturnCodeUtil.addReturnCode(Boolean.valueOf(filePath.trim()),"上传升级包（应用包）失败");
 			}else{
-				if (!"facePhoto".equals(fileType)){
-					//上传成功，保存信息到本地
-					DeviceUpdatePackSys deviceUpdatePackSys = new DeviceUpdatePackSys();
-					deviceUpdatePackSys.setNewSysVerion(versionCode);
-					deviceUpdatePackSys.setPath(filePath.trim());
-					deviceUpdatePackSys.setCreateTime(DateUtils.getDateTime());
+				if ("application".equals(fileType)){
+					String fileName = uploadResource.getOriginalFilename().substring(0,uploadResource.getOriginalFilename().lastIndexOf("."));
 
-					//根据路径查询当前本地数据库中是否已经存在该资源
-					String status = deviceUpdatePackSysMapper.verifyWhetherExistsResource(filePath.trim());
-					if(status==null || "".equals(status)){
-						//添加新的数据
-						int insertResult = deviceUpdatePackSysMapper.insert(deviceUpdatePackSys);
+					DeviceUpdatePackApp deviceUpdatePackApp = new DeviceUpdatePackApp();
+					deviceUpdatePackApp.setAppName(fileName);
+					deviceUpdatePackApp.setVersion(versionCode);
+					deviceUpdatePackApp.setCreateTime(DateUtils.getDateTime());
+					deviceUpdatePackApp.setPath(filePath);
 
-						if(insertResult>0){
-							result = ReturnCodeUtil.addReturnCode(true,"上传文件成功，并保存信息至本地数据库");
-						}else{
-							result = ReturnCodeUtil.addReturnCode(false,"上传文件成功，保存至本地数据库失败");
-						}
-					}else{
-						//根据路径更新操作时间
-						Map map = new HashMap();
-						map.put("createTime",DateUtils.getDateTime());
-						map.put("path",filePath.trim());
-						deviceUpdatePackSysMapper.updateOperateTime(map);
-						result = ReturnCodeUtil.addReturnCode(true,"上传文件成功，并保存信息至本地数据库");
+					//查找是否上传过同名apk升级包
+					DeviceUpdatePackApp deviceUpdatePackAppExist = deviceUpdatePackAppMapper.selectByPrimaryKey(fileName);
+					if (null == deviceUpdatePackAppExist){
+						deviceUpdatePackAppMapper.insertSelective(deviceUpdatePackApp);
+					}else {
+						deviceUpdatePackAppMapper.updateByPrimaryKeySelective(deviceUpdatePackApp);
 					}
 				}
+				//上传成功
+				result = ReturnCodeUtil.addReturnCode(Boolean.valueOf(filePath.trim()),"上传升级包（应用包）成功");
 			}
 		}
 		return JSONObject.toJSONString(result);
