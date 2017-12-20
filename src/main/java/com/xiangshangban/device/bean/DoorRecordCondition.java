@@ -10,17 +10,10 @@ public class DoorRecordCondition {
     private String name;
     private String department;
     private String punchCardType;
-    private String punchCardTime;
+    private String punchCardStartTime;
+    private String punchCardEndTime;
     private String companyId;
     private String deviceName;
-
-    public String getCompanyId() {
-        return companyId;
-    }
-
-    public void setCompanyId(String companyId) {
-        this.companyId = companyId;
-    }
 
     public String getName() {
         return name;
@@ -46,12 +39,28 @@ public class DoorRecordCondition {
         this.punchCardType = punchCardType;
     }
 
-    public String getPunchCardTime() {
-        return punchCardTime;
+    public String getPunchCardStartTime() {
+        return punchCardStartTime;
     }
 
-    public void setPunchCardTime(String punchCardTime) {
-        this.punchCardTime = punchCardTime;
+    public void setPunchCardStartTime(String punchCardStartTime) {
+        this.punchCardStartTime = punchCardStartTime;
+    }
+
+    public String getPunchCardEndTime() {
+        return punchCardEndTime;
+    }
+
+    public void setPunchCardEndTime(String punchCardEndTime) {
+        this.punchCardEndTime = punchCardEndTime;
+    }
+
+    public String getCompanyId() {
+        return companyId;
+    }
+
+    public void setCompanyId(String companyId) {
+        this.companyId = companyId;
     }
 
     public String getDeviceName() {
@@ -60,5 +69,18 @@ public class DoorRecordCondition {
 
     public void setDeviceName(String deviceName) {
         this.deviceName = deviceName;
+    }
+
+    @Override
+    public String toString() {
+        return "DoorRecordCondition{" +
+                "name='" + name + '\'' +
+                ", department='" + department + '\'' +
+                ", punchCardType='" + punchCardType + '\'' +
+                ", punchCardStartTime='" + punchCardStartTime + '\'' +
+                ", punchCardEndTime='" + punchCardEndTime + '\'' +
+                ", companyId='" + companyId + '\'' +
+                ", deviceName='" + deviceName + '\'' +
+                '}';
     }
 }

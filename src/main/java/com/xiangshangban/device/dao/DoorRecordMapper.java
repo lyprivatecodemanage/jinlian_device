@@ -2,7 +2,7 @@ package com.xiangshangban.device.dao;
 
 import com.xiangshangban.device.bean.DoorRecord;
 import com.xiangshangban.device.bean.DoorRecordCondition;
-import org.apache.ibatis.annotations.Mapper;
+import com.xiangshangban.device.bean.SignInAndOut;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
 
@@ -27,6 +27,11 @@ public interface DoorRecordMapper {
      * 分条件，查询所有的打卡记录
      */
     List<Map> selectPunchCardRecord(@Param("doorRecordCondition") DoorRecordCondition doorRecordCondition);
+
+    /**
+     * 查询该公司人员的签到/签退情况
+     */
+    List<SignInAndOut> selectSignInAndOutRecord(Map map);
 
     /**
      * 查询一段时间内，一个人的最早最晚打卡时间

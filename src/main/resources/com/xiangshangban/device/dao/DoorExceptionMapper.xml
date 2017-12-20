@@ -154,8 +154,10 @@
     <if test="doorRecordCondition.punchCardType!=null and doorRecordCondition.punchCardType!=''">
       and S.record_type = #{doorRecordCondition.punchCardType}
     </if>
-    <if test="doorRecordCondition.punchCardTime!=null and doorRecordCondition.punchCardTime!=''">
-      and S.record_date like #{doorRecordCondition.punchCardTime}
+    <if test="doorRecordCondition.punchCardStartTime!=null and doorRecordCondition.punchCardStartTime!=''">
+      <if test="doorRecordCondition.punchCardEndTime!=null and doorRecordCondition.punchCardEndTime!=''">
+        and S.record_date ::DATE BETWEEN #{doorRecordCondition.punchCardStartTime} :: DATE AND #{doorRecordCondition.punchCardEndTime}  :: DATE
+      </if>
     </if>
     <if test="doorRecordCondition.deviceName != null  and doorRecordCondition.deviceName!=''">
       and S.device_name like #{doorRecordCondition.deviceName}

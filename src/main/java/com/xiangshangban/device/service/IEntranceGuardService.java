@@ -2,6 +2,7 @@ package com.xiangshangban.device.service;
 
 import com.xiangshangban.device.bean.*;
 
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -40,6 +41,7 @@ public interface IEntranceGuardService {
      * 根据门名称查询门信息[动态查询]
      */
     List<Map> queryAllDoorInfo(Map map);
+
 
     //TODO 日志管理
     /**
@@ -123,6 +125,17 @@ public interface IEntranceGuardService {
 
     //2）查询一个人在某段时间内的最早和最晚的打卡时间
     public List<String> queryPunchCardTime(String empId,String companyId,String startTime,String endTime);
+
+    //3 ) 查询当前公司人员的签到签退情况
+    public Map querySignInAndOutRecord(String requestParam,String companyId);
+
+    /**
+     * 导出记录到Excel
+     * @param excelName 导出的Excel表的名称
+     * @param out 输出流
+     * @param companyId 公司ID
+     */
+    public void exportRecordToExcel(String requestParam,String excelName, OutputStream out, String companyId);
 
     //门禁配置---功能配置（身份验证失败次数、非法入侵、报警时长、密码、开门事件记录）
     void doorCommonSetupAdditional(String doorId, String countLimitAuthenticationFailed, String enableAlarm,

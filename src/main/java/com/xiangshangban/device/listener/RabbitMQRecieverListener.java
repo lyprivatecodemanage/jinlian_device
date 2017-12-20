@@ -6,9 +6,6 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.util.concurrent.TimeoutException;
-
 /**
  * Created by liuguanglong on 2017/10/27.
  */
@@ -22,7 +19,7 @@ public class RabbitMQRecieverListener implements ApplicationListener<Application
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent applicationReadyEvent) {
-      try {
+      /*try {
 
             rabbitMQReciever.startRabbitMqReceiver();
 
@@ -32,6 +29,6 @@ public class RabbitMQRecieverListener implements ApplicationListener<Application
             e.printStackTrace();
         } catch (TimeoutException e) {
             e.printStackTrace();
-        }
+        }*/
     }
 }

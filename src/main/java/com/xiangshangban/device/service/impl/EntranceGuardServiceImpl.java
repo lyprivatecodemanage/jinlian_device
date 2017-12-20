@@ -6,10 +6,8 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.xiangshangban.device.bean.*;
 import com.xiangshangban.device.common.rmq.RabbitMQSender;
-import com.xiangshangban.device.common.utils.CalendarUtil;
-import com.xiangshangban.device.common.utils.DateUtils;
-import com.xiangshangban.device.common.utils.FormatUtil;
-import com.xiangshangban.device.common.utils.PageUtils;
+import com.xiangshangban.device.common.utils.*;
+import com.xiangshangban.device.controller.EntranceGuardController;
 import com.xiangshangban.device.dao.*;
 import com.xiangshangban.device.service.IEntranceGuardService;
 import net.sf.json.JSONObject;
@@ -18,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -70,6 +69,9 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
 
     @Autowired
     private EmployeeMapper employeeMapper;
+
+    @Autowired
+    private EntranceGuardController entranceGuardController;
 
     /**
      * 添加命令到命令表
@@ -545,9 +547,6 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
             }
             if(doorRecordCondition.getDepartment()!=null&&!doorRecordCondition.getDepartment().isEmpty()){
                 doorRecordCondition.setDepartment("%"+doorRecordCondition.getDepartment()+"%");
-            }
-            if(doorRecordCondition.getPunchCardTime()!=null&&!doorRecordCondition.getPunchCardTime().isEmpty()){
-                doorRecordCondition.setPunchCardTime("%"+doorRecordCondition.getPunchCardTime()+"%");
             }
             List<Map> doorRecords = null;
             if(flag==0){//打卡记录
@@ -1025,6 +1024,136 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         map.put("endTime", endTime);
         List<String> strings = doorRecordMapper.selectPunchCardTime(map);
         return strings;
+    }
+
+    /**
+     * 查询指定公司人员的签到签退情况
+     * @return
+     *
+     *   {
+     *       "empName":"人员名称"，
+     *       "deptName":"部门名称"，
+     *       "recordTime":"2017-12-10~2017-12-20"----->记录时间段
+     *       "page":"当前页码",
+     *       "rows":"每一页要显示的行数"
+     *   }
+     */
+    @Override
+    public Map querySignInAndOutRecord(String requestParam,String companyId) {
+        //解析数据
+        com.alibaba.fastjson.JSONObject jsonObject = com.alibaba.fastjson.JSONObject.parseObject(requestParam);
+        Object empName = jsonObject.get("empName");
+        Object deptName = jsonObject.get("deptName");
+        Object recordTime = jsonObject.get("recordTime");
+        Object page = jsonObject.get("page");
+        Object rows = jsonObject.get("rows");
+
+        //获取签到签退记录
+        Map param = new HashMap();
+        param.put("companyId",companyId);
+        param.put("empName",(empName!=null && !empName.toString().isEmpty())?"%"+empName.toString()+"%":null);
+        param.put("deptName",(deptName!=null && !deptName.toString().isEmpty())?"%"+deptName.toString()+"%":null);
+        if(recordTime!=null && !recordTime.toString().trim().isEmpty()){
+            param.put("recordStartTime",recordTime.toString().split("~")[0].trim());
+            param.put("recordEndTime",recordTime.toString().split("~")[1].trim());
+        }else{
+            param.put("recordStartTime",null);
+            param.put("recordEndTime",null);
+        }
+        //进行分页操作
+        Page pageObj = null;
+        if (page != null && !page.toString().isEmpty() && rows != null && !rows.toString().isEmpty()) {
+            pageObj = PageHelper.startPage(Integer.parseInt(page.toString()), Integer.parseInt(rows.toString()));
+        }
+        List<SignInAndOut> signInAndOuts = doorRecordMapper.selectSignInAndOutRecord(param);
+        //返回结果
+        Map resultMap = new HashMap();
+        //重新遍历数据，更改数据结构
+        List<Map> realData = new ArrayList<>();
+        if(signInAndOuts!=null && signInAndOuts.size()>0){
+            for(SignInAndOut sign : signInAndOuts){
+                Map innerMap = new HashMap();
+                innerMap.put("empId",sign.getEmpId());
+                innerMap.put("empName",sign.getEmpName());
+                innerMap.put("empDept",sign.getEmpDept());
+                innerMap.put("punchCardTime",sign.getSignIn().split(" ")[0].trim());
+                innerMap.put("signIn",sign.getSignIn().split(" ")[1].trim());
+                innerMap.put("signOut",sign.getSignOut().split(" ")[1].trim());
+
+                realData.add(innerMap);
+            }
+            resultMap = PageUtils.doSplitPage(null, realData, page, rows, pageObj,1);
+        }else{
+            resultMap.put("returnCode","4203");
+            resultMap.put("message","当前列表为空");
+        }
+        return resultMap;
+    }
+
+    /**
+     * 导出考勤记录（出入记录、门禁异常）到Excel
+     * @param excelName 导出的Excel表的名称
+     * @param out 输出流
+     * @param companyId 公司ID
+     */
+    @Override
+    public void exportRecordToExcel(String requestParam,String excelName, OutputStream out, String companyId) {
+        //解析请求参数
+        com.alibaba.fastjson.JSONObject jsonObject = com.alibaba.fastjson.JSONObject.parseObject(requestParam);
+        Object flag = jsonObject.get("flag");
+
+        if(flag!=null && !flag.toString().trim().isEmpty()){
+            int value =  Integer.parseInt(flag.toString().trim());
+            switch (value){
+                case 0:  //条件查询出入记录
+                    Map doorRecord = entranceGuardController.getDoorRecordAndException(requestParam, companyId, 0);
+                    Object doorData = doorRecord.get("data");
+                    if(doorData!=null && !doorData.toString().isEmpty()){
+                        //要导出的出入记录数据
+                        List<Map> doorResource = (List<Map>)doorData;
+                        String[] inOutHeaders = new String[]{"姓名", "所属部门", "设备名称", "打卡方式","打卡时间"};
+                        //导出出入记录
+                        ExportRecordUtil.exportAnyRecordToExcel(doorResource,excelName,inOutHeaders,out,value);
+                    }
+                    break;
+                case 1:  //条件查询门禁异常
+                    Map exceptionRecord = entranceGuardController.getDoorRecordAndException(requestParam, companyId, 1);
+                    Object exceptionData = exceptionRecord.get("data");
+                    if(exceptionData!=null && !exceptionData.toString().isEmpty()){
+                        //要导出的门禁异常记录数据
+                        List<Map> doorExceptionResource = (List<Map>)exceptionData;
+                        String[] exceptionHeaders = new String[]{"姓名", "所属部门", "设备名称", "日期","报警记录"};
+                        //导出门禁异常记录
+                        ExportRecordUtil.exportAnyRecordToExcel(doorExceptionResource,excelName,exceptionHeaders,out,value);
+                    }
+                    break;
+                case 2:  //条件查询签到签退记录
+                    Object empName = jsonObject.get("empName");
+                    Object deptName = jsonObject.get("deptName");
+                    Object recordTime = jsonObject.get("recordTime");
+                    //获取签到签退记录
+                    Map param = new HashMap();
+                    param.put("companyId",companyId);
+                    param.put("empName",(empName!=null && !empName.toString().isEmpty())?"%"+empName.toString()+"%":null);
+                    param.put("deptName",(deptName!=null && !deptName.toString().isEmpty())?"%"+deptName.toString()+"%":null);
+                    if(recordTime!=null && !recordTime.toString().trim().isEmpty()){
+                        param.put("recordStartTime",recordTime.toString().split("~")[0]);
+                        param.put("recordEndTime",recordTime.toString().split("~")[1]);
+                    }else{
+                        param.put("recordStartTime",null);
+                        param.put("recordEndTime",null);
+                    }
+                    //查询签到记录
+                    List<SignInAndOut> signInAndOutRecord = doorRecordMapper.selectSignInAndOutRecord(param);
+
+                    String[] signInAndOutHeaders = new String[]{"ID","姓名", "所属部门", "打卡日期", "签到/签退"};
+                    //导出签到签退记录
+                    ExportRecordUtil.exportAnyRecordToExcel(signInAndOutRecord,excelName,signInAndOutHeaders,out,value);
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
     /**

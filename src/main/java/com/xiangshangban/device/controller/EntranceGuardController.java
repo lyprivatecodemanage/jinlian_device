@@ -22,6 +22,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.*;
 
 
@@ -881,7 +884,7 @@ public class EntranceGuardController {
      *     "deviceName":"",
      *     "dept":"",
      *     "recordType":"",
-     *     "recordTime":"",
+     *     "recordTime":"2017-12-19~2017-12-20",--------->搜索时间
      *     "page":"",
      *     "rows":"",
      * }
@@ -911,7 +914,7 @@ public class EntranceGuardController {
      *     "deviceName":"",
      *     "dept":"",
      *     "alarmType":"",
-     *     "alarmTime":"",
+     *     "alarmTime":"2017-12-19~2017-12-20",--------->搜索时间
      *     "page":"",
      *     "rows":"",
      *}
@@ -930,6 +933,117 @@ public class EntranceGuardController {
         }
         return JSONArray.toJSONString(resultMap);
     }
+
+    /**
+     * 获取考勤（签到/签退）记录
+     * 请求参数：
+     * {
+     *     "empName":"人员名称"，
+     *     "deptName":"部门名称"，
+     *     "recordTime":"2017-12-10~2017-12-20"----->记录时间段
+     *     "page":"当前页码",
+     *     "rows":"每一页要显示的行数"
+     * }
+     * 返回数据结构：
+     * {
+         "pagecountNum": "1",
+         "message": "数据请求成功",
+         "returnCode": "3000",
+         "data": [
+             {
+             "empName": "王勇辉",
+             "empId": "C7C48436B3B74400B56D6E9AD1E4A685",
+             "signIn": "09:41:25",
+             "signOut": "12:57:08",
+             "punchCardTime": "2017-12-20",
+             "empDept": "软件研发部"
+             },
+             {
+             "empName": "王玉康",
+             "empId": "DE7479E8159D4DD2AB9E43D3D95D71F4",
+             "signIn": "09:36:28",
+             "signOut": "11:42:16",
+             "punchCardTime": "2017-12-20",
+             "empDept": "软件研发部"
+             },
+             {
+             "empName": "王玉康",
+             "empId": "DE7479E8159D4DD2AB9E43D3D95D71F4",
+             "signIn": "09:51:07",
+             "signOut": "17:10:56",
+             "punchCardTime": "2017-12-19",
+             "empDept": "软件研发部"
+             },
+             {
+             "empName": "王勇辉",
+             "empId": "C7C48436B3B74400B56D6E9AD1E4A685",
+             "signIn": "09:41:19",
+             "signOut": "21:05:56",
+             "punchCardTime": "2017-12-19",
+             "empDept": "软件研发部"
+             }
+         ],
+         "totalPages": "4"
+     }
+     */
+    @PostMapping("/record/getSignInAndOutRecord")
+    public String getSignInOutRecord(@RequestBody String requestParam,HttpServletRequest request){
+        //获取公司ID
+        String companyId = request.getHeader("companyId");
+        //返回给前端的数据
+        Map resultMap = new HashMap();
+        if(companyId!=null && !companyId.isEmpty()){
+            resultMap = iEntranceGuardService.querySignInAndOutRecord(requestParam, companyId);
+        }else{
+            //未知的公司ID和人员ID
+            resultMap = ReturnCodeUtil.addReturnCode(3);
+        }
+        return JSONObject.toJSONString(resultMap);
+    }
+
+    /**
+     * 出入记录、门禁异常、考勤（签到/签退）记录导出到Excel
+     * 请求参数:
+     * {
+     *     "empName":"人员名称"，
+     *     "deptName":"部门名称"，
+     *     "recordTime":"2017-12-10~2017-12-20",----->记录时间段
+     *
+     *     "flag":"标志位"（0：导出出入记录  1：导出门禁异常  2：导出签到签退表）
+     * }
+     */
+    @PostMapping(value = "/export/signInAndOutRecord", produces="application/json;charset=UTF-8")
+    public void exportSignInAndOut(@RequestBody String requestParam,HttpServletRequest request, HttpServletResponse response){
+        try {
+            response.setContentType("octets/stream");
+            String agent = request.getHeader("USER-AGENT");
+            String excelName = "signInAndOutRecord.xls";
+
+            if(agent!=null && agent.indexOf("MSIE")==-1&&agent.indexOf("rv:11")==-1 &&
+                    agent.indexOf("Edge")==-1 && agent.indexOf("Apache-HttpClient")==-1){//非IE
+
+                excelName = new String(excelName.getBytes("UTF-8"), "ISO-8859-1");
+
+                response.addHeader("Content-Disposition", "attachment;filename="+excelName);
+
+            }else{
+                response.addHeader("Content-Disposition","attachment;filename="+java.net.URLEncoder.encode(excelName,"UTF-8"));
+            }
+            response.addHeader("excelName",java.net.URLEncoder.encode(excelName,"UTF-8"));
+            OutputStream out = response.getOutputStream();
+            // 获取公司ID
+            String companyId = request.getHeader("companyId");
+            if(companyId!=null && !companyId.isEmpty()){
+                iEntranceGuardService.exportRecordToExcel(requestParam,excelName,out,companyId);
+                out.flush();
+            }else{
+                System.out.println("未知的公司ID");
+            }
+        } catch (IOException e) {
+            System.out.println("导出文件输出流出错了！"+e);
+        }
+    }
+
 
     //TODO 门禁管理------------门禁系统设置下发
 
@@ -1507,7 +1621,14 @@ public class EntranceGuardController {
             doorRecordCondition.setCompanyId(companyId);
             doorRecordCondition.setDepartment(dept != null ? dept.toString() : null);
             doorRecordCondition.setPunchCardType(recordType != null ? recordType.toString() : null);
-            doorRecordCondition.setPunchCardTime(recordTime != null ? recordTime.toString() : null);
+
+            if(recordTime!=null && !recordTime.toString().isEmpty()){
+                doorRecordCondition.setPunchCardStartTime(recordTime.toString().split("~")[0].trim());
+                doorRecordCondition.setPunchCardEndTime(recordTime.toString().split("~")[1].trim());
+            }else{
+                doorRecordCondition.setPunchCardStartTime(null);
+                doorRecordCondition.setPunchCardEndTime(null);
+            }
             doorRecordCondition.setDeviceName(deviceName != null ? deviceName.toString() : null);
 
             Page pageObj = null;
