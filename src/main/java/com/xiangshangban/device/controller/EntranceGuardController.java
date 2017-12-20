@@ -1012,8 +1012,8 @@ public class EntranceGuardController {
      *     "flag":"标志位"（0：导出出入记录  1：导出门禁异常  2：导出签到签退表）
      * }
      */
-    @PostMapping(value = "/export/signInAndOutRecord", produces="application/json;charset=UTF-8")
-    public void exportSignInAndOut(@RequestBody String requestParam,HttpServletRequest request, HttpServletResponse response){
+    @PostMapping(value = "/export/doorRecord", produces="application/json;charset=UTF-8")
+    public void exportDoorRecord(@RequestBody String requestParam,HttpServletRequest request, HttpServletResponse response){
         try {
             response.setContentType("octets/stream");
             String agent = request.getHeader("USER-AGENT");
