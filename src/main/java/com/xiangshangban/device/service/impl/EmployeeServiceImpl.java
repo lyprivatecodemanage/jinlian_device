@@ -186,19 +186,14 @@ public class EmployeeServiceImpl implements IEmployeeService {
         employee.setEmployeeId(employeeId);
         employee.setEmployeeCompanyId(companyId);
         if ("1".equals(style)){
-            try {
-                System.out.println("人脸信息: "+JSON.toJSONString(userLabelMap.get("userFace")));
-                if (StringUtils.isEmpty((String) userLabelMap.get("userFace"))){
-                    System.out.println("人脸信息为空1");
-                    employee.setEmployeeFace("");
-                    System.out.println("employeeFace--------: "+employee.getEmployeeFace());
-                }else {
-                    employee.setEmployeeFace(JSON.toJSONString(userLabelMap.get("userFace")));
-                }
-            }catch (Exception e){
-                System.out.println("人脸信息为空2");
+            System.out.println("人脸信息: " + JSON.toJSONString(userLabelMap.get("userFace")));
+            if (StringUtils.isEmpty((String) userLabelMap.get("userFace"))) {
+                System.out.println("人脸信息为空1");
                 employee.setEmployeeFace("");
-                System.out.println("employeeFace--------: "+employee.getEmployeeFace());
+//                    System.out.println("employeeFace--------: "+employee.getEmployeeFace());
+            } else {
+                System.out.println("人脸信息不为空，值="+JSON.toJSONString(userLabelMap.get("userFace")));
+                employee.setEmployeeFace(JSON.toJSONString(userLabelMap.get("userFace")));
             }
         }
         if (StringUtils.isNotEmpty((String) userLabelMap.get("userFinger1"))){
@@ -273,11 +268,11 @@ public class EmployeeServiceImpl implements IEmployeeService {
         //命令数据存入数据库
         entranceGuardService.insertCommand(doorCmdRecord);
 
-        System.out.println("style = "+style);
-        //同步人脸信息到其它设备
-        if ("1".equals(style)){
-            synchronizeEmployeePermissionForDevices(jsonString, employeeId);
-        }
+//        System.out.println("style = "+style);
+//        //同步人脸信息到其它设备
+//        if ("1".equals(style)){
+//            synchronizeEmployeePermissionForDevices(jsonString, employeeId);
+//        }
 
         System.out.println("doorRecordAll = "+JSON.toJSONString(doorRecordAll));
         System.out.println("人员指纹、人脸信息上传已回复");
@@ -639,10 +634,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
 
                         String userFinger1 = employeeLocal.getEmployeeFinger1();
                         String userFinger2 = employeeLocal.getEmployeeFinger2();
-                        String userFace = "";
-                        if (StringUtils.isNotEmpty(employeeLocal.getEmployeeFace())){
-                            userFace = employeeLocal.getEmployeeFace();
-                        }
+                        String userFace = employeeLocal.getEmployeeFace();
                         String userNFC = employeeLocal.getEmployeeNfc();
 
                         //组装人员数据DATA
@@ -661,10 +653,18 @@ public class EmployeeServiceImpl implements IEmployeeService {
                         userInformation.put("userPhoto", userPhoto);
                         userInformation.put("userFinger1", userFinger1);
                         userInformation.put("userFinger2", userFinger2);
-                        userInformation.put("userFace", userFace);
+                        if (StringUtils.isNotEmpty(employeeLocal.getEmployeeFace())){
+                            System.out.println("人脸信息非空");
+                            userInformation.put("userFace", userFace);
+                        }else {
+                            userInformation.put("userFace", "");
+                        }
                         userInformation.put("userPhone", employeePhone);
                         userInformation.put("userNFC", userNFC);
                         userInformation.put("bluetoothId", blueboothId);
+
+                        System.out.println("userFace-------------: "+userFace);
+                        System.out.println("userFace+++++++++++++: "+userInformation.get("userFace"));
 
                         //下发人员基本信息
                         //构造命令格式
