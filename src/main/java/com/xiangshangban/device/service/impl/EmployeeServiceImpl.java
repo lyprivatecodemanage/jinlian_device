@@ -553,6 +553,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
             //查询该人员的有效时间是否过期
             Map<String, String> doorEmployeePermission = doorEmployeePermissionMapper.selectEmployeePressionByLeftJoin(employeeId, door.getDoorId());
 
+            System.out.println("doorEmployeePermission = "+JSON.toJSONString(doorEmployeePermission));
             //这个人有开门权限设置
             if (doorEmployeePermission != null){
                 String startTime = doorEmployeePermission.get("doorOpenStartTime");
@@ -561,17 +562,23 @@ public class EmployeeServiceImpl implements IEmployeeService {
 
                 //这个人的开门权限时间有效
                 Boolean timeEffective = DateUtils.isBetweenTwoTime(startTime, endTime, nowTime);
+                System.out.println("startTime = "+startTime);
+                System.out.println("endTime = "+endTime);
+                System.out.println("nowTime = "+nowTime);
+                System.out.println("timeEffective = "+timeEffective);
 
                 //这个人的最后一条下发的命令信息
                 List<DoorCmd> doorCmdList = doorCmdMapper.selectDoorCmdLatestByEmployeeId(employeeId);
                 //找不到最后一条命令就不同步
                 if (doorCmdList.size() == 0){
+                    System.out.println("找不到【"+employeeId+"】的最后一条下发命令");
                     return;
                 }
                 //最新的下发命令不是下发该人员的信息就不同步
                 for (DoorCmd doorCmd : doorCmdList) {
                     String actionCode = doorCmd.getActionCode();
                     if (!"2001".equals(actionCode) || !"3001".equals(actionCode)){
+                        System.out.println("【"+employeeId+"】最后一条命令不是下发命令");
                         return;
                     }
                 }
@@ -665,6 +672,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
                 }
             }
         }
+        System.out.println("已退出人脸同步方法..............................................");
     }
 
     @Override
