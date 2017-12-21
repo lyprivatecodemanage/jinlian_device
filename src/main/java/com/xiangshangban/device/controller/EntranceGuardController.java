@@ -22,6 +22,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.*;
 
 
@@ -1009,71 +1012,49 @@ public class EntranceGuardController {
      *     "flag":"标志位"（0：导出出入记录  1：导出门禁异常  2：导出签到签退表）
      * }
      */
-    @PostMapping(value = "export/doorRecord")
-    public void exportDoorRecord(@RequestBody String requestParam){
-      /*  try {*/
-            /*System.out.println("===========进入接口===========");
-            //设置请求的编码方式
-            request.setCharacterEncoding("UTF-8");
+    @PostMapping(value = "export/doorRecord",produces="application/json;charset=UTF-8")
+    public void exportDoorRecord(@RequestBody String requestParam, HttpServletRequest request, HttpServletResponse response) {
+        try {
             response.setContentType("application/octet-stream ");
             String agent = request.getHeader("USER-AGENT");
-            String excelName = "";
-            //获取flag标志
-         *//*   String flag = request.getParameter("flag");*//*
-            String empNames = request.getParameter("empName");
-            System.out.println("flag+$$$$$$$$$$$$$$$$$$$$$$$$"+flag+"$$$$$$$$$$$$$$$$$$$$$$$$");
-            System.out.println("empName+$$$$$$$$$$$$$$$$$$$$$$$$"+empNames+"$$$$$$$$$$$$$$$$$$$$$$$$");
-            //封装请求签到签退记录的参数
-            Map signInOutParam = new HashMap();
+            String excelName = "unknown.xls";
+            //解析请求的数据
+            JSONObject jsonObject = JSONObject.parseObject(requestParam);
+            //获取请求的标志
+            Object flag = jsonObject.get("flag");
 
-            if(flag!=null && !flag.toString().trim().isEmpty()){
+            if (flag != null && !flag.toString().trim().isEmpty()) {
                 String status = flag.toString().trim();
-                System.out.println("status+$$$$$$$$$$$$$$$$$$$$$$$$"+status+"$$$$$$$$$$$$$$$$$$$$$$$$");
-                if(status.equals("0")){
+                if (status.equals("0")) {
                     excelName = "inOutRecord.xls";
                 }
-                if(status.equals("1")){
+                if (status.equals("1")) {
                     excelName = "doorExceptionRecord.xls";
                 }
-                if(status.equals("2")){
+                if (status.equals("2")) {
                     excelName = "signInAndOutRecord.xls";
-                    String empName = request.getParameter("empName");
-                    String deptName = request.getParameter("deptName");
-                    String recordTime = request.getParameter("recordTime");
-                    signInOutParam.put("flag",flag);
-                    signInOutParam.put("empName",empName);
-                    signInOutParam.put("empName",deptName);
-                    signInOutParam.put("empName",recordTime);
                 }
             }
-            if(agent!=null && agent.indexOf("MSIE")==-1&&agent.indexOf("rv:11")==-1 &&
-                    agent.indexOf("Edge")==-1 && agent.indexOf("Apache-HttpClient")==-1){//非IE
+            if (agent != null && agent.indexOf("MSIE") == -1 && agent.indexOf("rv:11") == -1 &&
+                    agent.indexOf("Edge") == -1 && agent.indexOf("Apache-HttpClient") == -1) {//非IE
                 excelName = new String(excelName.getBytes("UTF-8"), "ISO-8859-1");
-                response.addHeader("Content-Disposition", "attachment;filename="+excelName);
-            }else{
-                response.addHeader("Content-Disposition","attachment;filename="+java.net.URLEncoder.encode(excelName,"UTF-8"));
+                response.addHeader("Content-Disposition", "attachment;filename=" + excelName);
+            } else {
+                response.addHeader("Content-Disposition", "attachment;filename=" + java.net.URLEncoder.encode(excelName, "UTF-8"));
             }
-            response.addHeader("excelName",java.net.URLEncoder.encode(excelName,"UTF-8"));
+            response.addHeader("excelName", java.net.URLEncoder.encode(excelName, "UTF-8"));
             //获取输出流
-           OutputStream out = response.getOutputStream();
+            OutputStream out = response.getOutputStream();
             // 获取公司ID
             String companyId = request.getHeader("companyId");
-            if(companyId!=null && !companyId.isEmpty()){
-                System.out.println("@@@@@@@@@"+excelName+"@@@@@@@@@");
-                iEntranceGuardService.exportRecordToExcel(signInOutParam,excelName,out,companyId);
+            if (companyId != null && !companyId.isEmpty()) {
+                iEntranceGuardService.exportRecordToExcel(requestParam, excelName, out, companyId);
                 out.flush();
-            }else{
-                System.out.println("未知的公司ID");*/
-      /*  } catch (IOException e) {
-            System.out.println("导出文件输出流出错了！"+e);
-        }*/
-        JSONObject jsonObject = JSONObject.parseObject(requestParam);
-        Object flag = jsonObject.get("flag");
-        Object empName = jsonObject.get("empName");
-        if((flag!=null &&  !flag.toString().trim().isEmpty())&&empName!=null &&  !empName.toString().trim().isEmpty()){
-            System.out.println("FLAG---------》@@@@@@@@@@@"+flag+"@@@@@@@@@@@@@EMPNAME--------》"+empName+"@@@@@@@@@@@@@");
-        }else{
-            System.out.println("发送的参数为null");
+            } else {
+                System.out.println("未知的公司ID");
+            }
+        } catch (IOException e) {
+            System.out.println("导出文件输出流出错了！" + e);
         }
     }
 

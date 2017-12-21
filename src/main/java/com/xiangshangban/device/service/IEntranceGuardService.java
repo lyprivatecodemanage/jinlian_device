@@ -135,8 +135,7 @@ public interface IEntranceGuardService {
      * @param out 输出流
      * @param companyId 公司ID
      */
-//    public void exportRecordToExcel(String requestParam,String excelName, OutputStream out, String companyId);
-    public void exportRecordToExcel(Map requestParam,String excelName, OutputStream out, String companyId);
+    public void exportRecordToExcel(String requestParam,String excelName, OutputStream out, String companyId);
 
     //门禁配置---功能配置（身份验证失败次数、非法入侵、报警时长、密码、开门事件记录）
     void doorCommonSetupAdditional(String doorId, String countLimitAuthenticationFailed, String enableAlarm,

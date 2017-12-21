@@ -1091,16 +1091,15 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
      * @param companyId 公司ID
      */
     @Override
-    public void exportRecordToExcel(Map requestParam,String excelName, OutputStream out, String companyId) {
+    public void exportRecordToExcel(String requestParam,String excelName, OutputStream out, String companyId) {
         //解析请求参数
-        /*com.alibaba.fastjson.JSONObject jsonObject = com.alibaba.fastjson.JSONObject.parseObject(requestParam);
-        Object flag = jsonObject.get("flag");*/
-        Object flag = requestParam.get("flag").toString().trim();
+        com.alibaba.fastjson.JSONObject jsonObject = com.alibaba.fastjson.JSONObject.parseObject(requestParam);
+        Object flag = jsonObject.get("flag");
 
         if(flag!=null && !flag.toString().trim().isEmpty()){
             int value =  Integer.parseInt(flag.toString().trim());
             switch (value){
-             /*   case 0:  //条件查询出入记录
+                case 0:  //条件查询出入记录
                     Map doorRecord = entranceGuardController.getDoorRecordAndException(requestParam, companyId, 0);
                     Object doorData = doorRecord.get("data");
                     if(doorData!=null && !doorData.toString().isEmpty()){
@@ -1121,14 +1120,11 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
                         //导出门禁异常记录
                         ExportRecordUtil.exportAnyRecordToExcel(doorExceptionResource,excelName,exceptionHeaders,out,value);
                     }
-                    break;*/
+                    break;
                 case 2:  //条件查询签到签退记录
-                  /*  Object empName = jsonObject.get("empName");
+                    Object empName = jsonObject.get("empName");
                     Object deptName = jsonObject.get("deptName");
-                    Object recordTime = jsonObject.get("recordTime");*/
-                    Object empName = requestParam.get("empName");
-                    Object deptName = requestParam.get("deptName");
-                    Object recordTime  = requestParam.get("recordTime");
+                    Object recordTime = jsonObject.get("recordTime");
                     //获取签到签退记录
                     Map param = new HashMap();
                     param.put("companyId",companyId);
