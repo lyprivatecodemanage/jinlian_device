@@ -1007,7 +1007,7 @@ public class EntranceGuardController {
      * {
      *     "empName":"人员名称"，
      *     "deptName":"部门名称"，
-     *     "recordTime":"2017-12-10~2017-12-20",----->记录时间段
+     *     "recordTime":"2017-12-10~2017-12-20",------>记录时间段
      *
      *     "flag":"标志位"（0：导出出入记录  1：导出门禁异常  2：导出签到签退表）
      * }
