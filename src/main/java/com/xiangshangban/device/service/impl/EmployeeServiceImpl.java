@@ -271,6 +271,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
             synchronizeEmployeePermissionForDevices(jsonString, employeeId);
         }
 
+        System.out.println("doorRecordAll = "+JSON.toJSONString(doorRecordAll));
         System.out.println("人员指纹、人脸信息上传已回复");
         return doorRecordAll;
 
@@ -532,10 +533,23 @@ public class EmployeeServiceImpl implements IEmployeeService {
         }
         employeeMapper.updateByPrimaryKeySelective(employeeTemp);
 
+        //查询当前录人脸的门
+        String localDoorId = doorMapper.findDoorIdByDeviceId((String) allMap.get("deviceId")).getDoorId();
+        if (null == localDoorId){
+            System.out.println("当前设备【"+(String) allMap.get("deviceId")+"】未绑定门");
+            return;
+        }
+
         //2.同步该人员的人脸、指纹信息到其它有权限的设备上
         List<DoorEmployee> doorEmployeeList = doorEmployeeMapper.selectByPrimaryKey(employeeId);
         System.out.println("doorEmployeeList = "+ JSON.toJSONString(doorEmployeeList));
         for (DoorEmployee doorEmployee : doorEmployeeList) {
+
+            //录人脸的这个门不再同步
+            if (localDoorId.equals(doorEmployee.getDoorId())){
+                continue;
+            }
+
             Door door = doorMapper.selectByPrimaryKey(doorEmployee.getDoorId());
             String deviceId = door.getDeviceId();
             //删除门时会删除对应关系，需要判断
@@ -577,7 +591,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
                 //最新的下发命令不是下发该人员的信息就不同步
                 for (DoorCmd doorCmd : doorCmdList) {
                     String actionCode = doorCmd.getActionCode();
-                    if (!"2001".equals(actionCode) || !"3001".equals(actionCode)){
+                    if (!"2001".equals(actionCode) && !"3001".equals(actionCode)){
                         System.out.println("【"+employeeId+"】最后一条命令不是下发命令");
                         return;
                     }
@@ -589,7 +603,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
                     Employee employeeLocal = employeeMapper.selectByEmployeeIdAndCompanyId(employeeId, companyId);
 
                     if (employeeLocal == null){
-                        System.out.println("人员信息不同步，未查到【"+employeeLocal.getEmployeeName()+"】的信息");
+                        System.out.println("人员信息不同步，未查到【"+employeeId+"】的信息");
                         return;
                     }else {
                         String employeeName = employeeLocal.getEmployeeName();
@@ -628,7 +642,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
                         userInformation.put("userPhoto", userPhoto);
                         userInformation.put("userFinger1", userFinger1);
                         userInformation.put("userFinger2", userFinger2);
-                        userInformation.put("userFace", userFace);
+                        userInformation.put("userFace", userFace.replace("\\", ""));
                         userInformation.put("userPhone", employeePhone);
                         userInformation.put("userNFC", userNFC);
                         userInformation.put("bluetoothId", blueboothId);
