@@ -188,7 +188,11 @@ public class EmployeeServiceImpl implements IEmployeeService {
         if ("1".equals(style)){
             try {
                 System.out.println("人脸信息: "+JSON.toJSONString(userLabelMap.get("userFace")));
-                employee.setEmployeeFace(JSON.toJSONString(userLabelMap.get("userFace")));
+                if (StringUtils.isEmpty((String) userLabelMap.get("userFace"))){
+                    employee.setEmployeeFace("");
+                }else {
+                    employee.setEmployeeFace(JSON.toJSONString(userLabelMap.get("userFace")));
+                }
             }catch (Exception e){
                 employee.setEmployeeFace("");
             }
@@ -631,7 +635,10 @@ public class EmployeeServiceImpl implements IEmployeeService {
 
                         String userFinger1 = employeeLocal.getEmployeeFinger1();
                         String userFinger2 = employeeLocal.getEmployeeFinger2();
-                        String userFace = employeeLocal.getEmployeeFace();
+                        String userFace = "";
+                        if (StringUtils.isNotEmpty(employeeLocal.getEmployeeFace())){
+                            userFace = employeeLocal.getEmployeeFace();
+                        }
                         String userNFC = employeeLocal.getEmployeeNfc();
 
                         //组装人员数据DATA
