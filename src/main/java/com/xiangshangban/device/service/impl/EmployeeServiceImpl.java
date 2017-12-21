@@ -189,7 +189,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
             System.out.println("人脸信息: " + JSON.toJSONString(userLabelMap.get("userFace")));
             if (StringUtils.isEmpty((String) userLabelMap.get("userFace"))) {
                 System.out.println("人脸信息为空1");
-                employee.setEmployeeFace("");
+                employee.setEmployeeFace((String) userLabelMap.get("userFace"));
 //                    System.out.println("employeeFace--------: "+employee.getEmployeeFace());
             } else {
                 System.out.println("人脸信息不为空，值="+JSON.toJSONString(userLabelMap.get("userFace")));
