@@ -1012,8 +1012,8 @@ public class EntranceGuardController {
      *     "flag":"标志位"（0：导出出入记录  1：导出门禁异常  2：导出签到签退表）
      * }
      */
-    @RequestMapping(value = "export/doorRecord", produces="application/json;charset=UTF-8")
-    public void exportDoorRecord(HttpServletRequest request, HttpServletResponse response){
+    @RequestMapping(value = "export/doorRecord", produces="application/json;charset=UTF-8",method = RequestMethod.GET)
+    public void exportDoorRecord(String flag,HttpServletRequest request, HttpServletResponse response){
         try {
             System.out.println("===========进入接口===========");
             //设置请求的编码方式
@@ -1022,8 +1022,8 @@ public class EntranceGuardController {
             String agent = request.getHeader("USER-AGENT");
             String excelName = "";
             //获取flag标志
-            String flag = request.getParameter("&flag");
-            String empNames = request.getParameter("&empName");
+         /*   String flag = request.getParameter("flag");*/
+            String empNames = request.getParameter("empName");
             System.out.println("flag+$$$$$$$$$$$$$$$$$$$$$$$$"+flag+"$$$$$$$$$$$$$$$$$$$$$$$$");
             System.out.println("empName+$$$$$$$$$$$$$$$$$$$$$$$$"+empNames+"$$$$$$$$$$$$$$$$$$$$$$$$");
             //封装请求签到签退记录的参数
