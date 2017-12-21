@@ -80,6 +80,7 @@ public class ExportRecordUtil {
             //TODO  =========保存数据部分============
             switch (flag){
                 case 0: //TODO 出入记录
+                    System.out.println("-------《导出出入记录》------");
                     for(int a = 0;a<exportData.size();a++){
                         Map inOutMap = (Map)exportData.get(a);
                         //从表格的第二行开始
@@ -101,6 +102,7 @@ public class ExportRecordUtil {
                     }
                     break;
                 case 1://TODO 门禁异常
+                    System.out.println("-------《导出门禁异常》------");
                     for(int b=0;b<exportData.size();b++){
                         Map exceptionMap = (Map)exportData.get(b);
                         //从表格的第二行开始
@@ -122,6 +124,7 @@ public class ExportRecordUtil {
                     }
                     break;
                 case 2://TODO 签到签退
+                    System.out.println("-------《导出签到签退记录》------");
                     for (int i = 0; i < exportData.size(); i++) {
                         SignInAndOut sign = (SignInAndOut)exportData.get(i);
                         //从表格的第二行开始

@@ -1078,11 +1078,8 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
 
                 realData.add(innerMap);
             }
-            resultMap = PageUtils.doSplitPage(null, realData, page, rows, pageObj,1);
-        }else{
-            resultMap.put("returnCode","4203");
-            resultMap.put("message","当前列表为空");
         }
+        resultMap = PageUtils.doSplitPage(null, realData, page, rows, pageObj,2);
         return resultMap;
     }
 
@@ -1099,6 +1096,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         Object flag = jsonObject.get("flag");
 
         if(flag!=null && !flag.toString().trim().isEmpty()){
+            System.out.println("-----"+flag+"-----");
             int value =  Integer.parseInt(flag.toString().trim());
             switch (value){
                 case 0:  //条件查询出入记录

@@ -16,24 +16,24 @@ public class ConnectionFactoryServiceImpl implements IConnectionFactoryService {
 
 //    private static final Log LOG = LogFactory.getLog(ConnectionFactoryServiceImpl.class);
 
-    public static Map<String,CachingConnectionFactory> connection;//空闲的连接
-    public static Map<String,CachingConnectionFactory> useConn; //使用中的连接
+    public static Map<String, CachingConnectionFactory> connection;//空闲的连接
+    public static Map<String, CachingConnectionFactory> useConn; //使用中的连接
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //本地环境
 //    private static String host = "192.168.0.118";
     //测试环境
-//  private static String host = "192.168.0.242";
-//  private static String username = "test";
-    //  private static String password = "123";
+    private static String host = "192.168.0.242";
+    private static String username = "test";
+    private static String password = "123";
     //真实环境
-    private static String host = "106.14.63.175";
-    private static String username = "jinnianmq";
-    private static String password = "jinnian-123456";
+//    private static String host = "106.14.63.175";
+//    private static String username = "jinnianmq";
+//    private static String password = "jinnian-123456";
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     private static int port = 5672;
-    private static String virtualHost= "/";
+    private static String virtualHost = "/";
 
     static {
         System.out.println("连接池初始化20个MQ连接");
@@ -59,13 +59,14 @@ public class ConnectionFactoryServiceImpl implements IConnectionFactoryService {
 
     /**
      * 获取链接工厂
+     *
      * @return
      */
-    public static Connection getConnectionFactory(){
+    public static Connection getConnectionFactory() {
 
         //从空闲的连接里获取连接
         Connection conn = new Connection();
-        for (Map.Entry<String,CachingConnectionFactory> entry : connection.entrySet()) {
+        for (Map.Entry<String, CachingConnectionFactory> entry : connection.entrySet()) {
             conn.setConnectionFactory(entry.getValue());
             conn.setKey(entry.getKey());
             useConn.put(entry.getKey(), entry.getValue());
@@ -74,7 +75,7 @@ public class ConnectionFactoryServiceImpl implements IConnectionFactoryService {
         }
 
         //如果没有空闲的连接了
-        if(conn.getKey() == null){
+        if (conn.getKey() == null) {
             System.out.println("没有空闲的连接了.............................................................");
         }
         return conn;
