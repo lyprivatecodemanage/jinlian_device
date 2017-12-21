@@ -1012,9 +1012,10 @@ public class EntranceGuardController {
      *     "flag":"标志位"（0：导出出入记录  1：导出门禁异常  2：导出签到签退表）
      * }
      */
-    @GetMapping(value = "export/doorRecord", produces="application/json;charset=UTF-8")
+    @RequestMapping(value = "export/doorRecord", produces="application/json;charset=UTF-8")
     public void exportDoorRecord(HttpServletRequest request, HttpServletResponse response){
         try {
+            System.out.println("===========进入接口===========");
             //设置请求的编码方式
             request.setCharacterEncoding("UTF-8");
             response.setContentType("application/octet-stream ");
