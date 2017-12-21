@@ -79,4 +79,12 @@
       reboot_time = #{rebootTime,jdbcType=VARCHAR}
     where reboot_id = #{rebootId,jdbcType=VARCHAR}
   </update>
+
+  <select id="selectByRebootIdAndDeviceId" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from device_reboot_record
+    where reboot_id = #{rebootId,jdbcType=VARCHAR}
+    AND device_id = #{deviceId,jdbcType=VARCHAR}
+  </select>
 </mapper>

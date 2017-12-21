@@ -28,8 +28,6 @@
         <result column="sign_out" property="signOut" jdbcType="VARCHAR"/>
     </resultMap>
 
-
-
     <sql id="Base_Column_List">
         door_permission_record_id, employee_id, door_id, record_type, upper_state, upper_edition,
         employee_group_name, open_door_photo_name, back_key, device_group_name, real_week,
@@ -400,5 +398,13 @@
             </if>
         </where>
          ORDER BY S.sign_in DESC
+    </select>
+
+    <select id="selectByRecordIdAndDoorId" resultMap="BaseResultMap" parameterType="java.lang.String">
+        select
+        <include refid="Base_Column_List"/>
+        from door_record
+        where door_permission_record_id = #{doorPermissionRecordId,jdbcType=VARCHAR}
+        AND door_id = #{doorId,jdbcType=VARCHAR}
     </select>
 </mapper>

@@ -283,6 +283,11 @@ public class DeviceServiceImpl implements IDeviceService {
         rebootRecordList = (List<Map<String, Object>>) mapJson.get("record");
         for (Map<String, Object> singleRecordMap : rebootRecordList) {
 
+            //重启记录时间大于当前服务器时间的数据不保存
+            if (!DateUtils.isTime1LtTime2((String) singleRecordMap.get("rebootTime"), DateUtils.getDateTime())){
+                continue;
+            }
+
             rebootId = (String) singleRecordMap.get("rebootId");
             rebootIdList.add(rebootId);
 
@@ -292,7 +297,7 @@ public class DeviceServiceImpl implements IDeviceService {
             deviceRebootRecord.setRebootNumber((String) singleRecordMap.get("rebootNumber"));
             deviceRebootRecord.setRebootTime((String) singleRecordMap.get("rebootTime"));
 
-            DeviceRebootRecord deviceRebootRecordExist = deviceRebootRecordMapper.selectByPrimaryKey(rebootId);
+            DeviceRebootRecord deviceRebootRecordExist = deviceRebootRecordMapper.selectByRebootIdAndDeviceId(rebootId, deviceId);
             if (deviceRebootRecordExist == null){
                 deviceRebootRecordMapper.insertSelective(deviceRebootRecord);
             }else {
@@ -385,7 +390,7 @@ public class DeviceServiceImpl implements IDeviceService {
             deviceRunningLog.setLogTime(deviceRunningLogMap.get("logTime"));
             deviceRunningLog.setDeviceId(deviceId);
 
-            DeviceRunningLog deviceRunningLogExist = deviceRunningLogMapper.selectByPrimaryKey(logId);
+            DeviceRunningLog deviceRunningLogExist = deviceRunningLogMapper.selectByLogIdAndDeviceId(logId, deviceId);
             if (deviceRunningLogExist == null){
                 deviceRunningLogMapper.insertSelective(deviceRunningLog);
             }else {

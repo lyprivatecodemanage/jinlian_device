@@ -534,6 +534,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
 
         //2.同步该人员的人脸、指纹信息到其它有权限的设备上
         List<DoorEmployee> doorEmployeeList = doorEmployeeMapper.selectByPrimaryKey(employeeId);
+        System.out.println("doorEmployeeList = "+ JSON.toJSONString(doorEmployeeList));
         for (DoorEmployee doorEmployee : doorEmployeeList) {
             Door door = doorMapper.selectByPrimaryKey(doorEmployee.getDoorId());
             String deviceId = door.getDeviceId();

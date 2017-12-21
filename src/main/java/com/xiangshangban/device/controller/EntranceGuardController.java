@@ -1467,7 +1467,10 @@ public class EntranceGuardController {
             doorRecord.setDoorPermissionRecordId(id);
             doorRecord.setBackKey(key);
             doorRecord.setEventPhotoGroupId(eventPhotoCombinationId);
-            DoorRecord doorRecordExist = doorRecordMapper.selectByPrimaryKey(id);
+
+            //查询设备对应的门
+            String doorId = doorMapper.findDoorIdByDeviceId(deviceId).getDoorId();
+            DoorRecord doorRecordExist = doorRecordMapper.selectByRecordIdAndDoorId(id, doorId);
             if (doorRecordExist != null){
 //                System.out.println("上传的警报记录图片【"+key+"】已成功");
                 doorRecordMapper.updateByPrimaryKeySelective(doorRecord);

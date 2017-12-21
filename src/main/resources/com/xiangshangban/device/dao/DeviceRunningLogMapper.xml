@@ -103,4 +103,12 @@
       device_id = #{deviceId,jdbcType=VARCHAR}
     where log_id = #{logId,jdbcType=VARCHAR}
   </update>
+
+  <select id="selectByLogIdAndDeviceId" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from device_running_log
+    where log_id = #{logId,jdbcType=VARCHAR}
+    AND device_id = #{deviceId,jdbcType=VARCHAR}
+  </select>
 </mapper>

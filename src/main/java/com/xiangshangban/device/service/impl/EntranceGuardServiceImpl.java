@@ -914,8 +914,9 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
             doorRecord.setEventResultReason(recordMap.get("cause"));
             doorRecord.setRecordType(recordMap.get("attType"));
 
+            String doorId = "";
             try {
-                String doorId = doorMapper.findDoorIdByDeviceId((String) doorRecordMapTemp.get("deviceId")).getDoorId();
+                doorId = doorMapper.findDoorIdByDeviceId((String) doorRecordMapTemp.get("deviceId")).getDoorId();
                 doorRecord.setDoorId(doorId);
             }catch (Exception e){
                 System.out.println("门禁记录上传：该设备还未关联门，将不记录门id");
@@ -928,7 +929,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
             doorRecord.setEventPhotoGroupId(recordMap.get("eventPhotoCombinationId"));
 
             //查找记录是否重复上传
-            DoorRecord doorRecordExit = doorRecordMapper.selectByPrimaryKey(recordMap.get("id"));
+            DoorRecord doorRecordExit = doorRecordMapper.selectByRecordIdAndDoorId(recordMap.get("id"), doorId);
 
             if (doorRecordExit == null){
                 //保存门禁记录到数据库

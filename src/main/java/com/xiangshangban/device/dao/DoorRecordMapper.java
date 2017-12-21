@@ -42,4 +42,7 @@ public interface DoorRecordMapper {
      * TODO APP接口：查询人员的打卡记录
      *******************************/
     List<Map> selectEmpPunchRecord(Map map);
+
+    DoorRecord selectByRecordIdAndDoorId(@Param("doorPermissionRecordId") String doorPermissionRecordId,
+                                         @Param("doorId") String doorId);
 }
