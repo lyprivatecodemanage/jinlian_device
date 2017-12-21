@@ -1016,7 +1016,6 @@ public class EntranceGuardController {
     public void exportDoorRecord(@RequestBody String requestParam,HttpServletRequest request, HttpServletResponse response){
         try {
             response.setContentType("application/octet-stream ");
-
             String agent = request.getHeader("USER-AGENT");
             String excelName = "";
             //获取flag标志
@@ -1035,7 +1034,6 @@ public class EntranceGuardController {
                     excelName = "signInAndOutRecord.xls";
                 }
             }
-
             if(agent!=null && agent.indexOf("MSIE")==-1&&agent.indexOf("rv:11")==-1 &&
                     agent.indexOf("Edge")==-1 && agent.indexOf("Apache-HttpClient")==-1){//非IE
 
@@ -1043,14 +1041,14 @@ public class EntranceGuardController {
                 excelName = new String(excelName.getBytes("UTF-8"), "ISO-8859-1");
                 //指定下载文件的文件名称
                 response.addHeader("Content-Disposition", "attachment;filename="+excelName);
-
             }else{
                 System.out.println("②：==================="+excelName);
                 response.addHeader("Content-Disposition","attachment;filename="+java.net.URLEncoder.encode(excelName,"UTF-8"));
             }
             response.addHeader("excelName",java.net.URLEncoder.encode(excelName,"UTF-8"));
             //获取输出流
-            OutputStream out = response.getOutputStream();
+           OutputStream out = response.getOutputStream();
+            /*FileOutputStream out = new FileOutputStream("E:/test.xls");*/
             // 获取公司ID
             String companyId = request.getHeader("companyId");
             if(companyId!=null && !companyId.isEmpty()){

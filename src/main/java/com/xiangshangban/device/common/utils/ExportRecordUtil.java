@@ -92,8 +92,8 @@ public class ExportRecordUtil {
                                 inOutMap.get("record_type_name").toString().trim(),
                                 inOutMap.get("record_date").toString().trim()};
 
-                        for(int x=1;x<headers.length;x++){
-                            HSSFCell cell = row.createCell(x+1);
+                        for(int x=0;x<headers.length;x++){
+                            HSSFCell cell = row.createCell(x);
                             //设置内容表格的样式
                           /*  cell.setCellStyle(contentStyle);*/
                             //设置显示的内容
@@ -115,7 +115,7 @@ public class ExportRecordUtil {
                                 exceptionMap.get("alarm_type_name").toString().trim()};
 
                         for(int y=0;y<headers.length;y++){
-                            HSSFCell cell = row.createCell(y+1);
+                            HSSFCell cell = row.createCell(y);
                             //设置内容表格的样式
                           /*  cell.setCellStyle(contentStyle);*/
                             //设置显示的内容
@@ -138,7 +138,7 @@ public class ExportRecordUtil {
                         String[] cellContent = {sign.getEmpId(),sign.getEmpName(),sign.getEmpDept(),signInArr[0],signInArr[1]+"/"+signOutArr[1]};
 
                         for(int z=0;z<headers.length;z++){
-                            HSSFCell cell = row.createCell(z+1);
+                            HSSFCell cell = row.createCell(z);
                             //设置内容表格的样式
                          /*   cell.setCellStyle(contentStyle);*/
                             //设置显示的内容
