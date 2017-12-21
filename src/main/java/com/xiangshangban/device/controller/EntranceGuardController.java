@@ -1015,6 +1015,8 @@ public class EntranceGuardController {
     @GetMapping(value = "export/doorRecord", produces="application/json;charset=UTF-8")
     public void exportDoorRecord(HttpServletRequest request, HttpServletResponse response){
         try {
+            //设置请求的编码方式
+            request.setCharacterEncoding("UTF-8");
             response.setContentType("application/octet-stream ");
             String agent = request.getHeader("USER-AGENT");
             String excelName = "";
@@ -1056,6 +1058,7 @@ public class EntranceGuardController {
             // 获取公司ID
             String companyId = request.getHeader("companyId");
             if(companyId!=null && !companyId.isEmpty()){
+                System.out.println("@@@@@@@@@"+excelName+"@@@@@@@@@");
                 iEntranceGuardService.exportRecordToExcel(signInOutParam,excelName,out,companyId);
                 out.flush();
             }else{
