@@ -197,7 +197,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         map.put("operateCommand",jsonObject.get("operateCommand")!=null?jsonObject.get("operateCommand").toString():null);
         map.put("companyId",(companyId!=null && !companyId.isEmpty())?companyId:null);
 
-        System.out.println("queryLogCommand---------->"+companyId+"----------");
+//        System.out.println("queryLogCommand---------->"+companyId+"----------");
 
 
         Object page = jsonObject.get("page");
@@ -467,7 +467,6 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
             return null;
         }
     }
-
 
 
 

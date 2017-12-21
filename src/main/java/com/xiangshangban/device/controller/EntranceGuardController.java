@@ -442,7 +442,7 @@ public class EntranceGuardController {
 
         if(companyId!=null && !companyId.isEmpty()){
             //--打印测试--
-            System.out.println("getRelateEmpPermissionInfo(查询的门的Id)==============="+doorId+"==================");
+//            System.out.println("getRelateEmpPermissionInfo(查询的门的Id)==============="+doorId+"==================");
 
             Map relateEmpPermissionCondition = new HashMap();
             relateEmpPermissionCondition.put("doorId",doorId!=null?doorId.toString():null);
@@ -501,7 +501,7 @@ public class EntranceGuardController {
                                 }
                             }
                         }
-                        System.out.println("-----------------"+buffer.toString()+"------------------");
+                        /*System.out.println("-----------------"+buffer.toString()+"------------------");*/
                         maps.get(i).put("range_door_open_type",buffer.toString().substring(0,buffer.toString().length()-1));
                     }else{
                         maps.get(i).put("range_door_open_type","");
