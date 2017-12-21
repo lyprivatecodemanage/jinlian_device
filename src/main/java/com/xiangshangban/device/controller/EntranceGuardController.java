@@ -1020,6 +1020,7 @@ public class EntranceGuardController {
             String excelName = "";
             //获取flag标志
             String flag = request.getParameter("flag");
+
             //封装请求签到签退记录的参数
             Map signInOutParam = new HashMap();
 
@@ -1036,7 +1037,6 @@ public class EntranceGuardController {
                     String empName = request.getParameter("empName");
                     String deptName = request.getParameter("deptName");
                     String recordTime = request.getParameter("recordTime");
-
                     signInOutParam.put("flag",flag);
                     signInOutParam.put("empName",empName);
                     signInOutParam.put("empName",deptName);
@@ -1045,19 +1045,14 @@ public class EntranceGuardController {
             }
             if(agent!=null && agent.indexOf("MSIE")==-1&&agent.indexOf("rv:11")==-1 &&
                     agent.indexOf("Edge")==-1 && agent.indexOf("Apache-HttpClient")==-1){//非IE
-
-                System.out.println("①：==================="+excelName);
                 excelName = new String(excelName.getBytes("UTF-8"), "ISO-8859-1");
-                //指定下载文件的文件名称
                 response.addHeader("Content-Disposition", "attachment;filename="+excelName);
             }else{
-                System.out.println("②：==================="+excelName);
                 response.addHeader("Content-Disposition","attachment;filename="+java.net.URLEncoder.encode(excelName,"UTF-8"));
             }
             response.addHeader("excelName",java.net.URLEncoder.encode(excelName,"UTF-8"));
             //获取输出流
            OutputStream out = response.getOutputStream();
-            /*FileOutputStream out = new FileOutputStream("E:/test.xls");*/
             // 获取公司ID
             String companyId = request.getHeader("companyId");
             if(companyId!=null && !companyId.isEmpty()){

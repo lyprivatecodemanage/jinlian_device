@@ -1097,7 +1097,6 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         Object flag = requestParam.get("flag").toString().trim();
 
         if(flag!=null && !flag.toString().trim().isEmpty()){
-            System.out.println("-----"+flag+"-----");
             int value =  Integer.parseInt(flag.toString().trim());
             switch (value){
              /*   case 0:  //条件查询出入记录
@@ -1126,7 +1125,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
                   /*  Object empName = jsonObject.get("empName");
                     Object deptName = jsonObject.get("deptName");
                     Object recordTime = jsonObject.get("recordTime");*/
-                    Object empName = requestParam.get("deptName");
+                    Object empName = requestParam.get("empName");
                     Object deptName = requestParam.get("deptName");
                     Object recordTime  = requestParam.get("recordTime");
                     //获取签到签退记录
