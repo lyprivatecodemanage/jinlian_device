@@ -1071,7 +1071,7 @@ public class EntranceGuardController {
         Object flag = jsonObject.get("flag");
         Object empName = jsonObject.get("empName");
         if((flag!=null &&  !flag.toString().trim().isEmpty())&&empName!=null &&  !empName.toString().trim().isEmpty()){
-            System.out.println("FLAG--------》@@@@@@@@@@@"+flag+"@@@@@@@@@@@@@EMPNAME--------》"+empName+"@@@@@@@@@@@@@");
+            System.out.println("FLAG---------》@@@@@@@@@@@"+flag+"@@@@@@@@@@@@@EMPNAME--------》"+empName+"@@@@@@@@@@@@@");
         }else{
             System.out.println("发送的参数为null");
         }
