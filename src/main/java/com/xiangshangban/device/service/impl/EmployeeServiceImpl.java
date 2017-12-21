@@ -551,7 +551,15 @@ public class EmployeeServiceImpl implements IEmployeeService {
             }
 
             Door door = doorMapper.selectByPrimaryKey(doorEmployee.getDoorId());
-            String deviceId = door.getDeviceId();
+
+            //如果某个门删除了，跳过这个门
+            String deviceId = "";
+            try {
+                deviceId = door.getDeviceId();
+            }catch (Exception e){
+                continue;
+            }
+
             //删除门时会删除对应关系，需要判断
             if (StringUtils.isEmpty(deviceId)){
                 System.out.println("同步人脸信息时，门【"+door.getDoorId()+"】和设备的关联关系不存在");
@@ -642,7 +650,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
                         userInformation.put("userPhoto", userPhoto);
                         userInformation.put("userFinger1", userFinger1);
                         userInformation.put("userFinger2", userFinger2);
-                        userInformation.put("userFace", userFace.replace("\\", ""));
+                        userInformation.put("userFace", userFace);
                         userInformation.put("userPhone", employeePhone);
                         userInformation.put("userNFC", userNFC);
                         userInformation.put("bluetoothId", blueboothId);
