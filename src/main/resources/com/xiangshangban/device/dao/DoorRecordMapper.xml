@@ -339,14 +339,21 @@
         (
         SELECT
         door_id,
-        COALESCE (record_type,'') AS record_type,
-        COALESCE (record_date,'') AS record_date
+        COALESCE (record_type, '') AS record_type,
+        COALESCE (record_date, '') AS record_date
         FROM
         door_record
         WHERE
         employee_id = #{empId}
         AND record_type IN ('3', '5', '6', '7', '8')
         AND record_date LIKE #{recordDate}
+        <if test="companyId!=null and companyId!=''">
+            AND door_id in(
+            select door_id from door_ where device_id in (
+            select device_id from device_ where company_id = #{companyId}
+                )
+            )
+        </if>
         ORDER BY
         record_date
         ) X

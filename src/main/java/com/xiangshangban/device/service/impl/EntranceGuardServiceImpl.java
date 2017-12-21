@@ -1160,12 +1160,14 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         com.alibaba.fastjson.JSONObject jsonObject = com.alibaba.fastjson.JSONObject.parseObject(requestParam);
         Object empId = jsonObject.get("empId");
         Object searchTime = jsonObject.get("searchTime");
+        Object companyId = jsonObject.get("companyId");
 
         List<Map> punchCardRecord = null;
         if(empId!=null){
             Map map = new HashMap();
             map.put("empId",empId.toString());
             map.put("recordDate",(searchTime==null || searchTime.toString().isEmpty())?"%"+DateUtils.getDate()+"%":"%"+searchTime+"%");
+            map.put("companyId",companyId!=null&& !companyId.toString().trim().isEmpty()?companyId.toString():null);
             punchCardRecord = doorRecordMapper.selectEmpPunchRecord(map);
         }else{
             System.out.println("APP---------->传递的员工参数为null !!!");
