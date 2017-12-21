@@ -1012,16 +1012,17 @@ public class EntranceGuardController {
      *     "flag":"标志位"（0：导出出入记录  1：导出门禁异常  2：导出签到签退表）
      * }
      */
-    @PostMapping(value = "export/doorRecord", produces="application/json;charset=UTF-8")
-    public void exportDoorRecord(@RequestBody String requestParam,HttpServletRequest request, HttpServletResponse response){
+    @GetMapping(value = "export/doorRecord", produces="application/json;charset=UTF-8")
+    public void exportDoorRecord(HttpServletRequest request, HttpServletResponse response){
         try {
             response.setContentType("application/octet-stream ");
             String agent = request.getHeader("USER-AGENT");
             String excelName = "";
             //获取flag标志
-            JSONObject jsonObject = JSONObject.parseObject(requestParam);
-            //确定导出后文件的名称
-            Object flag = jsonObject.get("flag");
+            String flag = request.getParameter("flag");
+            //封装请求签到签退记录的参数
+            Map signInOutParam = new HashMap();
+
             if(flag!=null && !flag.toString().trim().isEmpty()){
                 String status = flag.toString().trim();
                 if(status.equals("0")){
@@ -1032,6 +1033,14 @@ public class EntranceGuardController {
                 }
                 if(status.equals("2")){
                     excelName = "signInAndOutRecord.xls";
+                    String empName = request.getParameter("empName");
+                    String deptName = request.getParameter("deptName");
+                    String recordTime = request.getParameter("recordTime");
+
+                    signInOutParam.put("flag",flag);
+                    signInOutParam.put("empName",empName);
+                    signInOutParam.put("empName",deptName);
+                    signInOutParam.put("empName",recordTime);
                 }
             }
             if(agent!=null && agent.indexOf("MSIE")==-1&&agent.indexOf("rv:11")==-1 &&
@@ -1052,7 +1061,7 @@ public class EntranceGuardController {
             // 获取公司ID
             String companyId = request.getHeader("companyId");
             if(companyId!=null && !companyId.isEmpty()){
-                iEntranceGuardService.exportRecordToExcel(requestParam,excelName,out,companyId);
+                iEntranceGuardService.exportRecordToExcel(signInOutParam,excelName,out,companyId);
                 out.flush();
             }else{
                 System.out.println("未知的公司ID");
