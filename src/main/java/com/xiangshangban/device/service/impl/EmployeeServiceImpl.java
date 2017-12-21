@@ -265,6 +265,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
         //命令数据存入数据库
         entranceGuardService.insertCommand(doorCmdRecord);
 
+        System.out.println("style = "+style);
         //同步人脸信息到其它设备
         if ("1".equals(style)){
             synchronizeEmployeePermissionForDevices(jsonString, employeeId);
@@ -505,6 +506,10 @@ public class EmployeeServiceImpl implements IEmployeeService {
     //同步不同设备上，有开门权限的人员的基本信息
     @Override
     public void synchronizeEmployeePermissionForDevices(String jsonString, String employeeId) {
+
+        System.out.println("已进入人脸同步方法..............................................");
+        System.out.println("jsonString = "+jsonString);
+        System.out.println("employeeId = "+employeeId);
 
         //提取数据
         Map<String, Object> allMap = JSONObject.fromObject(jsonString);
