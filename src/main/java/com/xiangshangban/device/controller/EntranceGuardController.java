@@ -22,9 +22,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.*;
 
 
@@ -1012,17 +1009,18 @@ public class EntranceGuardController {
      *     "flag":"标志位"（0：导出出入记录  1：导出门禁异常  2：导出签到签退表）
      * }
      */
-    @RequestMapping(value = "export/doorRecord", produces="application/json;charset=UTF-8",method = RequestMethod.GET)
-    public void exportDoorRecord(String flag,HttpServletRequest request, HttpServletResponse response){
-        try {
-            System.out.println("===========进入接口===========");
+    @PostMapping(value = "export/doorRecord", produces="application/json;charset=UTF-8")
+    public void exportDoorRecord(@RequestParam("flag") String flag,
+                                 @RequestParam(name = "empName",required = false )String empName,HttpServletRequest request){
+      /*  try {*/
+            /*System.out.println("===========进入接口===========");
             //设置请求的编码方式
             request.setCharacterEncoding("UTF-8");
             response.setContentType("application/octet-stream ");
             String agent = request.getHeader("USER-AGENT");
             String excelName = "";
             //获取flag标志
-         /*   String flag = request.getParameter("flag");*/
+         *//*   String flag = request.getParameter("flag");*//*
             String empNames = request.getParameter("empName");
             System.out.println("flag+$$$$$$$$$$$$$$$$$$$$$$$$"+flag+"$$$$$$$$$$$$$$$$$$$$$$$$");
             System.out.println("empName+$$$$$$$$$$$$$$$$$$$$$$$$"+empNames+"$$$$$$$$$$$$$$$$$$$$$$$$");
@@ -1066,11 +1064,12 @@ public class EntranceGuardController {
                 iEntranceGuardService.exportRecordToExcel(signInOutParam,excelName,out,companyId);
                 out.flush();
             }else{
-                System.out.println("未知的公司ID");
-            }
-        } catch (IOException e) {
+                System.out.println("未知的公司ID");*/
+      /*  } catch (IOException e) {
             System.out.println("导出文件输出流出错了！"+e);
-        }
+        }*/
+      System.out.println(request.getParameter("flag")+"-----"+request.getParameter("empName"));
+      System.out.println("FLAG--------》@@@@@@@@@@@"+flag+"@@@@@@@@@@@@@EMPNAME--------》"+empName+"@@@@@@@@@@@@@");
     }
 
 
