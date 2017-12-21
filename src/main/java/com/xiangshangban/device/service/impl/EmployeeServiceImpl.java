@@ -654,12 +654,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
                         userInformation.put("userPhoto", userPhoto);
                         userInformation.put("userFinger1", userFinger1);
                         userInformation.put("userFinger2", userFinger2);
-                        if (StringUtils.isNotEmpty(employeeLocal.getEmployeeFace())){
-                            System.out.println("人脸信息非空");
-                            userInformation.put("userFace", userFace);
-                        }else {
-                            userInformation.put("userFace", "");
-                        }
+                        userInformation.put("userFace", userFace);
                         userInformation.put("userPhone", employeePhone);
                         userInformation.put("userNFC", userNFC);
                         userInformation.put("bluetoothId", blueboothId);
