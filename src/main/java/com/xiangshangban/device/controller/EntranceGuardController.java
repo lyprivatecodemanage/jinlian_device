@@ -1010,7 +1010,7 @@ public class EntranceGuardController {
      * }
      */
     @PostMapping(value = "export/doorRecord")
-    public void exportDoorRecord(HttpServletRequest request){
+    public void exportDoorRecord(@RequestBody String requestParam){
       /*  try {*/
             /*System.out.println("===========进入接口===========");
             //设置请求的编码方式
@@ -1067,8 +1067,14 @@ public class EntranceGuardController {
       /*  } catch (IOException e) {
             System.out.println("导出文件输出流出错了！"+e);
         }*/
-      System.out.println(request.getParameter("flag")+"-----"+request.getParameter("empName"));
-      System.out.println("FLAG--------》@@@@@@@@@@@"+flag+"@@@@@@@@@@@@@EMPNAME--------》"+empName+"@@@@@@@@@@@@@");
+        JSONObject jsonObject = JSONObject.parseObject(requestParam);
+        Object flag = jsonObject.get("flag");
+        Object empName = jsonObject.get("empName");
+        if((flag!=null &&  !flag.toString().trim().isEmpty())&&empName!=null &&  !empName.toString().trim().isEmpty()){
+            System.out.println("FLAG--------》@@@@@@@@@@@"+flag+"@@@@@@@@@@@@@EMPNAME--------》"+empName+"@@@@@@@@@@@@@");
+        }else{
+            System.out.println("发送的参数为null");
+        }
     }
 
 
