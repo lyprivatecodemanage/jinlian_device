@@ -1022,13 +1022,16 @@ public class EntranceGuardController {
             String agent = request.getHeader("USER-AGENT");
             String excelName = "";
             //获取flag标志
-            String flag = request.getParameter("flag");
-
+            String flag = request.getParameter("&flag");
+            String empNames = request.getParameter("&empName");
+            System.out.println("flag+$$$$$$$$$$$$$$$$$$$$$$$$"+flag+"$$$$$$$$$$$$$$$$$$$$$$$$");
+            System.out.println("empName+$$$$$$$$$$$$$$$$$$$$$$$$"+empNames+"$$$$$$$$$$$$$$$$$$$$$$$$");
             //封装请求签到签退记录的参数
             Map signInOutParam = new HashMap();
 
             if(flag!=null && !flag.toString().trim().isEmpty()){
                 String status = flag.toString().trim();
+                System.out.println("status+$$$$$$$$$$$$$$$$$$$$$$$$"+status+"$$$$$$$$$$$$$$$$$$$$$$$$");
                 if(status.equals("0")){
                     excelName = "inOutRecord.xls";
                 }
