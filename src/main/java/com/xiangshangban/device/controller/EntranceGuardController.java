@@ -1015,10 +1015,13 @@ public class EntranceGuardController {
     @PostMapping(value = "export/doorRecord", produces="application/json;charset=UTF-8")
     public void exportDoorRecord(@RequestBody String requestParam,HttpServletRequest request, HttpServletResponse response){
         try {
+            response.setContentType("application/octet-stream ");
+
             String agent = request.getHeader("USER-AGENT");
             String excelName = "";
             //获取flag标志
             JSONObject jsonObject = JSONObject.parseObject(requestParam);
+            //确定导出后文件的名称
             Object flag = jsonObject.get("flag");
             if(flag!=null && !flag.toString().trim().isEmpty()){
                 String status = flag.toString().trim();
@@ -1032,23 +1035,20 @@ public class EntranceGuardController {
                     excelName = "signInAndOutRecord.xls";
                 }
             }
-           /* response.reset();*/
+
             if(agent!=null && agent.indexOf("MSIE")==-1&&agent.indexOf("rv:11")==-1 &&
                     agent.indexOf("Edge")==-1 && agent.indexOf("Apache-HttpClient")==-1){//非IE
+
                 System.out.println("①：==================="+excelName);
                 excelName = new String(excelName.getBytes("UTF-8"), "ISO-8859-1");
                 //指定下载文件的文件名称
-                response.setHeader("Content-Disposition", "attachment;filename="+excelName);
+                response.addHeader("Content-Disposition", "attachment;filename="+excelName);
+
             }else{
                 System.out.println("②：==================="+excelName);
-                response.setHeader("Content-Disposition","attachment;filename="+java.net.URLEncoder.encode(excelName,"UTF-8"));
+                response.addHeader("Content-Disposition","attachment;filename="+java.net.URLEncoder.encode(excelName,"UTF-8"));
             }
-            response.setContentType("application/octet-stream ");
-          /*  response.setContentType("application/vnd.ms-excel");
-            response.setHeader("Pragma", "no-cache");
-            response.setHeader("Cache-Control", "no-cache");
-            response.setDateHeader("Expires", 0);*/
-            response.setHeader("excelName",java.net.URLEncoder.encode(excelName,"UTF-8"));
+            response.addHeader("excelName",java.net.URLEncoder.encode(excelName,"UTF-8"));
             //获取输出流
             OutputStream out = response.getOutputStream();
             // 获取公司ID

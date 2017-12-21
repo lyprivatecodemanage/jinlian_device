@@ -92,12 +92,12 @@ public class ExportRecordUtil {
                                 inOutMap.get("record_type_name").toString().trim(),
                                 inOutMap.get("record_date").toString().trim()};
 
-                        for(int j=0;j<headers.length;j++){
-                            HSSFCell cell = row.createCell(j);
+                        for(int x=1;x<headers.length;x++){
+                            HSSFCell cell = row.createCell(x+1);
                             //设置内容表格的样式
-                            cell.setCellStyle(contentStyle);
+                          /*  cell.setCellStyle(contentStyle);*/
                             //设置显示的内容
-                            cell.setCellValue(doorCellContent[j]);
+                            cell.setCellValue(doorCellContent[x]);
                         }
                     }
                     break;
@@ -114,21 +114,22 @@ public class ExportRecordUtil {
                                 exceptionMap.get("alarm_date").toString().trim(),
                                 exceptionMap.get("alarm_type_name").toString().trim()};
 
-                        for(int j=0;j<headers.length;j++){
-                            HSSFCell cell = row.createCell(j);
+                        for(int y=0;y<headers.length;y++){
+                            HSSFCell cell = row.createCell(y+1);
                             //设置内容表格的样式
-                            cell.setCellStyle(contentStyle);
+                          /*  cell.setCellStyle(contentStyle);*/
                             //设置显示的内容
-                            cell.setCellValue(exceptionCellContent[j]);
+                            cell.setCellValue(exceptionCellContent[y]);
                         }
                     }
                     break;
                 case 2://TODO 签到签退
                     System.out.println("-------《导出签到签退记录》------");
-                    for (int i = 0; i < exportData.size(); i++) {
-                        SignInAndOut sign = (SignInAndOut)exportData.get(i);
+                    for (int c = 0; c < exportData.size(); c++) {
+                        SignInAndOut sign = (SignInAndOut)exportData.get(c);
+                        System.out.println("************************签到签退内容:"+sign.toString()+"*****************************");
                         //从表格的第二行开始
-                        row = sheet.createRow(i + 1);
+                        row = sheet.createRow(c + 1);
                         //分割时间(日期+时间)
                         String[] signInArr = sign.getSignIn().trim().split(" "); //签到
                         String[] signOutArr = sign.getSignOut().trim().split(" ");//签退
@@ -136,12 +137,12 @@ public class ExportRecordUtil {
                         //创建字符串数组，保存每一行表格中的内容
                         String[] cellContent = {sign.getEmpId(),sign.getEmpName(),sign.getEmpDept(),signInArr[0],signInArr[1]+"/"+signOutArr[1]};
 
-                        for(int j=0;j<headers.length;j++){
-                            HSSFCell cell = row.createCell(j);
+                        for(int z=0;z<headers.length;z++){
+                            HSSFCell cell = row.createCell(z+1);
                             //设置内容表格的样式
-                            cell.setCellStyle(contentStyle);
+                         /*   cell.setCellStyle(contentStyle);*/
                             //设置显示的内容
-                            cell.setCellValue(cellContent[j]);
+                            cell.setCellValue(cellContent[z]);
                         }
                     }
                     break;
