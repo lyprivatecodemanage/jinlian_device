@@ -270,11 +270,10 @@ public class EmployeeServiceImpl implements IEmployeeService {
         //命令数据存入数据库
         entranceGuardService.insertCommand(doorCmdRecord);
 
-//        System.out.println("style = "+style);
-//        //同步人脸信息到其它设备
-//        if ("1".equals(style)){
-//            synchronizeEmployeePermissionForDevices(jsonString, employeeId);
-//        }
+        //同步人脸信息到其它设备
+        if ("1".equals(style)){
+            synchronizeEmployeePermissionForDevices(jsonString, employeeId);
+        }
 
         System.out.println("doorRecordAll = "+JSON.toJSONString(doorRecordAll));
         System.out.println("人员指纹、人脸信息上传已回复");
