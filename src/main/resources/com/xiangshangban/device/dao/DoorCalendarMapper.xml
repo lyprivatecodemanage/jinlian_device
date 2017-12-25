@@ -56,14 +56,12 @@
   <update id="updateByPrimaryKeySelective" parameterType="com.xiangshangban.device.bean.DoorCalendar" >
     update door_calendar
     <set >
-      <if test="calendarDate != null" >
-        calendar_date = #{calendarDate,jdbcType=VARCHAR},
-      </if>
       <if test="weatherOpenDoor != null" >
         weather_open_door = #{weatherOpenDoor,jdbcType=VARCHAR},
       </if>
     </set>
     where door_id = #{doorId,jdbcType=VARCHAR}
+    AND calendar_date = #{calendarDate,jdbcType=VARCHAR}
   </update>
 
   <update id="updateByPrimaryKey" parameterType="com.xiangshangban.device.bean.DoorCalendar" >
@@ -84,6 +82,5 @@
     from door_calendar
     where door_id = #{doorId,jdbcType=VARCHAR}
     AND calendar_date = #{calendarDate,jdbcType=VARCHAR}
-    AND weather_open_door = #{weatherOpenDoor,jdbcType=VARCHAR}
   </select>
 </mapper>

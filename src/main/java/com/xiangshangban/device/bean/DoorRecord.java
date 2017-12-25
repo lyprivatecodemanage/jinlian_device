@@ -17,6 +17,7 @@ public class DoorRecord {
     private String eventResultReason;
     private String eventPhotoGroupId;
     private String recordDate;
+    private String deviceId;
 
     public String getDoorPermissionRecordId() {
         return doorPermissionRecordId;
@@ -136,5 +137,13 @@ public class DoorRecord {
 
     public void setRecordDate(String recordDate) {
         this.recordDate = recordDate;
+    }
+
+    public String getDeviceId() {
+        return deviceId;
+    }
+
+    public void setDeviceId(String deviceId) {
+        this.deviceId = deviceId;
     }
 }

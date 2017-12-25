@@ -17,6 +17,7 @@
         <result column="event_result_reason" property="eventResultReason" jdbcType="VARCHAR"/>
         <result column="event_photo_group_id" property="eventPhotoGroupId" jdbcType="VARCHAR"/>
         <result column="record_date" property="recordDate" jdbcType="VARCHAR"/>
+        <result column="device_id" property="deviceId" jdbcType="VARCHAR"/>
     </resultMap>
 
     <!--自定义resultMap-->
@@ -31,7 +32,7 @@
     <sql id="Base_Column_List">
         door_permission_record_id, employee_id, door_id, record_type, upper_state, upper_edition,
         employee_group_name, open_door_photo_name, back_key, device_group_name, real_week,
-        event_result, event_result_reason, event_photo_group_id, record_date
+        event_result, event_result_reason, event_photo_group_id, record_date, device_id
     </sql>
     <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String">
         select
@@ -49,13 +50,13 @@
         upper_edition, employee_group_name, open_door_photo_name,
         back_key, device_group_name, real_week,
         event_result, event_result_reason, event_photo_group_id,
-        record_date)
+        record_date, device_id)
         values (#{doorPermissionRecordId,jdbcType=VARCHAR}, #{employeeId,jdbcType=VARCHAR},
         #{doorId,jdbcType=VARCHAR}, #{recordType,jdbcType=VARCHAR}, #{upperState,jdbcType=VARCHAR},
         #{upperEdition,jdbcType=VARCHAR}, #{employeeGroupName,jdbcType=VARCHAR}, #{openDoorPhotoName,jdbcType=VARCHAR},
         #{backKey,jdbcType=VARCHAR}, #{deviceGroupName,jdbcType=VARCHAR}, #{realWeek,jdbcType=VARCHAR},
         #{eventResult,jdbcType=VARCHAR}, #{eventResultReason,jdbcType=VARCHAR}, #{eventPhotoGroupId,jdbcType=VARCHAR},
-        #{recordDate,jdbcType=VARCHAR})
+        #{recordDate,jdbcType=VARCHAR}, #{deviceId,jdbcType=VARCHAR})
     </insert>
     <insert id="insertSelective" parameterType="com.xiangshangban.device.bean.DoorRecord">
         insert into door_record
@@ -105,6 +106,9 @@
             <if test="recordDate != null">
                 record_date,
             </if>
+            <if test="deviceId != null">
+                device_id,
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="doorPermissionRecordId != null">
@@ -151,6 +155,9 @@
             </if>
             <if test="recordDate != null">
                 #{recordDate,jdbcType=VARCHAR},
+            </if>
+            <if test="deviceId != null">
+                #{deviceId,jdbcType=VARCHAR},
             </if>
         </trim>
     </insert>
@@ -199,6 +206,9 @@
             <if test="recordDate != null">
                 record_date = #{recordDate,jdbcType=VARCHAR},
             </if>
+            <if test="deviceId != null">
+                device_id = #{deviceId,jdbcType=VARCHAR},
+            </if>
         </set>
         where door_permission_record_id = #{doorPermissionRecordId,jdbcType=VARCHAR}
     </update>
@@ -217,7 +227,8 @@
         event_result = #{eventResult,jdbcType=VARCHAR},
         event_result_reason = #{eventResultReason,jdbcType=VARCHAR},
         event_photo_group_id = #{eventPhotoGroupId,jdbcType=VARCHAR},
-        record_date = #{recordDate,jdbcType=VARCHAR}
+        record_date = #{recordDate,jdbcType=VARCHAR},
+        device_id = #{deviceId,jdbcType=VARCHAR}
         where door_permission_record_id = #{doorPermissionRecordId,jdbcType=VARCHAR}
     </update>
     <!--###############《新添加部分》##############-->
@@ -400,11 +411,12 @@
          ORDER BY S.sign_in DESC
     </select>
 
-    <select id="selectByRecordIdAndDoorId" resultMap="BaseResultMap" parameterType="java.lang.String">
+    <select id="selectByRecordIdDoorIdAndDeviceId" resultMap="BaseResultMap" parameterType="java.lang.String">
         select
         <include refid="Base_Column_List"/>
         from door_record
         where door_permission_record_id = #{doorPermissionRecordId,jdbcType=VARCHAR}
         AND door_id = #{doorId,jdbcType=VARCHAR}
+        AND device_id = #{deviceId,jdbcType=VARCHAR}
     </select>
 </mapper>

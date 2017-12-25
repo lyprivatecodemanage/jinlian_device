@@ -434,7 +434,7 @@ public class EmployeeController {
                         userPermission.put("employeeDoorPassword", doorSetting.getFirstPublishPassword());
                     }catch (Exception e){
                         userPermission.put("employeeDoorPassword", "");
-                        System.out.println("【"+employeeName+"】的门设置未设置");
+                        System.out.println("【"+employeeName+"】当前下发到的门的公共开门密码未设置");
                     }
 
                     userPermission.put("oneWeekTimeList", oneWeekTimeList);

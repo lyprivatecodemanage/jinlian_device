@@ -43,6 +43,7 @@ public interface DoorRecordMapper {
      *******************************/
     List<Map> selectEmpPunchRecord(Map map);
 
-    DoorRecord selectByRecordIdAndDoorId(@Param("doorPermissionRecordId") String doorPermissionRecordId,
-                                         @Param("doorId") String doorId);
+    DoorRecord selectByRecordIdDoorIdAndDeviceId(@Param("doorPermissionRecordId") String doorPermissionRecordId,
+                                         @Param("doorId") String doorId,
+                                         @Param("deviceId") String deviceId);
 }

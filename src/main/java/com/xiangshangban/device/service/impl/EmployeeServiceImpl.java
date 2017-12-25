@@ -194,7 +194,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
                     employee.setEmployeeFace((String) userLabelMap.get("userFace"));
                 }
             }catch (Exception e){
-                System.out.println("人脸信息不为空，值="+JSON.toJSONString(userLabelMap.get("userFace")));
+//                System.out.println("人脸信息不为空，值="+JSON.toJSONString(userLabelMap.get("userFace")));
                 employee.setEmployeeFace(JSON.toJSONString(userLabelMap.get("userFace")));
             }
         }
@@ -211,13 +211,13 @@ public class EmployeeServiceImpl implements IEmployeeService {
         //回复人员人脸、指纹、卡号信息上传
         Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
         Map<String, Object> resultData = new LinkedHashMap<String, Object>();
-        System.out.println("employeeId: "+employeeId+"     companyId: "+companyId);
+//        System.out.println("employeeId: "+employeeId+"     companyId: "+companyId);
 
         //查看人员是否存在
         Employee employeeExist = employeeMapper.selectByEmployeeIdAndCompanyId(employeeId, companyId);
 
         if (employeeExist != null){
-            System.out.println("employee: "+JSON.toJSONString(employee));
+//            System.out.println("employee: "+JSON.toJSONString(employee));
             //更新人员的指纹、人脸、卡号数据
             employeeMapper.updateByEmployeeIdAndCompanyIdSelective(employee);
 
@@ -270,12 +270,12 @@ public class EmployeeServiceImpl implements IEmployeeService {
         //命令数据存入数据库
         entranceGuardService.insertCommand(doorCmdRecord);
 
-        //同步人脸信息到其它设备
-        if ("1".equals(style)){
-            synchronizeEmployeePermissionForDevices(jsonString, employeeId);
-        }
+//        //同步人脸信息到其它设备
+//        if ("1".equals(style)){
+//            synchronizeEmployeePermissionForDevices(jsonString, employeeId);
+//        }
 
-        System.out.println("doorRecordAll = "+JSON.toJSONString(doorRecordAll));
+//        System.out.println("doorRecordAll = "+JSON.toJSONString(doorRecordAll));
         System.out.println("人员指纹、人脸信息上传已回复");
         return doorRecordAll;
 
@@ -524,11 +524,17 @@ public class EmployeeServiceImpl implements IEmployeeService {
         //1.同步该人员的人脸、指纹信息到人员表（一个人对多个公司）
         Employee employeeTemp = new Employee();
         employeeTemp.setEmployeeId(employeeId);
+
         try {
-            employeeTemp.setEmployeeFace(JSON.toJSONString(userLabelMap.get("userFace")));
+            if (StringUtils.isEmpty((String) userLabelMap.get("userFace"))) {
+                System.out.println("人脸信息为空1");
+                employeeTemp.setEmployeeFace((String) userLabelMap.get("userFace"));
+            }
         }catch (Exception e){
-            employeeTemp.setEmployeeFace((String) userLabelMap.get("userFace"));
+            System.out.println("人脸信息不为空，值="+JSON.toJSONString(userLabelMap.get("userFace")));
+            employeeTemp.setEmployeeFace(JSON.toJSONString(userLabelMap.get("userFace")));
         }
+
         if (StringUtils.isNotEmpty((String) userLabelMap.get("userFinger1"))) {
             employeeTemp.setEmployeeFinger1((String) userLabelMap.get("userFinger1"));
         }

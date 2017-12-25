@@ -301,7 +301,7 @@ public class DeviceServiceImpl implements IDeviceService {
             if (deviceRebootRecordExist == null){
                 deviceRebootRecordMapper.insertSelective(deviceRebootRecord);
             }else {
-                deviceRebootRecordMapper.updateByPrimaryKeySelective(deviceRebootRecord);
+//                deviceRebootRecordMapper.updateByPrimaryKeySelective(deviceRebootRecord);
             }
 
             //删除该记录对应的所有硬件版本记录信息
@@ -394,7 +394,7 @@ public class DeviceServiceImpl implements IDeviceService {
             if (deviceRunningLogExist == null){
                 deviceRunningLogMapper.insertSelective(deviceRunningLog);
             }else {
-                deviceRunningLogMapper.updateByPrimaryKeySelective(deviceRunningLog);
+//                deviceRunningLogMapper.updateByPrimaryKeySelective(deviceRunningLog);
             }
         }
 

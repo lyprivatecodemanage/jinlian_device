@@ -9,10 +9,7 @@ import com.xiangshangban.device.bean.*;
 import com.xiangshangban.device.common.encode.MD5Util;
 import com.xiangshangban.device.common.rmq.RabbitMQSender;
 import com.xiangshangban.device.common.utils.*;
-import com.xiangshangban.device.dao.DoorMapper;
-import com.xiangshangban.device.dao.DoorRecordMapper;
-import com.xiangshangban.device.dao.EmployeeMapper;
-import com.xiangshangban.device.dao.OSSFileMapper;
+import com.xiangshangban.device.dao.*;
 import com.xiangshangban.device.service.IEntranceGuardService;
 import org.apache.commons.collections.map.HashedMap;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +55,9 @@ public class EntranceGuardController {
 
     @Autowired
     private OSSFileMapper ossFileMapper;
+
+    @Autowired
+    private DeviceMapper deviceMapper;
 
     //TODO 门禁管理-------“基础信息”
 
@@ -1136,7 +1136,7 @@ public class EntranceGuardController {
 
         String operatorEmployeeId = request.getHeader("accessUserId");
 
-//        System.out.println("doorFeaturesSetup: "+doorFeaturesSetup);
+        System.out.println("doorFeaturesSetup: "+doorFeaturesSetup);
 
         //解析数据
         Map<String, Object> setupMap = (Map<String, Object>) net.sf.json.JSONObject.fromObject(doorFeaturesSetup);
@@ -1223,8 +1223,8 @@ public class EntranceGuardController {
             oneWeekTimeDoorKeepList = new ArrayList<>();
         }
 
-        //判断门定时常开是否开启
-        if (enableFirstCardKeepOpen.equals("1")) {
+        //判断首卡常开是否开启
+        if (enableFirstCardKeepOpen.equals("1")){
             try {
                 oneWeekTimeFirstCardList = (List) setupMap.get("oneWeekTimeFirstCardList");
             } catch (Exception e) {
@@ -1452,51 +1452,63 @@ public class EntranceGuardController {
         //根据文件名称查询是否有对应的记录，有则不再上传此文件
         OSSFile ossFile = ossFileMapper.selectByFileName(file.getOriginalFilename());
 
-        if (ossFile == null) {
-            //上传照片到oss服务器
-            String fileJsonString = ossController.deviceOssUpdate(file, "deviceRecordImg", "", deviceId);
+        try {
+            String companyId = deviceMapper.selectByPrimaryKey(deviceId).getCompanyId();
 
-            //获取文件上传返回的标识文件的唯一值key
-            String key = ((Map<String, String>) net.sf.json.JSONObject.fromObject(fileJsonString)).get("key");
+            if (ossFile == null){
+                //上传照片到oss服务器
+                String fileJsonString = ossController.deviceOssUpdate(file, "deviceRecordImg", "", deviceId);
 
-            //将这个文件标识存到门禁记录表里
-            DoorRecord doorRecord = new DoorRecord();
-            doorRecord.setDoorPermissionRecordId(id);
-            doorRecord.setBackKey(key);
-            doorRecord.setEventPhotoGroupId(eventPhotoCombinationId);
+                //获取文件上传返回的标识文件的唯一值key
+                String key = ((Map<String, String>)net.sf.json.JSONObject.fromObject(fileJsonString)).get("key");
 
-            //查询设备对应的门
-            String doorId = doorMapper.findDoorIdByDeviceId(deviceId).getDoorId();
-            DoorRecord doorRecordExist = doorRecordMapper.selectByRecordIdAndDoorId(id, doorId);
-            if (doorRecordExist != null) {
+                //将这个文件标识存到门禁记录表里
+                DoorRecord doorRecord = new DoorRecord();
+                doorRecord.setDoorPermissionRecordId(id);
+                doorRecord.setBackKey(key);
+                doorRecord.setEventPhotoGroupId(eventPhotoCombinationId);
+
+                //查询设备对应的门
+                String doorId = doorMapper.findDoorIdByDeviceId(deviceId).getDoorId();
+                DoorRecord doorRecordExist = doorRecordMapper.selectByRecordIdDoorIdAndDeviceId(id, doorId, deviceId);
+                if (doorRecordExist != null){
 //                System.out.println("上传的警报记录图片【"+key+"】已成功");
-                doorRecordMapper.updateByPrimaryKeySelective(doorRecord);
+                    doorRecordMapper.updateByPrimaryKeySelective(doorRecord);
 
-                //回复设备
-                resultCode = "0";
-                resultMessage = "执行成功";
-                resultData.put("resultCode", resultCode);
-                resultData.put("resultMessage", resultMessage);
-                Map<String, String> keyMap = new HashMap<String, String>();
-                keyMap.put("imgKey", key);
-                List<Map<String, String>> returnList = new ArrayList<Map<String, String>>();
-                returnList.add(keyMap);
-                resultData.put("returnObj", returnList);
-            } else {
-                System.out.println("上传的警报记录图片【" + key + "】没有与之匹配的记录id");
+                    //回复设备
+                    resultCode = "0";
+                    resultMessage = "执行成功";
+                    resultData.put("resultCode", resultCode);
+                    resultData.put("resultMessage", resultMessage);
+                    Map<String, String> keyMap = new HashMap<String, String>();
+                    keyMap.put("imgKey", key);
+                    List<Map<String, String>> returnList = new ArrayList<Map<String, String>>();
+                    returnList.add(keyMap);
+                    resultData.put("returnObj", returnList);
+                }else {
+                    System.out.println("上传的警报记录图片【"+key+"】没有与之匹配的记录id");
+                    //回复设备
+                    resultCode = "999";
+                    resultMessage = "上传的警报记录图片【"+key+"】没有与之匹配的记录id";
+                    resultData.put("resultCode", resultCode);
+                    resultData.put("resultMessage", resultMessage);
+                    resultData.put("returnObj", new ArrayList<>());
+                }
+
+            }else {
+                System.out.println("上传的警报记录图片【"+file.getOriginalFilename()+"】已存在");
                 //回复设备
                 resultCode = "999";
-                resultMessage = "上传的警报记录图片【" + key + "】没有与之匹配的记录id";
+                resultMessage = "上传的警报记录图片【"+file.getOriginalFilename()+"】已存在";
                 resultData.put("resultCode", resultCode);
                 resultData.put("resultMessage", resultMessage);
                 resultData.put("returnObj", new ArrayList<>());
             }
-
-        } else {
-            System.out.println("上传的警报记录图片【" + file.getOriginalFilename() + "】已存在");
+        }catch (java.lang.NullPointerException e){
+            System.out.println("设备【"+deviceId+"】没有绑定公司");
             //回复设备
             resultCode = "999";
-            resultMessage = "上传的警报记录图片【" + file.getOriginalFilename() + "】已存在";
+            resultMessage = "设备【"+deviceId+"】没有绑定公司";
             resultData.put("resultCode", resultCode);
             resultData.put("resultMessage", resultMessage);
             resultData.put("returnObj", new ArrayList<>());

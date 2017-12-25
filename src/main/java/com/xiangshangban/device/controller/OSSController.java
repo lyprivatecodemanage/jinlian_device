@@ -211,7 +211,6 @@ public class OSSController {
 				String companyId = deviceMapper.selectByPrimaryKey(deviceId).getCompanyId();
 
 				//获取公司编号
-
 				List<String> employeeList = employeeMapper.selectCompanyNoByCompanyId(companyId);
 				String companyNo = "unknowCompanyNo";
 

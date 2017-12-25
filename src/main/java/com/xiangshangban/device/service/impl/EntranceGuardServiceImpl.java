@@ -544,6 +544,9 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
             if(doorRecordCondition.getDepartment()!=null&&!doorRecordCondition.getDepartment().isEmpty()){
                 doorRecordCondition.setDepartment("%"+doorRecordCondition.getDepartment()+"%");
             }
+            if(doorRecordCondition.getDeviceName()!=null&&!doorRecordCondition.getDeviceName().isEmpty()){
+                doorRecordCondition.setDeviceName("%"+doorRecordCondition.getDeviceName()+"%");
+            }
             List<Map> doorRecords = null;
             if(flag==0){//打卡记录
                 doorRecords = doorRecordMapper.selectPunchCardRecord(doorRecordCondition);
@@ -687,6 +690,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
     @Override
     public void handOutFirstCard(String doorId, String enableFirstCardKeepOpen, List<String> employeeIdList, List oneWeekTimeFirstCardList, String operatorEmployeeId) {
 
+        System.out.println("employeeIdList = "+JSON.toJSONString(employeeIdList));
         //获取设备id
         Door doorInfo = doorMapper.findAllByDoorId(doorId);
 
@@ -769,7 +773,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         //下发的门禁配置DATA数据结构
         Map<String, Object> firstCardSetupMap = new LinkedHashMap<String, Object>();
         firstCardSetupMap.put("employeeIdList", employeeIdList);
-        firstCardSetupMap.put("oneWeekTimeList", oneWeekTimeFirstCardList);
+        firstCardSetupMap.put("oneWeekTimeList", oneWeekTimeFirstCardListTemp);
 
         //下发门禁常规设置
         //构造命令格式
@@ -789,11 +793,11 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         doorCmdEmployeeInformation.setSendTime(CalendarUtil.getCurrentTime());
         doorCmdEmployeeInformation.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
         doorCmdEmployeeInformation.setSuperCmdId(FormatUtil.createUuid());
-        doorCmdEmployeeInformation.setData(JSON.toJSONString(doorSetting));
+        doorCmdEmployeeInformation.setData(JSON.toJSONString(firstCardSetupMap));
 
         //获取完整的数据加协议封装格式
         RabbitMQSender rabbitMQSender = new RabbitMQSender();
-        Map<String, Object> userInformationAll =  rabbitMQSender.messagePackaging(doorCmdEmployeeInformation, "firstCardKeepDoorOpen", oneWeekTimeFirstCardListTemp, "C");
+        Map<String, Object> userInformationAll =  rabbitMQSender.messagePackaging(doorCmdEmployeeInformation, "firstCardKeepDoorOpen", firstCardSetupMap, "C");
         //命令状态设置为: 发送中
         doorCmdEmployeeInformation.setStatus("1");
         //设置md5校验值
@@ -804,6 +808,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         insertCommand(doorCmdEmployeeInformation);
         //立即下发数据到MQ
         rabbitMQSender.sendMessage(deviceId, userInformationAll);
+        System.out.println("userInformationAll"+JSON.toJSONString(userInformationAll));
     }
 
     //门禁配置---功能配置（门禁日历）
@@ -927,16 +932,23 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
             doorRecord.setRecordDate(recordMap.get("attTime"));
             doorRecord.setRealWeek(recordMap.get("week"));
             doorRecord.setEventPhotoGroupId(recordMap.get("eventPhotoCombinationId"));
+            doorRecord.setDeviceId(deviceId);
 
             //查找记录是否重复上传
-            DoorRecord doorRecordExit = doorRecordMapper.selectByRecordIdAndDoorId(recordMap.get("id"), doorId);
+            DoorRecord doorRecordExit = doorRecordMapper.selectByRecordIdDoorIdAndDeviceId(recordMap.get("id"), doorId, deviceId);
 
             if (doorRecordExit == null){
                 //保存门禁记录到数据库
                 doorRecordMapper.insertSelective(doorRecord);
             }else {
-                //更新门禁记录到数据库
-                doorRecordMapper.updateByPrimaryKeySelective(doorRecord);
+                //设备恢复出厂设置了，记录id又会从1开始，这时候需要根据时间区分记录是否保存
+                Boolean judge = DateUtils.isTime1LtTime2(doorRecordExit.getRecordDate(), recordMap.get("week"));
+                if (judge){
+                    doorRecordMapper.insertSelective(doorRecord);
+                }
+
+//                //更新门禁记录到数据库
+//                doorRecordMapper.updateByPrimaryKeySelective(doorRecord);
             }
         }
 
