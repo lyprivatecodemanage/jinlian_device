@@ -344,7 +344,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
                 }
 
                 returnData.setMessage("已执行删除设备上人员权限的操作");
-                returnData.setReturnCode("4202");
+                returnData.setReturnCode("3000");
                 return returnData;
 
             }catch (Exception e){

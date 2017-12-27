@@ -160,5 +160,5 @@ public interface IEntranceGuardService {
     /**
      *  TODO APP接口（获取员工的打卡记录）
      */
-    List<Map> queryEmpPunchCardRecord(String requestParam);
+    List<Map> queryEmpPunchCardRecord(String requestParam,String companyId);
 }

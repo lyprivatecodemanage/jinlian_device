@@ -15,7 +15,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -61,7 +60,6 @@ public class DeviceServiceImpl implements IDeviceService {
     @Autowired
     private EmployeeMapper employeeMapper;
 
-    @Transactional
     @Override
     public String addDevice(String deviceId) {
 
@@ -79,7 +77,7 @@ public class DeviceServiceImpl implements IDeviceService {
             deviceMapper.insertSelective(device);
             return "1";
         }else {
-//            System.out.println("设备已存在");
+            System.out.println("设备已存在");
             return "0";
         }
 

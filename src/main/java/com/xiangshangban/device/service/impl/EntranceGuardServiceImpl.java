@@ -1180,11 +1180,11 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
      * TODO APP接口，查询员工的打卡记录
      */
     @Override
-    public List<Map> queryEmpPunchCardRecord(String requestParam) {
+    public List<Map> queryEmpPunchCardRecord(String requestParam,String companyId) {
         com.alibaba.fastjson.JSONObject jsonObject = com.alibaba.fastjson.JSONObject.parseObject(requestParam);
         Object empId = jsonObject.get("empId");
         Object searchTime = jsonObject.get("searchTime");
-        Object companyId = jsonObject.get("companyId");
+       /* Object companyId = jsonObject.get("companyId");*/
 
         List<Map> punchCardRecord = null;
         if(empId!=null){

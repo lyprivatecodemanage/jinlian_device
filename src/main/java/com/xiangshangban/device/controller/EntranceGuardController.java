@@ -829,7 +829,7 @@ public class EntranceGuardController {
             }
 
             //声明首卡常开最终数据
-            Map firstCardKeepOpenMap = null;
+            Map firstCardKeepOpenMap = new HashedMap();
             if (firstCardKeepOpen != null && firstCardKeepOpen.size() > 0) {
                 firstCardKeepOpenMap = new HashMap();
                 firstCardKeepOpenMap.put("startWeekNumber", firstCardKeepOpen.get(0).get("start_week_number").toString());
@@ -1172,7 +1172,7 @@ public class EntranceGuardController {
 
         try {
             doorId = (String) setupMap.get("doorId");
-            loginEmployeeId = (String) setupMap.get("loginEmployeeId");
+            loginEmployeeId = request.getHeader("accessUserId");
             countLimitAuthenticationFailed = (String) setupMap.get("countLimitAuthenticationFailed");
             enableAlarm = (String) setupMap.get("enableAlarm");
             alarmTimeLength = (String) setupMap.get("alarmTimeLength");
@@ -1726,58 +1726,72 @@ public class EntranceGuardController {
      ****************************************************/
 
     @PostMapping("/app/getEmpPunchCardRecord")
-    public String getEmployeePunchCardRecord(@RequestBody String requestParam) {
-        //定义打卡方式
-        String[] punchCardType = {"", "", "", "卡", "", "指纹", "人脸", "蓝牙", "NFC"};
+    public String getEmployeePunchCardRecord(@RequestBody String requestParam,HttpServletRequest request) {
+        com.alibaba.fastjson.JSONObject jsonObject = com.alibaba.fastjson.JSONObject.parseObject(requestParam);
+        Object empId = jsonObject.get("empId");
+        //获取公司ID
+        String companyId = request.getHeader("companyId");
+        //返回的数据
+        Map resultMap = new HashMap();
+        if(companyId!=null && !companyId.isEmpty()){
+            if(empId!=null && !empId.toString().isEmpty()){
+                //定义打卡方式
+                String[] punchCardType = {"", "", "", "卡", "", "指纹", "人脸", "蓝牙", "NFC"};
+                List<Map> empPunchCardRecord = iEntranceGuardService.queryEmpPunchCardRecord(requestParam,companyId);
+                //将数据封装成对象，方便进行排序
+                List<PersonalRecordForApp> personalRecordForAppsList = new ArrayList<>();
+                if (empPunchCardRecord != null && empPunchCardRecord.size() > 0) {
+                    //将打卡方式由数字装换为文字
+                    for (int i = 0; i < empPunchCardRecord.size(); i++) {
+                        String openType = empPunchCardRecord.get(i).get("record_type").toString();
+                        for (int s = 0; s < punchCardType.length; s++) {
+                            if (openType.equals(String.valueOf(s))) {
+                                empPunchCardRecord.get(i).put("openType", punchCardType[s].toString());
+                            }
+                        }
+                        //移除所有的record_type数字
+                        empPunchCardRecord.get(i).remove("record_type");
+                    }
 
-        List<Map> empPunchCardRecord = iEntranceGuardService.queryEmpPunchCardRecord(requestParam);
-        //将数据封装成对象，方便进行排序
-        List<PersonalRecordForApp> personalRecordForAppsList = new ArrayList<>();
-        if (empPunchCardRecord != null && empPunchCardRecord.size() > 0) {
-            //将打卡方式由数字装换为文字
-            for (int i = 0; i < empPunchCardRecord.size(); i++) {
-                String openType = empPunchCardRecord.get(i).get("record_type").toString();
-                for (int s = 0; s < punchCardType.length; s++) {
-                    if (openType.equals(String.valueOf(s))) {
-                        empPunchCardRecord.get(i).put("openType", punchCardType[s].toString());
+                    //根据时间进行排序
+                    for (int k = 0; k < empPunchCardRecord.size(); k++) {
+                        PersonalRecordForApp personalRecordForApp = new PersonalRecordForApp();
+                        personalRecordForApp.setDoorName(empPunchCardRecord.get(k).get("door_name").toString().trim());
+                        personalRecordForApp.setDoorId(empPunchCardRecord.get(k).get("door_id").toString().trim());
+                        personalRecordForApp.setRecordDate(empPunchCardRecord.get(k).get("record_date").toString().trim().split(" ")[1]);
+                        personalRecordForApp.setOpenType(empPunchCardRecord.get(k).get("openType").toString().trim());
+
+                        personalRecordForAppsList.add(personalRecordForApp);
+                    }
+
+                    //根据时间进行排序
+                    Collections.sort(personalRecordForAppsList, new Comparator<PersonalRecordForApp>() {
+                        @Override
+                        public int compare(PersonalRecordForApp o1, PersonalRecordForApp o2) {
+                            return o1.getRecordDate().compareTo(o2.getRecordDate());
+                        }
+                    });
+
+                    //将第一个打卡时间和，最后的一个打卡时间的打卡方式更改为（“签到、签退”）
+                    if (personalRecordForAppsList.size() > 0) {
+                        if (personalRecordForAppsList.size() > 1) {
+                            personalRecordForAppsList.get(0).setOpenType(personalRecordForAppsList.get(0).getOpenType() + "(签到)");
+                            personalRecordForAppsList.get(personalRecordForAppsList.size() - 1).setOpenType(personalRecordForAppsList.get(personalRecordForAppsList.size() - 1).getOpenType() + "(签退)");
+                        } else {
+                            personalRecordForAppsList.get(0).setOpenType("签到");
+                        }
                     }
                 }
-                //移除所有的record_type数字
-                empPunchCardRecord.get(i).remove("record_type");
+                resultMap = ReturnCodeUtil.addReturnCode(personalRecordForAppsList != null && personalRecordForAppsList.size() > 0 ? personalRecordForAppsList : null);
+            }else{
+                //请求参数异常
+                resultMap = ReturnCodeUtil.addReturnCode(1);
             }
-
-            //根据时间进行排序
-            for (int k = 0; k < empPunchCardRecord.size(); k++) {
-                PersonalRecordForApp personalRecordForApp = new PersonalRecordForApp();
-                personalRecordForApp.setDoorName(empPunchCardRecord.get(k).get("door_name").toString().trim());
-                personalRecordForApp.setDoorId(empPunchCardRecord.get(k).get("door_id").toString().trim());
-                personalRecordForApp.setRecordDate(empPunchCardRecord.get(k).get("record_date").toString().trim().split(" ")[1]);
-                personalRecordForApp.setOpenType(empPunchCardRecord.get(k).get("openType").toString().trim());
-
-                personalRecordForAppsList.add(personalRecordForApp);
-            }
-
-            //根据时间进行排序
-            Collections.sort(personalRecordForAppsList, new Comparator<PersonalRecordForApp>() {
-                @Override
-                public int compare(PersonalRecordForApp o1, PersonalRecordForApp o2) {
-                    return o1.getRecordDate().compareTo(o2.getRecordDate());
-                }
-            });
-
-            //将第一个打卡时间和，最后的一个打卡时间的打卡方式更改为（“签到、签退”）
-            if (personalRecordForAppsList.size() > 0) {
-                if (personalRecordForAppsList.size() > 1) {
-                    personalRecordForAppsList.get(0).setOpenType(personalRecordForAppsList.get(0).getOpenType() + "(签到)");
-                    personalRecordForAppsList.get(personalRecordForAppsList.size() - 1).setOpenType(personalRecordForAppsList.get(personalRecordForAppsList.size() - 1).getOpenType() + "(签退)");
-                } else {
-                    personalRecordForAppsList.get(0).setOpenType("签到");
-                }
-            }
+        }else{
+            //未知的公司ID和人员Id
+            resultMap = ReturnCodeUtil.addReturnCode(3);
         }
-        //添加返回码
-        Map map = ReturnCodeUtil.addReturnCode(personalRecordForAppsList != null && personalRecordForAppsList.size() > 0 ? personalRecordForAppsList : null);
-        return JSONObject.toJSONString(map);
+        return JSONObject.toJSONString(resultMap);
     }
 }
 
