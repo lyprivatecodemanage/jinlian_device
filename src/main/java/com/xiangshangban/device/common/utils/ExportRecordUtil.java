@@ -127,7 +127,6 @@ public class ExportRecordUtil {
                     System.out.println("-------《导出签到签退记录》------");
                     for (int c = 0; c < exportData.size(); c++) {
                         SignInAndOut sign = (SignInAndOut)exportData.get(c);
-                        System.out.println("************************签到签退内容:"+sign.toString()+"*****************************");
                         //从表格的第二行开始
                         row = sheet.createRow(c + 1);
                         //分割时间(日期+时间)

@@ -120,6 +120,8 @@
       SELECT
       E.door_id,
       COALESCE (door_name, '') AS door_name,
+      device_id,
+      COALESCE (device_name, '') AS device_name,
       COALESCE (F.employee_phone, '') AS employee_phone,
       COALESCE (employee_face, '') AS employee_face,
       COALESCE (employee_nfc, '') AS employee_nfc
@@ -138,6 +140,7 @@
       INNER JOIN (
       SELECT
       device_id,
+      device_name,
       company_id
       FROM
       device_
@@ -150,7 +153,7 @@
       LEFT JOIN employee_ F ON E.employee_id = F.employee_id
       AND E.company_id = F.employee_company_id
       ) W
-    <where>
+      <where>
       <if test="doorName!=null and doorName!=''">
         W.door_name LIKE #{doorName}
       </if>
@@ -328,6 +331,12 @@
               and Q.range_door_open_type LIKE #{openType}
           </if>
       </where>
+      ORDER BY Q.range_flag_id
+    <!--  <if test="pageIndex!=null">
+          <if test="rowNumber!=null">
+              LIMIT #{rowNumber} OFFSET #{pageIndex}
+          </if>
+      </if>-->
   </select>
 
 

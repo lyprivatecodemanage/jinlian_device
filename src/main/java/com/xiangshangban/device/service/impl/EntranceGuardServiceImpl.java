@@ -197,8 +197,6 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         map.put("operateCommand",jsonObject.get("operateCommand")!=null?jsonObject.get("operateCommand").toString():null);
         map.put("companyId",(companyId!=null && !companyId.isEmpty())?companyId:null);
 
-//        System.out.println("queryLogCommand---------->"+companyId+"----------");
-
 
         Object page = jsonObject.get("page");
         Object rows = jsonObject.get("rows");
@@ -258,7 +256,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
 
             outterLogList.add(innerMap);
         }
-        return PageUtils.doSplitPage(null,outterLogList,page,rows,pageObj,1);
+        return PageUtils.doSplitPage(null,outterLogList,page,rows,pageObj,2);
     }
     /**
      * 批量删除日志信息
@@ -339,6 +337,15 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         if(relateEmpPermissionCondition.get("openType")!=null && !relateEmpPermissionCondition.get("openType").toString().isEmpty()){
             relateEmpPermissionCondition.put("openType","%"+relateEmpPermissionCondition.get("openType")+"%");
         }
+
+        Page pageObj = null;
+      if(relateEmpPermissionCondition.get("pageIndex")!=null && !relateEmpPermissionCondition.get("pageIndex").toString().isEmpty()){
+            if(relateEmpPermissionCondition.get("rowNumber")!=null && !relateEmpPermissionCondition.get("rowNumber").toString().isEmpty()){
+                int pageIndex = Integer.parseInt(relateEmpPermissionCondition.get("pageIndex").toString());
+                int rowNumber = Integer.parseInt(relateEmpPermissionCondition.get("rowNumber").toString());
+                pageObj = PageHelper.startPage(pageIndex, rowNumber);
+            }
+        }
         //查询门相关的人员的基本信息和周一的最早的打卡时间段
         List<Map> maps = doorEmployeeMapper.selectMondayPunchCardTimeAndEmpInfo(relateEmpPermissionCondition);
 
@@ -392,8 +399,15 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
                 }
             }
         }
+        //添加Page对象，返回给Controller层
+        Map pageMap = new HashMap();
+        pageMap.put("pageObj",pageObj);
+        maps.add(pageMap);
+
         return maps;
     }
+
+
     /**
      * TODO 维护doorEmployee表
      * 判断当前门关联的人员的最新的一条指令是哪个（删除、下发人员）

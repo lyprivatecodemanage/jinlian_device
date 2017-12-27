@@ -270,10 +270,10 @@ public class EmployeeServiceImpl implements IEmployeeService {
         //命令数据存入数据库
         entranceGuardService.insertCommand(doorCmdRecord);
 
-//        //同步人脸信息到其它设备
-//        if ("1".equals(style)){
-//            synchronizeEmployeePermissionForDevices(jsonString, employeeId);
-//        }
+        //同步人脸信息到其它设备
+        if ("1".equals(style)){
+            synchronizeEmployeePermissionForDevices(jsonString, employeeId);
+        }
 
 //        System.out.println("doorRecordAll = "+JSON.toJSONString(doorRecordAll));
         System.out.println("人员指纹、人脸信息上传已回复");
@@ -557,6 +557,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
 
             //录人脸的这个门不再同步
             if (localDoorId.equals(doorEmployee.getDoorId())){
+                System.out.println("正在录人脸的门【"+doorEmployee.getDoorName()+"】将不进行同步");
                 continue;
             }
 
@@ -567,6 +568,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
             try {
                 deviceId = door.getDeviceId();
             }catch (Exception e){
+                System.out.println("【"+doorEmployee.getDoorName()+"】门已删除，同步将跳过这个门");
                 continue;
             }
 

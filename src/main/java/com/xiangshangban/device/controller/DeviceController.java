@@ -183,7 +183,6 @@ public class DeviceController {
     @ResponseBody
     @RequestMapping(value = "/findDeviceInformation", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     public ReturnData findDeviceInformation(@RequestBody String jsonString, HttpServletRequest request) {
-
         /**
          * 测试数据
          {
@@ -197,7 +196,6 @@ public class DeviceController {
          "rows":"3"
          }
          */
-
 //        LOGGER.info(jsonString);
 
         //提取数据
