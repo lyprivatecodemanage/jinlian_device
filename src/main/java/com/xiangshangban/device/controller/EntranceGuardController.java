@@ -232,9 +232,9 @@ public class EntranceGuardController {
      * 批量删除日志
      * {
      * "logIdList":[
-     * {"log_id":"26C8746239514090926B68CE0A07AA60"},
-     * {"log_id":"725E7BD1B1F44DFAB4C64CA09D790E4A"}
-     * ]
+     *      {"log_id":"26C8746239514090926B68CE0A07AA60"},
+     *      {"log_id":"725E7BD1B1F44DFAB4C64CA09D790E4A"}
+     *  ]
      * }
      */
     @PostMapping("/log/delLogCommand")
