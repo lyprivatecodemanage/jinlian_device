@@ -829,7 +829,8 @@ public class EntranceGuardController {
             }
 
             //声明首卡常开最终数据
-            Map firstCardKeepOpenMap = new HashedMap();
+            Map firstCardKeepOpenMap = new HashMap();
+
             if (firstCardKeepOpen != null && firstCardKeepOpen.size() > 0) {
                 firstCardKeepOpenMap = new HashMap();
                 firstCardKeepOpenMap.put("startWeekNumber", firstCardKeepOpen.get(0).get("start_week_number").toString());
