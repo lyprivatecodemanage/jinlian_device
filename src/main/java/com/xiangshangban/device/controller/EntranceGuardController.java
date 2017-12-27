@@ -632,8 +632,8 @@ public class EntranceGuardController {
         String companyId = request.getHeader("companyId");
         Map result = new HashMap();
 
-        if (jsonObject != null && jsonObject.size() > 0) {
-            List<Map> aWeekTimeList = iEntranceGuardService.queryAWeekOpenTime(empId.toString().trim(), (doorId != null && !doorId.toString().isEmpty()) ? doorId.toString().trim() : null);
+        if ((empId!=null && !empId.toString().trim().isEmpty())&&(doorId!=null && !doorId.toString().trim().isEmpty())) {
+            List<Map> aWeekTimeList = iEntranceGuardService.queryAWeekOpenTime(empId.toString().trim(),doorId.toString().trim());
 
             if (aWeekTimeList != null && aWeekTimeList.size() > 0) {
                 //获取该人员的有效的开门时间
