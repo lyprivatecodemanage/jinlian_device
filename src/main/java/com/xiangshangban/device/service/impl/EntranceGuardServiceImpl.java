@@ -328,8 +328,8 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
             relateEmpPermissionCondition.put("rangeStartTime","");
             relateEmpPermissionCondition.put("rangeEndTime","");
         }else{
-            relateEmpPermissionCondition.put("rangeStartTime",openTime.toString().split("-")[0]);
-            relateEmpPermissionCondition.put("rangeEndTime",openTime.toString().split("-")[1]);
+            relateEmpPermissionCondition.put("rangeStartTime",openTime.toString().split("-")[0].trim());
+            relateEmpPermissionCondition.put("rangeEndTime",openTime.toString().split("-")[1].trim());
         }
         //移除openTime
         relateEmpPermissionCondition.remove("openTime");
