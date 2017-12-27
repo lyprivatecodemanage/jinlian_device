@@ -79,7 +79,6 @@ public class DeviceServiceImpl implements IDeviceService {
             deviceMapper.insertSelective(device);
             return "1";
         }else {
-            deviceMapper.updateByPrimaryKeySelective(device);
 //            System.out.println("设备已存在");
             return "0";
         }
@@ -192,46 +191,46 @@ public class DeviceServiceImpl implements IDeviceService {
         return doorMapper.selectAllDoorByCompanyId(companyId);
     }
 
-    @Override
-    public void bindDevice(String deviceId) {
-
-        Device device = deviceMapper.selectByPrimaryKey(deviceId);
-
-        Map<String, Object> bindInformation = new LinkedHashMap<String, Object>();
-        bindInformation.put("companyId", device.getCompanyId());
-        bindInformation.put("companyName", device.getCompanyName());
-
-        //构造命令格式
-        DoorCmd doorCmdBindDevice = new DoorCmd();
-        doorCmdBindDevice.setServerId(serverId);
-        doorCmdBindDevice.setDeviceId(deviceId);
-        doorCmdBindDevice.setFileEdition("v1.3");
-        doorCmdBindDevice.setCommandMode("C");
-        doorCmdBindDevice.setCommandType("single");
-        doorCmdBindDevice.setCommandTotal("1");
-        doorCmdBindDevice.setCommandIndex("1");
-        doorCmdBindDevice.setSubCmdId("");
-        doorCmdBindDevice.setAction("BIND_DEVICE");
-        doorCmdBindDevice.setActionCode("1001");
-        doorCmdBindDevice.setSendTime(CalendarUtil.getCurrentTime());
-        doorCmdBindDevice.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
-        doorCmdBindDevice.setSuperCmdId(FormatUtil.createUuid());
-        doorCmdBindDevice.setData(JSON.toJSONString(bindInformation));
-
-        //获取完整的数据加协议封装格式
-        RabbitMQSender rabbitMQSender = new RabbitMQSender();
-        Map<String, Object> doorCmdPackageAll =  rabbitMQSender.messagePackaging(doorCmdBindDevice, "bindInformation", bindInformation, "C");
-        //命令状态设置为: 发送中
-        doorCmdBindDevice.setStatus("1");
-        //设置md5校验值
-        doorCmdBindDevice.setMd5Check((String) doorCmdPackageAll.get("MD5Check"));
-        //设置数据库的data字段
-        doorCmdBindDevice.setData(JSON.toJSONString(doorCmdPackageAll.get("data")));
-        //命令数据存入数据库
-        entranceGuardService.insertCommand(doorCmdBindDevice);
-        //立即下发数据到MQ
-        rabbitMQSender.sendMessage(deviceId, doorCmdPackageAll);
-    }
+//    @Override
+//    public void bindDevice(String deviceId) {
+//
+//        Device device = deviceMapper.selectByPrimaryKey(deviceId);
+//
+//        Map<String, Object> bindInformation = new LinkedHashMap<String, Object>();
+//        bindInformation.put("companyId", device.getCompanyId());
+//        bindInformation.put("companyName", device.getCompanyName());
+//
+//        //构造命令格式
+//        DoorCmd doorCmdBindDevice = new DoorCmd();
+//        doorCmdBindDevice.setServerId(serverId);
+//        doorCmdBindDevice.setDeviceId(deviceId);
+//        doorCmdBindDevice.setFileEdition("v1.3");
+//        doorCmdBindDevice.setCommandMode("C");
+//        doorCmdBindDevice.setCommandType("single");
+//        doorCmdBindDevice.setCommandTotal("1");
+//        doorCmdBindDevice.setCommandIndex("1");
+//        doorCmdBindDevice.setSubCmdId("");
+//        doorCmdBindDevice.setAction("BIND_DEVICE");
+//        doorCmdBindDevice.setActionCode("1001");
+//        doorCmdBindDevice.setSendTime(CalendarUtil.getCurrentTime());
+//        doorCmdBindDevice.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
+//        doorCmdBindDevice.setSuperCmdId(FormatUtil.createUuid());
+//        doorCmdBindDevice.setData(JSON.toJSONString(bindInformation));
+//
+//        //获取完整的数据加协议封装格式
+//        RabbitMQSender rabbitMQSender = new RabbitMQSender();
+//        Map<String, Object> doorCmdPackageAll =  rabbitMQSender.messagePackaging(doorCmdBindDevice, "bindInformation", bindInformation, "C");
+//        //命令状态设置为: 发送中
+//        doorCmdBindDevice.setStatus("1");
+//        //设置md5校验值
+//        doorCmdBindDevice.setMd5Check((String) doorCmdPackageAll.get("MD5Check"));
+//        //设置数据库的data字段
+//        doorCmdBindDevice.setData(JSON.toJSONString(doorCmdPackageAll.get("data")));
+//        //命令数据存入数据库
+//        entranceGuardService.insertCommand(doorCmdBindDevice);
+//        //立即下发数据到MQ
+//        rabbitMQSender.sendMessage(deviceId, doorCmdPackageAll);
+//    }
 
     @Override
     public void unBindDevice(String deviceId) {

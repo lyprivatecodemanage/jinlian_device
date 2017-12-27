@@ -46,11 +46,11 @@ public interface IDeviceService {
      */
     List<Door> queryAllDoorInfoByCompanyId(String companyId);
 
-    /**
-     * 绑定设备
-     * @param deviceId
-     */
-    void bindDevice(String deviceId);
+//    /**
+//     * 绑定设备
+//     * @param deviceId
+//     */
+//    void bindDevice(String deviceId);
 
     /**
      * 解绑设备

@@ -186,7 +186,7 @@ public class DeviceController {
         /**
          * 测试数据
          {
-         "companyId": "A3789DSYAG7FA7",
+         "role": "superAdmin",
          "companyName": "华龙国际集团",
          "deviceName": "设备1",
          "deviceId": "0f1a21d4e6fd3cb8",
@@ -200,7 +200,7 @@ public class DeviceController {
 
         //提取数据
         Map<String, String> mapJson = (Map<String, String>) net.sf.json.JSONObject.fromObject(jsonString);
-        String companyId = "";
+        String role = "";
         String companyName = "";
         String deviceName = "";
         String deviceId = "";
@@ -213,9 +213,9 @@ public class DeviceController {
         ReturnData returnData = new ReturnData();
 
         try {
-            companyId = mapJson.get("companyId");
+            role = mapJson.get("role");
         } catch (Exception e) {
-            LOGGER.error("公司id为null");
+            LOGGER.error("角色为null");
             returnData.setMessage("请登录账号后再操作");
             returnData.setReturnCode("3006");
             return returnData;
@@ -237,7 +237,7 @@ public class DeviceController {
             return returnData;
         }
 
-        if (companyId == null
+        if (role == null
                 || companyName == null
                 || deviceName == null
                 || deviceId == null
@@ -247,6 +247,26 @@ public class DeviceController {
                 || rows == null) {
             LOGGER.info("必传参数字段不存在");
             returnData.setMessage("必传参数字段不存在");
+            returnData.setReturnCode("3006");
+            return returnData;
+        }
+
+        String companyId = "";
+        //角色权限控制的判断，仅此一处有，目前通过前端判断role角色来隐藏入口控制权限
+        if ("superAdmin".equals(role)) {
+//            LOGGER.info("已匹配到【超级管理员】角色");
+
+        } else if ("admin".equals(role)) {
+//            LOGGER.info("已匹配到【企业管理员】角色");
+            companyId = request.getHeader("companyId");
+        } else if ("user".equals(role)) {
+//            LOGGER.info("已匹配到【普通用户】角色");
+            returnData.setMessage("您没有操作权限");
+            returnData.setReturnCode("3006");
+            return returnData;
+        } else {
+//            LOGGER.info("没有匹配的角色信息");
+            returnData.setMessage("没有匹配的角色信息");
             returnData.setReturnCode("3006");
             return returnData;
         }
@@ -619,32 +639,32 @@ public class DeviceController {
 //
 //    }
 
-//    /**
-//     * 解绑设备
-//     */
-//    @ResponseBody
-//    @RequestMapping("/unBindDevice")
-//    public void unBindDevice(@RequestBody String jsonString){
-//
-//        /**
-//         * 测试数据
-//         {
-//         "doorId": "0f1a21d4e6fd3cb8"
-//         }
-//         */
-//
-//        LOGGER.info(jsonString);
-//
-//        //解析数据
-//        Map<String, String> mapJson = (Map<String, String>)net.sf.json.JSONObject.fromObject(jsonString);
-//        String doorId = mapJson.get("doorId");
-//
-//        //查找设备id
-//        String deviceId = doorMapper.findAllByDoorId(doorId).getDeviceId();
-//
-//        deviceService.unBindDevice(deviceId);
-//
-//    }
+    /**
+     * 解绑设备
+     */
+    @ResponseBody
+    @RequestMapping("/unBindDevice")
+    public void unBindDevice(@RequestBody String jsonString){
+
+        /**
+         * 测试数据
+         {
+         "doorId": "0f1a21d4e6fd3cb8"
+         }
+         */
+
+        LOGGER.info(jsonString);
+
+        //解析数据
+        Map<String, String> mapJson = (Map<String, String>)net.sf.json.JSONObject.fromObject(jsonString);
+        String doorId = mapJson.get("doorId");
+
+        //查找设备id
+        String deviceId = doorMapper.findAllByDoorId(doorId).getDeviceId();
+
+        deviceService.unBindDevice(deviceId);
+
+    }
 
     /**
      * 保存设备上传的心跳信息（心跳信息包括设备的各种状态信息，如cpu、内存，HTTP POST上传）
@@ -2001,7 +2021,7 @@ public class DeviceController {
      */
     @ResponseBody
     @RequestMapping(value = "/getDeviceCount", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
-    public ReturnData getDeviceCount(@RequestBody String jsonString) {
+    public ReturnData getDeviceCount(@RequestBody String jsonString, HttpServletRequest request) {
 
         /**
          * 测试数据
@@ -2021,7 +2041,7 @@ public class DeviceController {
         ReturnData returnData = new ReturnData();
 
         try {
-            companyId = mapJson.get("companyId");
+            companyId = request.getHeader("companyId");
         } catch (Exception e) {
             LOGGER.error("必传参数字段为null");
             returnData.setMessage("必传参数字段为null");

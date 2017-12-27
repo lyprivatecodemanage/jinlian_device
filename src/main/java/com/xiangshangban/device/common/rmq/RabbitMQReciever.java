@@ -158,26 +158,33 @@ public class RabbitMQReciever {
 
                     }else if (mapResult.get("commandMode").equals("R")){
 
-                        //返回值为0代表执行成功
-                        if (((Map<String, String>)mapResult.get("resultData")).get("resultCode").equals("0")){
+                        //设备回复的命令获取superCMDID
+                        Map<String, String> commandMap = (Map<String, String>) mapResult.get("command");
+                        Map<String, Object> resultMap = (Map<String, Object>) mapResult.get("resultData");
+                        String superCmdId = commandMap.get("superCMDID");
+                        String resultCode = (String) resultMap.get("resultCode");
+                        String resultMessage = (String) resultMap.get("resultMessage");
 
-                            //设备回复的命令获取superCMDID
-                            Map<String, String> commandMap = (Map<String, String>)mapResult.get("command");
-                            String superCmdId = commandMap.get("superCMDID");
-                            DoorCmd doorCmd = new DoorCmd();
-                            doorCmd.setSuperCmdId(superCmdId);
+                        DoorCmd doorCmd = new DoorCmd();
+                        doorCmd.setSuperCmdId(superCmdId);
+                        doorCmd.setResultCode(resultCode);
+                        doorCmd.setResultCode(resultMessage);
+
+                        //判断命令成功与否
+                        if ("0".equals(resultCode)){
 
                             //删除人员的命令收到回复时将命令状态置为4：已删除，而不是2：下发成功，其它都置为下发成功
                             DoorCmd doorCmdTemp = doorCmdMapper.selectBySuperCmdId(superCmdId);
-                            if (doorCmdTemp.getAction().equals("DELETE_USER_INFO")){
+                            if (doorCmdTemp.getAction().equals("DELETE_USER_INFO")) {
                                 doorCmd.setStatus("4");
-                            }else {
+                            } else {
                                 doorCmd.setStatus("2");
                             }
 
-                            //改变这条命令的状态
-                            doorCmdMapper.updateBySuperCmdIdSelective(doorCmd);
                         }
+
+                        //改变这条命令的状态
+                        doorCmdMapper.updateBySuperCmdIdSelective(doorCmd);
                     }
                 }catch (Exception e){
                     e.printStackTrace();

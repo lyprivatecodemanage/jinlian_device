@@ -497,28 +497,27 @@ public class EntranceGuardController {
 
                     if (commandType != null && commandType.toString().equals("1")) { //删除指令（使用删除指令的状态）
                         Object statusStr = maps.get(i).get("status");
-                        for (int s = 0; s < delStatusStr.length; s++) {
-                            if (statusStr == null) {
-                                maps.get(i).put("status", "");
+                        for(int s=0;s<delStatusStr.length;s++){
+                            if(statusStr==null){
+                                maps.get(i).put("status","");
                                 continue;
                             }
-                            if (statusStr.toString().equals(String.valueOf(s))) {
-                                maps.get(i).put("status", delStatusStr[s].toString());
+                            if(statusStr.toString().equals(String.valueOf(s))){
+                                maps.get(i).put("status",delStatusStr[s].toString());
                             }
                         }
                     } else { //其它的指令或者是没有status的时候
                         Object statusStr = maps.get(i).get("status");
-                        for (int s = 0; s < cmdStatusStr.length; s++) {
-                            if (statusStr == null) {
-                                maps.get(i).put("status", "");
+                        for(int s=0;s<cmdStatusStr.length;s++){
+                            if(statusStr==null){
+                                maps.get(i).put("status","");
                                 continue;
                             }
-                            if (statusStr.toString().equals(String.valueOf(s))) {
-                                maps.get(i).put("status", cmdStatusStr[s].toString());
+                            if(statusStr.toString().equals(String.valueOf(s))){
+                                maps.get(i).put("status",cmdStatusStr[s].toString());
                             }
                         }
                     }
-
 
                     //TODO 转换打卡方式（包含组合打卡方式）
                     if (openDoorType != null && !"".equals(openDoorType)) {
