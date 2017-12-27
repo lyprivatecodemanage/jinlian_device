@@ -1282,10 +1282,22 @@ public class DeviceController {
             }
 
             //保存并下发系统更新设置
-            deviceService.updateDeviceSystem(deviceIdList, downloadTimeSys, updateTimeSys);
+            String codeSys = deviceService.updateDeviceSystem(deviceIdList, downloadTimeSys, updateTimeSys);
+
+            if ("0".equals(codeSys)){
+                returnData.setMessage("没有查询到可以升级的系统升级包");
+                returnData.setReturnCode("4202");
+                return returnData;
+            }
 
             //保存下发应用更新设置
-            deviceService.updateDeviceApplication(deviceIdList, downloadTimeApp, updateTimeApp);
+            String codeApp = deviceService.updateDeviceApplication(deviceIdList, downloadTimeApp, updateTimeApp);
+
+            if ("0".equals(codeApp)){
+                returnData.setMessage("没有查询到可以升级的应用升级包");
+                returnData.setReturnCode("4202");
+                return returnData;
+            }
 
             returnData.setMessage("已执行下发设备系统设置操作");
             returnData.setReturnCode("3000");

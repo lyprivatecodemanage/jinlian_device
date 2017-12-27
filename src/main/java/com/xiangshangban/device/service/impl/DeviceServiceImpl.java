@@ -471,6 +471,11 @@ public class DeviceServiceImpl implements IDeviceService {
                 deviceSettingUpdateMapper.updateByPrimaryKeySelective(deviceSettingUpdate);
             }
 
+            //判断系统升级时间是否空，空则不下发数据
+            if (StringUtils.isEmpty(downloadTime) && StringUtils.isEmpty(updateTime)){
+                return "";
+            }
+
             //查询最新的下载包路径信息
             List<DeviceUpdatePackSys> deviceUpdatePackSys = deviceUpdatePackSysMapper.selectAllByLatestTime();
 
@@ -494,13 +499,13 @@ public class DeviceServiceImpl implements IDeviceService {
                 }
                 mapHandOut.put("path1", path1);
                 mapHandOut.put("path2", path2);
+
+                //确保下载地址两个都有
+                if (StringUtils.isEmpty(path1) || StringUtils.isEmpty(path2)){
+                    return "0";
+                }
             }else {
-                mapHandOut.put("newSysVerion", "");
-                mapHandOut.put("isSameVesionUpdate", "");
-                mapHandOut.put("downloadTime", downloadTime);
-                mapHandOut.put("updateTime", updateTime);
-                mapHandOut.put("path1", "");
-                mapHandOut.put("path2", "");
+                return "0";
             }
 
             //构造命令格式
@@ -567,6 +572,11 @@ public class DeviceServiceImpl implements IDeviceService {
                 deviceSettingUpdateMapper.insertSelective(deviceSettingUpdate);
             }else {
                 deviceSettingUpdateMapper.updateByPrimaryKeySelective(deviceSettingUpdate);
+            }
+
+            //判断应用升级时间是否空，空则不下发数据
+            if (StringUtils.isEmpty(downloadTime)){
+                return "";
             }
 
             Map<String, String> mapHandOut = new HashMap<String, String>();
