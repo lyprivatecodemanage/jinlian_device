@@ -480,7 +480,7 @@ public class DeviceServiceImpl implements IDeviceService {
             List<DeviceUpdatePackSys> deviceUpdatePackSys = deviceUpdatePackSysMapper.selectAllByLatestTime();
 
             Map<String, String> mapHandOut = new HashMap<String, String>();
-            if (deviceUpdatePackSys.size() > 0 && deviceUpdatePackSys.size() == 2 && deviceUpdatePackSys.size() < 3){
+            if (deviceUpdatePackSys.size() == 2){
                 mapHandOut.put("newSysVerion", deviceUpdatePackSys.get(0).getNewSysVerion());
                 mapHandOut.put("isSameVesionUpdate", "");
                 mapHandOut.put("downloadTime", downloadTime);

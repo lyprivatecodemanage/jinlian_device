@@ -1291,13 +1291,7 @@ public class DeviceController {
             }
 
             //保存下发应用更新设置
-            String codeApp = deviceService.updateDeviceApplication(deviceIdList, downloadTimeApp, updateTimeApp);
-
-            if ("0".equals(codeApp)){
-                returnData.setMessage("没有查询到可以升级的应用升级包");
-                returnData.setReturnCode("4202");
-                return returnData;
-            }
+            deviceService.updateDeviceApplication(deviceIdList, downloadTimeApp, updateTimeApp);
 
             returnData.setMessage("已执行下发设备系统设置操作");
             returnData.setReturnCode("3000");
