@@ -480,9 +480,14 @@ public class EntranceGuardController {
                     Object object = maps.get(p).get("pageObj");
                     if(object!=null){
                         pageObj = (Page)object;
-                        //移除List中保存有Page对象的Map
-                        maps.remove(p);
                     }
+                }
+            }
+            
+             //移除List中的Page对象
+            for(int p=0;p<maps.size();p++){
+                if(maps.get(p).keySet().size()==1){
+                    maps.remove(p);
                 }
             }
 
