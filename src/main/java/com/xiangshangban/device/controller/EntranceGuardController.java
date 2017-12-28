@@ -12,6 +12,7 @@ import com.xiangshangban.device.common.utils.*;
 import com.xiangshangban.device.dao.*;
 import com.xiangshangban.device.service.IEntranceGuardService;
 import org.apache.commons.collections.map.HashedMap;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
@@ -1220,6 +1221,36 @@ public class EntranceGuardController {
             returnData.setMessage("必传参数字段不存在");
             returnData.setReturnCode("3006");
             return returnData;
+        }
+
+        //判断密码不能相同
+        if (StringUtils.isNotEmpty(publicPassword1) || StringUtils.isNotEmpty(publicPassword2)){
+            if (StringUtils.isNotEmpty(threatenPassword)){
+                if (threatenPassword.equals(publicPassword1) || threatenPassword.equals(publicPassword2)){
+                    System.out.println("公共开门密码和胁迫开门密码不能相同");
+                    returnData.setMessage("公共开门密码和胁迫开门密码不能相同");
+                    returnData.setReturnCode("4207");
+                    return returnData;
+                }
+            }
+            if (StringUtils.isNotEmpty(deviceManagePassword)){
+                if (deviceManagePassword.equals(publicPassword1) || deviceManagePassword.equals(publicPassword2)){
+                    System.out.println("公共开门密码和设备管理密码不能相同");
+                    returnData.setMessage("公共开门密码和设备管理密码不能相同");
+                    returnData.setReturnCode("4207");
+                    return returnData;
+                }
+            }
+        }
+        if (StringUtils.isNotEmpty(threatenPassword)){
+            if (StringUtils.isNotEmpty(deviceManagePassword)){
+                if (threatenPassword.equals(deviceManagePassword)){
+                    System.out.println("胁迫开门密码和设备管理密码不能相同");
+                    returnData.setMessage("胁迫开门密码和设备管理密码不能相同");
+                    returnData.setReturnCode("4207");
+                    return returnData;
+                }
+            }
         }
 
         //判断门定时常开是否开启

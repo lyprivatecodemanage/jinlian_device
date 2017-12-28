@@ -625,24 +625,28 @@ public class DeviceServiceImpl implements IDeviceService {
     @Override
     public boolean checkCrc16DeviceId(String deviceId) {
 
-        //去除deviceId尾部的-Crc16得到的字符串
-        String deviceIdAhead = deviceId.substring(0, deviceId.length()-5);
+        try {
+            //去除deviceId尾部的-Crc16得到的字符串
+            String deviceIdAhead = deviceId.substring(0, deviceId.length()-5);
 
-        //对方的Crc16
-        String otherCrc16= deviceId.substring(deviceId.length()-4, deviceId.length());
+            //对方的Crc16
+            String otherCrc16= deviceId.substring(deviceId.length()-4, deviceId.length());
 
-        //我方的Crc16
-        String myCrc16 = String.format("%04x", CRC16.calcCrc16(deviceIdAhead.getBytes()));
+            //我方的Crc16
+            String myCrc16 = String.format("%04x", CRC16.calcCrc16(deviceIdAhead.getBytes()));
 
-        //比对双方的Crc16
-        if (myCrc16.equals(otherCrc16)){
-//            System.out.println("CRC16校验成功，数据完好无损");
-            return true;
-        }else {
-            System.out.println("CRC16校验失败，数据已被修改");
+            //比对双方的Crc16
+            if (myCrc16.equals(otherCrc16)){
+//            System.out.println("CRC16校验成功");
+                return true;
+            }else {
+                System.out.println("CRC16校验失败");
+                return false;
+            }
+        }catch (Exception e){
+            System.out.println("CRC16校验失败");
             return false;
         }
-
     }
 
     public static void main(String[] args) {

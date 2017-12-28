@@ -19,7 +19,10 @@ import java.util.List;
 
 public class OSSFileUtil {
 	private static final Log LOG = LogFactory.getLog(OSSFileUtil.class);
+	//外网
 	private final static String OSS_ENDPOINT = "oss-cn-hangzhou.aliyuncs.com";
+	//内网
+//	private final static String OSS_ENDPOINT = "oss-cn-hangzhou-internal.aliyuncs.com";
 	private final static String OSS_ENDPOINT_PRE = "xiangshangban.com";
 	private final static String OSS_BUCKET = "xiangshangban";
 	private final static String OSS_BUCKET_PRE = "file";

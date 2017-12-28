@@ -806,6 +806,9 @@ public class EmployeeController {
                     resultData.put("resultMessage", resultMessage);
                     resultData.put("returnObj", "");
                     resultMap.put("result", resultData);
+
+                    //同步删除卡号操作
+                    iEmployeeService.synchronizeEmployeePermissionForDevices(jsonUrlDecoderString, employeeId);
                 }
 
             }else if ("1".equals(style)){

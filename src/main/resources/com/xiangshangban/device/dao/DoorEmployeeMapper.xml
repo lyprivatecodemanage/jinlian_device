@@ -429,4 +429,23 @@
         and
         employee_id = #{employee_id}
     </update>
+
+    <!--查找某个人在哪些设备上有开门权限-->
+    <select id="selectDeviceIdOfPermissionEffectiveByEmployeeId" resultType="java.util.Map" parameterType="java.lang.String" >
+        SELECT
+	    R.device_id AS "deviceId"
+        FROM
+	    (
+		SELECT
+			d.device_id
+		FROM
+			door_employee de
+		LEFT JOIN door_ d ON de.door_id = d.door_id
+		WHERE
+			employee_id = #{employeeId,jdbcType=VARCHAR}
+	    ) R
+        LEFT JOIN device_ dd ON R.device_id = dd.device_id
+        WHERE
+	    dd.company_id = #{companyId,jdbcType=VARCHAR}
+    </select>
 </mapper>

@@ -956,7 +956,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
                 doorRecordMapper.insertSelective(doorRecord);
             }else {
                 //设备恢复出厂设置了，记录id又会从1开始，这时候需要根据时间区分记录是否保存
-                Boolean judge = DateUtils.isTime1LtTime2(doorRecordExit.getRecordDate(), recordMap.get("week"));
+                Boolean judge = DateUtils.isTime1LtTime2(doorRecordExit.getRecordDate(), recordMap.get("attTime"));
                 if (judge){
                     doorRecordMapper.insertSelective(doorRecord);
                 }

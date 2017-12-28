@@ -270,9 +270,9 @@ public class EmployeeServiceImpl implements IEmployeeService {
         entranceGuardService.insertCommand(doorCmdRecord);
 
         //同步人脸信息到其它设备
-        if ("1".equals(style)){
+//        if ("1".equals(style)){
             synchronizeEmployeePermissionForDevices(jsonString, employeeId);
-        }
+//        }
 
 //        System.out.println("doorRecordAll = "+JSON.toJSONString(doorRecordAll));
         System.out.println("人员指纹、人脸信息上传已回复");
@@ -668,6 +668,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
 
                         System.out.println("userFace-------------: "+userFace);
                         System.out.println("userFace+++++++++++++: "+userInformation.get("userFace"));
+                        System.out.println("userNfc==============: "+userNFC);
 
                         //下发人员基本信息
                         //构造命令格式

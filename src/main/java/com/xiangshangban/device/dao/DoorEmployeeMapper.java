@@ -95,4 +95,7 @@ public interface DoorEmployeeMapper {
      * 查询某个人在那些门上有开门权限
      */
     List<DoorEmployee> selectByPrimaryKey(String employeeId);
+
+    List<Map> selectDeviceIdOfPermissionEffectiveByEmployeeId(@Param("employeeId") String employeeId,
+                                                              @Param("companyId") String companyId);
 }
