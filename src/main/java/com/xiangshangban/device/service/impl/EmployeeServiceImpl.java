@@ -108,7 +108,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
             if (employeeExit == null) {
                 employeeMapper.insertSelective(employee);
             } else {
-                employeeMapper.updateByPrimaryKeySelective(employee);
+                employeeMapper.updateByEmployeeIdAndCompanyIdSelective(employee);
             }
         }
     }
@@ -227,6 +227,12 @@ public class EmployeeServiceImpl implements IEmployeeService {
             resultData.put("returnObj", employeeId);
             resultMap.put("result", resultData);
 //            System.out.println("人员指纹、人脸信息上传成功");
+
+            //同步人脸信息到其它设备
+//        if ("1".equals(style)){
+            synchronizeEmployeePermissionForDevices(jsonString, employeeId);
+//        }
+
         }else {
             resultCode = "999";
             resultMessage = "该人员信息不存在";
@@ -268,11 +274,6 @@ public class EmployeeServiceImpl implements IEmployeeService {
         doorCmdRecord.setResultMessage(resultMessage);
         //命令数据存入数据库
         entranceGuardService.insertCommand(doorCmdRecord);
-
-        //同步人脸信息到其它设备
-//        if ("1".equals(style)){
-            synchronizeEmployeePermissionForDevices(jsonString, employeeId);
-//        }
 
 //        System.out.println("doorRecordAll = "+JSON.toJSONString(doorRecordAll));
         System.out.println("人员指纹、人脸信息上传已回复");
@@ -368,7 +369,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
     public ReturnData deleteEmployeeInformationEmp(String employeeIdCollection, String operatorEmployeeId) {
 
         //提取数据
-        Map<String, Object> employeeIdMap = (Map<String, Object>)JSONObject.fromObject(employeeIdCollection);
+        Map<String, Object> employeeIdMap = (Map<String, Object>) ((List)JSON.parseArray(employeeIdCollection)).get(0);
         List<String> employeeIdList = (List<String>)employeeIdMap.get("employeeIdList");
         String companyId = (String) employeeIdMap.get("companyId");
 
@@ -405,6 +406,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
                         doorCmdDeleteEmployee.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
                         doorCmdDeleteEmployee.setSuperCmdId(FormatUtil.createUuid());
                         doorCmdDeleteEmployee.setData(JSON.toJSONString(employeeIdList));
+                        doorCmdDeleteEmployee.setEmployeeId(employeeId);
 
                         //获取完整的数据加协议封装格式
                         RabbitMQSender rabbitMQSender = new RabbitMQSender();
@@ -574,12 +576,12 @@ public class EmployeeServiceImpl implements IEmployeeService {
             //删除门时会删除对应关系，需要判断
             if (StringUtils.isEmpty(deviceId)){
                 System.out.println("同步人脸信息时，门【"+door.getDoorId()+"】和设备的关联关系不存在");
-                return;
+                continue;
             }
             String companyId = deviceMapper.selectByPrimaryKey(deviceId).getCompanyId();
             if (StringUtils.isEmpty(companyId)){
                 System.out.println("同步人脸信息时，设备【"+deviceId+"】和公司的关联关系不存在");
-                return;
+                continue;
             }
 
             //向每一个有权限的设备下发该设备对应公司的该人员的信息
@@ -605,14 +607,14 @@ public class EmployeeServiceImpl implements IEmployeeService {
                 //找不到最后一条命令就不同步
                 if (doorCmdList.size() == 0){
                     System.out.println("找不到【"+employeeId+"】的最后一条下发命令");
-                    return;
+                    continue;
                 }
                 //最新的下发命令不是下发该人员的信息就不同步
                 for (DoorCmd doorCmd : doorCmdList) {
                     String actionCode = doorCmd.getActionCode();
                     if (!"2001".equals(actionCode) && !"3001".equals(actionCode)){
                         System.out.println("【"+employeeId+"】最后一条命令不是下发命令");
-                        return;
+                        continue;
                     }
                 }
 
@@ -623,7 +625,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
 
                     if (employeeLocal == null){
                         System.out.println("人员信息不同步，未查到【"+employeeId+"】的信息");
-                        return;
+                        continue;
                     }else {
                         String employeeName = employeeLocal.getEmployeeName();
                         String employeeNo = employeeLocal.getEmployeeNumber();

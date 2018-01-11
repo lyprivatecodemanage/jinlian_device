@@ -15,16 +15,19 @@ import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class OSSFileUtil {
 	private static final Log LOG = LogFactory.getLog(OSSFileUtil.class);
-	//外网
-	private final static String OSS_ENDPOINT = "oss-cn-hangzhou.aliyuncs.com";
-	//内网
-//	private final static String OSS_ENDPOINT = "oss-cn-hangzhou-internal.aliyuncs.com";
+
 	private final static String OSS_ENDPOINT_PRE = "xiangshangban.com";
+//***************************************************************************************
+	private final static String OSS_ENDPOINT = "oss-cn-hangzhou.aliyuncs.com";
 	private final static String OSS_BUCKET = "xiangshangban";
+//	private final static String OSS_ENDPOINT = "oss-cn-shanghai.aliyuncs.com";
+//	private final static String OSS_BUCKET = "shoumy";
+//***************************************************************************************
 	private final static String OSS_BUCKET_PRE = "file";
 	private final static String USER_FILE_LOCATION = "data";
 	private final static String SYS_FILE_LOCATION = "sys";
@@ -582,7 +585,7 @@ public class OSSFileUtil {
 			String fileName = "";
 			//判断文件类型
 			if ("facePhoto".equals(fileType)){
-				fileName = DateUtils.getDateTime();
+				fileName = DateUtils.formatDate(new Date(), "yyyy-MM-dd-HH-mm-ss");
 			}else {
 				//获取上传文件名
 				fileName = multipartFile.getOriginalFilename().substring(0,multipartFile.getOriginalFilename().lastIndexOf("."));

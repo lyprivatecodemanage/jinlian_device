@@ -878,8 +878,16 @@ public class EntranceGuardController {
             //门禁日历信息
             List<DoorCalendar> doorCalendars = iEntranceGuardService.queryDoorCalendarInfo(doorId != null ? doorId.toString() : null);
             Map map = new HashMap();
-
-            map.put("doorSetting", (doorSetting != null && doorSetting.size() > 0) ? doorSetting.get(0) : "");
+            //结果集为空的时候，添加公共开门密码和管理密码
+            Map doorSettingMap = null;
+            if(doorSetting==null || doorSetting.size()==0){
+                doorSettingMap = new HashMap();
+                doorSettingMap.put("first_publish_password","888888");
+                doorSettingMap.put("manager_password","123456");
+            }else{
+                doorSettingMap = doorSetting.get(0);
+            }
+            map.put("doorSetting",doorSettingMap);
             map.put("timingKeepOpen", timingKeepOpenList);
             map.put("firstCardKeepOpen", firstCardKeepOpenMap);
             map.put("doorCalendar", doorCalendars);

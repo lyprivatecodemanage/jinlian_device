@@ -759,7 +759,7 @@ public class DeviceController {
             String resultCode = "";
             String resultMessage = "";
             String deviceId = (String) mapJson.get("deviceId");
-            LOGGER.info("收到【"+deviceId+"】的心跳数据");
+//            LOGGER.info("收到【"+deviceId+"】的心跳数据");
 
             //校验MD5
             //获取对方的md5

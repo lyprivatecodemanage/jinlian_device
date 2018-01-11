@@ -44,5 +44,11 @@ public interface EmployeeMapper {
      */
     String selectEmpNameByComIdAndEmpId(Map map);
 
+    //临时方法-查询人脸非null非空字符串的所有人
     List<Employee> temp();
+
+    //临时方法-根据公司id查询所有员工信息
+    List<Employee> selectAllByCompanyId(String employeeCompanyId);
+
+    List<Employee> selectAllByEmployeeId(String employeeId);
 }

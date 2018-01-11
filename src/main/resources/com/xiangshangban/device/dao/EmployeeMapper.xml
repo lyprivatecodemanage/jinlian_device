@@ -432,7 +432,7 @@
     select employee_name from employee_ where employee_id = #{empId} and employee_company_id = #{companyId}
   </select>
 
-  <!--临时方法-->
+  <!--临时方法-查询人脸非null非空字符串的所有人-->
   <select id="temp" resultMap="BaseResultMap">
     SELECT
     <include refid="Base_Column_List" />
@@ -440,5 +440,20 @@
     employee_
     WHERE
     employee_face IS NOT NULL AND employee_face != ''
+  </select>
+
+  <!--临时方法-根据公司id查询所有员工信息-->
+  <select id="selectAllByCompanyId" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from employee_
+    where employee_company_id = #{employeeCompanyId,jdbcType=VARCHAR}
+  </select>
+
+  <select id="selectAllByEmployeeId" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from employee_
+    where employee_id = #{employeeId,jdbcType=VARCHAR}
   </select>
 </mapper>

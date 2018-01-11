@@ -1095,20 +1095,21 @@ public class EmployeeController {
 
     }
 
-//    /**
-//     * 测试接口
-//     */
-//    @ResponseBody
-//    @RequestMapping(value = "/test", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
-//    public void test(){
+    /**
+     * 测试接口
+     */
+    @ResponseBody
+    @RequestMapping(value = "/test", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    public void test(){
+
+//        DoorCmd doorCmd = doorCmdMapper.selectByPrimaryKey("");
 //
-////        DoorCmd doorCmd = doorCmdMapper.selectByPrimaryKey("");
-////
-////        System.out.println("[*] 测试接口");
-//////        System.out.println(JSON.toJSONString(doorCmd.getData()));
-////
-////        System.out.println(JSONObject.fromObject(doorCmd.getData()));
+//        System.out.println("[*] 测试接口");
+////        System.out.println(JSON.toJSONString(doorCmd.getData()));
 //
+//        System.out.println(JSONObject.fromObject(doorCmd.getData()));
+
+        //临时所有人脸信息修复
 //        List<Employee> employeeList = employeeMapper.temp();
 //        System.out.println(JSON.toJSONString(employeeList));
 //        System.out.println("size:"+employeeList.size());
@@ -1119,7 +1120,7 @@ public class EmployeeController {
 //            String employeeCompanyId = employee.getEmployeeCompanyId();
 //            String employeeFace = employee.getEmployeeFace();
 //
-//            Map<String, Object> userFace = new HashedMap();
+//            Map<String, Object> userFace = new HashMap<>();
 //            userFace.put("userId", employeeId);
 //            userFace.put("faceName", employeeName);
 //            userFace.put("faceData", employeeFace);
@@ -1134,5 +1135,27 @@ public class EmployeeController {
 //
 //            employeeMapper.updateByEmployeeIdAndCompanyIdSelective(employeeResult);
 //        }
-//    }
+
+//        //交享越物业管理临时人脸信息同步
+//        List<Employee> employeeList = employeeMapper.selectAllByCompanyId("59EC11BD60834DA190F9218CD4C996C7");
+//        System.out.println("人员总数："+employeeList.size());
+//        int totalFace = 0;
+//        for (Employee employee : employeeList) {
+//            List<Employee> EmployeeTempList = employeeMapper.selectAllByEmployeeId(employee.getEmployeeId());
+//            for (Employee employeeTemp : EmployeeTempList) {
+//                String employeeFace = employeeTemp.getEmployeeFace();
+//                String employeeFaceNull = employeeMapper.selectByEmployeeIdAndCompanyId(employeeTemp.getEmployeeId(), "59EC11BD60834DA190F9218CD4C996C7").getEmployeeFace();
+//                if (StringUtils.isEmpty(employeeFaceNull) && StringUtils.isNotEmpty(employeeFace)){
+//                    System.out.println("已查到【"+employeeTemp.getEmployeeName()+"】的人脸信息:"+employeeFace);
+//                    totalFace ++;
+//                    Employee employeeBean = new Employee();
+//                    employeeBean.setEmployeeId(employeeTemp.getEmployeeId());
+//                    employeeBean.setEmployeeCompanyId("59EC11BD60834DA190F9218CD4C996C7");
+//                    employeeBean.setEmployeeFace(employeeFace);
+//                    employeeMapper.updateByEmployeeIdAndCompanyIdSelective(employeeBean);
+//                }
+//            }
+//        }
+//        System.out.println("有人脸的人员总数："+totalFace);
+    }
 }

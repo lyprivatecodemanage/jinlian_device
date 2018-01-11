@@ -180,7 +180,6 @@ public class RabbitMQReciever {
                             } else {
                                 doorCmd.setStatus("2");
                             }
-
                         }
 
                         //改变这条命令的状态
