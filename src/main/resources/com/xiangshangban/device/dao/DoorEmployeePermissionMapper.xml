@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xiangshangban.device.dao.DoorEmployeePermissionMapper" >
+  <resultMap id="BaseResultMap" type="com.xiangshangban.device.bean.DoorEmployeePermission" >
+    <id column="employee_id" property="employeeId" jdbcType="VARCHAR" />
+    <result column="is_manager" property="isManager" jdbcType="VARCHAR" />
+    <result column="have_first_card_permission" property="haveFirstCardPermission" jdbcType="VARCHAR" />
+    <result column="door_open_start_time" property="doorOpenStartTime" jdbcType="VARCHAR" />
+    <result column="door_open_end_time" property="doorOpenEndTime" jdbcType="VARCHAR" />
+    <result column="range_flag_id" property="rangeFlagId" jdbcType="VARCHAR" />
+    <result column="device_id" property="deviceId" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    employee_id, is_manager, have_first_card_permission, door_open_start_time, door_open_end_time, 
+    range_flag_id, device_id
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from door_employee_permission
+    where employee_id = #{employeeId,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from door_employee_permission
+    where employee_id = #{employeeId,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.xiangshangban.device.bean.DoorEmployeePermission" >
+    insert into door_employee_permission (employee_id, is_manager, have_first_card_permission, 
+      door_open_start_time, door_open_end_time, range_flag_id, device_id
+      )
+    values (#{employeeId,jdbcType=VARCHAR}, #{isManager,jdbcType=VARCHAR}, #{haveFirstCardPermission,jdbcType=VARCHAR}, 
+      #{doorOpenStartTime,jdbcType=VARCHAR}, #{doorOpenEndTime,jdbcType=VARCHAR}, #{rangeFlagId,jdbcType=VARCHAR},
+      #{deviceId,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.xiangshangban.device.bean.DoorEmployeePermission" >
+    insert into door_employee_permission
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="employeeId != null" >
+        employee_id,
+      </if>
+      <if test="isManager != null" >
+        is_manager,
+      </if>
+      <if test="haveFirstCardPermission != null" >
+        have_first_card_permission,
+      </if>
+      <if test="doorOpenStartTime != null" >
+        door_open_start_time,
+      </if>
+      <if test="doorOpenEndTime != null" >
+        door_open_end_time,
+      </if>
+      <if test="rangeFlagId != null" >
+        range_flag_id,
+      </if>
+      <if test="deviceId != null" >
+        device_id,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="employeeId != null" >
+        #{employeeId,jdbcType=VARCHAR},
+      </if>
+      <if test="isManager != null" >
+        #{isManager,jdbcType=VARCHAR},
+      </if>
+      <if test="haveFirstCardPermission != null" >
+        #{haveFirstCardPermission,jdbcType=VARCHAR},
+      </if>
+      <if test="doorOpenStartTime != null" >
+        #{doorOpenStartTime,jdbcType=VARCHAR},
+      </if>
+      <if test="doorOpenEndTime != null" >
+        #{doorOpenEndTime,jdbcType=VARCHAR},
+      </if>
+      <if test="rangeFlagId != null" >
+        #{rangeFlagId,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceId != null" >
+        #{deviceId,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.xiangshangban.device.bean.DoorEmployeePermission" >
+    update door_employee_permission
+    <set >
+      <if test="isManager != null" >
+        is_manager = #{isManager,jdbcType=VARCHAR},
+      </if>
+      <if test="haveFirstCardPermission != null" >
+        have_first_card_permission = #{haveFirstCardPermission,jdbcType=VARCHAR},
+      </if>
+      <if test="doorOpenStartTime != null" >
+        door_open_start_time = #{doorOpenStartTime,jdbcType=VARCHAR},
+      </if>
+      <if test="doorOpenEndTime != null" >
+        door_open_end_time = #{doorOpenEndTime,jdbcType=VARCHAR},
+      </if>
+      <if test="rangeFlagId != null" >
+        range_flag_id = #{rangeFlagId,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceId != null" >
+        device_id = #{deviceId,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where employee_id = #{employeeId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.xiangshangban.device.bean.DoorEmployeePermission" >
+    update door_employee_permission
+    set is_manager = #{isManager,jdbcType=VARCHAR},
+      have_first_card_permission = #{haveFirstCardPermission,jdbcType=VARCHAR},
+      door_open_start_time = #{doorOpenStartTime,jdbcType=VARCHAR},
+      door_open_end_time = #{doorOpenEndTime,jdbcType=VARCHAR},
+      range_flag_id = #{rangeFlagId,jdbcType=VARCHAR},
+      device_id = #{deviceId,jdbcType=VARCHAR},
+    where employee_id = #{employeeId,jdbcType=VARCHAR}
+  </update>
+
+  <!--非自动生成-->
+  <delete id="deleteByRangeFlagId" parameterType="java.lang.String" >
+    delete from door_employee_permission
+    where range_flag_id = #{rangeFlagId,jdbcType=VARCHAR}
+  </delete>
+
+  <select id="selectEmployeePressionByLeftJoin" resultType="java.util.Map" parameterType="java.lang.String" >
+    SELECT
+	A .employee_id as "employeeId",
+	A .employee_name as "employeeName",
+	A .door_id as "doorId",
+	A .door_name as "doorName",
+	A .range_flag_id as "rangeFlagId",
+	B.door_open_start_time as "doorOpenStartTime",
+	B.door_open_end_time as "doorOpenEndTime"
+    FROM
+	door_employee A
+    LEFT JOIN door_employee_permission B ON A .range_flag_id = B.range_flag_id
+    WHERE
+	A .employee_id = #{employeeId,jdbcType=VARCHAR}
+    AND A .door_id = #{doorId,jdbcType=VARCHAR}
+  </select>
+  <!--删除门关联的人员权限：是否拥有首卡常开，以及门有效开门:开始时间和结束时间-->
+  <delete id="delDoorEmpPermission" parameterType="String">
+    delete from door_employee_permission where door_id = #{doorId}
+  </delete>
+</mapper>

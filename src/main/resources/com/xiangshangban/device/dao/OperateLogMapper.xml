@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xiangshangban.device.dao.OperateLogMapper" >
+  <resultMap id="BaseResultMap" type="com.xiangshangban.device.bean.OperateLog" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="operate_emp_id" property="operateEmpId" jdbcType="VARCHAR" />
+    <result column="operate_emp_company" property="operateEmpCompany" jdbcType="VARCHAR" />
+    <result column="operate_type" property="operateType" jdbcType="VARCHAR" />
+    <result column="operate_content" property="operateContent" jdbcType="VARCHAR" />
+    <result column="operate_date" property="operateDate" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    id, operate_emp_id, operate_emp_company, operate_type, operate_content, operate_date
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.xiangshangban.device.bean.OperateLogExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    'true' as QUERYID,
+    <include refid="Base_Column_List" />
+    from operate_log
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from operate_log
+    where id = #{id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from operate_log
+    where id = #{id,jdbcType=VARCHAR}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.xiangshangban.device.bean.OperateLogExample" >
+    delete from operate_log
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.xiangshangban.device.bean.OperateLog" >
+    insert into operate_log (id, operate_emp_id, operate_emp_company, 
+      operate_type, operate_content, operate_date
+      )
+    values (#{id,jdbcType=VARCHAR}, #{operateEmpId,jdbcType=VARCHAR}, #{operateEmpCompany,jdbcType=VARCHAR}, 
+      #{operateType,jdbcType=VARCHAR}, #{operateContent,jdbcType=VARCHAR}, #{operateDate,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.xiangshangban.device.bean.OperateLog" >
+    insert into operate_log
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="operateEmpId != null" >
+        operate_emp_id,
+      </if>
+      <if test="operateEmpCompany != null" >
+        operate_emp_company,
+      </if>
+      <if test="operateType != null" >
+        operate_type,
+      </if>
+      <if test="operateContent != null" >
+        operate_content,
+      </if>
+      <if test="operateDate != null" >
+        operate_date,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="operateEmpId != null" >
+        #{operateEmpId,jdbcType=VARCHAR},
+      </if>
+      <if test="operateEmpCompany != null" >
+        #{operateEmpCompany,jdbcType=VARCHAR},
+      </if>
+      <if test="operateType != null" >
+        #{operateType,jdbcType=VARCHAR},
+      </if>
+      <if test="operateContent != null" >
+        #{operateContent,jdbcType=VARCHAR},
+      </if>
+      <if test="operateDate != null" >
+        #{operateDate,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.xiangshangban.device.bean.OperateLogExample" resultType="java.lang.Integer" >
+    select count(*) from operate_log
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update operate_log
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=VARCHAR},
+      </if>
+      <if test="record.operateEmpId != null" >
+        operate_emp_id = #{record.operateEmpId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.operateEmpCompany != null" >
+        operate_emp_company = #{record.operateEmpCompany,jdbcType=VARCHAR},
+      </if>
+      <if test="record.operateType != null" >
+        operate_type = #{record.operateType,jdbcType=VARCHAR},
+      </if>
+      <if test="record.operateContent != null" >
+        operate_content = #{record.operateContent,jdbcType=VARCHAR},
+      </if>
+      <if test="record.operateDate != null" >
+        operate_date = #{record.operateDate,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update operate_log
+    set id = #{record.id,jdbcType=VARCHAR},
+      operate_emp_id = #{record.operateEmpId,jdbcType=VARCHAR},
+      operate_emp_company = #{record.operateEmpCompany,jdbcType=VARCHAR},
+      operate_type = #{record.operateType,jdbcType=VARCHAR},
+      operate_content = #{record.operateContent,jdbcType=VARCHAR},
+      operate_date = #{record.operateDate,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.xiangshangban.device.bean.OperateLog" >
+    update operate_log
+    <set >
+      <if test="operateEmpId != null" >
+        operate_emp_id = #{operateEmpId,jdbcType=VARCHAR},
+      </if>
+      <if test="operateEmpCompany != null" >
+        operate_emp_company = #{operateEmpCompany,jdbcType=VARCHAR},
+      </if>
+      <if test="operateType != null" >
+        operate_type = #{operateType,jdbcType=VARCHAR},
+      </if>
+      <if test="operateContent != null" >
+        operate_content = #{operateContent,jdbcType=VARCHAR},
+      </if>
+      <if test="operateDate != null" >
+        operate_date = #{operateDate,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.xiangshangban.device.bean.OperateLog" >
+    update operate_log
+    set operate_emp_id = #{operateEmpId,jdbcType=VARCHAR},
+      operate_emp_company = #{operateEmpCompany,jdbcType=VARCHAR},
+      operate_type = #{operateType,jdbcType=VARCHAR},
+      operate_content = #{operateContent,jdbcType=VARCHAR},
+      operate_date = #{operateDate,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+
+  <!--通用查询语句-->
+  <sql id="commonQuery">
+    (SELECT
+    A.operate_emp_id,
+    operate_emp_company,
+    (case operate_type
+    when '0' then '查看'
+    when '1' then '补勤'
+    when '2' then '年假调整'
+    when '3' then '调休调整'
+    when '4' then '报表导出'
+    end
+    ) operate_type,
+    operate_content,
+    operate_date,
+    B.employee_name,
+    employee_department_name
+    FROM
+    "public".operate_log A
+    LEFT JOIN "device".employee_ B ON A.operate_emp_id = B.employee_id
+    AND A.operate_emp_company = B.employee_company_id) W
+    <where>
+          W.operate_emp_company = #{companyId}
+      <if test="startDate!=null and startDate!=''">
+        <if test="endDate!=null and endDate!=''">
+          AND W.operate_date::DATE BETWEEN #{startDate} :: DATE AND #{endDate} :: DATE
+        </if>
+      </if>
+      <if test="operateType!=null and operateType!=''">
+        AND W.operate_type = CAST(#{operateType} AS VARCHAR)
+      </if>
+      <if test="empDept!=null and empDept!=''" >
+        AND W.employee_department_name = CAST(#{empDept} AS VARCHAR)
+      </if>
+      <if test="empName!=null and empName!=''">
+        AND W.employee_name LIKE #{empName}
+      </if>
+    </where>
+  </sql>
+
+  <!--查询操作日志信息-->
+  <select id="selectOperateLog" parameterType="Map" resultType="Map">
+    SELECT
+    COALESCE(employee_department_name,'') AS employee_department_name,
+    COALESCE(employee_name,'') AS employee_name,
+    COALESCE(operate_type,'') AS operate_type,
+    COALESCE(operate_content,'') AS operate_content,
+    COALESCE(operate_date,'') AS operate_date
+    FROM
+    <include refid="commonQuery"></include>
+    <if test="sortFlag!=null and sortFlag!=''">
+      <if test='sortFlag=="0"'>
+        ORDER BY W.operate_date
+      </if>
+      <if test='sortFlag=="1"'>
+        ORDER BY W.operate_date DESC
+      </if>
+    </if>
+    <if test="rows!=null">
+      <if test="offset!=null">
+        LIMIT CAST(#{rows} AS INTEGER) OFFSET CAST(#{offset} AS INTEGER)
+      </if>
+    </if>
+  </select>
+
+  <!--根据条件查询操作日志信息总行数-->
+  <select id="selectCountByCondition" parameterType="Map" resultType="int">
+    SELECT COUNT(1) FROM
+    <include refid="commonQuery"></include>
+  </select>
+
+  <!--查询日志操作次数-->
+  <select id="selectOperateCount" parameterType="String" resultType="Map">
+    SELECT DISTINCT
+    (
+    SELECT
+    COUNT (1) AS yesterday_count
+    FROM
+    operate_log
+    WHERE
+    operate_date LIKE #{yesterday}
+    AND
+    operate_emp_company = #{companyId}
+    ),
+    (
+    SELECT
+    COUNT (1) AS thisMonth_count
+    FROM
+    operate_log
+    WHERE
+    operate_date LIKE #{thisMonth}
+    AND
+    operate_emp_company = #{companyId}
+    ),
+    (
+    SELECT
+    COUNT (1) AS total_count
+    FROM
+    operate_log
+    WHERE
+    operate_emp_company = #{companyId}
+    )
+    FROM
+    operate_log
+  </select>
+</mapper>

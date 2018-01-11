@@ -1,0 +1,426 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xiangshangban.device.dao.DoorRecordMapper">
+    <resultMap id="BaseResultMap" type="com.xiangshangban.device.bean.DoorRecord">
+        <id column="door_permission_record_id" property="doorPermissionRecordId" jdbcType="VARCHAR"/>
+        <result column="employee_id" property="employeeId" jdbcType="VARCHAR"/>
+        <result column="door_id" property="doorId" jdbcType="VARCHAR"/>
+        <result column="record_type" property="recordType" jdbcType="VARCHAR"/>
+        <result column="upper_state" property="upperState" jdbcType="VARCHAR"/>
+        <result column="upper_edition" property="upperEdition" jdbcType="VARCHAR"/>
+        <result column="employee_group_name" property="employeeGroupName" jdbcType="VARCHAR"/>
+        <result column="open_door_photo_name" property="openDoorPhotoName" jdbcType="VARCHAR"/>
+        <result column="back_key" property="backKey" jdbcType="VARCHAR"/>
+        <result column="device_group_name" property="deviceGroupName" jdbcType="VARCHAR"/>
+        <result column="real_week" property="realWeek" jdbcType="VARCHAR"/>
+        <result column="event_result" property="eventResult" jdbcType="VARCHAR"/>
+        <result column="event_result_reason" property="eventResultReason" jdbcType="VARCHAR"/>
+        <result column="event_photo_group_id" property="eventPhotoGroupId" jdbcType="VARCHAR"/>
+        <result column="record_date" property="recordDate" jdbcType="VARCHAR"/>
+        <result column="device_id" property="deviceId" jdbcType="VARCHAR"/>
+        <result column="device_name" property="deviceName" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!--自定义resultMap-->
+    <resultMap id="personalResultMap" type="com.xiangshangban.device.bean.SignInAndOut">
+        <result column="employee_id" property="empId" jdbcType="VARCHAR"/>
+        <result column="emp_name" property="empName" jdbcType="VARCHAR"/>
+        <result column="emp_dept" property="empDept" jdbcType="VARCHAR"/>
+        <result column="sign_in" property="signIn" jdbcType="VARCHAR"/>
+        <result column="sign_out" property="signOut" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        door_permission_record_id, employee_id, door_id, record_type, upper_state, upper_edition,
+        employee_group_name, open_door_photo_name, back_key, device_group_name, real_week,
+        event_result, event_result_reason, event_photo_group_id, record_date, device_id, device_name
+    </sql>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String">
+        select
+        <include refid="Base_Column_List"/>
+        from door_record
+        where door_permission_record_id = #{doorPermissionRecordId,jdbcType=VARCHAR}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+        delete from door_record
+        where door_permission_record_id = #{doorPermissionRecordId,jdbcType=VARCHAR}
+    </delete>
+    <insert id="insert" parameterType="com.xiangshangban.device.bean.DoorRecord">
+        insert into door_record (door_permission_record_id, employee_id,
+        door_id, record_type, upper_state,
+        upper_edition, employee_group_name, open_door_photo_name,
+        back_key, device_group_name, real_week,
+        event_result, event_result_reason, event_photo_group_id,
+        record_date, device_id, device_name)
+        values (#{doorPermissionRecordId,jdbcType=VARCHAR}, #{employeeId,jdbcType=VARCHAR},
+        #{doorId,jdbcType=VARCHAR}, #{recordType,jdbcType=VARCHAR}, #{upperState,jdbcType=VARCHAR},
+        #{upperEdition,jdbcType=VARCHAR}, #{employeeGroupName,jdbcType=VARCHAR}, #{openDoorPhotoName,jdbcType=VARCHAR},
+        #{backKey,jdbcType=VARCHAR}, #{deviceGroupName,jdbcType=VARCHAR}, #{realWeek,jdbcType=VARCHAR},
+        #{eventResult,jdbcType=VARCHAR}, #{eventResultReason,jdbcType=VARCHAR}, #{eventPhotoGroupId,jdbcType=VARCHAR},
+        #{recordDate,jdbcType=VARCHAR}, #{deviceId,jdbcType=VARCHAR}, #{deviceName,jdbcType=VARCHAR})
+    </insert>
+    <insert id="insertSelective" parameterType="com.xiangshangban.device.bean.DoorRecord">
+        insert into door_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="doorPermissionRecordId != null">
+                door_permission_record_id,
+            </if>
+            <if test="employeeId != null">
+                employee_id,
+            </if>
+            <if test="doorId != null">
+                door_id,
+            </if>
+            <if test="recordType != null">
+                record_type,
+            </if>
+            <if test="upperState != null">
+                upper_state,
+            </if>
+            <if test="upperEdition != null">
+                upper_edition,
+            </if>
+            <if test="employeeGroupName != null">
+                employee_group_name,
+            </if>
+            <if test="openDoorPhotoName != null">
+                open_door_photo_name,
+            </if>
+            <if test="backKey != null">
+                back_key,
+            </if>
+            <if test="deviceGroupName != null">
+                device_group_name,
+            </if>
+            <if test="realWeek != null">
+                real_week,
+            </if>
+            <if test="eventResult != null">
+                event_result,
+            </if>
+            <if test="eventResultReason != null">
+                event_result_reason,
+            </if>
+            <if test="eventPhotoGroupId != null">
+                event_photo_group_id,
+            </if>
+            <if test="recordDate != null">
+                record_date,
+            </if>
+            <if test="deviceId != null">
+                device_id,
+            </if>
+            <if test="deviceName != null">
+                device_name,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="doorPermissionRecordId != null">
+                #{doorPermissionRecordId,jdbcType=VARCHAR},
+            </if>
+            <if test="employeeId != null">
+                #{employeeId,jdbcType=VARCHAR},
+            </if>
+            <if test="doorId != null">
+                #{doorId,jdbcType=VARCHAR},
+            </if>
+            <if test="recordType != null">
+                #{recordType,jdbcType=VARCHAR},
+            </if>
+            <if test="upperState != null">
+                #{upperState,jdbcType=VARCHAR},
+            </if>
+            <if test="upperEdition != null">
+                #{upperEdition,jdbcType=VARCHAR},
+            </if>
+            <if test="employeeGroupName != null">
+                #{employeeGroupName,jdbcType=VARCHAR},
+            </if>
+            <if test="openDoorPhotoName != null">
+                #{openDoorPhotoName,jdbcType=VARCHAR},
+            </if>
+            <if test="backKey != null">
+                #{backKey,jdbcType=VARCHAR},
+            </if>
+            <if test="deviceGroupName != null">
+                #{deviceGroupName,jdbcType=VARCHAR},
+            </if>
+            <if test="realWeek != null">
+                #{realWeek,jdbcType=VARCHAR},
+            </if>
+            <if test="eventResult != null">
+                #{eventResult,jdbcType=VARCHAR},
+            </if>
+            <if test="eventResultReason != null">
+                #{eventResultReason,jdbcType=VARCHAR},
+            </if>
+            <if test="eventPhotoGroupId != null">
+                #{eventPhotoGroupId,jdbcType=VARCHAR},
+            </if>
+            <if test="recordDate != null">
+                #{recordDate,jdbcType=VARCHAR},
+            </if>
+            <if test="deviceId != null">
+                #{deviceId,jdbcType=VARCHAR},
+            </if>
+            <if test="deviceName != null">
+                #{deviceName,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.xiangshangban.device.bean.DoorRecord">
+        update door_record
+        <set>
+            <if test="employeeId != null">
+                employee_id = #{employeeId,jdbcType=VARCHAR},
+            </if>
+            <if test="doorId != null">
+                door_id = #{doorId,jdbcType=VARCHAR},
+            </if>
+            <if test="recordType != null">
+                record_type = #{recordType,jdbcType=VARCHAR},
+            </if>
+            <if test="upperState != null">
+                upper_state = #{upperState,jdbcType=VARCHAR},
+            </if>
+            <if test="upperEdition != null">
+                upper_edition = #{upperEdition,jdbcType=VARCHAR},
+            </if>
+            <if test="employeeGroupName != null">
+                employee_group_name = #{employeeGroupName,jdbcType=VARCHAR},
+            </if>
+            <if test="openDoorPhotoName != null">
+                open_door_photo_name = #{openDoorPhotoName,jdbcType=VARCHAR},
+            </if>
+            <if test="backKey != null">
+                back_key = #{backKey,jdbcType=VARCHAR},
+            </if>
+            <if test="deviceGroupName != null">
+                device_group_name = #{deviceGroupName,jdbcType=VARCHAR},
+            </if>
+            <if test="realWeek != null">
+                real_week = #{realWeek,jdbcType=VARCHAR},
+            </if>
+            <if test="eventResult != null">
+                event_result = #{eventResult,jdbcType=VARCHAR},
+            </if>
+            <if test="eventResultReason != null">
+                event_result_reason = #{eventResultReason,jdbcType=VARCHAR},
+            </if>
+            <if test="eventPhotoGroupId != null">
+                event_photo_group_id = #{eventPhotoGroupId,jdbcType=VARCHAR},
+            </if>
+            <if test="recordDate != null">
+                record_date = #{recordDate,jdbcType=VARCHAR},
+            </if>
+            <if test="deviceId != null">
+                device_id = #{deviceId,jdbcType=VARCHAR},
+            </if>
+            <if test="deviceName != null">
+                device_name = #{deviceName,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where door_permission_record_id = #{doorPermissionRecordId,jdbcType=VARCHAR}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.xiangshangban.device.bean.DoorRecord">
+        update door_record
+        set employee_id = #{employeeId,jdbcType=VARCHAR},
+        door_id = #{doorId,jdbcType=VARCHAR},
+        record_type = #{recordType,jdbcType=VARCHAR},
+        upper_state = #{upperState,jdbcType=VARCHAR},
+        upper_edition = #{upperEdition,jdbcType=VARCHAR},
+        employee_group_name = #{employeeGroupName,jdbcType=VARCHAR},
+        open_door_photo_name = #{openDoorPhotoName,jdbcType=VARCHAR},
+        back_key = #{backKey,jdbcType=VARCHAR},
+        device_group_name = #{deviceGroupName,jdbcType=VARCHAR},
+        real_week = #{realWeek,jdbcType=VARCHAR},
+        event_result = #{eventResult,jdbcType=VARCHAR},
+        event_result_reason = #{eventResultReason,jdbcType=VARCHAR},
+        event_photo_group_id = #{eventPhotoGroupId,jdbcType=VARCHAR},
+        record_date = #{recordDate,jdbcType=VARCHAR},
+        device_id = #{deviceId,jdbcType=VARCHAR},
+        device_name = #{deviceName,jdbcType=VARCHAR}
+        where door_permission_record_id = #{doorPermissionRecordId,jdbcType=VARCHAR}
+    </update>
+
+
+    <!--###############《新添加部分》##############-->
+    <!--分条件查询打卡记录-->
+    <select id="selectPunchCardRecord" parameterType="com.xiangshangban.device.bean.DoorRecordCondition"
+            resultType="map">
+        SELECT
+        COALESCE (S.record_type, '') AS record_type,
+        COALESCE (record_date, '') AS record_date,
+        COALESCE (employee_name, '') AS employee_name,
+        COALESCE (employee_department_name,
+        ''
+        ) AS employee_department_name,
+        device_id,
+        COALESCE (device_name, '') AS device_name
+        FROM
+        (
+        SELECT
+        A .record_type,
+        record_date,
+        door_id,
+        device_id,
+        device_name,
+        B.employee_name,
+        employee_department_name
+        FROM
+        door_record A
+        LEFT JOIN employee_ B ON A .employee_id = B.employee_id
+        AND B.employee_company_id = #{doorRecordCondition.companyId}
+        AND A .employee_id IN (
+        SELECT
+        employee_id
+        FROM
+        employee_
+        WHERE
+        employee_company_id = #{doorRecordCondition.companyId}
+        )
+        WHERE
+        A .record_type IN ('3', '5', '6', '7', '8')
+        AND A .door_id IN (
+        SELECT
+        door_id
+        FROM
+        door_
+        WHERE
+        company_id = #{doorRecordCondition.companyId}
+        )
+        AND A.employee_id != ''
+        ) S
+        <where>
+            <if test="doorRecordCondition.name!=null and doorRecordCondition.name!=''">
+                S.employee_name like #{doorRecordCondition.name}
+            </if>
+            <if test="doorRecordCondition.department!=null and doorRecordCondition.department!=''">
+                and S.employee_department_name like #{doorRecordCondition.department}
+            </if>
+            <if test="doorRecordCondition.punchCardType!=null and doorRecordCondition.punchCardType!=''">
+                and S.record_type = #{doorRecordCondition.punchCardType}
+            </if>
+            <!--根据时间段查询数据-->
+            <if test="doorRecordCondition.punchCardStartTime!=null and doorRecordCondition.punchCardStartTime!=''">
+                <if test="doorRecordCondition.punchCardEndTime!=null and doorRecordCondition.punchCardEndTime!=''">
+                    and S.record_date ::DATE BETWEEN #{doorRecordCondition.punchCardStartTime} :: DATE AND #{doorRecordCondition.punchCardEndTime} :: DATE
+                </if>
+            </if>
+            <if test="doorRecordCondition.deviceName != null  and doorRecordCondition.deviceName!=''">
+                and S.device_name like #{doorRecordCondition.deviceName}
+            </if>
+        </where>
+        order by record_date DESC
+    </select>
+
+    <!--查询一个员工在某段时间内的最早和最晚打卡时间-->
+    <select id="selectPunchCardTime" parameterType="map" resultType="String">
+        SELECT
+        record_date
+        FROM
+        door_record
+        WHERE
+        employee_id = #{ MAP .empId }
+        AND door_id IN (
+        SELECT
+        door_id
+        FROM
+        door_
+        WHERE
+        device_id IN (
+        SELECT
+        device_id
+        FROM
+        device_
+        WHERE
+        company_id = #{ MAP .companyId }
+        )
+        )
+        AND record_date BETWEEN #{ MAP .startTime }
+        AND #{ MAP .endTime }
+        ORDER BY
+        record_date DESC
+    </select>
+
+    <!--APP接口:查询指定员工的打卡记录-->
+    <select id="selectEmpPunchRecord" parameterType="map" resultType="map">
+        SELECT
+        X.*, D.door_name
+        FROM
+        (
+        SELECT
+        door_id,
+        COALESCE (record_type, '') AS record_type,
+        COALESCE (record_date, '') AS record_date
+        FROM
+        door_record
+        WHERE
+        employee_id = #{empId}
+        AND record_type IN ('3', '5', '6', '7', '8')
+        AND record_date LIKE #{recordDate}
+        <if test="companyId!=null and companyId!=''">
+            AND door_id in(
+            select door_id from door_ where device_id in (
+            select device_id from device_ where company_id = #{companyId}
+            )
+            )
+        </if>
+        ORDER BY
+        record_date
+        ) X
+        LEFT JOIN door_ D ON X.door_id = D.door_id
+    </select>
+
+    <!--查询指定公司员工的签到签退情况-->
+    <select id="selectSignInAndOutRecord" parameterType="Map" resultMap="personalResultMap">
+        SELECT S.* from
+        (
+        SELECT
+        A .*,
+        COALESCE (B.employee_name, '') AS emp_name,
+        COALESCE (employee_department_name,'') AS emp_dept
+        FROM
+        (
+        SELECT
+        employee_id,
+        COALESCE (MIN(record_date), '') AS sign_in,
+        COALESCE (MAX(record_date), '') AS sign_out
+        FROM
+        door_record
+        WHERE
+        door_id IN (SELECT door_id FROM door_ WHERE company_id = #{ companyId })
+        AND record_type IN ('3', '5', '6', '7', '8')
+        GROUP BY
+        employee_id,
+        record_date :: DATE
+        ) A
+        LEFT JOIN employee_ B ON A .employee_id = B.employee_id
+        AND B.employee_company_id = #{companyId}
+        ) S
+        <where>
+            <if test="empName!=null and empName!=''">
+                S.emp_name like #{empName}
+            </if>
+            <if test="deptName!=null and deptName!=''">
+                AND S.emp_dept like #{deptName}
+            </if>
+            <if test="recordStartTime!=null and recordStartTime!=''">
+                <if test="recordEndTime!=null and recordEndTime!=''">
+                    AND S.sign_in :: DATE BETWEEN #{recordStartTime} :: DATE AND #{recordEndTime} :: DATE
+                </if>
+            </if>
+        </where>
+        ORDER BY S.sign_in DESC
+    </select>
+
+    <select id="selectByRecordIdDoorIdAndDeviceId" resultMap="BaseResultMap" parameterType="java.lang.String">
+        select
+        <include refid="Base_Column_List"/>
+        from door_record
+        where door_permission_record_id = #{doorPermissionRecordId,jdbcType=VARCHAR}
+        AND door_id = #{doorId,jdbcType=VARCHAR}
+        AND device_id = #{deviceId,jdbcType=VARCHAR}
+    </select>
+
+</mapper>

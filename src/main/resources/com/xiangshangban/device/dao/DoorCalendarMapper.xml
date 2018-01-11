@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+  <mapper namespace="com.xiangshangban.device.dao.DoorCalendarMapper" >
+  <resultMap id="BaseResultMap" type="com.xiangshangban.device.bean.DoorCalendar" >
+    <id column="door_id" property="doorId" jdbcType="VARCHAR" />
+    <result column="calendar_date" property="calendarDate" jdbcType="VARCHAR" />
+    <result column="weather_open_door" property="weatherOpenDoor" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    door_id, calendar_date, weather_open_door
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from door_calendar
+    where door_id = #{doorId,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from door_calendar
+    where door_id = #{doorId,jdbcType=VARCHAR}
+  </delete>
+
+  <insert id="insert" parameterType="com.xiangshangban.device.bean.DoorCalendar">
+    insert into door_calendar (door_id, calendar_date, weather_open_door
+      )
+    values (#{doorId,jdbcType=VARCHAR}, #{calendarDate,jdbcType=VARCHAR}, #{weatherOpenDoor,jdbcType=VARCHAR}
+      )
+  </insert>
+
+  <insert id="insertSelective" parameterType="com.xiangshangban.device.bean.DoorCalendar">
+    insert into door_calendar
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="doorId != null">
+        door_id,
+      </if>
+      <if test="calendarDate != null">
+        calendar_date,
+      </if>
+      <if test="weatherOpenDoor != null">
+        weather_open_door,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="doorId != null">
+        #{doorId,jdbcType=VARCHAR},
+      </if>
+      <if test="calendarDate != null">
+        #{calendarDate,jdbcType=VARCHAR},
+      </if>
+      <if test="weatherOpenDoor != null">
+        #{weatherOpenDoor,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="updateByPrimaryKeySelective" parameterType="com.xiangshangban.device.bean.DoorCalendar" >
+    update door_calendar
+    <set >
+      <if test="weatherOpenDoor != null" >
+        weather_open_door = #{weatherOpenDoor,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where door_id = #{doorId,jdbcType=VARCHAR}
+    AND calendar_date = #{calendarDate,jdbcType=VARCHAR}
+  </update>
+
+  <update id="updateByPrimaryKey" parameterType="com.xiangshangban.device.bean.DoorCalendar" >
+    update door_calendar
+    set calendar_date = #{calendarDate,jdbcType=VARCHAR},
+      weather_open_door = #{weatherOpenDoor,jdbcType=VARCHAR}
+    where door_id = #{doorId,jdbcType=VARCHAR}
+  </update>
+
+  <!--根据门id查询门禁信息-->
+  <select id="selectDoorCalendarInfo" parameterType="String" resultMap="BaseResultMap">
+    select * from door_calendar where door_id = #{doorId}
+  </select>
+
+  <select id="selectDoorCalendarExist" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from door_calendar
+    where door_id = #{doorId,jdbcType=VARCHAR}
+    AND calendar_date = #{calendarDate,jdbcType=VARCHAR}
+  </select>
+</mapper>

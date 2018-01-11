@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xiangshangban.device.dao.DoorExceptionMapper" >
+  <resultMap id="BaseResultMap" type="com.xiangshangban.device.bean.DoorException" >
+    <id column="door_exception_id" property="doorExceptionId" jdbcType="VARCHAR" />
+    <result column="alarm_type" property="alarmType" jdbcType="VARCHAR" />
+    <result column="alarm_date" property="alarmDate" jdbcType="VARCHAR" />
+    <result column="employee_id" property="employeeId" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    door_exception_id, alarm_type, alarm_date, employee_id
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from door_exception
+    where door_exception_id = #{doorExceptionId,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from door_exception
+    where door_exception_id = #{doorExceptionId,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.xiangshangban.device.bean.DoorException" >
+    insert into door_exception (door_exception_id, alarm_type, alarm_date, 
+      employee_id)
+    values (#{doorExceptionId,jdbcType=VARCHAR}, #{alarmType,jdbcType=VARCHAR}, #{alarmDate,jdbcType=VARCHAR}, 
+      #{employeeId,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.xiangshangban.device.bean.DoorException" >
+    insert into door_exception
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="doorExceptionId != null" >
+        door_exception_id,
+      </if>
+      <if test="alarmType != null" >
+        alarm_type,
+      </if>
+      <if test="alarmDate != null" >
+        alarm_date,
+      </if>
+      <if test="employeeId != null" >
+        employee_id,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="doorExceptionId != null" >
+        #{doorExceptionId,jdbcType=VARCHAR},
+      </if>
+      <if test="alarmType != null" >
+        #{alarmType,jdbcType=VARCHAR},
+      </if>
+      <if test="alarmDate != null" >
+        #{alarmDate,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeId != null" >
+        #{employeeId,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.xiangshangban.device.bean.DoorException" >
+    update door_exception
+    <set >
+      <if test="alarmType != null" >
+        alarm_type = #{alarmType,jdbcType=VARCHAR},
+      </if>
+      <if test="alarmDate != null" >
+        alarm_date = #{alarmDate,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeId != null" >
+        employee_id = #{employeeId,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where door_exception_id = #{doorExceptionId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.xiangshangban.device.bean.DoorException" >
+    update door_exception
+    set alarm_type = #{alarmType,jdbcType=VARCHAR},
+      alarm_date = #{alarmDate,jdbcType=VARCHAR},
+      employee_id = #{employeeId,jdbcType=VARCHAR}
+    where door_exception_id = #{doorExceptionId,jdbcType=VARCHAR}
+  </update>
+
+  <!--###############《新添加部分》##############-->
+  <!--分条件查询门禁异常记录-->
+  <!--门禁异常表和门禁记录表进行整合-->
+  <select id="selectDoorExceptionRecord" parameterType="com.xiangshangban.device.bean.DoorRecordCondition" resultType="map">
+    SELECT
+    COALESCE (S.record_type, '') AS record_type,
+    COALESCE (record_date, '') AS record_date,
+    COALESCE (employee_name, '') AS employee_name,
+    COALESCE (
+    employee_department_name,
+    ''
+    ) AS employee_department_name,
+    device_id,
+    COALESCE (device_name, '') AS device_name
+    FROM
+    (
+    SELECT
+    A .record_type,
+    record_date,
+    door_id,
+    device_id,
+    device_name,
+    B.employee_name,
+    employee_department_name
+    FROM
+    door_record A
+    LEFT JOIN employee_ B ON A .employee_id = B.employee_id
+    AND B.employee_company_id = #{doorRecordCondition.companyId}
+    AND A .employee_id IN (
+    SELECT
+    employee_id
+    FROM
+    employee_
+    WHERE
+    employee_company_id =  #{doorRecordCondition.companyId}
+    )
+    WHERE
+    A .record_type IN (
+    '1',
+    '20',
+    '25',
+    '27',
+    '28',
+    '30',
+    '32'
+    )
+    AND A .door_id IN (
+    SELECT
+    door_id
+    FROM
+    door_
+    WHERE
+    company_id =  #{doorRecordCondition.companyId}
+    )
+   <!-- AND A .employee_id != ''-->
+    ) S
+  <where>
+    <if test="doorRecordCondition.name!=null and doorRecordCondition.name!=''">
+      S.employee_name like #{doorRecordCondition.name}
+    </if>
+    <if test="doorRecordCondition.department!=null and doorRecordCondition.department!=''">
+      and S.employee_department_name like #{doorRecordCondition.department}
+    </if>
+    <if test="doorRecordCondition.punchCardType!=null and doorRecordCondition.punchCardType!=''">
+      and S.record_type = #{doorRecordCondition.punchCardType}
+    </if>
+    <if test="doorRecordCondition.punchCardStartTime!=null and doorRecordCondition.punchCardStartTime!=''">
+      <if test="doorRecordCondition.punchCardEndTime!=null and doorRecordCondition.punchCardEndTime!=''">
+        and S.record_date ::DATE BETWEEN #{doorRecordCondition.punchCardStartTime} :: DATE AND #{doorRecordCondition.punchCardEndTime}  :: DATE
+      </if>
+    </if>
+    <if test="doorRecordCondition.deviceName != null  and doorRecordCondition.deviceName!=''">
+      and S.device_name like #{doorRecordCondition.deviceName}
+    </if>
+  </where>
+    order by S.record_date DESC
+</select>
+</mapper>

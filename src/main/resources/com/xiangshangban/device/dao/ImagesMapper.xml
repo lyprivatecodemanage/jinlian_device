@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xiangshangban.device.dao.ImagesMapper" >
+  <resultMap id="BaseResultMap" type="com.xiangshangban.device.bean.Images" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="img_name" property="imgName" jdbcType="VARCHAR" />
+    <result column="img_url" property="imgUrl" jdbcType="VARCHAR" />
+    <result column="img_type" property="imgType" jdbcType="VARCHAR" />
+    <result column="relate" property="relate" jdbcType="VARCHAR" />
+    <result column="ripple_color" property="rippleColor" jdbcType="VARCHAR" />
+    <result column="broad_start_date" property="broadStartDate" jdbcType="VARCHAR" />
+    <result column="broad_end_date" property="broadEndDate" jdbcType="VARCHAR" />
+    <result column="broad_start_time" property="broadStartTime" jdbcType="VARCHAR" />
+    <result column="broad_end_time" property="broadEndTime" jdbcType="VARCHAR" />
+    <result column="template_id" property="templateId" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, img_name, img_url, img_type, relate, ripple_color, broad_start_date, broad_end_date, 
+    broad_start_time, broad_end_time, template_id
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from image_
+    where id = #{id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from image_
+    where id = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.xiangshangban.device.bean.Images" >
+    insert into image_ (id, img_name, img_url, 
+      img_type, relate, ripple_color, 
+      broad_start_date, broad_end_date, broad_start_time, 
+      broad_end_time, template_id)
+    values (#{id,jdbcType=VARCHAR}, #{imgName,jdbcType=VARCHAR}, #{imgUrl,jdbcType=VARCHAR}, 
+      #{imgType,jdbcType=VARCHAR}, #{relate,jdbcType=VARCHAR}, #{rippleColor,jdbcType=VARCHAR}, 
+      #{broadStartDate,jdbcType=VARCHAR}, #{broadEndDate,jdbcType=VARCHAR}, #{broadStartTime,jdbcType=VARCHAR}, 
+      #{broadEndTime,jdbcType=VARCHAR}, #{templateId,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.xiangshangban.device.bean.Images" >
+    insert into image_
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="imgName != null" >
+        img_name,
+      </if>
+      <if test="imgUrl != null" >
+        img_url,
+      </if>
+      <if test="imgType != null" >
+        img_type,
+      </if>
+      <if test="relate != null" >
+        relate,
+      </if>
+      <if test="rippleColor != null" >
+        ripple_color,
+      </if>
+      <if test="broadStartDate != null" >
+        broad_start_date,
+      </if>
+      <if test="broadEndDate != null" >
+        broad_end_date,
+      </if>
+      <if test="broadStartTime != null" >
+        broad_start_time,
+      </if>
+      <if test="broadEndTime != null" >
+        broad_end_time,
+      </if>
+      <if test="templateId != null" >
+        template_id,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="imgName != null" >
+        #{imgName,jdbcType=VARCHAR},
+      </if>
+      <if test="imgUrl != null" >
+        #{imgUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="imgType != null" >
+        #{imgType,jdbcType=VARCHAR},
+      </if>
+      <if test="relate != null" >
+        #{relate,jdbcType=VARCHAR},
+      </if>
+      <if test="rippleColor != null" >
+        #{rippleColor,jdbcType=VARCHAR},
+      </if>
+      <if test="broadStartDate != null" >
+        #{broadStartDate,jdbcType=VARCHAR},
+      </if>
+      <if test="broadEndDate != null" >
+        #{broadEndDate,jdbcType=VARCHAR},
+      </if>
+      <if test="broadStartTime != null" >
+        #{broadStartTime,jdbcType=VARCHAR},
+      </if>
+      <if test="broadEndTime != null" >
+        #{broadEndTime,jdbcType=VARCHAR},
+      </if>
+      <if test="templateId != null" >
+        #{templateId,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.xiangshangban.device.bean.Images" >
+    update image_
+    <set >
+      <if test="imgName != null" >
+        img_name = #{imgName,jdbcType=VARCHAR},
+      </if>
+      <if test="imgUrl != null" >
+        img_url = #{imgUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="imgType != null" >
+        img_type = #{imgType,jdbcType=VARCHAR},
+      </if>
+      <if test="relate != null" >
+        relate = #{relate,jdbcType=VARCHAR},
+      </if>
+      <if test="rippleColor != null" >
+        ripple_color = #{rippleColor,jdbcType=VARCHAR},
+      </if>
+      <if test="broadStartDate != null" >
+        broad_start_date = #{broadStartDate,jdbcType=VARCHAR},
+      </if>
+      <if test="broadEndDate != null" >
+        broad_end_date = #{broadEndDate,jdbcType=VARCHAR},
+      </if>
+      <if test="broadStartTime != null" >
+        broad_start_time = #{broadStartTime,jdbcType=VARCHAR},
+      </if>
+      <if test="broadEndTime != null" >
+        broad_end_time = #{broadEndTime,jdbcType=VARCHAR},
+      </if>
+      <if test="templateId != null" >
+        template_id = #{templateId,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.xiangshangban.device.bean.Images" >
+    update image_
+    set img_name = #{imgName,jdbcType=VARCHAR},
+      img_url = #{imgUrl,jdbcType=VARCHAR},
+      img_type = #{imgType,jdbcType=VARCHAR},
+      relate = #{relate,jdbcType=VARCHAR},
+      ripple_color = #{rippleColor,jdbcType=VARCHAR},
+      broad_start_date = #{broadStartDate,jdbcType=VARCHAR},
+      broad_end_date = #{broadEndDate,jdbcType=VARCHAR},
+      broad_start_time = #{broadStartTime,jdbcType=VARCHAR},
+      broad_end_time = #{broadEndTime,jdbcType=VARCHAR},
+      template_id = #{templateId,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+
+  <!--查询所有的背景图(按照类型进行分组)-->
+  <select id="selectAllBackGround" resultType="map">
+      select id,img_name,img_url,img_type from image_ where img_type like 'back%'
+  </select>
+
+  <!--根据图片的类型查询图片信息-->
+  <select id="selectBackGroundByType" parameterType="String" resultType="map">
+   SELECT
+	A .img_name,
+	A .img_url,
+	A .ripple_color,
+	B.img_name rimg_name,
+	B.img_url rimg_url
+    FROM
+        image_ A,
+        image_ B
+    WHERE
+        A .img_type LIKE #{ imgType }
+    AND A .relate = B. ID
+  </select>
+
+  <!--查询image表主键的最大值-->
+  <select id="selectImagePrimaryKey" resultType="String">
+    select max(cast(id as integer)) from image_
+  </select>
+
+  <!--添加图片-->
+  <insert id="insertIntoImageInfo" parameterType="map">
+    insert into image_ values(#{id},#{img_name},#{img_url},#{img_type},#{relate},#{ripple_color})
+  </insert>
+
+</mapper>

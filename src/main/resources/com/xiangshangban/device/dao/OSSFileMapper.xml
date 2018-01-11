@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xiangshangban.device.dao.OSSFileMapper" >
+  <resultMap id="BaseResultMap" type="com.xiangshangban.device.bean.OSSFile" >
+    <result column="key" property="key" jdbcType="VARCHAR" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="upload_time" property="uploadTime" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="VARCHAR" />
+    <result column="upload_user" property="uploadUser" jdbcType="VARCHAR" />
+    <result column="customer_id" property="customerId" jdbcType="VARCHAR" />
+    <result column="path" property="path" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    key, name, upload_time, status, upload_user, customer_id, path
+  </sql>
+
+  <select id="selectOSSFile" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from device_oss_file
+    where key = #{key,jdbcType=VARCHAR}
+  </select>
+
+  <insert id="addOSSFile" parameterType="com.xiangshangban.device.bean.OSSFile" >
+    insert into device_oss_file (key, name, upload_time, status, upload_user, customer_id, path)
+    values (#{key,jdbcType=VARCHAR},
+            #{name,jdbcType=VARCHAR},
+            #{uploadTime,jdbcType=VARCHAR},
+            #{status,jdbcType=VARCHAR},
+            #{uploadUser,jdbcType=VARCHAR},
+            #{customerId,jdbcType=VARCHAR},
+            #{path,jdbcType=VARCHAR})
+  </insert>
+
+    <select id="selectByFileName" resultMap="BaseResultMap" parameterType="java.lang.String" >
+        select
+        <include refid="Base_Column_List" />
+        from device_oss_file
+        where name = #{fileName,jdbcType=VARCHAR}
+    </select>
+
+</mapper>

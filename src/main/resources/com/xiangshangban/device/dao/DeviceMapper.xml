@@ -1,0 +1,349 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xiangshangban.device.dao.DeviceMapper" >
+  <resultMap id="BaseResultMap" type="com.xiangshangban.device.bean.Device" >
+    <id column="device_id" property="deviceId" jdbcType="VARCHAR" />
+    <result column="device_name" property="deviceName" jdbcType="VARCHAR" />
+    <result column="company_id" property="companyId" jdbcType="VARCHAR" />
+    <result column="company_name" property="companyName" jdbcType="VARCHAR" />
+    <result column="device_number" property="deviceNumber" jdbcType="VARCHAR" />
+    <result column="mac_address" property="macAddress" jdbcType="VARCHAR" />
+    <result column="is_online" property="isOnline" jdbcType="VARCHAR" />
+    <result column="active_status" property="activeStatus" jdbcType="VARCHAR" />
+    <result column="device_place" property="devicePlace" jdbcType="VARCHAR" />
+    <result column="device_usages" property="deviceUsages" jdbcType="VARCHAR" />
+    <result column="total_server_time" property="totalServerTime" jdbcType="VARCHAR" />
+    <result column="have_used_time" property="haveUsedTime" jdbcType="VARCHAR" />
+    <result column="remain_server_time" property="remainServerTime" jdbcType="VARCHAR" />
+    <result column="is_unbind" property="isUnbind" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    device_id, device_name, company_id, company_name, device_number, mac_address, is_online, 
+    active_status, device_place, device_usages, total_server_time, have_used_time, remain_server_time,
+    is_unbind
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from device_
+    where device_id = #{deviceId,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from device_
+    where device_id = #{deviceId,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.xiangshangban.device.bean.Device" >
+    insert into device_ (device_id, device_name, company_id, 
+      company_name, device_number, mac_address, 
+      is_online, active_status, device_place, 
+      device_usages, total_server_time, have_used_time, 
+      remain_server_time, is_unbind)
+    values (#{deviceId,jdbcType=VARCHAR}, #{deviceName,jdbcType=VARCHAR}, #{companyId,jdbcType=VARCHAR}, 
+      #{companyName,jdbcType=VARCHAR}, #{deviceNumber,jdbcType=VARCHAR}, #{macAddress,jdbcType=VARCHAR}, 
+      #{isOnline,jdbcType=VARCHAR}, #{activeStatus,jdbcType=VARCHAR}, #{devicePlace,jdbcType=VARCHAR}, 
+      #{deviceUsages,jdbcType=VARCHAR}, #{totalServerTime,jdbcType=VARCHAR}, #{haveUsedTime,jdbcType=VARCHAR}, 
+      #{remainServerTime,jdbcType=VARCHAR}, #{isUnbind,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.xiangshangban.device.bean.Device" >
+    insert into device_
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="deviceId != null" >
+        device_id,
+      </if>
+      <if test="deviceName != null" >
+        device_name,
+      </if>
+      <if test="companyId != null" >
+        company_id,
+      </if>
+      <if test="companyName != null" >
+        company_name,
+      </if>
+      <if test="deviceNumber != null" >
+        device_number,
+      </if>
+      <if test="macAddress != null" >
+        mac_address,
+      </if>
+      <if test="isOnline != null" >
+        is_online,
+      </if>
+      <if test="activeStatus != null" >
+        active_status,
+      </if>
+      <if test="devicePlace != null" >
+        device_place,
+      </if>
+      <if test="deviceUsages != null" >
+        device_usages,
+      </if>
+      <if test="totalServerTime != null" >
+        total_server_time,
+      </if>
+      <if test="haveUsedTime != null" >
+        have_used_time,
+      </if>
+      <if test="remainServerTime != null" >
+        remain_server_time,
+      </if>
+      <if test="isUnbind != null" >
+        is_unbind,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="deviceId != null" >
+        #{deviceId,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceName != null" >
+        #{deviceName,jdbcType=VARCHAR},
+      </if>
+      <if test="companyId != null" >
+        #{companyId,jdbcType=VARCHAR},
+      </if>
+      <if test="companyName != null" >
+        #{companyName,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceNumber != null" >
+        #{deviceNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="macAddress != null" >
+        #{macAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="isOnline != null" >
+        #{isOnline,jdbcType=VARCHAR},
+      </if>
+      <if test="activeStatus != null" >
+        #{activeStatus,jdbcType=VARCHAR},
+      </if>
+      <if test="devicePlace != null" >
+        #{devicePlace,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceUsages != null" >
+        #{deviceUsages,jdbcType=VARCHAR},
+      </if>
+      <if test="totalServerTime != null" >
+        #{totalServerTime,jdbcType=VARCHAR},
+      </if>
+      <if test="haveUsedTime != null" >
+        #{haveUsedTime,jdbcType=VARCHAR},
+      </if>
+      <if test="remainServerTime != null" >
+        #{remainServerTime,jdbcType=VARCHAR},
+      </if>
+      <if test="isUnbind != null" >
+        #{isUnbind,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.xiangshangban.device.bean.Device" >
+    update device_
+    <set>
+      <if test="deviceName != null" >
+        device_name = #{deviceName,jdbcType=VARCHAR},
+      </if>
+      <if test="companyId != null" >
+        company_id = #{companyId,jdbcType=VARCHAR},
+      </if>
+      <if test="companyName != null" >
+        company_name = #{companyName,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceNumber != null" >
+        device_number = #{deviceNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="macAddress != null" >
+        mac_address = #{macAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="isOnline != null" >
+        is_online = #{isOnline,jdbcType=VARCHAR},
+      </if>
+      <if test="activeStatus != null" >
+        active_status = #{activeStatus,jdbcType=VARCHAR},
+      </if>
+      <if test="devicePlace != null" >
+        device_place = #{devicePlace,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceUsages != null" >
+        device_usages = #{deviceUsages,jdbcType=VARCHAR},
+      </if>
+      <if test="totalServerTime != null" >
+        total_server_time = #{totalServerTime,jdbcType=VARCHAR},
+      </if>
+      <if test="haveUsedTime != null" >
+        have_used_time = #{haveUsedTime,jdbcType=VARCHAR},
+      </if>
+      <if test="remainServerTime != null" >
+        remain_server_time = #{remainServerTime,jdbcType=VARCHAR},
+      </if>
+      <if test="isUnbind != null" >
+        is_unbind = #{isUnbind,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where device_id = #{deviceId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.xiangshangban.device.bean.Device" >
+    update device_
+    set device_name = #{deviceName,jdbcType=VARCHAR},
+      company_id = #{companyId,jdbcType=VARCHAR},
+      company_name = #{companyName,jdbcType=VARCHAR},
+      device_number = #{deviceNumber,jdbcType=VARCHAR},
+      mac_address = #{macAddress,jdbcType=VARCHAR},
+      is_online = #{isOnline,jdbcType=VARCHAR},
+      active_status = #{activeStatus,jdbcType=VARCHAR},
+      device_place = #{devicePlace,jdbcType=VARCHAR},
+      device_usages = #{deviceUsages,jdbcType=VARCHAR},
+      total_server_time = #{totalServerTime,jdbcType=VARCHAR},
+      have_used_time = #{haveUsedTime,jdbcType=VARCHAR},
+      remain_server_time = #{remainServerTime,jdbcType=VARCHAR},
+      is_unbind = #{isUnbind,jdbcType=VARCHAR}
+    where device_id = #{deviceId,jdbcType=VARCHAR}
+  </update>
+
+  <!--非自动生成-->
+  <select id="findByCondition" resultType="java.util.Map" parameterType="com.xiangshangban.device.bean.Device" >
+    SELECT
+    COALESCE (A .device_id, '') as device_id,
+    COALESCE (A .device_name, '') as device_name,
+    COALESCE (A .company_id, '') as company_id,
+    COALESCE (A .company_name, '') as company_name,
+    COALESCE (A .mac_address, '') as mac_address,
+    COALESCE (A .is_online, '') as is_online,
+    COALESCE (A .active_status, '') as active_status,
+    COALESCE (A .device_place, '') as device_place,
+    COALESCE (A .device_usages, '') as device_usages,
+    COALESCE (A .total_server_time, '') as total_server_time,
+    COALESCE (A .have_used_time, '') as have_used_time,
+    COALESCE (A .remain_server_time, '') as remain_server_time,
+    COALESCE (B.door_id, '') as door_id,
+    COALESCE (B.door_name, '') as door_name,
+    COALESCE (B.operate_time, '') as operate_time,
+    COALESCE (B.operate_employee, '') as operate_employee
+    FROM
+    device_ A
+    LEFT JOIN door_ b ON (A .device_id = b.device_id)
+    WHERE
+    1 = 1
+    <if test="companyId != null and companyId != ''" >
+      AND a.company_id LIKE '%${companyId}%'
+    </if>
+    <if test="companyName != null and companyName != ''" >
+      AND a.company_name LIKE '%${companyName}%'
+    </if>
+    <if test="deviceName != null and deviceName != ''" >
+      AND a.device_name LIKE '%${deviceName}%'
+    </if>
+    <if test="deviceId != null and deviceId != ''" >
+      AND a.device_id = #{deviceId,jdbcType=VARCHAR}
+    </if>
+    <if test="isOnline != null and isOnline != ''" >
+      AND a.is_online = #{isOnline,jdbcType=VARCHAR}
+    </if>
+    <if test="activeStatus != null and activeStatus != ''" >
+      AND a.active_status = #{activeStatus,jdbcType=VARCHAR}
+    </if>
+    ORDER BY a.device_id
+  </select>
+
+  <select id="findDeviceIdByCompanyId" resultType="java.lang.String" parameterType="java.lang.String">
+    SELECT device_id FROM device_ WHERE company_id = #{companyId,jdbcType=VARCHAR}
+  </select>
+
+  <!--查询所有的没有关联门的设备信息-->
+  <select id="selectAllDeviceInfo" parameterType="String"  resultType="map">
+    SELECT
+    device_id AS "deviceId",
+    COALESCE(device_name,'')  AS "deviceName",
+    COALESCE(mac_address,'')   AS "macAddress"
+    FROM
+    device_
+    WHERE
+    device_id NOT IN (SELECT device_id FROM door_)
+    and is_unbind != '1'
+    <if test="companyId != null and companyId != ''">
+      and company_id = #{companyId}
+    </if>
+    ORDER BY device_id
+  </select>
+
+  <!--查询所有的设备信息-->
+  <select id="selectAllDevice" parameterType="String"  resultType="map">
+    select device_id as "deviceId",device_name as "deviceName",mac_address as "macAddress" from device_
+    <where>
+      <if test="companyId != null and companyId != ''">
+        company_id = #{companyId}
+      </if>
+    </where>
+  </select>
+
+  <!--根据设备id查询该公司下的设备id的集合-->
+  <select id="selectAllDeviceIdOfCompanyByDeviceId" parameterType="java.lang.String" resultType="java.util.Map">
+    SELECT
+    device_id
+    FROM
+    device_
+    WHERE
+    company_id IN (
+    SELECT
+    company_id
+    FROM
+    device_
+    WHERE
+    device_id = #{deviceId,jdbcType=VARCHAR}
+    )
+  </select>
+
+  <!--根据设备id查询该设备上传的最新的一条重启记录带上来的所有版本信息-->
+  <select id="selectAllVersionInfoByDeviceId" parameterType="java.lang.String" resultType="java.util.Map">
+    SELECT
+	A .*, B."name",
+	b."value"
+    FROM
+	device_reboot_record A
+    LEFT JOIN device_reboot_record_version b ON A .reboot_id = b.reboot_id
+    WHERE
+	b."name" IN (
+		'characUuid',
+		'serviceUuid',
+		'major',
+		'minor',
+		'ibeaconUuid',
+		'bleModeMacaddr'
+	)
+    AND reboot_time = (
+	SELECT
+		MAX (T1.reboot_time)
+	FROM
+		(
+			SELECT
+				A .*, B."name",
+				b."value"
+			FROM
+				device_reboot_record A
+			LEFT JOIN device_reboot_record_version b ON A .reboot_id = b.reboot_id
+			WHERE
+				b."name" IN (
+					'characUuid',
+					'serviceUuid',
+					'major',
+					'minor',
+					'ibeaconUuid',
+					'bleModeMacaddr'
+				)
+			ORDER BY
+				reboot_time DESC
+		) T1
+	WHERE
+		T1.device_id = #{deviceId,jdbcType=VARCHAR}
+  )
+  </select>
+
+  <!--查出所有的设备的信息-->
+  <select id="selectAllDeviceInfoByNone" resultMap="BaseResultMap">
+    SELECT * FROM device_
+  </select>
+
+  <!--查询跟当前公司已经解绑的设备列表-->
+  <select id="selectUnBindDeviceByCompanyId" parameterType="String" resultType="String">
+    select device_id from device_ where is_unbind = '1'
+  </select>
+</mapper>
+

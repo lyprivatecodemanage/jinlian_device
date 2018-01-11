@@ -1,0 +1,469 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xiangshangban.device.dao.TemplateMapper" >
+  <resultMap id="BaseResultMap" type="com.xiangshangban.device.bean.Template" >
+    <id column="template_id" property="templateId" jdbcType="VARCHAR" />
+    <result column="template_type" property="templateType" jdbcType="VARCHAR" />
+    <result column="template_level" property="templateLevel" jdbcType="VARCHAR" />
+    <result column="operate_time" property="operateTime" jdbcType="VARCHAR" />
+    <result column="operate_emp" property="operateEmp" jdbcType="VARCHAR" />
+    <result column="device_id" property="deviceId" jdbcType="VARCHAR" />
+    <result column="roasting_time" property="roastingTime" jdbcType="VARCHAR" />
+    <result column="logo_flag" property="logoFlag" jdbcType="VARCHAR" />
+    <result column="salutation_flag" property="salutationFlag" jdbcType="VARCHAR" />
+    <result column="festival_name" property="festivalName" jdbcType="VARCHAR" />
+    <result column="template_style" property="templateStyle" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    template_id, template_type, template_level, operate_time, operate_emp, device_id, 
+    roasting_time, logo_flag, salutation_flag, festival_name, template_style
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from template_
+    where template_id = #{templateId,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from template_
+    where template_id = #{templateId,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.xiangshangban.device.bean.Template" >
+    insert into template_ (template_id, template_type, template_level, 
+      operate_time, operate_emp, device_id, 
+      roasting_time, logo_flag, salutation_flag,
+      festival_name, template_style)
+    values (#{templateId,jdbcType=VARCHAR}, #{templateType,jdbcType=VARCHAR}, #{templateLevel,jdbcType=VARCHAR}, 
+      #{operateTime,jdbcType=VARCHAR}, #{operateEmp,jdbcType=VARCHAR}, #{deviceId,jdbcType=VARCHAR}, 
+      #{roastingTime,jdbcType=VARCHAR}, #{logoFlag,jdbcType=VARCHAR}, #{salutationFlag,jdbcType=VARCHAR},
+      #{festivalName,jdbcType=VARCHAR}, #{templateStyle,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.xiangshangban.device.bean.Template" >
+    insert into template_
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="templateId != null" >
+        template_id,
+      </if>
+      <if test="templateType != null" >
+        template_type,
+      </if>
+      <if test="templateLevel != null" >
+        template_level,
+      </if>
+      <if test="operateTime != null" >
+        operate_time,
+      </if>
+      <if test="operateEmp != null" >
+        operate_emp,
+      </if>
+      <if test="deviceId != null" >
+        device_id,
+      </if>
+      <if test="roastingTime != null" >
+        roasting_time,
+      </if>
+      <if test="logoFlag != null" >
+        logo_flag,
+      </if>
+      <if test="salutationFlag != null" >
+        salutation_flag,
+      </if>
+      <if test="festivalName != null" >
+        festival_name,
+      </if>
+      <if test="templateStyle != null" >
+        template_style,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="templateId != null" >
+        #{templateId,jdbcType=VARCHAR},
+      </if>
+      <if test="templateType != null" >
+        #{templateType,jdbcType=VARCHAR},
+      </if>
+      <if test="templateLevel != null" >
+        #{templateLevel,jdbcType=VARCHAR},
+      </if>
+      <if test="operateTime != null" >
+        #{operateTime,jdbcType=VARCHAR},
+      </if>
+      <if test="operateEmp != null" >
+        #{operateEmp,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceId != null" >
+        #{deviceId,jdbcType=VARCHAR},
+      </if>
+      <if test="roastingTime != null" >
+        #{roastingTime,jdbcType=VARCHAR},
+      </if>
+      <if test="logoFlag != null" >
+        #{logoFlag,jdbcType=VARCHAR},
+      </if>
+      <if test="salutationFlag != null" >
+        #{salutationFlag,jdbcType=VARCHAR},
+      </if>
+      <if test="festivalName != null" >
+        #{festivalName,jdbcType=VARCHAR},
+      </if>
+      <if test="templateStyle != null" >
+        #{templateStyle,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.xiangshangban.device.bean.Template" >
+    update template_
+    <set >
+      <if test="templateType != null" >
+        template_type = #{templateType,jdbcType=VARCHAR},
+      </if>
+      <if test="templateLevel != null" >
+        template_level = #{templateLevel,jdbcType=VARCHAR},
+      </if>
+      <if test="operateTime != null" >
+        operate_time = #{operateTime,jdbcType=VARCHAR},
+      </if>
+      <if test="operateEmp != null" >
+        operate_emp = #{operateEmp,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceId != null" >
+        device_id = #{deviceId,jdbcType=VARCHAR},
+      </if>
+      <if test="roastingTime != null" >
+        roasting_time = #{roastingTime,jdbcType=VARCHAR},
+      </if>
+      <if test="logoFlag != null" >
+        logo_flag = #{logoFlag,jdbcType=VARCHAR},
+      </if>
+      <if test="salutationFlag != null" >
+        salutation_flag = #{salutationFlag,jdbcType=VARCHAR},
+      </if>
+      <if test="festivalName != null" >
+        festival_name = #{festivalName,jdbcType=VARCHAR},
+      </if>
+      <if test="templateStyle != null" >
+        template_style = #{templateStyle,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where template_id = #{templateId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.xiangshangban.device.bean.Template" >
+    update template_
+    set template_type = #{templateType,jdbcType=VARCHAR},
+      template_level = #{templateLevel,jdbcType=VARCHAR},
+      operate_time = #{operateTime,jdbcType=VARCHAR},
+      operate_emp = #{operateEmp,jdbcType=VARCHAR},
+      device_id = #{deviceId,jdbcType=VARCHAR},
+      roasting_time = #{roastingTime,jdbcType=VARCHAR},
+      logo_flag = #{logoFlag,jdbcType=VARCHAR},
+      salutation_flag = #{salutationFlag,jdbcType=VARCHAR},
+      festival_name = #{festivalName,jdbcType=VARCHAR},
+      template_style = #{templateStyle,jdbcType=VARCHAR}
+    where template_id = #{templateId,jdbcType=VARCHAR}
+  </update>
+
+  <!--#########《2017-11-21》########-->
+
+  <!--查询所有设备的自定义模板信息（用于首页列表展示）-->
+  <select id="selectDeviceTemplateInfo" parameterType="map" resultType="map">
+      SELECT
+      S.*
+      FROM
+      (
+      SELECT
+      E.device_id,
+      COALESCE (device_name, '') AS device_name,
+      template_id,
+      COALESCE (template_style, '') AS template_style,
+      logo_flag,
+      salutation_flag,
+      COALESCE (employee_name) AS operate_emp,
+      F.operate_time,
+      status
+      FROM
+      (
+      SELECT
+      C .*, D.employee_name
+      FROM
+      (
+      SELECT
+      A .*, B.template_id,
+      template_style,
+      logo_flag,
+      salutation_flag,
+      operate_emp
+      FROM
+      (
+      SELECT
+      device_id,
+      device_name
+      FROM
+      device_
+      WHERE
+      company_id = #{companyId}
+      AND is_unbind != '1'
+      ) A
+      INNER JOIN template_ B ON A .device_id = B.device_id
+      AND B.template_level = '2'
+      ) C
+      LEFT JOIN employee_ D ON C .operate_emp = D.employee_id
+      AND D.employee_company_id = #{companyId}
+      ) E
+      LEFT JOIN (
+      SELECT
+      device_id,
+      MAX (send_time) operate_time,
+      status
+      FROM
+      door_cmd
+      WHERE
+      action_code = '4001'
+      GROUP BY
+      device_id,
+      status
+      ) F ON E.device_id = F.device_id
+      ) S
+    <where>
+      <if test="deviceId != null  and deviceId!=''">
+        S.device_id = #{deviceId}
+      </if>
+      <if test="deviceName!=null and deviceName!=''">
+        AND S.device_name LIKE #{deviceName}
+      </if>
+    </where>
+    ORDER  BY S.operate_time DESC
+  </select>
+
+  <!--查询所有(指定)标准模板的预览图-->
+  <select id="selectStandardTemplatePreview" resultType="map">
+    SELECT
+	A .template_id,
+	img_id,
+	B.img_name,
+	img_url
+    FROM
+        background_image_template A,
+        image_ B
+    WHERE
+        <if test="templateId !=null and templateId!=''">
+            template_id = #{templateId}
+        </if>
+        <if test="templateId ==null or templateId==''">
+            template_id IN (
+            SELECT
+            template_id
+            FROM
+            template_
+            WHERE
+            is_standard = '1'
+            )
+        </if>
+     AND A .img_id = B. ID
+  </select>
+
+  <!--根据模板的id查询模板的背景图以及展示时间（新增主题的时候，传递的是标准模板的ID，此时查询出来的将会是预览图，
+  所以添加“!='perview'进行限定”）-->
+  <select id="selectTemplateBackAndTime" parameterType="String" resultType="map">
+      SELECT
+      A .img_id,
+      COALESCE (broad_start_date, '') AS broad_start_date,
+      COALESCE (broad_end_date, '') AS broad_end_date,
+      COALESCE (broad_start_time, '') AS broad_start_time,
+      COALESCE (broad_end_time, '') AS broad_end_time,
+      COALESCE (B.img_name, '') AS img_name,
+      COALESCE (img_url, '') AS img_url
+      FROM
+      background_image_template A,
+      image_ B
+      WHERE
+      A .template_id = #{templateId}
+      AND A .img_id = B. ID
+      AND B.img_type != 'preview'
+  </select>
+
+  <!--查询当前自定义模板的问候语-->
+  <select id="selectTemplateSalutation" parameterType="String" resultType="map">
+      SELECT
+      COALESCE (item_top_x, '') AS item_top_x,
+      COALESCE (item_top_y, '') AS item_top_y,
+      COALESCE (item_font_orient, '') AS item_font_orient,
+      COALESCE (item_font_content, '') AS item_font_content,
+      COALESCE (item_start_date, '') AS item_start_date,
+      COALESCE (item_end_date, '') AS item_end_date
+      FROM
+      template_items
+      WHERE
+      item_type = '0'
+      AND template_id = #{ templateId }
+      ORDER BY
+      item_start_date
+  </select>
+
+  <!--查询template表中的主键最大值-->
+  <select id="selectTemplateMaxPrimaryKey" resultType="String">
+    select max(cast(template_id as integer)) from template_
+  </select>
+
+  <!--查询标准模板信息(样式、item和item关联的图片)-->
+  <select id="selectStandardItemInfo" parameterType="String" resultType="map">
+  SELECT
+	S.*, M .img_name,
+	img_url
+    FROM
+        (
+            SELECT
+                A .template_style,
+                B.item_type,
+                item_top_x,
+                item_top_y,
+                item_font_orient,
+                item_font_size,
+                item_font_bold,
+                item_font_color,
+                item_img_id
+            FROM
+                template_ A,
+                template_items B
+            WHERE
+                A .template_id = B.template_id
+            AND A .template_id = #{ templateId }
+        ) S
+    LEFT JOIN image_ M ON S.item_img_id = M . ID
+  </select>
+
+  <!--查询节日模板的item信息-->
+  <select id="selectFestivalItemInfo" resultType="map">
+   SELECT
+	S.*, M .img_name,
+	img_url
+    FROM
+        (
+            SELECT
+                A .template_id,
+                B.item_id,
+                item_type,
+                item_top_x,
+                item_top_y,
+                item_font_orient,
+                item_font_size,
+                item_font_bold,
+                item_font_color,
+                item_img_id
+            FROM
+                template_ A,
+                template_items B
+            WHERE
+                A .template_id = B.template_id
+            AND A .template_id = (
+                SELECT
+                    template_id
+                FROM
+                    template_
+                WHERE
+                    festival_flag = '1'
+            )
+        ) S
+    LEFT JOIN image_ M ON S.item_img_id = M . ID
+  </select>
+
+  <!--确认指定设备是否具有自定义模板-->
+  <select id="confirmPersonalTemplate" parameterType="String" resultType="com.xiangshangban.device.bean.Template">
+    SELECT
+	template_id AS templateId
+    FROM
+        template_
+    WHERE
+        device_id = #{ deviceId }
+    AND template_level = '2'
+  </select>
+
+  <!--向template_表中添加自定义模板信息-->
+  <insert id="insertIntoPersonalTemplate" parameterType="Map">
+   INSERT INTO template_
+    VALUES
+        (
+            #{ template_id },#{ template_type },#{ template_level }, #{ operate_time },#{ operate_emp },#{ device_id },#{ roasting_time },#{ logo_flag },#{ salutation_flag },#{ festival_flag },#{ template_style },#{ is_use },#{ is_standard }
+        )
+  </insert>
+
+  <!--查询background_image_template表主键的最大值-->
+  <select id="selectBackgroundImageTemplatePrimaryKey" resultType="String">
+    select max(cast(id as INTEGER )) from background_image_template
+  </select>
+
+  <!--向background_image_template表中添加数据-->
+  <insert id="insertIntoBackImage" parameterType="Map">
+   INSERT INTO background_image_template
+    VALUES
+        (
+            #{ id},#{ img_id },#{ template_id },#{ broad_start_date },#{ broad_end_date },#{ broad_start_time },#{ broad_end_time }
+        )
+  </insert>
+
+  <!--删除指定的自定义模板-->
+  <delete id="deletePersonalTemplate" parameterType="String">
+    delete from template_ where template_id = #{templateId}
+  </delete>
+
+  <!--删除background_image_template中的数据-->
+  <delete id="deleteBackgroundImage" parameterType="String">
+    delete from background_image_template where template_id = #{templateId}
+  </delete>
+
+  <!--根据自定义模板的template_style查询其使用的标准模板的id-->
+  <select id="selectStandardTemplateIdByStyle" parameterType="String" resultType="String">
+    select template_id from template_ where template_style = #{template_style}
+  </select>
+
+  <!--查询模板详细信息（用于封装指令信息）-->
+  <select id="selectTemplateDetailInfo" parameterType="String" resultType="map">
+    select device_id,template_id,template_type,template_level,roasting_time from template_ where template_id = #{templateId}
+  </select>
+
+  <!--根据模板的ID查询详细的模板items（备用方法<用于封装指令信息>）-->
+  <select id="selectTemplateItemsDetail" parameterType="String" resultType="map">
+   SELECT
+	A .item_id,
+	item_type,
+	item_top_x,
+	item_top_y,
+	item_font_orient,
+	item_font_size,
+	item_font_bold,
+	item_font_color,
+	A .template_id,
+	item_start_date,
+	item_end_date,
+	item_font_content,
+	B.img_name,
+	img_url
+    FROM
+        template_items A
+    LEFT JOIN image_ B ON A .item_img_id = B. ID
+    WHERE
+        A .template_id = #{ templateId }
+  </select>
+
+  <!--根据模板的ID查询模板相关的详细图片信息（备用方法<用于封装指令信息>）-->
+  <select id="selectTemplateImagesDetail" parameterType="String" resultType="map">
+    SELECT
+	A .broad_start_date,
+	A .broad_end_date,
+	A .broad_start_time,
+	A .broad_end_time,
+	B.img_name,
+	B.img_url,
+	B.ripple_color,
+	C .img_name relate_img_name,
+	C .img_url relate_img_url
+    FROM
+        background_image_template A,
+        image_ B,
+        image_ C
+    WHERE
+        template_id = #{ templateId }
+    AND A .img_id = B. ID
+    AND B.relate = C . ID
+  </select>
+
+</mapper>

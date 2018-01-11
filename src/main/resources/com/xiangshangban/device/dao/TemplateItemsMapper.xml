@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xiangshangban.device.dao.TemplateItemsMapper" >
+  <resultMap id="BaseResultMap" type="com.xiangshangban.device.bean.TemplateItems" >
+    <id column="item_id" property="itemId" jdbcType="VARCHAR" />
+    <result column="item_type" property="itemType" jdbcType="VARCHAR" />
+    <result column="item_top_x" property="itemTopX" jdbcType="VARCHAR" />
+    <result column="item_top_y" property="itemTopY" jdbcType="VARCHAR" />
+    <result column="item_font_orient" property="itemFontOrient" jdbcType="VARCHAR" />
+    <result column="item_font_size" property="itemFontSize" jdbcType="DOUBLE" />
+    <result column="item_font_bold" property="itemFontBold" jdbcType="VARCHAR" />
+    <result column="item_font_color" property="itemFontColor" jdbcType="VARCHAR" />
+    <result column="template_id" property="templateId" jdbcType="VARCHAR" />
+    <result column="item_img_id" property="itemImgId" jdbcType="VARCHAR" />
+    <result column="item_start_date" property="itemStartDate" jdbcType="VARCHAR" />
+    <result column="item_end_date" property="itemEndDate" jdbcType="VARCHAR" />
+    <result column="item_font_content" property="itemFontContent" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    item_id, item_type, item_top_x, item_top_y, item_font_orient, item_font_size, item_font_bold, 
+    item_font_color, template_id, item_img_id, item_start_date, item_end_date, item_font_content
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from template_items
+    where item_id = #{itemId,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from template_items
+    where item_id = #{itemId,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.xiangshangban.device.bean.TemplateItems" >
+    insert into template_items (item_id, item_type, item_top_x, 
+      item_top_y, item_font_orient, item_font_size, 
+      item_font_bold, item_font_color, template_id, 
+      item_img_id, item_start_date, item_end_date, 
+      item_font_content)
+    values (#{itemId,jdbcType=VARCHAR}, #{itemType,jdbcType=VARCHAR}, #{itemTopX,jdbcType=VARCHAR}, 
+      #{itemTopY,jdbcType=VARCHAR}, #{itemFontOrient,jdbcType=VARCHAR}, #{itemFontSize,jdbcType=DOUBLE}, 
+      #{itemFontBold,jdbcType=VARCHAR}, #{itemFontColor,jdbcType=VARCHAR}, #{templateId,jdbcType=VARCHAR}, 
+      #{itemImgId,jdbcType=VARCHAR}, #{itemStartDate,jdbcType=VARCHAR}, #{itemEndDate,jdbcType=VARCHAR}, 
+      #{itemFontContent,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.xiangshangban.device.bean.TemplateItems" >
+    insert into template_items
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="itemId != null" >
+        item_id,
+      </if>
+      <if test="itemType != null" >
+        item_type,
+      </if>
+      <if test="itemTopX != null" >
+        item_top_x,
+      </if>
+      <if test="itemTopY != null" >
+        item_top_y,
+      </if>
+      <if test="itemFontOrient != null" >
+        item_font_orient,
+      </if>
+      <if test="itemFontSize != null" >
+        item_font_size,
+      </if>
+      <if test="itemFontBold != null" >
+        item_font_bold,
+      </if>
+      <if test="itemFontColor != null" >
+        item_font_color,
+      </if>
+      <if test="templateId != null" >
+        template_id,
+      </if>
+      <if test="itemImgId != null" >
+        item_img_id,
+      </if>
+      <if test="itemStartDate != null" >
+        item_start_date,
+      </if>
+      <if test="itemEndDate != null" >
+        item_end_date,
+      </if>
+      <if test="itemFontContent != null" >
+        item_font_content,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="itemId != null" >
+        #{itemId,jdbcType=VARCHAR},
+      </if>
+      <if test="itemType != null" >
+        #{itemType,jdbcType=VARCHAR},
+      </if>
+      <if test="itemTopX != null" >
+        #{itemTopX,jdbcType=VARCHAR},
+      </if>
+      <if test="itemTopY != null" >
+        #{itemTopY,jdbcType=VARCHAR},
+      </if>
+      <if test="itemFontOrient != null" >
+        #{itemFontOrient,jdbcType=VARCHAR},
+      </if>
+      <if test="itemFontSize != null" >
+        #{itemFontSize,jdbcType=DOUBLE},
+      </if>
+      <if test="itemFontBold != null" >
+        #{itemFontBold,jdbcType=VARCHAR},
+      </if>
+      <if test="itemFontColor != null" >
+        #{itemFontColor,jdbcType=VARCHAR},
+      </if>
+      <if test="templateId != null" >
+        #{templateId,jdbcType=VARCHAR},
+      </if>
+      <if test="itemImgId != null" >
+        #{itemImgId,jdbcType=VARCHAR},
+      </if>
+      <if test="itemStartDate != null" >
+        #{itemStartDate,jdbcType=VARCHAR},
+      </if>
+      <if test="itemEndDate != null" >
+        #{itemEndDate,jdbcType=VARCHAR},
+      </if>
+      <if test="itemFontContent != null" >
+        #{itemFontContent,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.xiangshangban.device.bean.TemplateItems" >
+    update template_items
+    <set >
+      <if test="itemType != null" >
+        item_type = #{itemType,jdbcType=VARCHAR},
+      </if>
+      <if test="itemTopX != null" >
+        item_top_x = #{itemTopX,jdbcType=VARCHAR},
+      </if>
+      <if test="itemTopY != null" >
+        item_top_y = #{itemTopY,jdbcType=VARCHAR},
+      </if>
+      <if test="itemFontOrient != null" >
+        item_font_orient = #{itemFontOrient,jdbcType=VARCHAR},
+      </if>
+      <if test="itemFontSize != null" >
+        item_font_size = #{itemFontSize,jdbcType=DOUBLE},
+      </if>
+      <if test="itemFontBold != null" >
+        item_font_bold = #{itemFontBold,jdbcType=VARCHAR},
+      </if>
+      <if test="itemFontColor != null" >
+        item_font_color = #{itemFontColor,jdbcType=VARCHAR},
+      </if>
+      <if test="templateId != null" >
+        template_id = #{templateId,jdbcType=VARCHAR},
+      </if>
+      <if test="itemImgId != null" >
+        item_img_id = #{itemImgId,jdbcType=VARCHAR},
+      </if>
+      <if test="itemStartDate != null" >
+        item_start_date = #{itemStartDate,jdbcType=VARCHAR},
+      </if>
+      <if test="itemEndDate != null" >
+        item_end_date = #{itemEndDate,jdbcType=VARCHAR},
+      </if>
+      <if test="itemFontContent != null" >
+        item_font_content = #{itemFontContent,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where item_id = #{itemId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.xiangshangban.device.bean.TemplateItems" >
+    update template_items
+    set item_type = #{itemType,jdbcType=VARCHAR},
+      item_top_x = #{itemTopX,jdbcType=VARCHAR},
+      item_top_y = #{itemTopY,jdbcType=VARCHAR},
+      item_font_orient = #{itemFontOrient,jdbcType=VARCHAR},
+      item_font_size = #{itemFontSize,jdbcType=DOUBLE},
+      item_font_bold = #{itemFontBold,jdbcType=VARCHAR},
+      item_font_color = #{itemFontColor,jdbcType=VARCHAR},
+      template_id = #{templateId,jdbcType=VARCHAR},
+      item_img_id = #{itemImgId,jdbcType=VARCHAR},
+      item_start_date = #{itemStartDate,jdbcType=VARCHAR},
+      item_end_date = #{itemEndDate,jdbcType=VARCHAR},
+      item_font_content = #{itemFontContent,jdbcType=VARCHAR}
+    where item_id = #{itemId,jdbcType=VARCHAR}
+  </update>
+
+  <!--==============<2017-11-22>=================-->
+
+  <!--查询item_id的最大值-->
+  <select id="selectMaxItemId" resultType="String">
+    select max(cast(item_id as integer)) from template_items
+  </select>
+
+  <!--添加自定义模板的item信息-->
+  <insert id="insertPersonalTemplateItemInfo" parameterType="Map">
+   INSERT INTO template_items
+    VALUES
+        (
+            #{ item_id },#{ item_type },#{ item_top_x },#{ item_top_y },#{ item_font_orient },#{ item_font_size },#{ item_font_bold }, #{ item_font_color },#{ template_id },#{ item_img_id },#{ item_start_date },#{ item_end_date },#{ item_font_content }
+        )
+  </insert>
+
+  <!--删除指定自定义模板的item-->
+  <delete id="deletePersonalTemplateItemInfo" parameterType="String">
+    delete from template_items where template_id = #{templateId}
+  </delete>
+
+</mapper>
