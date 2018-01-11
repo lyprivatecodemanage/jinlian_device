@@ -163,7 +163,6 @@ public class RabbitMQReciever {
                         }
 
                     }else if (mapResult.get("commandMode").equals("R")){
-
                         //返回值为0代表执行成功
                         if (((Map<String, String>)mapResult.get("resultData")).get("resultCode").equals("0")){
 

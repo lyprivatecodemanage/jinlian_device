@@ -53,6 +53,7 @@ public class ActivityController {
          "message":"数据请求成功/请求数据不存在",
          "returnCode":"3000/4203",
          "data":[
+<<<<<<< HEAD
              {
                  "template_id":"3",
                  "device_name":"设备1.1",

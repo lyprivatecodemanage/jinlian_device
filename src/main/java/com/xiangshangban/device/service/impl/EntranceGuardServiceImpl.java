@@ -147,7 +147,6 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         if(door!=null&&!door.getDoorId().isEmpty()){
             //首先查询该id对应的门的信息
             Door currDoor = doorMapper.selectByPrimaryKey(door.getDoorId());
-
             //区分更改名称和更改关联设备
             if(door.getDeviceId()!=null){
                 //设置数据
@@ -372,7 +371,6 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
                 pageObj = PageHelper.startPage(pageIndex, rowNumber);
             }
         }
-
         //查询门相关的人员的基本信息和周一的最早的打卡时间段
         List<Map> maps = doorEmployeeMapper.selectMondayPunchCardTimeAndEmpInfo(relateEmpPermissionCondition);
 
@@ -428,7 +426,6 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
                 }
             }
         }
-
         if(doorObj!=null){
             //获取门和设备(绑定/解绑)的时间
             String bindDate = doorObj.getBindDate();

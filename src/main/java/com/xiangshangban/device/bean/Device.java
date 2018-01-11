@@ -1,7 +1,6 @@
 package com.xiangshangban.device.bean;
 
 public class Device {
-
     private String deviceId;
     private String deviceName;
     private String companyId;

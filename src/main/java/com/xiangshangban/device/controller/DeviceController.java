@@ -86,6 +86,10 @@ public class DeviceController {
 
     @Autowired
     private CmdUtil cmdUtil;
+
+    @Autowired
+    private DoorEmployeeMapper doorEmployeeMapper;
+
     /**
      * 平台新增设备，未绑定公司的设备
      *
@@ -129,6 +133,13 @@ public class DeviceController {
             LOGGER.info("必传参数字段不存在");
             returnData.setMessage("必传参数字段不存在");
             returnData.setReturnCode("3006");
+            return returnData;
+        }
+
+        //CRC16校验设备编码的合法性
+        if (!deviceService.checkCrc16DeviceId(deviceId)){
+            returnData.setMessage("设备编码校验失败，请检查设备编码是否输入错误");
+            returnData.setReturnCode("4206");
             return returnData;
         }
 
@@ -186,7 +197,6 @@ public class DeviceController {
     @ResponseBody
     @RequestMapping(value = "/findDeviceInformation", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     public ReturnData findDeviceInformation(@RequestBody String jsonString, HttpServletRequest request) {
-
         /**
          * 测试数据
          {
@@ -200,7 +210,6 @@ public class DeviceController {
          "rows":"3"
          }
          */
-
 //        LOGGER.info(jsonString);
 
         //提取数据
@@ -220,7 +229,7 @@ public class DeviceController {
         try {
             role = mapJson.get("role");
         } catch (Exception e) {
-            LOGGER.error("公司id为null");
+            LOGGER.error("角色为null");
             returnData.setMessage("请登录账号后再操作");
             returnData.setReturnCode("3006");
             return returnData;
@@ -242,7 +251,8 @@ public class DeviceController {
             return returnData;
         }
 
-        if (companyName == null
+        if (role == null
+                || companyName == null
                 || deviceName == null
                 || deviceId == null
                 || isOnline == null
@@ -387,6 +397,7 @@ public class DeviceController {
 
             //下发绑定信息到设备
             deviceService.bindDevice(deviceId, companyId, companyName);
+
             returnData.setMessage("编辑信息成功");
             returnData.setReturnCode("3000");
             return returnData;
@@ -564,6 +575,7 @@ public class DeviceController {
 
             cmdUtil.handOutCmd(deviceId, "NULLDATA", "REBOOT_DEVICE", "1007", "", "",
                     "", "1", "", "", "");
+
             returnData.setMessage("重启操作已发出请求，请前往设备查看，网络波动时，会有一定的延时");
             returnData.setReturnCode("3000");
             return returnData;
@@ -576,7 +588,11 @@ public class DeviceController {
     }
 
     /**
+<<<<<<< HEAD
      * 查询当前公司的所有设备信息（未和公司解绑，并且尚未绑定门的设备）
+=======
+     * 查询当前公司的所有设备信息（一个设备信息列表）
+>>>>>>> temp
      */
     @ResponseBody
     @RequestMapping("/getAllDevice")
@@ -1024,7 +1040,7 @@ public class DeviceController {
          "0f1a21d4e6fd3cb8",
          "0f1a21d4e6fd3cb8"
          ],
-         //         "heartbeatPeriod": "60",
+//         "heartbeatPeriod": "60",
          "faceThreshold": "79.1",
          "fingerThreshold": "56.8",
          "faceDetecTime": "15",
@@ -1065,6 +1081,7 @@ public class DeviceController {
          */
 
 //        LOGGER.info(jsonString);
+
         return deviceService.handOutDeviceSetting(jsonString);
     }
 
@@ -1619,13 +1636,14 @@ public class DeviceController {
             if (StringUtils.isNotEmpty(employeeId)) {
                 //获取公司id
                 String companyId = request.getHeader("companyId");
-//                LOGGER.info("***********************************************************************公司的id是："+companyId);
+                LOGGER.info("***********************************************************************公司的id是："+companyId);
                 if (StringUtils.isNotEmpty(companyId)) {
-                    //查出该公司的所有设备
-                    List<Map> deviceList = deviceMapper.selectAllDevice(companyId);
+                    //查出当前登录人在哪些设备有开门权限
+                    List<Map> deviceList = doorEmployeeMapper.selectDeviceIdOfPermissionEffectiveByEmployeeId(employeeId, companyId);
 
-                    //判断该公司是否有设备
+                    //判断当前登录人是否有拥有开门权限的设备
                     if (deviceList.size() > 0) {
+                        System.out.println("deviceList : "+JSON.toJSONString(deviceList));
                         //返回的蓝牙参数集合
                         List<Map<String, String>> bluetoothParameterList = new ArrayList<Map<String, String>>();
 
@@ -1644,11 +1662,18 @@ public class DeviceController {
                             Door doorExist = doorMapper.findAllByDeviceId(deviceId);
                             if (doorExist != null) {
 
-//                                //判断当前登录人员在该门的开门权限有效期是否过期，过期则不显示该门
-//                                doorEmployeePermissionMapper.selectEmployeePressionByLeftJoin(employeeId, companyId);
-
                                 //有绑定的设备和门，则计数加1
                                 deviceDoorBindCount = deviceDoorBindCount + 1;
+
+                                //判断当前登录人员在该门的开门权限有效期是否过期，过期则不显示该门
+                                Map doorEmployeePermissionMap = doorEmployeePermissionMapper.selectEmployeePressionByLeftJoin(employeeId, doorExist.getDoorId());
+                                String doorOpenStartTime = (String) doorEmployeePermissionMap.get("doorOpenStartTime");
+                                String doorOpenEndTime = (String) doorEmployeePermissionMap.get("doorOpenEndTime");
+                                if (!DateUtils.isBetweenTwoTime(doorOpenStartTime, doorOpenEndTime, DateUtils.getDateTime())){
+                                    System.out.println("【"+employeeId+"】在【"+doorExist.getDoorId()+"】上权限无效");
+                                    continue;
+                                }
+
                                 List<Map<String, String>> versionInfoList = deviceMapper.selectAllVersionInfoByDeviceId(deviceId);
 
 //                                LOGGER.info("versionInfoList: " + JSON.toJSONString(versionInfoList));
@@ -1760,7 +1785,7 @@ public class DeviceController {
                         returnData.setBluetoothId(bluetoothIdResult);
                         return returnData;
                     } else {
-                        returnData.setMessage("您的公司暂无已绑定的设备");
+                        returnData.setMessage("没有查到拥有进出权限的门，请联系管理员下发您的开门权限");
                         returnData.setReturnCode("4007");
                         return returnData;
                     }

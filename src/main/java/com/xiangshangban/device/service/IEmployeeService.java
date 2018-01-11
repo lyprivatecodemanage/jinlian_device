@@ -47,6 +47,7 @@ public interface IEmployeeService {
 
     String deviceUploadPackage(String versionCode, MultipartFile uploadResource,
                                String fileType, String employeeId) throws IOException;
+
     //下发人员信息及门禁权限
     ReturnData handOutEmployeePermission(String employeePermission, HttpServletRequest request);
 }

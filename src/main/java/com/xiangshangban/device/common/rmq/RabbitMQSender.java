@@ -8,8 +8,6 @@ import com.xiangshangban.device.common.utils.RabbitTemplateUtil;
 import com.xiangshangban.device.service.impl.ConnectionFactoryServiceImpl;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

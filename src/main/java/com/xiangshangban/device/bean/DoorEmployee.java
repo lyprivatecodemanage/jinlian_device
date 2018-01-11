@@ -1,7 +1,6 @@
 package com.xiangshangban.device.bean;
 
 public class DoorEmployee {
-
     private String employeeId;
     private String employeeName;
     private String doorId;

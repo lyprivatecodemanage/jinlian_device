@@ -69,6 +69,12 @@ public interface IDeviceService {
      */
     void unBindDeviceDeleteOperation(String deviceId);
 
+//    /**
+//     * 绑定设备
+//     * @param deviceId
+//     */
+//    void bindDevice(String deviceId);
+
     /**
      * 上传设备重启记录
      * @param jsonString
@@ -89,7 +95,7 @@ public interface IDeviceService {
      * @param downloadTime
      * @param updateTime
      */
-    void updateDeviceSystem(List<String> deviceIdList, String downloadTime, String updateTime);
+    String updateDeviceSystem(List<String> deviceIdList, String downloadTime, String updateTime);
 
     /**
      * 定时下载升级更新设备应用
@@ -98,7 +104,7 @@ public interface IDeviceService {
      * @param updateTime
      * @return
      */
-    void updateDeviceApplication(List<String> deviceIdList, String downloadTime, String updateTime);
+    String updateDeviceApplication(List<String> deviceIdList, String downloadTime, String updateTime);
 
     /**
      * CRC16校验设备id

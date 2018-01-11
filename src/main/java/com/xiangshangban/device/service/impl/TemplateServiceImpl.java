@@ -3,6 +3,7 @@ package com.xiangshangban.device.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.sun.xml.internal.bind.v2.TODO;
 import com.xiangshangban.device.bean.*;
 import com.xiangshangban.device.common.QRCodeUtil.TwoDimensionCode;
 import com.xiangshangban.device.common.command.CmdUtil;
@@ -23,8 +24,12 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
+
 
 /**
  * author : Administrator
@@ -188,7 +193,6 @@ public class TemplateServiceImpl implements ITemplateService{
             JSONArray personalBackImgList =JSONArray.parseArray(jsonObject.get("backImgList").toString());
             //用户设置的问候语数据
             JSONArray personalSalutationList =JSONArray.parseArray(jsonObject.get("salutationList").toString());
-
             //声明添加新模板后的结果
             boolean operateResult = false;
 
@@ -425,7 +429,6 @@ public class TemplateServiceImpl implements ITemplateService{
         List<Map> standardImage = templateMapper.selectStandardTemplatePreview((templateId!=null&&!templateId.toString().isEmpty())?templateId.toString():null);
         return standardImage;
     }
-
 
     /**
      * TODO 获取所有的背景图

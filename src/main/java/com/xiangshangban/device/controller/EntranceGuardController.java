@@ -223,6 +223,7 @@ public class EntranceGuardController {
         }
         return JSONArray.toJSONString(resultMap);
     }*/
+
     /**
      * 修改门信息（更改门的名称以及门关联的设备）（√）
      * ==先执行解绑的操作，解绑成功的时候才能进行更换设备的操作==
@@ -1089,11 +1090,7 @@ public class EntranceGuardController {
     }
 
     /**
-<<<<<<< HEAD
      * 批量删除日志 ----->web端（√）
-=======
-     * 批量删除日志 （√）
->>>>>>> temp
      * {
      * "logIdList":[
      *      {"log_id":"26C8746239514090926B68CE0A07AA60"},
@@ -1122,7 +1119,6 @@ public class EntranceGuardController {
      */
     @PostMapping("/record/getInOutRecord")
     public String getInOutRecord(@RequestBody String requestParam, HttpServletRequest request) {
-
         //获取公司ID
         String companyId = request.getHeader("companyId");
         //返回给前端的数据
@@ -1134,7 +1130,6 @@ public class EntranceGuardController {
             resultMap = ReturnCodeUtil.addReturnCode(3);
         }
         return JSONArray.toJSONString(resultMap);
-
     }
 
     // 2)门禁异常 （√）
@@ -1480,6 +1475,7 @@ public class EntranceGuardController {
 /**************************************************************************
  *          TODO 下发指令
  **************************************************************************/
+
     //TODO 门禁管理------------门禁系统设置下发
 
     /**
@@ -1554,6 +1550,7 @@ public class EntranceGuardController {
          */
 
         String operatorEmployeeId = request.getHeader("accessUserId");
+
         return iEntranceGuardService.handOutDoorFeaturesSetup(doorFeaturesSetup, operatorEmployeeId);
     }
 
@@ -1870,4 +1867,5 @@ public class EntranceGuardController {
         }
     }
 }
+
 

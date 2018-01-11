@@ -20,6 +20,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
 import java.util.*;
 
 /**
@@ -413,6 +417,41 @@ public class DeviceServiceImpl implements IDeviceService {
         doorMapper.updateByPrimaryKeySelective(door);
     }
 
+//    @Override
+//    public void unBindDevice(String deviceId) {
+//
+//        //构造命令格式
+//        DoorCmd doorCmdUnBindDevice = new DoorCmd();
+//        doorCmdUnBindDevice.setServerId(serverId);
+//        doorCmdUnBindDevice.setDeviceId(deviceId);
+//        doorCmdUnBindDevice.setFileEdition("v1.3");
+//        doorCmdUnBindDevice.setCommandMode("C");
+//        doorCmdUnBindDevice.setCommandType("single");
+//        doorCmdUnBindDevice.setCommandTotal("1");
+//        doorCmdUnBindDevice.setCommandIndex("1");
+//        doorCmdUnBindDevice.setSubCmdId("");
+//        doorCmdUnBindDevice.setAction("UNBIND_DEVICE");
+//        doorCmdUnBindDevice.setActionCode("1002");
+//        doorCmdUnBindDevice.setSendTime(CalendarUtil.getCurrentTime());
+//        doorCmdUnBindDevice.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
+//        doorCmdUnBindDevice.setSuperCmdId(FormatUtil.createUuid());
+//        doorCmdUnBindDevice.setData("");
+//
+//        //获取完整的数据加协议封装格式
+//        RabbitMQSender rabbitMQSender = new RabbitMQSender();
+//        Map<String, Object> doorCmdPackageAll =  cmdUtil.messagePackaging(doorCmdUnBindDevice, "", "", "NULLDATA");
+//        //命令状态设置为: 发送中
+//        doorCmdUnBindDevice.setStatus("1");
+//        //设置md5校验值
+//        doorCmdUnBindDevice.setMd5Check((String) doorCmdPackageAll.get("MD5Check"));
+//        //设置数据库的data字段
+//        doorCmdUnBindDevice.setData(JSON.toJSONString(doorCmdPackageAll.get("data")));
+//        //命令数据存入数据库
+//        entranceGuardService.insertCommand(doorCmdUnBindDevice);
+//        //立即下发数据到MQ
+//        rabbitMQSender.sendMessage(deviceId, doorCmdPackageAll);
+//    }
+
     @Override
     public void deviceRebootRecordSave(String jsonString, String deviceId) {
 
@@ -594,7 +633,7 @@ public class DeviceServiceImpl implements IDeviceService {
      * @param downloadTime
      * @param updateTime
      */
-    public void updateDeviceSystem(List<String> deviceIdList, String downloadTime, String updateTime){
+    public String updateDeviceSystem(List<String> deviceIdList, String downloadTime, String updateTime){
 
         DeviceSettingUpdate deviceSettingUpdate = new DeviceSettingUpdate();
 
@@ -613,11 +652,16 @@ public class DeviceServiceImpl implements IDeviceService {
                 deviceSettingUpdateMapper.updateByPrimaryKeySelective(deviceSettingUpdate);
             }
 
+            //判断系统升级时间是否空，空则不下发数据
+            if (StringUtils.isEmpty(downloadTime) && StringUtils.isEmpty(updateTime)){
+                return "";
+            }
+
             //查询最新的下载包路径信息
             List<DeviceUpdatePackSys> deviceUpdatePackSys = deviceUpdatePackSysMapper.selectAllByLatestTime();
 
             Map<String, String> mapHandOut = new HashMap<String, String>();
-            if (deviceUpdatePackSys.size() > 0 && deviceUpdatePackSys.size() == 2 && deviceUpdatePackSys.size() < 3){
+            if (deviceUpdatePackSys.size() == 2){
                 mapHandOut.put("newSysVerion", deviceUpdatePackSys.get(0).getNewSysVerion());
                 mapHandOut.put("isSameVesionUpdate", "");
                 mapHandOut.put("downloadTime", downloadTime);
@@ -636,16 +680,16 @@ public class DeviceServiceImpl implements IDeviceService {
                 }
                 mapHandOut.put("path1", path1);
                 mapHandOut.put("path2", path2);
+
+                //确保下载地址两个都有
+                if (StringUtils.isEmpty(path1) || StringUtils.isEmpty(path2)){
+                    return "0";
+                }
             }else {
-                mapHandOut.put("newSysVerion", "");
-                mapHandOut.put("isSameVesionUpdate", "");
-                mapHandOut.put("downloadTime", downloadTime);
-                mapHandOut.put("updateTime", updateTime);
-                mapHandOut.put("path1", "");
-                mapHandOut.put("path2", "");
+                return "0";
             }
 
-//            //构造命令格式
+            //            //构造命令格式
 //            DoorCmd doorCmdUpdateSystem = new DoorCmd();
 //            doorCmdUpdateSystem.setServerId(serverId);
 //            doorCmdUpdateSystem.setDeviceId(deviceId);
@@ -679,6 +723,7 @@ public class DeviceServiceImpl implements IDeviceService {
             cmdUtil.handOutCmd(deviceId, "C", "UPDATE_DEVICE_SYSTEM", "1008", "", "update",
                     mapHandOut, "1", "", "", "");
         }
+        return "";
     }
 
     /**
@@ -687,7 +732,7 @@ public class DeviceServiceImpl implements IDeviceService {
      * @param downloadTime
      * @param updateTime
      */
-    public void updateDeviceApplication(List<String> deviceIdList, String downloadTime, String updateTime){
+    public String updateDeviceApplication(List<String> deviceIdList, String downloadTime, String updateTime){
 
         DeviceSettingUpdate deviceSettingUpdate = new DeviceSettingUpdate();
 
@@ -704,6 +749,11 @@ public class DeviceServiceImpl implements IDeviceService {
                 deviceSettingUpdateMapper.insertSelective(deviceSettingUpdate);
             }else {
                 deviceSettingUpdateMapper.updateByPrimaryKeySelective(deviceSettingUpdate);
+            }
+
+            //判断应用升级时间是否空，空则不下发数据
+            if (StringUtils.isEmpty(downloadTime)){
+                return "";
             }
 
             Map<String, String> mapHandOut = new HashMap<String, String>();
@@ -745,6 +795,7 @@ public class DeviceServiceImpl implements IDeviceService {
             cmdUtil.handOutCmd(deviceId, "C", "UPDATE_DEVICE_APP", "1009", "", "update",
                     mapHandOut, "1", "", "", "");
         }
+        return "";
     }
 
     /**
@@ -1110,7 +1161,13 @@ public class DeviceServiceImpl implements IDeviceService {
             }
 
             //保存并下发系统更新设置
-            deviceService.updateDeviceSystem(deviceIdList, downloadTimeSys, updateTimeSys);
+            String codeSys = deviceService.updateDeviceSystem(deviceIdList, downloadTimeSys, updateTimeSys);
+
+            if ("0".equals(codeSys)){
+                returnData.setMessage("没有查询到可以升级的系统升级包");
+                returnData.setReturnCode("4202");
+                return returnData;
+            }
 
             //保存下发应用更新设置
             deviceService.updateDeviceApplication(deviceIdList, downloadTimeApp, updateTimeApp);

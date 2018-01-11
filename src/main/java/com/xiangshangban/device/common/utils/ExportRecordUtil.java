@@ -10,11 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
-<<<<<<< HEAD
  * 导出记录(出入记录、门禁异常、签到签退情况、操作日志)到Excel
-=======
- * 导出记录(出入记录、门禁异常、签到签退情况)到Excel
->>>>>>> temp
  */
 public class ExportRecordUtil {
 
@@ -27,10 +23,7 @@ public class ExportRecordUtil {
      *             0 ---->出入记录
      *             1----->门禁异常
      *             2----->签到签退记录
-<<<<<<< HEAD
      *             3----->操作日志
-=======
->>>>>>> temp
      */
     public static void exportAnyRecordToExcel(List<?> exportData, String excelName, String[] headers,OutputStream out,int flag){
         if(exportData!=null && exportData.size()>0){

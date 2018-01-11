@@ -38,7 +38,7 @@
       is_online, active_status, device_place, 
       device_usages, total_server_time, have_used_time, 
       remain_server_time, is_unbind)
-    values (#{deviceId,jdbcType=VARCHAR}, #{deviceName,jdbcType=VARCHAR}, #{companyId,jdbcType=VARCHAR}, 
+    values (#{deviceId,jdbcType=VARCHAR}, #{deviceName,jdbcType=VARCHAR}, #{companyId,jdbcType=VARCHAR},
       #{companyName,jdbcType=VARCHAR}, #{deviceNumber,jdbcType=VARCHAR}, #{macAddress,jdbcType=VARCHAR}, 
       #{isOnline,jdbcType=VARCHAR}, #{activeStatus,jdbcType=VARCHAR}, #{devicePlace,jdbcType=VARCHAR}, 
       #{deviceUsages,jdbcType=VARCHAR}, #{totalServerTime,jdbcType=VARCHAR}, #{haveUsedTime,jdbcType=VARCHAR}, 

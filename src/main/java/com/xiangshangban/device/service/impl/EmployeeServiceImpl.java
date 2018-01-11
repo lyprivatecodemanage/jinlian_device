@@ -453,7 +453,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
                 }
             }
 
-            returnData.setMessage("已下发删除设备上人员权限的操作命令");
+            returnData.setMessage("已执行删除这些人员，在本公司的所有设备上的信息及开门权限");
             returnData.setReturnCode("3000");
             return returnData;
 
@@ -1079,6 +1079,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
             return returnData;
         }
     }
+
     public static void main(String[] args) {
         String employeeInfo = HttpRequestFactory.sendRequet("http://192.168.0.108:8072/EmployeeController/selectByEmployee", "13DFF865799A42C785F33AAFDC2FDD2D");
         System.out.println("[*] send: 已发出请求");

@@ -1,7 +1,6 @@
 package com.xiangshangban.device.bean;
 
 public class DoorEmployeePermission {
-
     private String employeeId;
     private String isManager;
     private String haveFirstCardPermission;

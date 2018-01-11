@@ -203,7 +203,6 @@ public class OSSFileServiceImpl implements OSSFileService {
 		}
 		//保存上传的文件信息到本地仓库
 		Map infoMap = new HashMap<>();
-
 		infoMap.put("id",(imagesMapper.selectImagePrimaryKey()==null && imagesMapper.selectImagePrimaryKey().isEmpty())?"1":Integer.parseInt(imagesMapper.selectImagePrimaryKey())+1);
 		/**上传的是logo的时候，使用的文件名称是用户上传的文件的真实名称（格式）、
 		上传的如果是二维码的时候，采用的是流的形式，所以要生成不同的文件名称（格式），所以采用UUID*/

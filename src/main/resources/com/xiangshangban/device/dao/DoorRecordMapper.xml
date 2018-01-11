@@ -422,5 +422,4 @@
         AND door_id = #{doorId,jdbcType=VARCHAR}
         AND device_id = #{deviceId,jdbcType=VARCHAR}
     </select>
-
 </mapper>
