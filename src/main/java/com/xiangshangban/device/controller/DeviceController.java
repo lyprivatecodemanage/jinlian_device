@@ -90,6 +90,12 @@ public class DeviceController {
     @Autowired
     private DoorEmployeeMapper doorEmployeeMapper;
 
+    @Autowired
+    private DeviceOnlineMapper deviceOnlineMapper;
+
+    @Autowired
+    private DeviceStatusCheckUtil deviceStatusCheckUtil;
+
     /**
      * 平台新增设备，未绑定公司的设备
      *
@@ -574,7 +580,7 @@ public class DeviceController {
 //            rabbitMQSender.sendMessage(deviceId, doorCmdPackageAll);
 
             cmdUtil.handOutCmd(deviceId, "NULLDATA", "REBOOT_DEVICE", "1007", "", "",
-                    "", "1", "", "", "");
+                    "", "1", "", "", "", "");
 
             returnData.setMessage("重启操作已发出请求，请前往设备查看，网络波动时，会有一定的延时");
             returnData.setReturnCode("3000");
@@ -588,11 +594,7 @@ public class DeviceController {
     }
 
     /**
-<<<<<<< HEAD
      * 查询当前公司的所有设备信息（未和公司解绑，并且尚未绑定门的设备）
-=======
-     * 查询当前公司的所有设备信息（一个设备信息列表）
->>>>>>> temp
      */
     @ResponseBody
     @RequestMapping("/getAllDevice")
@@ -641,24 +643,26 @@ public class DeviceController {
      * 解绑设备
      */
     @ResponseBody
+    @Transactional
     @RequestMapping("/unBindDevice")
     public ReturnData unBindDevice(@RequestBody String jsonString, HttpServletRequest request){
 
         /**
          * 测试数据
          {
-         "doorId": "0f1a21d4e6fd3cb8"
+         "deviceId": "0f1a21d4e6fd3cb8"
          }
          */
 
-        LOGGER.info(jsonString);
+//        LOGGER.info(jsonString);
 
         //解析数据
         Map<String, String> mapJson = (Map<String, String>)net.sf.json.JSONObject.fromObject(jsonString);
-        String doorId = mapJson.get("doorId");
+        String deviceId = mapJson.get("deviceId");
+//        String doorId = mapJson.get("doorId");
 
-        //查找设备id
-        String deviceId = doorMapper.findAllByDoorId(doorId).getDeviceId();
+//        //查找设备id
+//        String deviceId = doorMapper.findAllByDoorId(doorId).getDeviceId();
 
         return deviceService.unBindDevice(deviceId, "", "1", request);
     }
@@ -1872,5 +1876,4 @@ public class DeviceController {
             return returnData;
         }
     }
-
 }

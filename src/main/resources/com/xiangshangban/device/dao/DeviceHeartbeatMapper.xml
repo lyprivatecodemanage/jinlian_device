@@ -307,31 +307,29 @@
   <!--非自动生成-->
   <select id="selectLatestByDeviceId" resultType="java.util.Map" parameterType="java.lang.String" >
     SELECT
-	T .*
+    dh.cpu_user_unilization,
+    dh.rom_available_size,
+    dh.internal_unilization,
+    dh.cpu_temper,
+    dh."time",
+    d.device_name,
+    d.company_id,
+    d.company_name
     FROM
-	(
-		SELECT
-			device_heartbeat.cpu_user_unilization,
-			device_heartbeat.rom_available_size,
-			device_heartbeat.internal_unilization,
-			device_heartbeat.cpu_temper,
-            device_heartbeat.time,
-			device_.device_name,
-            device_.company_id,
-			device_.company_name,
-			ROW_NUMBER () OVER (ORDER BY "time" DESC) rn
-		FROM
-			device_heartbeat
-		LEFT JOIN device_ ON (
-			device_.device_id = device_heartbeat.device_id
-		)
-		WHERE
-          device_heartbeat.device_id = #{deviceId,jdbcType=VARCHAR}
-	) T
+    device_heartbeat dh
+    LEFT JOIN device_ d ON (d.device_id = dh.device_id)
     WHERE
-	rn = 1
+    dh.device_id = #{deviceId,jdbcType=VARCHAR}
+    AND dh."time" = (
+    SELECT
+    MAX ("time")
+    FROM
+    device_heartbeat
+    WHERE
+    device_heartbeat.device_id = #{deviceId,jdbcType=VARCHAR}
+    )
     <if test='companyName != null and companyName != ""' >
-      AND company_name LIKE '%${companyName}%'
+      AND d.company_name LIKE '%${companyName}%'
     </if>
     <if test="cpuUserUnilizationCondition != null and cpuTemperCondition != null" >
       <if test='cpuUserUnilizationCondition != ""' >
@@ -366,22 +364,20 @@
 
   <select id="selectLatestTimeByDeviceId" resultType="java.util.Map" parameterType="java.lang.String" >
     SELECT
-	T .*
+	dh.device_id AS "deviceId",
+	dh."time" AS "time"
     FROM
-	(
-		SELECT
-			device_heartbeat.device_id AS "deviceId",
-			device_heartbeat. TIME AS "time",
-			ROW_NUMBER () OVER (ORDER BY "time" DESC) rn
-		FROM
-			device_heartbeat
-		LEFT JOIN device_ ON (
-			device_.device_id = device_heartbeat.device_id
-		)
-		WHERE
-			device_heartbeat.device_id = #{deviceId,jdbcType=VARCHAR}
-	) T
+	device_heartbeat dh
+    LEFT JOIN device_ d ON (d.device_id = dh.device_id)
     WHERE
-	rn IN (1)
+	dh.device_id = #{deviceId,jdbcType=VARCHAR}
+    AND dh."time" = (
+	SELECT
+		MAX ("time")
+	FROM
+		device_heartbeat
+	WHERE
+		device_heartbeat.device_id = #{deviceId,jdbcType=VARCHAR}
+    )
   </select>
 </mapper>

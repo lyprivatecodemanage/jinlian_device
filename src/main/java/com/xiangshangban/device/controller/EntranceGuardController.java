@@ -14,7 +14,6 @@ import com.xiangshangban.device.dao.*;
 import com.xiangshangban.device.service.IDeviceService;
 import com.xiangshangban.device.service.IEntranceGuardService;
 import org.apache.commons.collections.map.HashedMap;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
@@ -125,6 +124,7 @@ public class EntranceGuardController {
                 door.setOperateTime(DateUtils.getDateTime());
                 door.setOperateEmployee(operateUserId);//设置操作人
                 door.setCompanyId(companyId);//设置设备所属公司的Id
+                door.setBindDate(DateUtils.getDateTime());
 
                 boolean result = iEntranceGuardService.addDoorInfo(door);
                 resultMap = ReturnCodeUtil.addReturnCode(result);
@@ -163,6 +163,14 @@ public class EntranceGuardController {
                 ReturnData returnData =  iDeviceService.unBindDevice(allByDoorId.getDeviceId(), "", "2", request);
                 String returnCode = returnData.getReturnCode();
                 if(returnCode!=null && returnCode.trim().equals("3000")){
+                    //改变设备的绑定状态
+                    Device device = new Device();
+                    device.setDeviceId(allByDoorId.getDeviceId());
+                    device.setIsUnbind("0");
+                    deviceMapper.updateByPrimaryKeySelective(device);
+
+                    System.out.println("设备置0");
+
                     //(设备和门解绑成功)删除本地数据库中门和设备的关系
                     boolean delDoorResult = iEntranceGuardService.delDoorInfo(doorId.toString().trim());
                     resultMap = ReturnCodeUtil.addReturnCode(delDoorResult);
@@ -248,48 +256,58 @@ public class EntranceGuardController {
         if (operateUserId != null && !operateUserId.toString().trim().isEmpty()) {
             if (deviceId != null) {
                 //TODO ==========查询门当前绑定的设备ID=解绑设备===========
-                Door allByDoorId = doorMapper.findAllByDoorId(doorId.toString());
+                        Door allByDoorId = doorMapper.findAllByDoorId(doorId.toString());
 
-                if(allByDoorId!=null && allByDoorId.getDeviceId()!=null && !allByDoorId.getDeviceId().isEmpty()){
-                   //判断当前用户是否进行换绑设备的操作
-                    if(!deviceId.toString().trim().equals(allByDoorId.getDeviceId())){
-                        //解绑（0：代表不删除公司）
-                        ReturnData returnData =  iDeviceService.unBindDevice(allByDoorId.getDeviceId(), deviceId.toString(), "0", request);
-                        String returnCode = returnData.getReturnCode();
+                        if(allByDoorId!=null){
+                            if(allByDoorId.getDeviceId() != null && !deviceId.toString().trim().equals((allByDoorId.getDeviceId()))){
+                                //解绑（0：代表不删除公司）
+                                ReturnData returnData =  iDeviceService.unBindDevice(allByDoorId.getDeviceId(), deviceId.toString(), "0", request);
+                                String returnCode = returnData.getReturnCode();
 
-                        if(returnCode!=null && returnCode.trim().equals("3000")){
-                            //设备和当前的门解绑成功（进行更换设备的操作）
-                            Door door = new Door();
-                            door.setDoorName(doorName != null ? doorName.toString() : null);
-                            door.setDeviceId(deviceId != null ? deviceId.toString() : null);
-                            door.setDoorId(doorId != null ? doorId.toString() : null);
-                            door.setOperateEmployee(operateUserId);//当前登录的人员的ID
-                            boolean result = iEntranceGuardService.updateDoorInfo(door);
+                                if(returnCode!=null && returnCode.trim().equals("3000")){
+                                    //改变设备的绑定状态
+                                    Device device = new Device();
+                                    device.setDeviceId(deviceId.toString());
+                                    device.setIsUnbind("0");
+                                    deviceMapper.updateByPrimaryKeySelective(device);
 
-                            resultMap = ReturnCodeUtil.addReturnCode(result);
+                                    System.out.println("设备置0");
 
-                        }else{
-                            if(returnCode.trim().equals("4208")){
-                                resultMap = ReturnCodeUtil.addReturnCode(4);
+                                    //设备和当前的门解绑成功（进行更换设备的操作）
+                                    Door door = new Door();
+                                    door.setDoorName(doorName != null ? doorName.toString() : null);
+                                    door.setDeviceId(deviceId != null ? deviceId.toString() : null);
+                                    door.setDoorId(doorId != null ? doorId.toString() : null);
+                                    door.setOperateEmployee(operateUserId);//当前登录的人员的ID
+                                    door.setBindDate(DateUtils.getDateTime());
+                                    boolean result = iEntranceGuardService.updateDoorInfo(door);
+
+                                    System.out.println("door: "+JSON.toJSONString(door));
+
+                                    resultMap = ReturnCodeUtil.addReturnCode(result);
+
+                                }else{
+                                    if(returnCode.trim().equals("4208")){
+                                        resultMap = ReturnCodeUtil.addReturnCode(4);
+                                    }
+                                    if(returnCode.trim().equals("4209")){
+                                        resultMap = ReturnCodeUtil.addReturnCode(5);
+                                    }
+                                    if(returnCode.trim().equals("4210")){
+                                        resultMap = ReturnCodeUtil.addReturnCode(6);
+                                    }
+                                }
+                            }else{
+                                //用户未更换设备，仅仅是改变设备的名称
+                                Door door = new Door();
+                                door.setDoorName(doorName != null ? doorName.toString() : null);
+                                door.setDeviceId(deviceId != null ? deviceId.toString() : null);
+                                door.setDoorId(doorId != null ? doorId.toString() : null);
+                                door.setOperateEmployee(operateUserId);//当前登录的人员的ID
+                                boolean result = iEntranceGuardService.updateDoorInfo(door);
+
+                                resultMap = ReturnCodeUtil.addReturnCode(result);
                             }
-                            if(returnCode.trim().equals("4209")){
-                                resultMap = ReturnCodeUtil.addReturnCode(5);
-                            }
-                            if(returnCode.trim().equals("4210")){
-                                resultMap = ReturnCodeUtil.addReturnCode(6);
-                            }
-                        }
-                    }else{
-                        //用户未更换设备，仅仅是改变设备的名称
-                        Door door = new Door();
-                        door.setDoorName(doorName != null ? doorName.toString() : null);
-                        door.setDeviceId(deviceId != null ? deviceId.toString() : null);
-                        door.setDoorId(doorId != null ? doorId.toString() : null);
-                        door.setOperateEmployee(operateUserId);//当前登录的人员的ID
-                        boolean result = iEntranceGuardService.updateDoorInfo(door);
-
-                        resultMap = ReturnCodeUtil.addReturnCode(result);
-                    }
                 }
             } else {
                 //该门未绑定设备
@@ -416,6 +434,7 @@ public class EntranceGuardController {
                     int relateNFC = 0;
                     String doorId = "";
                     String deviceId = "";
+                    String deviceStatus = "";
                     String deviceName = "";
                     innerList = resultMap.get(newList.get(j));
 
@@ -443,6 +462,9 @@ public class EntranceGuardController {
                         }
                         if (innerMap.get("device_id") != null && !innerMap.get("device_id").toString().isEmpty()) {
                             deviceId = innerMap.get("device_id").toString();
+                        }
+                        if (innerMap.get("is_unbind") != null && !innerMap.get("is_unbind").toString().isEmpty()) {
+                            deviceStatus = innerMap.get("is_unbind").toString();
                         }
                         if (innerMap.get("device_name") != null && !innerMap.get("device_name").toString().isEmpty()) {
                             deviceName = innerMap.get("device_name").toString();
@@ -472,6 +494,9 @@ public class EntranceGuardController {
                         if(realMap.get(newList.get(j)).get("deviceId") != null){
                             realMap.get(newList.get(j)).put("deviceId",deviceId);
                         }
+                        if(realMap.get(newList.get(j)).get("deviceStatus") != null){
+                            realMap.get(newList.get(j)).put("deviceStatus",deviceId);
+                        }
                         if(realMap.get(newList.get(j)).get("deviceName") != null){
                             realMap.get(newList.get(j)).put("deviceName",deviceName);
                         }
@@ -479,6 +504,7 @@ public class EntranceGuardController {
                         Map<String, String> map = new HashMap<String, String>();
                         map.put("doorId", doorId);
                         map.put("deviceId", deviceId);
+                        map.put("deviceStatus", deviceStatus);
                         map.put("deviceName",deviceName);
                         map.put("relatePhone", String.valueOf(relatePhone));
                         map.put("relateFace", String.valueOf(relateFace));
@@ -729,6 +755,7 @@ public class EntranceGuardController {
               if (doorId != null) {
                   //根据门的id查询门的名称
                   Door door = doorMapper.selectByPrimaryKey(doorId.toString());
+                  result.put("deviceId", (door.getDeviceId()==null ? "" : door.getDeviceId()));
                   if (door != null) {
                       result.put("doorId", doorId);
                       result.put("doorName", door.getDoorName());

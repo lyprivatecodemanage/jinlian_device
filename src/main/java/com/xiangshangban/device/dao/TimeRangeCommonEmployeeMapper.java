@@ -14,7 +14,7 @@ public interface TimeRangeCommonEmployeeMapper {
 
     int insertSelective(TimeRangeCommonEmployee record);
 
-    TimeRangeCommonEmployee selectByPrimaryKey(String rangeFlagId);
+    List<TimeRangeCommonEmployee> selectByPrimaryKey(String rangeFlagId);
 
     int updateByPrimaryKeySelective(TimeRangeCommonEmployee record);
 

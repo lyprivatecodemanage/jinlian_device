@@ -77,15 +77,15 @@ public class ReturnCodeUtil {
                 map.put("message","未知的登录人(公司)ID");
                 break;
             case 4:
-                map.put("returnCode","4208");
-                map.put("message","设备正在解绑，前稍等......");
+                map.put("returnCode","4211");
+                map.put("message","设备正在解绑，请稍等......");
                 break;
             case 5:
-                map.put("returnCode","4209");
+                map.put("returnCode","4212");
                 map.put("message","设备解绑失败,当前操作终止");
                 break;
             case 6:
-                map.put("returnCode","4210");
+                map.put("returnCode","4213");
                 map.put("message","检测到当前设备正在上传数据，请稍后再进行解绑操作，当前操作终止");
                 break;
                 default:

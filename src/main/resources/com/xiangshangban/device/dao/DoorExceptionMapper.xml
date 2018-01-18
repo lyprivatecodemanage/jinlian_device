@@ -134,7 +134,7 @@
     WHERE
     company_id =  #{doorRecordCondition.companyId}
     )
-   <!-- AND A .employee_id != ''-->
+    AND A .employee_id != ''
     ) S
   <where>
     <if test="doorRecordCondition.name!=null and doorRecordCondition.name!=''">

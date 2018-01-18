@@ -152,6 +152,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
                 //设置数据
                 if(!door.getDeviceId().isEmpty()){
                     currDoor.setDeviceId(door.getDeviceId());
+                    currDoor.setBindDate(DateUtils.getDateTime());
                 }
             }
             if(!door.getDoorName().isEmpty()){
@@ -431,8 +432,8 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
             String bindDate = doorObj.getBindDate();
             //根据门和设备绑定的时间区分（“当前/历史”）下发人员信息
             for(int f=0;f<maps.size();f++){
-                String createDate = maps.get(f).get("create_date").toString();
-                if(createDate.compareTo(bindDate)>0){
+                String createDate = maps.get(f).get("lasttime").toString();
+                if(DateUtils.isTime1LtTime2(createDate, bindDate)){
                     //添加标志
                     maps.get(f).put("isHistoryDevice","1");
                 }else{
@@ -705,7 +706,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
 
         //下发门禁常规设置命令
         cmdUtil.handOutCmd(deviceId, "C", "UPDATE_ACCESS_CONTROL_SETTING", "3003",
-                operatorEmployeeId, "attSetting", doorSetupMap, "1", "", "", "");
+                operatorEmployeeId, "attSetting", doorSetupMap, "1", "", "", "", "");
     }
 
     //
@@ -836,7 +837,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
 
         //下发首卡常开命令
         cmdUtil.handOutCmd(deviceId, "C", "UPDATE_FIRST_CARD_NORMAL_OPENED", "3004", operatorEmployeeId,
-                "firstCardKeepDoorOpen", firstCardSetupMap, "1", "", "", "");
+                "firstCardKeepDoorOpen", firstCardSetupMap, "1", "", "", "", "");
 
     }
 
@@ -934,7 +935,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
 
         //下发门禁日历命令
         cmdUtil.handOutCmd(deviceId, "C", "UPDATE_ACCESS_CALENDER", "3005", operatorEmployeeId,
-                "accessCalendar", accessCalendar, "1", "", "", "");
+                "accessCalendar", accessCalendar, "1", "", "", "", "");
 
     }
 
@@ -985,6 +986,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         String resultMessage;
 
         String deviceId = (String) doorRecordMapTemp.get("deviceId");
+        String sendDate = (String) doorRecordMapTemp.get("sendTime");
 
         //遍历门禁记录
         for (Map<String, String> recordMap : doorRecordList) {
@@ -1014,6 +1016,8 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
             doorRecord.setEventPhotoGroupId(recordMap.get("eventPhotoCombinationId"));
             doorRecord.setDeviceId(deviceId);
             doorRecord.setDeviceName(deviceMapper.selectByPrimaryKey(deviceId).getDeviceName());
+            doorRecord.setUploadDate(sendDate);
+            doorRecord.setSaveDate(DateUtils.getDateTime());
 
             //查找记录是否重复上传
             DoorRecord doorRecordExit = doorRecordMapper.selectByRecordIdDoorIdAndDeviceId(recordMap.get("id"), doorId, deviceId);

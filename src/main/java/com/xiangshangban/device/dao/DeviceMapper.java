@@ -65,4 +65,9 @@ public interface DeviceMapper {
      * 查询跟当前公司已经解绑的设备列表
      */
     List<String> selectUnBindDeviceByCompanyId(@Param("companyId") String companyId);
+
+    /**
+     * 更改设备的绑定状态
+     */
+    int updateDeviceBindState(@Param("deviceId") String deviceId);
 }

@@ -7,6 +7,7 @@ public class DoorEmployee {
     private String doorName;
     private String rangeFlagId;
     private String deviceId;
+    private String createDate;
 
     public String getEmployeeId() {
         return employeeId;
@@ -54,5 +55,13 @@ public class DoorEmployee {
 
     public void setDeviceId(String deviceId) {
         this.deviceId = deviceId;
+    }
+
+    public String getCreateDate() {
+        return createDate;
+    }
+
+    public void setCreateDate(String createDate) {
+        this.createDate = createDate;
     }
 }

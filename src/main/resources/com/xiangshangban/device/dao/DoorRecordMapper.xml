@@ -19,6 +19,8 @@
         <result column="record_date" property="recordDate" jdbcType="VARCHAR"/>
         <result column="device_id" property="deviceId" jdbcType="VARCHAR"/>
         <result column="device_name" property="deviceName" jdbcType="VARCHAR"/>
+        <result column="upload_date" property="uploadDate" jdbcType="VARCHAR"/>
+        <result column="save_date" property="saveDate" jdbcType="VARCHAR"/>
     </resultMap>
 
     <!--自定义resultMap-->
@@ -33,7 +35,8 @@
     <sql id="Base_Column_List">
         door_permission_record_id, employee_id, door_id, record_type, upper_state, upper_edition,
         employee_group_name, open_door_photo_name, back_key, device_group_name, real_week,
-        event_result, event_result_reason, event_photo_group_id, record_date, device_id, device_name
+        event_result, event_result_reason, event_photo_group_id, record_date, device_id, device_name,
+        upload_date, save_date
     </sql>
     <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String">
         select
@@ -51,13 +54,14 @@
         upper_edition, employee_group_name, open_door_photo_name,
         back_key, device_group_name, real_week,
         event_result, event_result_reason, event_photo_group_id,
-        record_date, device_id, device_name)
+        record_date, device_id, device_name, upload_date, save_date)
         values (#{doorPermissionRecordId,jdbcType=VARCHAR}, #{employeeId,jdbcType=VARCHAR},
         #{doorId,jdbcType=VARCHAR}, #{recordType,jdbcType=VARCHAR}, #{upperState,jdbcType=VARCHAR},
         #{upperEdition,jdbcType=VARCHAR}, #{employeeGroupName,jdbcType=VARCHAR}, #{openDoorPhotoName,jdbcType=VARCHAR},
         #{backKey,jdbcType=VARCHAR}, #{deviceGroupName,jdbcType=VARCHAR}, #{realWeek,jdbcType=VARCHAR},
         #{eventResult,jdbcType=VARCHAR}, #{eventResultReason,jdbcType=VARCHAR}, #{eventPhotoGroupId,jdbcType=VARCHAR},
-        #{recordDate,jdbcType=VARCHAR}, #{deviceId,jdbcType=VARCHAR}, #{deviceName,jdbcType=VARCHAR})
+        #{recordDate,jdbcType=VARCHAR}, #{deviceId,jdbcType=VARCHAR}, #{deviceName,jdbcType=VARCHAR},
+        #{uploadDate,jdbcType=VARCHAR}, #{saveDate,jdbcType=VARCHAR})
     </insert>
     <insert id="insertSelective" parameterType="com.xiangshangban.device.bean.DoorRecord">
         insert into door_record
@@ -113,6 +117,12 @@
             <if test="deviceName != null">
                 device_name,
             </if>
+            <if test="uploadDate != null">
+                upload_date,
+            </if>
+            <if test="saveDate != null">
+                save_date,
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="doorPermissionRecordId != null">
@@ -165,6 +175,12 @@
             </if>
             <if test="deviceName != null">
                 #{deviceName,jdbcType=VARCHAR},
+            </if>
+            <if test="uploadDate != null">
+                #{uploadDate,jdbcType=VARCHAR},
+            </if>
+            <if test="saveDate != null">
+                #{saveDate,jdbcType=VARCHAR},
             </if>
         </trim>
     </insert>
@@ -219,6 +235,12 @@
             <if test="deviceName != null">
                 device_name = #{deviceName,jdbcType=VARCHAR},
             </if>
+            <if test="uploadDate != null">
+                upload_date = #{uploadDate,jdbcType=VARCHAR},
+            </if>
+            <if test="saveDate != null">
+                save_date = #{saveDate,jdbcType=VARCHAR},
+            </if>
         </set>
         where door_permission_record_id = #{doorPermissionRecordId,jdbcType=VARCHAR}
     </update>
@@ -239,7 +261,9 @@
         event_photo_group_id = #{eventPhotoGroupId,jdbcType=VARCHAR},
         record_date = #{recordDate,jdbcType=VARCHAR},
         device_id = #{deviceId,jdbcType=VARCHAR},
-        device_name = #{deviceName,jdbcType=VARCHAR}
+        device_name = #{deviceName,jdbcType=VARCHAR},
+        upload_date = #{uploadDate,jdbcType=VARCHAR},
+        save_date = #{saveDate,jdbcType=VARCHAR}
         where door_permission_record_id = #{doorPermissionRecordId,jdbcType=VARCHAR}
     </update>
 
@@ -252,7 +276,8 @@
         COALESCE (S.record_type, '') AS record_type,
         COALESCE (record_date, '') AS record_date,
         COALESCE (employee_name, '') AS employee_name,
-        COALESCE (employee_department_name,
+        COALESCE (
+        employee_department_name,
         ''
         ) AS employee_department_name,
         device_id,
@@ -270,14 +295,14 @@
         FROM
         door_record A
         LEFT JOIN employee_ B ON A .employee_id = B.employee_id
-        AND B.employee_company_id = #{doorRecordCondition.companyId}
+        AND B.employee_company_id = #{ doorRecordCondition.companyId }
         AND A .employee_id IN (
         SELECT
         employee_id
         FROM
         employee_
         WHERE
-        employee_company_id = #{doorRecordCondition.companyId}
+        employee_company_id = #{ doorRecordCondition.companyId }
         )
         WHERE
         A .record_type IN ('3', '5', '6', '7', '8')
@@ -287,9 +312,9 @@
         FROM
         door_
         WHERE
-        company_id = #{doorRecordCondition.companyId}
+        company_id = #{ doorRecordCondition.companyId }
         )
-        AND A.employee_id != ''
+        AND A .employee_id != ''
         ) S
         <where>
             <if test="doorRecordCondition.name!=null and doorRecordCondition.name!=''">

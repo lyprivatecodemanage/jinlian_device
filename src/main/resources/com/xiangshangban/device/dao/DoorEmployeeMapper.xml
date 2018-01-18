@@ -8,9 +8,10 @@
     <result column="door_name" property="doorName" jdbcType="VARCHAR" />
     <result column="range_flag_id" property="rangeFlagId" jdbcType="VARCHAR" />
     <result column="device_id" property="deviceId" jdbcType="VARCHAR" />
+    <result column="create_date" property="createDate" jdbcType="VARCHAR" />
   </resultMap>
   <sql id="Base_Column_List" >
-    employee_id, employee_name, door_id, door_name, range_flag_id, device_id
+    employee_id, employee_name, door_id, door_name, range_flag_id, device_id, create_date
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
     select 
@@ -24,9 +25,9 @@
   </delete>
   <insert id="insert" parameterType="com.xiangshangban.device.bean.DoorEmployee" >
     insert into door_employee (employee_id, employee_name, door_id, 
-      door_name, range_flag_id, device_id)
+      door_name, range_flag_id, device_id, create_date)
     values (#{employeeId,jdbcType=VARCHAR}, #{employeeName,jdbcType=VARCHAR}, #{doorId,jdbcType=VARCHAR}, 
-      #{doorName,jdbcType=VARCHAR}, #{rangeFlagId,jdbcType=VARCHAR}, #{deviceId,jdbcType=VARCHAR})
+      #{doorName,jdbcType=VARCHAR}, #{rangeFlagId,jdbcType=VARCHAR}, #{deviceId,jdbcType=VARCHAR}, #{createDate,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="com.xiangshangban.device.bean.DoorEmployee" >
     insert into door_employee
@@ -49,6 +50,9 @@
       <if test="deviceId != null" >
         device_id,
       </if>
+      <if test="createDate != null" >
+        create_date,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="employeeId != null" >
@@ -68,6 +72,9 @@
       </if>
       <if test="deviceId != null" >
         #{deviceId,jdbcType=VARCHAR},
+      </if>
+      <if test="createDate != null" >
+        #{createDate,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
@@ -89,6 +96,9 @@
       <if test="deviceId != null">
         device_id = #{deviceId,jdbcType=VARCHAR},
       </if>
+      <if test="createDate != null">
+        create_date = #{createDate,jdbcType=VARCHAR},
+      </if>
     </set>
     where employee_id = #{employeeId,jdbcType=VARCHAR}
   </update>
@@ -98,7 +108,8 @@
       door_id = #{doorId,jdbcType=VARCHAR},
       door_name = #{doorName,jdbcType=VARCHAR},
       range_flag_id = #{rangeFlagId,jdbcType=VARCHAR},
-      device_id = #{deviceId,jdbcType=VARCHAR}
+      device_id = #{deviceId,jdbcType=VARCHAR},
+      create_date = #{createDate,jdbcType=VARCHAR}
     where employee_id = #{employeeId,jdbcType=VARCHAR}
   </update>
 
@@ -135,6 +146,7 @@
       E.door_id,
       COALESCE (door_name, '') AS door_name,
       device_id,
+      is_unbind,
       COALESCE (device_name, '') AS device_name,
       COALESCE (F.employee_phone, '') AS employee_phone,
       COALESCE (employee_face, '') AS employee_face,
@@ -148,7 +160,8 @@
       (
       <!--查询该公司的门以及门关联的设备-->
       SELECT
-      A .*, B.device_name
+      A .*, B.device_name,
+      is_unbind
       FROM
       (
       SELECT
@@ -159,7 +172,7 @@
       FROM
       door_
       WHERE
-      company_id = #{companyId}
+      company_id = #{companyId,jdbcType=VARCHAR}
       ) A
       LEFT JOIN device_ B ON A .device_id = B.device_id
       ) S
@@ -173,10 +186,18 @@
       device_id,
       (
       CASE
-      WHEN info_status = '2' AND permi_status = '2' THEN '2'
-      WHEN info_status = '0' OR permi_status = '0' THEN '0'
-      WHEN info_status = '1' OR permi_status = '1' THEN '1'
-      WHEN info_status = '3' OR permi_status = '3' THEN '3'
+      WHEN info_status = '2'
+      AND permi_status = '2' THEN
+      '2'
+      WHEN info_status = '0'
+      OR permi_status = '0' THEN
+      '0'
+      WHEN info_status = '1'
+      OR permi_status = '1' THEN
+      '1'
+      WHEN info_status = '3'
+      OR permi_status = '3' THEN
+      '3'
       END
       ) status
       FROM
@@ -184,6 +205,10 @@
       SELECT DISTINCT
       C .*, D.action_code permi,
       D.status permi_status
+      FROM
+      (
+      SELECT
+      X.*
       FROM
       (
       SELECT
@@ -211,8 +236,16 @@
       AND A .employee_id = B.employee_id
       ORDER BY
       A .send_time DESC
+      ) X
+      LEFT JOIN door_ d ON (X.device_id = d.device_id)
+      WHERE
+      X.send_time > d.bind_date
       ) C
       INNER JOIN (
+      SELECT
+      X.*
+      FROM
+      (
       SELECT
       A .*, B.status
       FROM
@@ -238,10 +271,15 @@
       AND A .employee_id = B.employee_id
       ORDER BY
       A .send_time DESC
+      ) X
+      LEFT JOIN door_ d ON (X.device_id = d.device_id)
+      WHERE
+      X.send_time > d.bind_date
       ) D ON C .employee_id = D.employee_id
       ) E
       ) H
-      ) Q ON S.device_id = Q.device_id AND Q.status = '2'
+      ) Q ON S.device_id = Q.device_id
+      AND Q.status = '2'
       ) E
       LEFT JOIN employee_ F ON E.employee_id = F.employee_id
       AND E.company_id = F.employee_company_id
@@ -401,6 +439,23 @@
       ) W ON S.employee_id = W.employee_id
       AND S.device_id = W.device_id
       ) Q
+      <where>
+          <if test="empName!=null and empName!=''">
+              Q.employee_name like #{empName}
+          </if>
+          <if test="deptName!=null and deptName!=''">
+              and Q.employee_department_name like #{deptName}
+          </if>
+          <if test="rangeStartTime!=null and rangeStartTime!=''">
+              and Q.range_start_time between #{rangeStartTime} and #{rangeEndTime}
+          </if>
+          <if test="rangeEndTime!=null and rangeEndTime!=''">
+              and Q.range_end_time between #{rangeStartTime} and #{rangeEndTime}
+          </if>
+          <if test="openType!=null and openType!=''">
+              and Q.range_door_open_type LIKE #{openType}
+          </if>
+      </where>
   </select>
 
 

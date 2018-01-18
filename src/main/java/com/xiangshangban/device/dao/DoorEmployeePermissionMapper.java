@@ -43,4 +43,11 @@ public interface DoorEmployeePermissionMapper {
      * 删除门关联的人员权限信息（是否首卡常开、以及有效开始时间和结束时间）
      */
     int delDoorEmpPermission(@Param("doorId") String doorId);
+
+    /**
+     * 根据rangeFlagId查询人员开门权限有效年月日时间
+     * @param rangeFlagId
+     * @return
+     */
+    DoorEmployeePermission selectByRangeFlagId(String rangeFlagId);
 }

@@ -19,6 +19,8 @@ public class DoorRecord {
     private String recordDate;
     private String deviceId;
     private String deviceName;
+    private String uploadDate;
+    private String saveDate;
 
     public String getDoorPermissionRecordId() {
         return doorPermissionRecordId;
@@ -154,5 +156,21 @@ public class DoorRecord {
 
     public void setDeviceName(String deviceName) {
         this.deviceName = deviceName;
+    }
+
+    public String getUploadDate() {
+        return uploadDate;
+    }
+
+    public void setUploadDate(String uploadDate) {
+        this.uploadDate = uploadDate;
+    }
+
+    public String getSaveDate() {
+        return saveDate;
+    }
+
+    public void setSaveDate(String saveDate) {
+        this.saveDate = saveDate;
     }
 }

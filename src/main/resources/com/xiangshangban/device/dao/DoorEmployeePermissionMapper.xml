@@ -143,4 +143,12 @@
   <delete id="delDoorEmpPermission" parameterType="String">
     delete from door_employee_permission where door_id = #{doorId}
   </delete>
+
+  <!--根据rangeFlagId查询人员开门权限有效年月日时间-->
+  <select id="selectByRangeFlagId" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from door_employee_permission
+    where range_flag_id = #{rangeFlagId,jdbcType=VARCHAR}
+  </select>
 </mapper>

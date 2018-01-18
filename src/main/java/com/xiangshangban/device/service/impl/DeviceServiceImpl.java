@@ -20,10 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
 import java.util.*;
 
 /**
@@ -149,8 +145,8 @@ public class DeviceServiceImpl implements IDeviceService {
 
         List<Map<String, String>> mapList = deviceMapper.findByCondition(device);
 
-        System.out.println("companyId: "+JSON.toJSONString(companyId));
-        System.out.println("mapList: "+JSON.toJSONString(mapList));
+//        System.out.println("companyId: "+JSON.toJSONString(companyId));
+//        System.out.println("mapList: "+JSON.toJSONString(mapList));
         if (mapList.size() > 0){
             for (Map<String, String> map : mapList) {
                 //判断离线状态空
@@ -278,7 +274,7 @@ public class DeviceServiceImpl implements IDeviceService {
 //        rabbitMQSender.sendMessage(deviceId, doorCmdPackageAll);
 
         cmdUtil.handOutCmd(deviceId, "C", "BIND_DEVICE", "1001", "", "bindInformation",
-                bindInformation, "1", "", "", "");
+                bindInformation, "1", "", "", "", "");
     }
 
     @Override
@@ -321,6 +317,13 @@ public class DeviceServiceImpl implements IDeviceService {
             //设备数据未全部上传
             returnData.setMessage("设备数据未全部上传，请稍后解绑");
             returnData.setReturnCode("4210");
+
+            //解绑失败，还原设备绑定状态
+            Device device = new Device();
+            device.setDeviceId(oldDeviceId);
+            device.setIsUnbind("0");
+            deviceMapper.updateByPrimaryKeySelective(device);
+
             return returnData;
         }
 
@@ -340,7 +343,13 @@ public class DeviceServiceImpl implements IDeviceService {
 //        doorCmdUnBindDevice.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
 //        doorCmdUnBindDevice.setSuperCmdId(FormatUtil.createUuid());
 
-        String doorId = doorMapper.findDoorIdByDeviceId(oldDeviceId).getDoorId();
+        String doorId = "";
+        try {
+            doorId = doorMapper.findDoorIdByDeviceId(oldDeviceId).getDoorId();
+        }catch (Exception e){
+            doorId = "";
+        }
+
         Map<String, String> unbindTypeMap = new HashMap<>();
         if ("1".equals(unBindType)){
             //场景1：解绑设备和公司
@@ -380,7 +389,7 @@ public class DeviceServiceImpl implements IDeviceService {
 //        rabbitMQSender.sendMessage(oldDeviceId, doorCmdPackageAll);
 
         cmdUtil.handOutCmd(oldDeviceId, "C", "UNBIND_DEVICE", "1002", operatorEmployeeId, "unbindTypeMap",
-                unbindTypeMap, "1", "", "", "");
+                unbindTypeMap, "1", "", "", "", "120");
 
         //设备状态设置为解绑中
         Device device = new Device();
@@ -409,12 +418,17 @@ public class DeviceServiceImpl implements IDeviceService {
         deviceMapper.updateByPrimaryKeySelective(device);
 
         //2.door_表设备id置null，绑定时间插入当前解绑时间，使门上的记录都变为不可操作的历史
-        String doorId = doorMapper.findDoorIdByDeviceId(deviceId).getDoorId();
-        doorMapper.updateDeviceIdNull(doorId);
-        Door door = new Door();
-        door.setDoorId(doorId);
-        door.setBindDate(DateUtils.getDateTime());
-        doorMapper.updateByPrimaryKeySelective(door);
+        String doorId = "";
+        try {
+            doorId = doorMapper.findDoorIdByDeviceId(deviceId).getDoorId();
+            doorMapper.updateDeviceIdNull(doorId);
+            Door door = new Door();
+            door.setDoorId(doorId);
+            door.setBindDate(DateUtils.getDateTime());
+            doorMapper.updateByPrimaryKeySelective(door);
+        }catch (Exception e){
+            System.out.println("该设备还未绑定过门");
+        }
     }
 
 //    @Override
@@ -721,7 +735,7 @@ public class DeviceServiceImpl implements IDeviceService {
 //            rabbitMQSender.sendMessage(deviceId, doorCmdPackageAll);
 
             cmdUtil.handOutCmd(deviceId, "C", "UPDATE_DEVICE_SYSTEM", "1008", "", "update",
-                    mapHandOut, "1", "", "", "");
+                    mapHandOut, "1", "", "", "", "");
         }
         return "";
     }
@@ -793,7 +807,7 @@ public class DeviceServiceImpl implements IDeviceService {
 //            rabbitMQSender.sendMessage(deviceId, doorCmdPackageAll);
 
             cmdUtil.handOutCmd(deviceId, "C", "UPDATE_DEVICE_APP", "1009", "", "update",
-                    mapHandOut, "1", "", "", "");
+                    mapHandOut, "1", "", "", "", "");
         }
         return "";
     }
@@ -951,10 +965,63 @@ public class DeviceServiceImpl implements IDeviceService {
         for (String employeeId : employeeIdSet) {
             //4.1人员基本信息同步
             Employee employeeTemp = employeeMapper.selectByEmployeeIdAndCompanyId(employeeId, companyId);
+            //组装人员数据DATA
+            Map<String, Object> userInformation = new LinkedHashMap<String, Object>();
+            userInformation.put("userId", employeeId);
+            userInformation.put("userCode", employeeTemp.getEmployeeNumber());
+            userInformation.put("userName", employeeTemp.getEmployeeName());
+            userInformation.put("userDeptId", employeeTemp.getEmployeeDepartmentId());
+            userInformation.put("userDeptName", employeeTemp.getEmployeeDepartmentName());
+            userInformation.put("birthday", employeeTemp.getEmployeeBirthday());
+            userInformation.put("entryTime", employeeTemp.getEmployeeEntryTime());
+            userInformation.put("probationaryExpired", employeeTemp.getEmployeeProbationaryExpired());
+            userInformation.put("contractExpired", employeeTemp.getEmployeeContractExpired());
+            userInformation.put("adminFlag", employeeTemp.getAdminFlag());
+            userInformation.put("userImg", employeeTemp.getEmployeeImg());
+            userInformation.put("userPhoto", employeeTemp.getEmployeePhoto());
+            userInformation.put("userFinger1", employeeTemp.getEmployeeFinger1());
+            userInformation.put("userFinger2", employeeTemp.getEmployeeFinger2());
+            userInformation.put("userFace", employeeTemp.getEmployeeFace());
+            userInformation.put("userPhone", employeeTemp.getEmployeePhone());
+            userInformation.put("userNFC", employeeTemp.getEmployeeNfc());
+            userInformation.put("bluetoothId", employeeTemp.getBluetoothNo());
+            //下发人员基本信息
+            cmdUtil.handOutCmd(newDeviceId, "C", "UPDATE_USER_INFO", "2001", operatorEmployeeId,
+                    "userInfo", userInformation, "1", "", "", employeeId, "");
 
             //4.2人员时间权限同步
-            DoorEmployee doorEmployee = doorEmployeeMapper.selectByEmployeeIdAndDoorId(employeeId, doorId);
+            String rangeFlagId = doorEmployeeMapper.selectByEmployeeIdAndDoorId(employeeId, doorId).getRangeFlagId();
+            DoorEmployeePermission doorEmployeePermission = doorEmployeePermissionMapper.selectByRangeFlagId(rangeFlagId);
 
+            String doorOpenStartTime = doorEmployeePermission.getDoorOpenStartTime();
+            String doorOpenEndTime = doorEmployeePermission.getDoorOpenEndTime();
+
+            List<TimeRangeCommonEmployee> trceList = timeRangeCommonEmployeeMapper.selectByPrimaryKey(rangeFlagId);
+            List<Map<String, String>> oneWeekTimeList = new ArrayList<>();
+            for (TimeRangeCommonEmployee trce : trceList) {
+                Map<String, String> oneDayTimeMap = new HashMap<>();
+                oneDayTimeMap.put("weekType", trce.getDayOfWeek());
+                oneDayTimeMap.put("startTime", trce.getRangeStartTime());
+                oneDayTimeMap.put("endTime", trce.getRangeEndTime());
+                oneDayTimeMap.put("doorOpenType", trce.getRangeDoorOpenType());
+                oneWeekTimeList.add(oneDayTimeMap);
+            }
+
+            //组装更新人员门禁权限业务数据DATA
+            Map<String, Object> userPermission = new LinkedHashMap<String, Object>();
+            userPermission.put("employeeId", employeeId);
+            userPermission.put("permissionValidityBeginTime", doorOpenStartTime);
+            userPermission.put("permissionValidityEndTime", doorOpenEndTime);
+            try {
+                userPermission.put("employeeDoorPassword", doorSetting.getFirstPublishPassword());
+            }catch (Exception e){
+                userPermission.put("employeeDoorPassword", "");
+                System.out.println("【"+employeeTemp.getEmployeeName()+"】当前下发到的门的公共开门密码未设置");
+            }
+            userPermission.put("oneWeekTimeList", oneWeekTimeList);
+            //下发人员开门权限时间区间
+            cmdUtil.handOutCmd(newDeviceId, "C", "UPDATE_USER_ACCESS_CONTROL", "3001", operatorEmployeeId,
+                    "userPermission", userPermission, "1", "", "", employeeId, "");
         }
     }
 
@@ -1157,7 +1224,7 @@ public class DeviceServiceImpl implements IDeviceService {
 //                rabbitMQSender.sendMessage(deviceId, doorCmdPackageAll);
 
                 cmdUtil.handOutCmd(deviceId, "C", "UPDATE_DEVICE_SYSTEM_SETTING", "1003",
-                        "", "setting", mapJson, "1", "", "", "");
+                        "", "setting", mapJson, "1", "", "", "", "");
             }
 
             //保存并下发系统更新设置

@@ -213,6 +213,7 @@
     COALESCE (A .total_server_time, '') as total_server_time,
     COALESCE (A .have_used_time, '') as have_used_time,
     COALESCE (A .remain_server_time, '') as remain_server_time,
+    COALESCE (A .is_unbind, '') as is_unbind,
     COALESCE (B.door_id, '') as door_id,
     COALESCE (B.door_name, '') as door_name,
     COALESCE (B.operate_time, '') as operate_time,
@@ -256,8 +257,7 @@
     FROM
     device_
     WHERE
-    device_id NOT IN (SELECT device_id FROM door_)
-    and is_unbind != '1'
+    device_id NOT IN (SELECT device_id FROM door_ WHERE device_id is not null)
     <if test="companyId != null and companyId != ''">
       and company_id = #{companyId}
     </if>
@@ -343,7 +343,7 @@
 
   <!--查询跟当前公司已经解绑的设备列表-->
   <select id="selectUnBindDeviceByCompanyId" parameterType="String" resultType="String">
-    select device_id from device_ where is_unbind = '1'
+    select device_id from device_ where is_unbind = '1' and company_id = ''
   </select>
 </mapper>
 

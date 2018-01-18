@@ -14,6 +14,7 @@ import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.List;
@@ -111,6 +112,7 @@ public class RabbitMQReciever {
 
         Consumer consumer = new DefaultConsumer(channel) {
             @Override
+            @Transactional
             public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
 
                 String message = new String(body, "UTF-8");
@@ -178,12 +180,6 @@ public class RabbitMQReciever {
                                 doorCmd.setStatus("4");
                             }else {
                                 if (doorCmdTemp.getAction().equals("UNBIND_DEVICE")){
-                                    //改变设备的绑定状态为未绑定，即解绑成功
-                                    Device device = new Device();
-                                    device.setDeviceId(deviceId);
-                                    device.setIsUnbind("1");
-                                    deviceMapper.updateByPrimaryKeySelective(device);
-
                                     //同步门上的信息
                                     List returnObj = (List)((Map<String, Object>)mapResult.get("resultData")).get("returnObj");
                                     Map<String, String> returnMap = (Map<String, String>) (returnObj.get(0));
@@ -198,6 +194,12 @@ public class RabbitMQReciever {
                                         //执行设备和公司解绑的删除操作
                                         deviceService.unBindDeviceDeleteOperation(deviceId);
                                     }
+
+                                    //改变设备的绑定状态为未绑定，即解绑成功
+                                    Device device = new Device();
+                                    device.setDeviceId(deviceId);
+                                    device.setIsUnbind("1");
+                                    deviceMapper.updateByPrimaryKeySelective(device);
                                 }
                                 doorCmd.setStatus("2");
                             }
@@ -210,9 +212,9 @@ public class RabbitMQReciever {
                             DoorCmd doorCmd = new DoorCmd();
                             doorCmd.setSuperCmdId(superCmdId);
 
-
                             DoorCmd doorCmdTemp = doorCmdMapper.selectBySuperCmdId(superCmdId);
 
+//                            System.out.println("*****"+JSON.toJSONString(doorCmdTemp));
                             if (doorCmdTemp.getAction().equals("UNBIND_DEVICE")){
                                 //设备端有尚未上传的数据，改变设备的绑定状态为数据未完全上传
                                 Device device = new Device();

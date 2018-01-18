@@ -11,7 +11,7 @@
     <result column="bind_date" property="bindDate" jdbcType="VARCHAR" />
   </resultMap>
   <sql id="Base_Column_List" >
-    door_id, door_name, device_id, operate_time, operate_employee, company_id
+    door_id, door_name, device_id, operate_time, operate_employee, company_id, bind_date
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
     select 
@@ -25,9 +25,10 @@
   </delete>
   <insert id="insert" parameterType="com.xiangshangban.device.bean.Door" >
     insert into door_ (door_id, door_name, device_id, 
-      operate_time, operate_employee, company_id)
+      operate_time, operate_employee, company_id, bind_date)
     values (#{doorId,jdbcType=VARCHAR}, #{doorName,jdbcType=VARCHAR}, #{deviceId,jdbcType=VARCHAR}, 
-      #{operateTime,jdbcType=VARCHAR}, #{operateEmployee,jdbcType=VARCHAR}, #{companyId,jdbcType=VARCHAR})
+      #{operateTime,jdbcType=VARCHAR}, #{operateEmployee,jdbcType=VARCHAR}, #{companyId,jdbcType=VARCHAR},
+      #{bindDate,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="com.xiangshangban.device.bean.Door" >
     insert into door_
@@ -50,6 +51,9 @@
       <if test="companyId != null" >
         company_id,
       </if>
+      <if test="bindDate != null" >
+        bind_date,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="doorId != null" >
@@ -69,6 +73,9 @@
       </if>
       <if test="companyId != null" >
         #{companyId,jdbcType=VARCHAR},
+      </if>
+      <if test="bindDate != null" >
+        #{bindDate,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
@@ -90,6 +97,9 @@
       <if test="companyId != null" >
         company_id = #{companyId,jdbcType=VARCHAR},
       </if>
+      <if test="bindDate != null" >
+        bind_date = #{bindDate,jdbcType=VARCHAR},
+      </if>
     </set>
     where door_id = #{doorId,jdbcType=VARCHAR}
   </update>
@@ -99,7 +109,8 @@
       device_id = #{deviceId,jdbcType=VARCHAR},
       operate_time = #{operateTime,jdbcType=VARCHAR},
       operate_employee = #{operateEmployee,jdbcType=VARCHAR},
-      company_id = #{companyId,jdbcType=VARCHAR}
+      company_id = #{companyId,jdbcType=VARCHAR},
+      bind_date = #{bindDate,jdbcType=VARCHAR}
     where door_id = #{doorId,jdbcType=VARCHAR}
   </update>
 

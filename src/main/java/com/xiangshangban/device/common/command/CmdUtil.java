@@ -18,6 +18,7 @@ import com.xiangshangban.device.common.utils.CalendarUtil;
 import com.xiangshangban.device.common.utils.DateUtils;
 import com.xiangshangban.device.common.utils.FormatUtil;
 import com.xiangshangban.device.service.IEntranceGuardService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -59,11 +60,19 @@ public class CmdUtil {
      * @param dataObject            协议里data部分的所有内容
      * @param status                命令下发时初始化的状态，目前1是立即下发命令，0是存为草稿不下发命令（存为草稿只有人员有）
      * @param employeeId            人员相关的命令需要存储一下这个人的id，即每个人一条命令，不能一条对应所有
+     * @param customTimeoutSeconds  自定义超时秒数(区别于application.properties里的command.timeout.seconds全局配置)
      */
     public Map<String, Object> handOutCmd(String deviceId, String commandMode, String action,
                            String actionCode, String operatorEmployeeId, String dataName,
                            Object dataObject, String status, String resultCode, String resultMessage,
-                           String employeeId){
+                           String employeeId, String customTimeoutSeconds){
+
+        String timeoutSeconds = commandTimeoutSeconds;
+        //支持自定义超时秒数(区别于application.properties里的command.timeout.seconds全局配置)
+        if (StringUtils.isNotEmpty(customTimeoutSeconds)){
+            timeoutSeconds = customTimeoutSeconds;
+        }
+
         //构造命令格式
         DoorCmd doorCmd = new DoorCmd();
         doorCmd.setServerId(serverId);
@@ -84,7 +93,7 @@ public class CmdUtil {
         doorCmd.setOperateEmployeeId(operatorEmployeeId);
 
         doorCmd.setSendTime(CalendarUtil.getCurrentTime());
-        doorCmd.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), commandTimeoutSeconds));
+        doorCmd.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), timeoutSeconds));
         doorCmd.setSuperCmdId(FormatUtil.createUuid());
         doorCmd.setData(JSON.toJSONString(dataObject));
 
