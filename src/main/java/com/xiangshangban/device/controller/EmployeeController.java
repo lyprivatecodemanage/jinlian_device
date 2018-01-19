@@ -80,6 +80,9 @@ public class EmployeeController {
     @Autowired
     private OSSController ossController;
 
+    @Autowired
+    private DoorRecordMapper doorRecordMapper;
+
     /**
      * 人员模块人员信息同步（之所以是这个名字，是因为之前打算用协议包成命令记录下来同步的操作日志）
      * @param userInformation
@@ -732,6 +735,7 @@ public class EmployeeController {
     /**
      * 测试接口
      */
+    @Transactional
     @ResponseBody
     @RequestMapping(value = "/test", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     public void test(){
@@ -791,5 +795,123 @@ public class EmployeeController {
 //            }
 //        }
 //        System.out.println("有人脸的人员总数："+totalFace);
+
+        //door_employee新增device_id、create_date字段数据修复
+//        List<DoorEmployee> doorEmployeeList = doorEmployeeMapper.temp();
+//        System.out.println(JSON.toJSONString(doorEmployeeList));
+//        if (doorEmployeeList.size() > 0){
+//            for (DoorEmployee doorEmployee : doorEmployeeList) {
+//                String doorId = doorEmployee.getDoorId();
+//                String deviceId = "";
+//                DoorEmployee doorEmployeeTemp = new DoorEmployee();
+//                doorEmployeeTemp.setRangeFlagId(doorEmployee.getRangeFlagId());
+//
+//                if (null == doorEmployee.getDeviceId() || null == doorEmployee.getCreateDate()){
+//                    if (null == doorEmployee.getDeviceId()){
+//                        try {
+//                            deviceId = doorMapper.selectByPrimaryKey(doorId).getDeviceId();
+//                            doorEmployeeTemp.setDeviceId(deviceId);
+//                        }catch (Exception e){
+//                            System.out.println("【"+doorEmployee.getDoorName()+"】门已无关联的设备");
+//                        }
+//                    }
+//
+//                    if (null == doorEmployee.getCreateDate()){
+//                        doorEmployeeTemp.setCreateDate(DateUtils.getDateTime());
+//                    }
+//
+//                    if (null != doorEmployeeTemp.getDeviceId() || null != doorEmployeeTemp.getCreateDate()){
+//                        doorEmployeeMapper.updateByRangeFlagId(doorEmployeeTemp);
+//                        System.out.println("已修复【"+doorEmployee.getDoorName()+"】门上【"+doorEmployee.getEmployeeName()+"】的新字段数据");
+//                    }
+//                }
+//            }
+//        }
+
+        //door_employee_permission新增device_id字段数据修复
+//        List<DoorEmployeePermission> doorEmployeePermissionList = doorEmployeePermissionMapper.temp();
+//        for (DoorEmployeePermission doorEmployeePermission : doorEmployeePermissionList) {
+//            if (null == doorEmployeePermission.getDeviceId()){
+//                String rangeFlagId = doorEmployeePermission.getRangeFlagId();
+//                String deviceId = "";
+//                try {
+//                    deviceId = doorEmployeeMapper.selectByRangeFlagId(rangeFlagId).getDeviceId();
+//                }catch (Exception e){
+//                    System.out.println("rangeFlagId为【"+doorEmployeePermission.getRangeFlagId()+"】的设备id为空，已跳过");
+//                }
+//
+//                if (null != deviceId && !"".equals(deviceId)){
+//                    DoorEmployeePermission doorEmployeePermissionTemp = new DoorEmployeePermission();
+//                    doorEmployeePermissionTemp.setRangeFlagId(rangeFlagId);
+//                    doorEmployeePermissionTemp.setDeviceId(deviceId);
+//                    doorEmployeePermissionMapper.updateByRangeFlagIdSelective(doorEmployeePermissionTemp);
+//
+//                    System.out.println("已修复rangeFlagId为【"+doorEmployeePermission.getRangeFlagId()+"】的数据");
+//                }
+//            }
+//        }
+
+        //time_range_common_employee新增device_id字段数据修复
+//        List<TimeRangeCommonEmployee> timeRangeCommonEmployeeList = timeRangeCommonEmployeeMapper.temp();
+//        for (TimeRangeCommonEmployee timeRangeCommonEmployee : timeRangeCommonEmployeeList) {
+//            String rangeFlagId = timeRangeCommonEmployee.getRangeFlagId();
+//            String deviceId = "";
+//            try {
+//                deviceId = doorEmployeeMapper.selectByRangeFlagId(rangeFlagId).getDeviceId();
+//            } catch (Exception e) {
+//                System.out.println("rangeFlagId为【" + timeRangeCommonEmployee.getRangeFlagId() + "】的设备id为空，已跳过");
+//            }
+//
+//            if (null != deviceId && !"".equals(deviceId)) {
+//                TimeRangeCommonEmployee timeRangeCommonEmployeeTemp = new TimeRangeCommonEmployee();
+//                timeRangeCommonEmployeeTemp.setRangeFlagId(rangeFlagId);
+//                timeRangeCommonEmployeeTemp.setDeviceId(deviceId);
+//                timeRangeCommonEmployeeMapper.updateByRangeFlagIdSelective(timeRangeCommonEmployeeTemp);
+//
+//                System.out.println("已修复rangeFlagId为【" + timeRangeCommonEmployee.getRangeFlagId() + "】的数据");
+//            }
+//        }
+
+        //door_record新增device_id、device_name字段数据修复
+//        int sum = 0;
+//        List<DoorRecord> doorRecordList =  doorRecordMapper.temp();
+//        for (DoorRecord doorRecord : doorRecordList) {
+//            String deviceId = "";
+//            String doorId = doorRecord.getDoorId();
+//
+//            try {
+//                deviceId = doorMapper.selectByPrimaryKey(doorId).getDeviceId();
+//            } catch (Exception e) {
+//                System.out.println("门Id为【" + doorRecord.getDoorId()+"】的设备id为空，已跳过");
+//            }
+//
+//            if (null != deviceId && !"".equals(deviceId)){
+//                String deviceName = deviceMapper.selectByPrimaryKey(deviceId).getDeviceName();
+//
+//                DoorRecord doorRecordTemp = new DoorRecord();
+//                doorRecordTemp.setDoorId(doorId);
+//                if (null == doorRecord.getDeviceId()){
+//                    doorRecordTemp.setDeviceId(deviceId);
+//                }
+//
+//                if (null == doorRecord.getDeviceName()){
+//                    doorRecordTemp.setDeviceName(deviceName);
+//                }
+//
+//                if (null != doorRecordTemp.getDeviceId() || null != doorRecordTemp.getDeviceName()){
+//                    doorRecordMapper.updateByDoorIdSelective(doorRecordTemp);
+//                    System.out.println("已修复【"+doorRecord.getDoorId()+"】门上的新字段数据");
+//                }else {
+//                    System.out.println("门Id为【" + doorRecord.getDoorId()+"】的设备id为空，已跳过");
+//                }
+//            }
+//
+////            if (sum > 1000){
+////                return;
+////            }
+////            sum ++;
+//        }
+
+
     }
 }

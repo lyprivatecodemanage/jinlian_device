@@ -107,4 +107,10 @@ public interface DoorEmployeeMapper {
      * 根据门id查询所有的人员权限信息
      */
     List<DoorEmployee> selectAllByDoorId(String doorId);
+
+    DoorEmployee selectByRangeFlagId(String rangeFlagId);
+
+    List<DoorEmployee> temp();
+
+    int updateByRangeFlagId(DoorEmployee doorEmployee);
 }

@@ -151,4 +151,39 @@
     from door_employee_permission
     where range_flag_id = #{rangeFlagId,jdbcType=VARCHAR}
   </select>
+
+  <update id="updateByRangeFlagIdSelective" parameterType="com.xiangshangban.device.bean.DoorEmployeePermission" >
+    update door_employee_permission
+    <set >
+      <if test="isManager != null" >
+        is_manager = #{isManager,jdbcType=VARCHAR},
+      </if>
+      <if test="haveFirstCardPermission != null" >
+        have_first_card_permission = #{haveFirstCardPermission,jdbcType=VARCHAR},
+      </if>
+      <if test="doorOpenStartTime != null" >
+        door_open_start_time = #{doorOpenStartTime,jdbcType=VARCHAR},
+      </if>
+      <if test="doorOpenEndTime != null" >
+        door_open_end_time = #{doorOpenEndTime,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeId != null" >
+        employee_id = #{employeeId,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceId != null" >
+        device_id = #{deviceId,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where range_flag_id = #{rangeFlagId,jdbcType=VARCHAR}
+  </update>
+
+  <select id="temp" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    SELECT
+    <include refid="Base_Column_List" />
+    FROM
+    door_employee_permission
+    WHERE
+    device_id IS NULL
+    OR device_id = ''
+  </select>
 </mapper>

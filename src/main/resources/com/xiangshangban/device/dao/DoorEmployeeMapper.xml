@@ -456,6 +456,7 @@
               and Q.range_door_open_type LIKE #{openType}
           </if>
       </where>
+       ORDER BY Q.create_date DESC
   </select>
 
 
@@ -578,4 +579,48 @@
         from door_employee
         where door_id = #{doorId,jdbcType=VARCHAR}
     </select>
+
+    <select id="selectByRangeFlagId" resultMap="BaseResultMap" parameterType="java.lang.String" >
+        select
+        <include refid="Base_Column_List" />
+        from door_employee
+        where range_flag_id = #{range_flag_id,jdbcType=VARCHAR}
+    </select>
+
+    <select id="temp" resultMap="BaseResultMap" parameterType="java.lang.String">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        door_employee
+        WHERE
+        device_id IS NULL
+        OR device_id = ''
+        OR create_date IS NULL
+        OR create_date = ''
+    </select>
+
+    <update id="updateByRangeFlagId" parameterType="com.xiangshangban.device.bean.DoorEmployee" >
+        update door_employee
+        <set >
+            <if test="employeeName != null" >
+                employee_name = #{employeeName,jdbcType=VARCHAR},
+            </if>
+            <if test="doorId != null" >
+                door_id = #{doorId,jdbcType=VARCHAR},
+            </if>
+            <if test="doorName != null" >
+                door_name = #{doorName,jdbcType=VARCHAR},
+            </if>
+            <if test="employeeId != null" >
+                employee_id = #{employeeId,jdbcType=VARCHAR},
+            </if>
+            <if test="deviceId != null">
+                device_id = #{deviceId,jdbcType=VARCHAR},
+            </if>
+            <if test="createDate != null">
+                create_date = #{createDate,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where range_flag_id = #{rangeFlagId,jdbcType=VARCHAR}
+    </update>
 </mapper>

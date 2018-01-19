@@ -192,4 +192,45 @@
   <delete id="delCommonEmpOpenTime" parameterType="String">
     delete from time_range_common_employee where door_id = #{doorId}
   </delete>
+
+  <select id="temp" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    SELECT
+    <include refid="Base_Column_List" />
+    FROM
+    time_range_common_employee
+    WHERE
+    device_id IS NULL
+    OR device_id = ''
+  </select>
+
+  <update id="updateByRangeFlagIdSelective" parameterType="com.xiangshangban.device.bean.TimeRangeCommonEmployee" >
+    update time_range_common_employee
+    <set >
+      <if test="employeeId != null" >
+        employee_id = #{employeeId,jdbcType=VARCHAR},
+      </if>
+      <if test="dayOfWeek != null" >
+        day_of_week = #{dayOfWeek,jdbcType=VARCHAR},
+      </if>
+      <if test="rangeStartTime != null" >
+        range_start_time = #{rangeStartTime,jdbcType=VARCHAR},
+      </if>
+      <if test="rangeEndTime != null" >
+        range_end_time = #{rangeEndTime,jdbcType=VARCHAR},
+      </if>
+      <if test="rangeDoorOpenType != null" >
+        range_door_open_type = #{rangeDoorOpenType,jdbcType=VARCHAR},
+      </if>
+      <if test="isAllDay != null" >
+        is_all_day = #{isAllDay,jdbcType=VARCHAR},
+      </if>
+      <if test="isDitto != null" >
+        is_ditto = #{isDitto,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceId != null" >
+        device_id = #{deviceId,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where range_flag_id = #{rangeFlagId,jdbcType=VARCHAR}
+  </update>
 </mapper>

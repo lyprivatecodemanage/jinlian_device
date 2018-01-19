@@ -24,6 +24,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 
@@ -670,7 +672,7 @@ public class EntranceGuardController {
               }
 
               //对查询出的数据根据最后下发时间进行排序
-              List<DoorPermissionEmp> permissionEmps = new ArrayList<>();
+              List<DoorPermissionEmp> permissionEmps = new LinkedList<>();
               if (maps != null && maps.size() > 0) {
                   //将开门方式和命令状态由数字更改为文字信息
                   for (int i = 0; i < maps.size(); i++) {
@@ -747,10 +749,20 @@ public class EntranceGuardController {
                   Collections.sort(permissionEmps, new Comparator<DoorPermissionEmp>() {
                       @Override
                       public int compare(DoorPermissionEmp o1, DoorPermissionEmp o2) {
-                          return (o2.getLasttime() + o2.getEmployee_name()).compareTo((o1.getLasttime() + o1.getEmployee_name()));
+//                          return (o2.getLasttime() + o2.getEmployee_name()).compareTo((o1.getLasttime() + o1.getEmployee_name()));
+                          Date date1 = null;
+                          Date date2 = null;
+                          try {
+                              date1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(o2.getLasttime());
+                              date2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(o2.getLasttime());
+                          } catch (ParseException e) {
+                              e.printStackTrace();
+                          }
+                          return (String.valueOf(date2.getTime())).compareTo(String.valueOf(date1.getTime()));
                       }
                   });
               }
+              System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++"+JSON.toJSONString(permissionEmps));
               result = PageUtils.doSplitPage(null, permissionEmps, page, rows, pageObj, 2);
               if (doorId != null) {
                   //根据门的id查询门的名称

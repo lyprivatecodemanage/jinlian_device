@@ -46,4 +46,8 @@ public interface DoorRecordMapper {
     DoorRecord selectByRecordIdDoorIdAndDeviceId(@Param("doorPermissionRecordId") String doorPermissionRecordId,
                                          @Param("doorId") String doorId,
                                          @Param("deviceId") String deviceId);
+
+    List<DoorRecord> temp();
+
+    int updateByDoorIdSelective(DoorRecord doorRecord);
 }

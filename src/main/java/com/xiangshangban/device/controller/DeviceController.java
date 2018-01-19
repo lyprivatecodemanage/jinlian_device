@@ -925,7 +925,7 @@ public class DeviceController {
             Set<String> deviceIdList = new HashSet<String>();
             //返回结果集合
             Map<String, Object> deviceHeartBeatMapResult = new HashMap<String, Object>();
-            List<Map<String, Object>> deviceHeartbeatListResult = new ArrayList<Map<String, Object>>();
+//            List<Map<String, Object>> deviceHeartbeatListResult = new ArrayList<Map<String, Object>>();
 
             List<Map> deviceList = deviceMapper.selectAllDevice("");
 //            LOGGER.info("deviceList: "+JSON.toJSONString(deviceList));
@@ -943,17 +943,38 @@ public class DeviceController {
                 float CpuTemperSum = 0;
                 int number = 0;
 
-                //遍历查找每一个设备最新的心跳数据信息
-                for (String deviceId : deviceIdList) {
-                    Map<String, Object> deviceHeartbeat = deviceHeartbeatMapper
-                            .selectLatestByDeviceId(deviceId, "", 0, 0, "", "");
+//                //遍历查找每一个设备最新的心跳数据信息
+//                for (String deviceId : deviceIdList) {
+//                    Map<String, Object> deviceHeartbeat = deviceHeartbeatMapper
+//                            .selectLatestByDeviceId(deviceId, "", 0, 0, "", "");
+//
+//                    if (deviceHeartbeat != null) {
+//                        String cpuUserUnilization = ((String) deviceHeartbeat.get("cpu_user_unilization")).replace("%", "");
+//                        int cpuUserUnilizationNumber = Integer.valueOf(cpuUserUnilization);
+//                        //累加cpu占用率
+//                        CpuUserUnilizationSum = CpuUserUnilizationSum + cpuUserUnilizationNumber;
+//                        String cpuTemper = (String) deviceHeartbeat.get("cpu_temper");
+//                        float cpuTemperNumber = Float.valueOf(cpuTemper);
+//                        //累加cpu温度
+//                        CpuTemperSum = CpuTemperSum + cpuTemperNumber;
+//                        //累加心跳数据有多少条
+//                        number = number + 1;
+//
+////                        LOGGER.info(JSON.toJSONString(deviceHeartbeat));
+//                    }
+//                }
 
-                    if (deviceHeartbeat != null) {
-                        String cpuUserUnilization = ((String) deviceHeartbeat.get("cpu_user_unilization")).replace("%", "");
+                //遍历查找每一个设备最新的心跳数据信息
+                List<Map<String, Object>> deviceHeartbeatList = deviceHeartbeatMapper
+                        .selectLatestByDeviceId("", 0, 0, "", "");
+                for (Map<String, Object> deviceHeartbeatMap : deviceHeartbeatList) {
+
+                    if (deviceHeartbeatList != null && deviceHeartbeatList.size() > 0 ) {
+                        String cpuUserUnilization = ((String) deviceHeartbeatMap.get("cpu_user_unilization")).replace("%", "");
                         int cpuUserUnilizationNumber = Integer.valueOf(cpuUserUnilization);
                         //累加cpu占用率
                         CpuUserUnilizationSum = CpuUserUnilizationSum + cpuUserUnilizationNumber;
-                        String cpuTemper = (String) deviceHeartbeat.get("cpu_temper");
+                        String cpuTemper = (String) deviceHeartbeatMap.get("cpu_temper");
                         float cpuTemperNumber = Float.valueOf(cpuTemper);
                         //累加cpu温度
                         CpuTemperSum = CpuTemperSum + cpuTemperNumber;
@@ -962,7 +983,9 @@ public class DeviceController {
 
 //                        LOGGER.info(JSON.toJSONString(deviceHeartbeat));
                     }
+
                 }
+
 
                 //算出CPU两个展示参数各自的平均值
                 String averageCpuUserUnilization = String.valueOf((int) Math.ceil(CpuUserUnilizationSum / number));
@@ -974,19 +997,24 @@ public class DeviceController {
 //                LOGGER.info("平均cpu占用率为：" + averageCpuUserUnilization);
 //                LOGGER.info("平均cpu温度为：" + averageCpuTemper);
 
+//                //遍历查找每一个设备最新的心跳数据信息
+//                for (String deviceId : deviceIdList) {
+////                    LOGGER.info("page = "+Integer.valueOf(page)+"\n"+"rows = "+Integer.valueOf(rows));
+////                    Page pageHelperResult = PageHelper.startPage(Integer.valueOf(page), Integer.valueOf(rows));
+//                    Map<String, Object> deviceHeartbeat = deviceHeartbeatMapper
+//                            .selectLatestByDeviceId(deviceId, companyName, Float.valueOf(averageCpuUserUnilization), Float.valueOf(averageCpuTemper), cpuUserUnilizationCondition, cpuTemperCondition);
+//                    if (deviceHeartbeat != null) {
+//                        deviceHeartbeatListResult.add(deviceHeartbeat);
+////                        LOGGER.info("【" + deviceId + "】有符合条件的心跳信息");
+//                    } else {
+////                        LOGGER.info("【" + deviceId + "】没有符合条件的心跳信息");
+//                    }
+//                }
+
                 //遍历查找每一个设备最新的心跳数据信息
-                for (String deviceId : deviceIdList) {
-//                    LOGGER.info("page = "+Integer.valueOf(page)+"\n"+"rows = "+Integer.valueOf(rows));
-//                    Page pageHelperResult = PageHelper.startPage(Integer.valueOf(page), Integer.valueOf(rows));
-                    Map<String, Object> deviceHeartbeat = deviceHeartbeatMapper
-                            .selectLatestByDeviceId(deviceId, companyName, Float.valueOf(averageCpuUserUnilization), Float.valueOf(averageCpuTemper), cpuUserUnilizationCondition, cpuTemperCondition);
-                    if (deviceHeartbeat != null) {
-                        deviceHeartbeatListResult.add(deviceHeartbeat);
-//                        LOGGER.info("【" + deviceId + "】有符合条件的心跳信息");
-                    } else {
-//                        LOGGER.info("【" + deviceId + "】没有符合条件的心跳信息");
-                    }
-                }
+                List<Map<String, Object>> deviceHeartbeatListResult = deviceHeartbeatMapper
+                        .selectLatestByDeviceId(companyName, Float.valueOf(averageCpuUserUnilization), Float.valueOf(averageCpuTemper), cpuUserUnilizationCondition, cpuTemperCondition);
+
 
                 //添加手动分页
                 List newInfo = new ArrayList();

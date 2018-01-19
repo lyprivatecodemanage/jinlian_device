@@ -4,6 +4,7 @@ import com.xiangshangban.device.bean.DoorEmployeePermission;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
 import java.util.Map;
 
 @Mapper
@@ -50,4 +51,8 @@ public interface DoorEmployeePermissionMapper {
      * @return
      */
     DoorEmployeePermission selectByRangeFlagId(String rangeFlagId);
+
+    int updateByRangeFlagIdSelective(DoorEmployeePermission doorEmployeePermission);
+
+    List<DoorEmployeePermission> temp();
 }

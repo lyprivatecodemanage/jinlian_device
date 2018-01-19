@@ -447,4 +447,77 @@
         AND door_id = #{doorId,jdbcType=VARCHAR}
         AND device_id = #{deviceId,jdbcType=VARCHAR}
     </select>
+
+    <select id="temp" resultMap="BaseResultMap" parameterType="java.lang.String">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        door_record
+        WHERE
+        device_id IS NULL
+        OR device_id = ''
+        OR device_name IS NULL
+        OR device_name = ''
+    </select>
+
+    <update id="updateByDoorIdSelective" parameterType="com.xiangshangban.device.bean.DoorRecord">
+        update door_record
+        <set>
+            <if test="employeeId != null">
+                employee_id = #{employeeId,jdbcType=VARCHAR},
+            </if>
+            <if test="recordType != null">
+                record_type = #{recordType,jdbcType=VARCHAR},
+            </if>
+            <if test="upperState != null">
+                upper_state = #{upperState,jdbcType=VARCHAR},
+            </if>
+            <if test="upperEdition != null">
+                upper_edition = #{upperEdition,jdbcType=VARCHAR},
+            </if>
+            <if test="employeeGroupName != null">
+                employee_group_name = #{employeeGroupName,jdbcType=VARCHAR},
+            </if>
+            <if test="openDoorPhotoName != null">
+                open_door_photo_name = #{openDoorPhotoName,jdbcType=VARCHAR},
+            </if>
+            <if test="backKey != null">
+                back_key = #{backKey,jdbcType=VARCHAR},
+            </if>
+            <if test="deviceGroupName != null">
+                device_group_name = #{deviceGroupName,jdbcType=VARCHAR},
+            </if>
+            <if test="realWeek != null">
+                real_week = #{realWeek,jdbcType=VARCHAR},
+            </if>
+            <if test="eventResult != null">
+                event_result = #{eventResult,jdbcType=VARCHAR},
+            </if>
+            <if test="eventResultReason != null">
+                event_result_reason = #{eventResultReason,jdbcType=VARCHAR},
+            </if>
+            <if test="eventPhotoGroupId != null">
+                event_photo_group_id = #{eventPhotoGroupId,jdbcType=VARCHAR},
+            </if>
+            <if test="recordDate != null">
+                record_date = #{recordDate,jdbcType=VARCHAR},
+            </if>
+            <if test="deviceId != null">
+                device_id = #{deviceId,jdbcType=VARCHAR},
+            </if>
+            <if test="deviceName != null">
+                device_name = #{deviceName,jdbcType=VARCHAR},
+            </if>
+            <if test="uploadDate != null">
+                upload_date = #{uploadDate,jdbcType=VARCHAR},
+            </if>
+            <if test="saveDate != null">
+                save_date = #{saveDate,jdbcType=VARCHAR},
+            </if>
+            <if test="doorPermissionRecordId != null">
+                door_permission_record_id = #{doorPermissionRecordId,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where door_id = #{doorId,jdbcType=VARCHAR}
+    </update>
 </mapper>

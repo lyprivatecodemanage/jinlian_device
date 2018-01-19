@@ -36,4 +36,8 @@ public interface TimeRangeCommonEmployeeMapper {
      * 删除门相关的人员的开门时间段信息
      */
     int delCommonEmpOpenTime(@Param("doorId") String doorId);
+
+    List<TimeRangeCommonEmployee> temp();
+
+    int updateByRangeFlagIdSelective(TimeRangeCommonEmployee timeRangeCommonEmployee);
 }

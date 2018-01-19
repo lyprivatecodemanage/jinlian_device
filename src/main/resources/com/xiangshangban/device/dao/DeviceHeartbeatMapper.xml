@@ -307,6 +307,7 @@
   <!--非自动生成-->
   <select id="selectLatestByDeviceId" resultType="java.util.Map" parameterType="java.lang.String" >
     SELECT
+    dh.device_id,
     dh.cpu_user_unilization,
     dh.rom_available_size,
     dh.internal_unilization,
@@ -319,14 +320,15 @@
     device_heartbeat dh
     LEFT JOIN device_ d ON (d.device_id = dh.device_id)
     WHERE
-    dh.device_id = #{deviceId,jdbcType=VARCHAR}
-    AND dh."time" = (
+    (dh.device_id, dh."time") IN (
     SELECT
+    device_id,
     MAX ("time")
     FROM
     device_heartbeat
-    WHERE
-    device_heartbeat.device_id = #{deviceId,jdbcType=VARCHAR}
+    GROUP BY
+    device_id
+    ORDER BY device_id
     )
     <if test='companyName != null and companyName != ""' >
       AND d.company_name LIKE '%${companyName}%'
