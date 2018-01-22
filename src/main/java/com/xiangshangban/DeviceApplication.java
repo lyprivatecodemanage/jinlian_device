@@ -2,6 +2,7 @@ package com.xiangshangban;
 
 import com.github.pagehelper.PageHelper;
 import com.xiangshangban.device.common.filter.ServletFilter;
+import org.apache.log4j.Logger;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -12,6 +13,7 @@ import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
@@ -24,7 +26,7 @@ import java.util.Properties;
  * 应用程序入口(开启事务)
  */
 @SpringBootApplication
-//@EnableScheduling
+@EnableScheduling
 @EnableTransactionManagement
 @MapperScan("com.xiangshangban.device.dao")
 @Configuration
@@ -32,9 +34,11 @@ import java.util.Properties;
 @ServletComponentScan
 public class DeviceApplication {
 
+	public static Logger logger = Logger.getLogger(DeviceApplication.class);
 	public static void main(String[] args) {
 
 		ConfigurableApplicationContext run = SpringApplication.run(DeviceApplication.class, args);
+		logger.info("启动成功");
 	}
 
 	//配置PageHelper分页插件属性

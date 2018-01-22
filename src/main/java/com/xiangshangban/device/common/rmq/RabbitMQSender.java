@@ -2,15 +2,10 @@ package com.xiangshangban.device.common.rmq;
 
 import com.alibaba.fastjson.JSON;
 import com.xiangshangban.device.bean.Connection;
-import com.xiangshangban.device.bean.DoorCmd;
-import com.xiangshangban.device.common.encode.MD5Util;
 import com.xiangshangban.device.common.utils.RabbitTemplateUtil;
 import com.xiangshangban.device.service.impl.ConnectionFactoryServiceImpl;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 /**
  * Created by liuguanglong on 2017/10/18.

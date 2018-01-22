@@ -87,11 +87,6 @@
     SELECT
     COALESCE (S.record_type, '') AS record_type,
     COALESCE (record_date, '') AS record_date,
-    COALESCE (employee_name, '') AS employee_name,
-    COALESCE (
-    employee_department_name,
-    ''
-    ) AS employee_department_name,
     device_id,
     COALESCE (device_name, '') AS device_name
     FROM
@@ -101,21 +96,9 @@
     record_date,
     door_id,
     device_id,
-    device_name,
-    B.employee_name,
-    employee_department_name
+    device_name
     FROM
     door_record A
-    LEFT JOIN employee_ B ON A .employee_id = B.employee_id
-    AND B.employee_company_id = #{doorRecordCondition.companyId}
-    AND A .employee_id IN (
-    SELECT
-    employee_id
-    FROM
-    employee_
-    WHERE
-    employee_company_id =  #{doorRecordCondition.companyId}
-    )
     WHERE
     A .record_type IN (
     '1',
@@ -132,17 +115,10 @@
     FROM
     door_
     WHERE
-    company_id =  #{doorRecordCondition.companyId}
+    company_id = 'D8640545612F4973A70CCF1019A02F6C'
     )
-    AND A .employee_id != ''
     ) S
   <where>
-    <if test="doorRecordCondition.name!=null and doorRecordCondition.name!=''">
-      S.employee_name like #{doorRecordCondition.name}
-    </if>
-    <if test="doorRecordCondition.department!=null and doorRecordCondition.department!=''">
-      and S.employee_department_name like #{doorRecordCondition.department}
-    </if>
     <if test="doorRecordCondition.punchCardType!=null and doorRecordCondition.punchCardType!=''">
       and S.record_type = #{doorRecordCondition.punchCardType}
     </if>

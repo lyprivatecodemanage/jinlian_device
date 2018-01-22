@@ -273,8 +273,10 @@ public class DeviceServiceImpl implements IDeviceService {
 //        //立即下发数据到MQ
 //        rabbitMQSender.sendMessage(deviceId, doorCmdPackageAll);
 
+        String sendTime = DateUtils.getDateTime();
+
         cmdUtil.handOutCmd(deviceId, "C", "BIND_DEVICE", "1001", "", "bindInformation",
-                bindInformation, "1", "", "", "", "");
+                bindInformation, "1", "", "", "", "", sendTime);
     }
 
     @Override
@@ -388,8 +390,9 @@ public class DeviceServiceImpl implements IDeviceService {
 //        //立即下发数据到MQ
 //        rabbitMQSender.sendMessage(oldDeviceId, doorCmdPackageAll);
 
+        String sendTime = DateUtils.getDateTime();
         cmdUtil.handOutCmd(oldDeviceId, "C", "UNBIND_DEVICE", "1002", operatorEmployeeId, "unbindTypeMap",
-                unbindTypeMap, "1", "", "", "", "120");
+                unbindTypeMap, "1", "", "", "", "120", sendTime);
 
         //设备状态设置为解绑中
         Device device = new Device();
@@ -734,8 +737,9 @@ public class DeviceServiceImpl implements IDeviceService {
 //            //立即下发数据到MQ
 //            rabbitMQSender.sendMessage(deviceId, doorCmdPackageAll);
 
+            String sendTime = DateUtils.getDateTime();
             cmdUtil.handOutCmd(deviceId, "C", "UPDATE_DEVICE_SYSTEM", "1008", "", "update",
-                    mapHandOut, "1", "", "", "", "");
+                    mapHandOut, "1", "", "", "", "", sendTime);
         }
         return "";
     }
@@ -806,8 +810,9 @@ public class DeviceServiceImpl implements IDeviceService {
 //            //立即下发数据到MQ
 //            rabbitMQSender.sendMessage(deviceId, doorCmdPackageAll);
 
+            String sendTime = DateUtils.getDateTime();
             cmdUtil.handOutCmd(deviceId, "C", "UPDATE_DEVICE_APP", "1009", "", "update",
-                    mapHandOut, "1", "", "", "", "");
+                    mapHandOut, "1", "", "", "", "", sendTime);
         }
         return "";
     }
@@ -963,6 +968,9 @@ public class DeviceServiceImpl implements IDeviceService {
         }
         //遍历下发所有人员的开门权限时间区间
         for (String employeeId : employeeIdSet) {
+
+            String sendTime = DateUtils.getDateTime();
+
             //4.1人员基本信息同步
             Employee employeeTemp = employeeMapper.selectByEmployeeIdAndCompanyId(employeeId, companyId);
             //组装人员数据DATA
@@ -985,9 +993,10 @@ public class DeviceServiceImpl implements IDeviceService {
             userInformation.put("userPhone", employeeTemp.getEmployeePhone());
             userInformation.put("userNFC", employeeTemp.getEmployeeNfc());
             userInformation.put("bluetoothId", employeeTemp.getBluetoothNo());
+
             //下发人员基本信息
             cmdUtil.handOutCmd(newDeviceId, "C", "UPDATE_USER_INFO", "2001", operatorEmployeeId,
-                    "userInfo", userInformation, "1", "", "", employeeId, "");
+                    "userInfo", userInformation, "1", "", "", employeeId, "", sendTime);
 
             //4.2人员时间权限同步
             String rangeFlagId = doorEmployeeMapper.selectByEmployeeIdAndDoorId(employeeId, doorId).getRangeFlagId();
@@ -1021,7 +1030,7 @@ public class DeviceServiceImpl implements IDeviceService {
             userPermission.put("oneWeekTimeList", oneWeekTimeList);
             //下发人员开门权限时间区间
             cmdUtil.handOutCmd(newDeviceId, "C", "UPDATE_USER_ACCESS_CONTROL", "3001", operatorEmployeeId,
-                    "userPermission", userPermission, "1", "", "", employeeId, "");
+                    "userPermission", userPermission, "1", "", "", employeeId, "", sendTime);
         }
     }
 
@@ -1223,8 +1232,10 @@ public class DeviceServiceImpl implements IDeviceService {
 //                //立即下发数据到MQ
 //                rabbitMQSender.sendMessage(deviceId, doorCmdPackageAll);
 
+                String sendTime = DateUtils.getDateTime();
+
                 cmdUtil.handOutCmd(deviceId, "C", "UPDATE_DEVICE_SYSTEM_SETTING", "1003",
-                        "", "setting", mapJson, "1", "", "", "", "");
+                        "", "setting", mapJson, "1", "", "", "", "", sendTime);
             }
 
             //保存并下发系统更新设置

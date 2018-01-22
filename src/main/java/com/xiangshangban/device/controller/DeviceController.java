@@ -279,6 +279,13 @@ public class DeviceController {
         } else if ("admin".equals(role)) {
 //            LOGGER.info("已匹配到【企业管理员】角色");
             companyId = request.getHeader("companyId");
+            System.out.println("companyId ====================== "+companyId);
+
+            if ("".equals(companyId)){
+                returnData.setMessage("没有获取到公司信息，请重新登录");
+                returnData.setReturnCode("3006");
+                return returnData;
+            }
         } else if ("user".equals(role)) {
 //            LOGGER.info("已匹配到【普通用户】角色");
             returnData.setMessage("您没有操作权限");
@@ -579,8 +586,10 @@ public class DeviceController {
 //            //立即下发数据到MQ
 //            rabbitMQSender.sendMessage(deviceId, doorCmdPackageAll);
 
+            String sendTime = DateUtils.getDateTime();
+
             cmdUtil.handOutCmd(deviceId, "NULLDATA", "REBOOT_DEVICE", "1007", "", "",
-                    "", "1", "", "", "", "");
+                    "", "1", "", "", "", "", sendTime);
 
             returnData.setMessage("重启操作已发出请求，请前往设备查看，网络波动时，会有一定的延时");
             returnData.setReturnCode("3000");

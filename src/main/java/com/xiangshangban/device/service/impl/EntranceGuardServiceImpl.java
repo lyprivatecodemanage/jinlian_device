@@ -705,8 +705,9 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         doorSetupMap.put("oneWeekTimeList", oneWeekTimeDoorKeepList);
 
         //下发门禁常规设置命令
+        String sendTime = DateUtils.getDateTime();
         cmdUtil.handOutCmd(deviceId, "C", "UPDATE_ACCESS_CONTROL_SETTING", "3003",
-                operatorEmployeeId, "attSetting", doorSetupMap, "1", "", "", "", "");
+                operatorEmployeeId, "attSetting", doorSetupMap, "1", "", "", "", "", sendTime);
     }
 
     //
@@ -836,8 +837,9 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         firstCardSetupMap.put("oneWeekTimeList", oneWeekTimeFirstCardListTemp);
 
         //下发首卡常开命令
+        String sendTime = DateUtils.getDateTime();
         cmdUtil.handOutCmd(deviceId, "C", "UPDATE_FIRST_CARD_NORMAL_OPENED", "3004", operatorEmployeeId,
-                "firstCardKeepDoorOpen", firstCardSetupMap, "1", "", "", "", "");
+                "firstCardKeepDoorOpen", firstCardSetupMap, "1", "", "", "", "", sendTime);
 
     }
 
@@ -934,8 +936,9 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         }
 
         //下发门禁日历命令
+        String sendTime = DateUtils.getDateTime();
         cmdUtil.handOutCmd(deviceId, "C", "UPDATE_ACCESS_CALENDER", "3005", operatorEmployeeId,
-                "accessCalendar", accessCalendar, "1", "", "", "", "");
+                "accessCalendar", accessCalendar, "1", "", "", "", "", sendTime);
 
     }
 

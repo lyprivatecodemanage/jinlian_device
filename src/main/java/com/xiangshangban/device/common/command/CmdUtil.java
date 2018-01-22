@@ -14,7 +14,6 @@ import com.alibaba.fastjson.JSON;
 import com.xiangshangban.device.bean.DoorCmd;
 import com.xiangshangban.device.common.encode.MD5Util;
 import com.xiangshangban.device.common.rmq.RabbitMQSender;
-import com.xiangshangban.device.common.utils.CalendarUtil;
 import com.xiangshangban.device.common.utils.DateUtils;
 import com.xiangshangban.device.common.utils.FormatUtil;
 import com.xiangshangban.device.service.IEntranceGuardService;
@@ -65,7 +64,7 @@ public class CmdUtil {
     public Map<String, Object> handOutCmd(String deviceId, String commandMode, String action,
                            String actionCode, String operatorEmployeeId, String dataName,
                            Object dataObject, String status, String resultCode, String resultMessage,
-                           String employeeId, String customTimeoutSeconds){
+                           String employeeId, String customTimeoutSeconds, String sendTime){
 
         String timeoutSeconds = commandTimeoutSeconds;
         //支持自定义超时秒数(区别于application.properties里的command.timeout.seconds全局配置)
@@ -92,7 +91,7 @@ public class CmdUtil {
         doorCmd.setEmployeeId(employeeId);
         doorCmd.setOperateEmployeeId(operatorEmployeeId);
 
-        doorCmd.setSendTime(CalendarUtil.getCurrentTime());
+        doorCmd.setSendTime(sendTime);
         doorCmd.setOutOfTime(DateUtils.addSecondsConvertToYMDHM(new Date(), timeoutSeconds));
         doorCmd.setSuperCmdId(FormatUtil.createUuid());
         doorCmd.setData(JSON.toJSONString(dataObject));

@@ -360,8 +360,9 @@ public class EmployeeServiceImpl implements IEmployeeService {
 //                    rabbitMQSender.sendMessage(deviceId, userDeleteInformation);
 
                     //下发人员删除命令，包括删除权限
+                    String sendTime = DateUtils.getDateTime();
                     cmdUtil.handOutCmd(deviceId, "C", "DELETE_USER_INFO", "2002", operatorEmployeeId,
-                            "employeeIdList", employeeIdListTemp, "1", "", "", employeeId, "");
+                            "employeeIdList", employeeIdListTemp, "1", "", "", employeeId, "", sendTime);
                 }
 
                 returnData.setMessage("已执行删除设备上人员权限的操作");
@@ -443,8 +444,9 @@ public class EmployeeServiceImpl implements IEmployeeService {
 //                        rabbitMQSender.sendMessage(deviceId, userDeleteInformation);
 
                         //下发人员删除命令，包括删除权限
+                        String sendTime = DateUtils.getDateTime();
                         cmdUtil.handOutCmd(deviceId, "C", "DELETE_USER_INFO", "2002", operatorEmployeeId,
-                                "employeeIdList", employeeIdListTemp, "1", "", "", employeeId, "");
+                                "employeeIdList", employeeIdListTemp, "1", "", "", employeeId, "", sendTime);
                     }
                 }catch (Exception e){
                     e.printStackTrace();
@@ -1023,6 +1025,9 @@ public class EmployeeServiceImpl implements IEmployeeService {
 
                     userPermission.put("oneWeekTimeList", oneWeekTimeList);
 
+                    //人员下发时发送时间需要控制到两条命令完全一样，曾出现过1秒的差值导致下发人员列表部分人没有下发状态
+                    String sendTime = DateUtils.getDateTime();
+
                     //判断是否立即下发数据到设备
                     if (immediatelyDownload.equals("0")){
 
@@ -1030,13 +1035,13 @@ public class EmployeeServiceImpl implements IEmployeeService {
                          * 人员基本信息存为草稿
                          */
                         cmdUtil.handOutCmd(deviceId, "C", "UPDATE_USER_INFO", "2001", operatorEmployeeId,
-                                "userInfo", userInformation, "0", "", "", employeeId, "");
+                                "userInfo", userInformation, "0", "", "", employeeId, "", sendTime);
 
                         /**
                          * 人员开门权限存为草稿
                          */
                         cmdUtil.handOutCmd(deviceId, "C", "UPDATE_USER_ACCESS_CONTROL", "3001", operatorEmployeeId,
-                                "userPermission", userPermission, "0", "", "", employeeId, "");
+                                "userPermission", userPermission, "0", "", "", employeeId, "", sendTime);
 
                     }else if (immediatelyDownload.equals("1")){
 
@@ -1050,7 +1055,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
                          * 人员基本信息立即下发
                          */
                         Map userInformationAll = cmdUtil.handOutCmd(deviceId, "C", "UPDATE_USER_INFO", "2001", operatorEmployeeId,
-                                "userInfo", userInformation, "1", "", "", employeeId, "");
+                                "userInfo", userInformation, "1", "", "", employeeId, "", sendTime);
 
                         System.out.println("基本信息："+JSON.toJSONString(userInformationAll));
 
@@ -1058,7 +1063,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
                          * 人员开门权限立即下发
                          */
                         Map userPermissionAll = cmdUtil.handOutCmd(deviceId, "C", "UPDATE_USER_ACCESS_CONTROL", "3001", operatorEmployeeId,
-                                "userPermission", userPermission, "1", "", "", employeeId, "");
+                                "userPermission", userPermission, "1", "", "", employeeId, "", sendTime);
 
                         System.out.println("开门权限信息："+JSON.toJSONString(userPermissionAll));
                     }
