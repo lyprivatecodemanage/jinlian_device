@@ -138,8 +138,14 @@
   <!--###############<授权中心>####################-->
   <!--查询门所关联设备上下发的人员的信息：手机号、人脸、NFC数量-->
   <select id="queryDoorEmployeeInfo" parameterType="Map" resultType="map">
+      SELECT dd.door_id as door_id_temp,QQ.* FROM door_ dd
+      LEFT JOIN (
       SELECT
-      W.*
+      w.*
+      FROM
+      (
+      SELECT
+      Z.*
       FROM
       (
       SELECT
@@ -148,12 +154,13 @@
       device_id,
       is_unbind,
       COALESCE (device_name, '') AS device_name,
+      E.employee_id,
       COALESCE (F.employee_phone, '') AS employee_phone,
       COALESCE (employee_face, '') AS employee_face,
       COALESCE (employee_nfc, '') AS employee_nfc
       FROM
       (
-      <!--查询当前设备上下发成功的人员信息-->
+      <!--查询当前公司所有设备上下发成功的人员-->
       SELECT
       S.*, Q.employee_id
       FROM
@@ -172,10 +179,11 @@
       FROM
       door_
       WHERE
-      company_id = #{companyId,jdbcType=VARCHAR}
+      company_id = #{companyId}
       ) A
       LEFT JOIN device_ B ON A .device_id = B.device_id
       ) S
+      <!--查询所有人员下发状态-->
       LEFT JOIN (
       SELECT DISTINCT
       H.*
@@ -209,7 +217,7 @@
       (
       SELECT
       X.*
-      FROM
+      FROM <!--查询每个设备下发人员(2001)指令最后一次下发时间,以及状态-->
       (
       SELECT
       A .*, B.status info_status
@@ -241,7 +249,7 @@
       WHERE
       X.send_time > d.bind_date
       ) C
-      INNER JOIN (
+      INNER JOIN ( <!--查询每个设备下发人员(3001)指令最后一次下发时间,以及状态-->
       SELECT
       X.*
       FROM
@@ -283,14 +291,41 @@
       ) E
       LEFT JOIN employee_ F ON E.employee_id = F.employee_id
       AND E.company_id = F.employee_company_id
+      ) Z
+      RIGHT JOIN
+      (
+      <!--查询指定公司所有设备上现有的人员id-->
+      SELECT DISTINCT
+      device_id,
+      employee_id
+      FROM
+      door_employee
+      WHERE
+      door_id IN (
+      SELECT
+      door_id
+      FROM
+      door_
+      WHERE
+      company_id = #{companyId}
+      )
+      GROUP BY
+      device_id,employee_id
+      ) R
+      ON Z.device_id = R.device_id
+      AND Z.employee_id = R.employee_id
       ) W
       <where>
+          W.door_id != '' and W.door_id is not NULL and W.device_id !='' AND  W.device_id is not NULL
           <if test="doorName!=null and doorName!=''">
-              W.door_name LIKE #{doorName}
+              and W.door_name LIKE #{doorName}
           </if>
       </where>
       ORDER BY
       CAST (W.door_id AS INTEGER)
+      )QQ
+      on dd.door_id = QQ.door_id
+      WHERE dd.company_id = #{companyId}
   </select>
 
   <!--查询门的人员命令下发的时间最后时间-->
@@ -424,6 +459,8 @@
       SELECT DISTINCT
       employee_id,
       device_id,
+      COALESCE (MIN(range_start_time), '') range_start_time,
+      COALESCE (MIN(range_end_time), '') range_end_time,
       range_door_open_type
       FROM
       time_range_common_employee
@@ -436,8 +473,17 @@
       WHERE
       door_id = #{ doorId }
       )
+      AND day_of_week = '1'
+      GROUP BY
+      employee_id,
+      device_id,
+      range_door_open_type
+      ORDER BY
+      employee_id
       ) W ON S.employee_id = W.employee_id
       AND S.device_id = W.device_id
+      AND s.range_start_time = w.range_start_time
+      AND s.range_end_time = W.range_end_time
       ) Q
       <where>
           <if test="empName!=null and empName!=''">

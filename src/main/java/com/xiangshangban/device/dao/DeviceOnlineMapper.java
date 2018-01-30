@@ -42,7 +42,7 @@ public interface DeviceOnlineMapper {
      * @param startTime
      * @return
      */
-    DeviceOnline selectByDeviceIdAndStartTime(@Param("deviceId") String deviceId,
+    List<DeviceOnline> selectByDeviceIdAndStartTime(@Param("deviceId") String deviceId,
                                               @Param("startTime") String startTime);
 
     /**

@@ -96,6 +96,9 @@ public class DeviceController {
     @Autowired
     private DeviceStatusCheckUtil deviceStatusCheckUtil;
 
+    @Autowired
+    private DeviceHeartbeatSimpleMapper deviceHeartbeatSimpleMapper;
+
     /**
      * 平台新增设备，未绑定公司的设备
      *
@@ -279,7 +282,7 @@ public class DeviceController {
         } else if ("admin".equals(role)) {
 //            LOGGER.info("已匹配到【企业管理员】角色");
             companyId = request.getHeader("companyId");
-            System.out.println("companyId ====================== "+companyId);
+//            System.out.println("companyId ====================== "+companyId);
 
             if ("".equals(companyId)){
                 returnData.setMessage("没有获取到公司信息，请重新登录");
@@ -603,7 +606,7 @@ public class DeviceController {
     }
 
     /**
-     * 查询当前公司的所有设备信息（未和公司解绑，并且尚未绑定门的设备）
+         * 查询当前公司的所有设备信息（未和公司解绑，并且尚未绑定门的设备）
      */
     @ResponseBody
     @RequestMapping("/getAllDevice")
@@ -774,8 +777,8 @@ public class DeviceController {
 
 //                LOGGER.info("MD5校验成功，数据完好无损");
 
-                //CRC16校验deviceId
-                if (deviceService.checkCrc16DeviceId(deviceId)) {
+//                //CRC16校验deviceId
+//                if (deviceService.checkCrc16DeviceId(deviceId)) {
 
                     if (((Map<String, String>) mapJson.get("command")).get("ACTION").equals("UPLOAD_DEVICE_HEARTBEAT")) {
                         //获取心跳map
@@ -814,6 +817,42 @@ public class DeviceController {
                         deviceHeartbeat.setTime(DateUtils.getDateTime());
 
                         deviceHeartbeatMapper.insertSelective(deviceHeartbeat);
+
+                        //存储到一个没有历史记录的心跳表，缓解数据量大的压力
+                        DeviceHeartbeatSimple deviceHeartbeatSimple = new DeviceHeartbeatSimple();
+                        deviceHeartbeatSimple.setDeviceId(deviceHeartbeat.getDeviceId());
+                        deviceHeartbeatSimple.setLockState(deviceHeartbeat.getLockState());
+                        deviceHeartbeatSimple.setWifiOpne(deviceHeartbeat.getWifiOpne());
+                        deviceHeartbeatSimple.setIp(deviceHeartbeat.getIp());
+                        deviceHeartbeatSimple.setMask(deviceHeartbeat.getMask());
+                        deviceHeartbeatSimple.setGate(deviceHeartbeat.getGate());
+                        deviceHeartbeatSimple.setTimeLimitDoorOpen(deviceHeartbeat.getTimeLimitDoorOpen());
+                        deviceHeartbeatSimple.setTimeLimitLockOpen(deviceHeartbeat.getTimeLimitLockOpen());
+                        deviceHeartbeatSimple.setDoorAlarm(deviceHeartbeat.getDoorAlarm());
+                        deviceHeartbeatSimple.setFireAlarm(deviceHeartbeat.getFireAlarm());
+                        deviceHeartbeatSimple.setUserNumber(deviceHeartbeat.getUserNumber());
+                        deviceHeartbeatSimple.setKeySwitch(deviceHeartbeat.getKeySwitch());
+                        deviceHeartbeatSimple.setCompanyId(deviceHeartbeat.getCompanyId());
+                        deviceHeartbeatSimple.setCompanyName(deviceHeartbeat.getCompanyName());
+                        deviceHeartbeatSimple.setDataUploadstate(deviceHeartbeat.getDataUploadstate());
+                        deviceHeartbeatSimple.setRomAvailableSize(deviceHeartbeat.getRomAvailableSize());
+                        deviceHeartbeatSimple.setCpuFreq(deviceHeartbeat.getCpuFreq());
+                        deviceHeartbeatSimple.setCpuTemper(deviceHeartbeat.getCpuTemper());
+                        deviceHeartbeatSimple.setCpuUserUnilization(deviceHeartbeat.getCpuUserUnilization());
+                        deviceHeartbeatSimple.setCpuUnilization(deviceHeartbeat.getCpuUnilization());
+                        deviceHeartbeatSimple.setInternalUnilization(deviceHeartbeat.getInternalUnilization());
+                        deviceHeartbeatSimple.setAppUsed(deviceHeartbeat.getAppUsed());
+                        deviceHeartbeatSimple.setTime(deviceHeartbeat.getTime());
+
+                        DeviceHeartbeatSimple deviceHeartbeatSimpleExist = deviceHeartbeatSimpleMapper.selectByPrimaryKey(deviceId);
+                        if (null == deviceHeartbeatSimpleExist){
+                            //无则插入
+                            deviceHeartbeatSimpleMapper.insertSelective(deviceHeartbeatSimple);
+                        }else {
+                            //有则更新
+                            deviceHeartbeatSimpleMapper.updateByPrimaryKeySelective(deviceHeartbeatSimple);
+                        }
+
 //                        LOGGER.info("心跳数据已存储");
 
                     }
@@ -823,7 +862,7 @@ public class DeviceController {
                     resultMessage = "执行成功";
                     resultData.put("resultCode", resultCode);
                     resultData.put("resultMessage", resultMessage);
-                }
+//                }
 
             } else {
                 LOGGER.info("MD5 = " + myMd5);
@@ -974,7 +1013,7 @@ public class DeviceController {
 //                }
 
                 //遍历查找每一个设备最新的心跳数据信息
-                List<Map<String, Object>> deviceHeartbeatList = deviceHeartbeatMapper
+                List<Map<String, Object>> deviceHeartbeatList = deviceHeartbeatSimpleMapper
                         .selectLatestByDeviceId("", 0, 0, "", "");
                 for (Map<String, Object> deviceHeartbeatMap : deviceHeartbeatList) {
 
@@ -1021,7 +1060,7 @@ public class DeviceController {
 //                }
 
                 //遍历查找每一个设备最新的心跳数据信息
-                List<Map<String, Object>> deviceHeartbeatListResult = deviceHeartbeatMapper
+                List<Map<String, Object>> deviceHeartbeatListResult = deviceHeartbeatSimpleMapper
                         .selectLatestByDeviceId(companyName, Float.valueOf(averageCpuUserUnilization), Float.valueOf(averageCpuTemper), cpuUserUnilizationCondition, cpuTemperCondition);
 
 
@@ -1684,7 +1723,7 @@ public class DeviceController {
 
                     //判断当前登录人是否有拥有开门权限的设备
                     if (deviceList.size() > 0) {
-                        System.out.println("deviceList : "+JSON.toJSONString(deviceList));
+//                        System.out.println("deviceList : "+JSON.toJSONString(deviceList));
                         //返回的蓝牙参数集合
                         List<Map<String, String>> bluetoothParameterList = new ArrayList<Map<String, String>>();
 
@@ -1711,7 +1750,7 @@ public class DeviceController {
                                 String doorOpenStartTime = (String) doorEmployeePermissionMap.get("doorOpenStartTime");
                                 String doorOpenEndTime = (String) doorEmployeePermissionMap.get("doorOpenEndTime");
                                 if (!DateUtils.isBetweenTwoTime(doorOpenStartTime, doorOpenEndTime, DateUtils.getDateTime())){
-                                    System.out.println("【"+employeeId+"】在【"+doorExist.getDoorId()+"】上权限无效");
+//                                    System.out.println("【"+employeeId+"】在【"+doorExist.getDoorId()+"】上权限无效");
                                     continue;
                                 }
 
@@ -1790,7 +1829,7 @@ public class DeviceController {
                                 //判断该人员有没有蓝牙id
                                 Employee employeeExist = employeeMapper.selectByEmployeeIdAndCompanyId(employeeId, companyId);
                                 if (null == employeeExist){
-                                    System.out.println("人员信息不同步，未查到您的信息");
+//                                    System.out.println("人员信息不同步，未查到您的信息");
                                     returnData.setMessage("人员信息不同步，未查到您的信息");
                                     returnData.setReturnCode("4007");
                                     return returnData;

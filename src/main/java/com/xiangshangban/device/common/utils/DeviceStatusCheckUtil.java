@@ -10,10 +10,10 @@
  */
 package com.xiangshangban.device.common.utils;
 
-import com.alibaba.fastjson.JSON;
 import com.xiangshangban.device.bean.Device;
 import com.xiangshangban.device.bean.DeviceOnline;
 import com.xiangshangban.device.dao.DeviceHeartbeatMapper;
+import com.xiangshangban.device.dao.DeviceHeartbeatSimpleMapper;
 import com.xiangshangban.device.dao.DeviceMapper;
 import com.xiangshangban.device.dao.DeviceOnlineMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,11 +44,14 @@ public class DeviceStatusCheckUtil {
     @Autowired
     private DeviceOnlineMapper deviceOnlineMapper;
 
+    @Autowired
+    private DeviceHeartbeatSimpleMapper deviceHeartbeatSimpleMapper;
+
     public String deviceStatusChecking(String deviceId){
         //在线状态，1在线，0离线
         String onlineStatus = "";
 
-        List<Map<String, String>> deviceHeartbeatLatestTimeList = deviceHeartbeatMapper.selectLatestTimeByDeviceId(deviceId);
+        List<Map<String, String>> deviceHeartbeatLatestTimeList = deviceHeartbeatSimpleMapper.selectLatestTimeByDeviceId(deviceId);
         String deviceHeartbeatLatestTime = "";
         try {
             Device deviceTemp = new Device();
@@ -93,7 +96,7 @@ public class DeviceStatusCheckUtil {
 
     public void deviceOnlineChecking(String deviceId){
         //查询最后一条心跳的时间
-        List<Map<String, String>> deviceHeartbeatLatestTimeList = deviceHeartbeatMapper.selectLatestTimeByDeviceId(deviceId);
+        List<Map<String, String>> deviceHeartbeatLatestTimeList = deviceHeartbeatSimpleMapper.selectLatestTimeByDeviceId(deviceId);
         //必须要有至少一条心跳信息
         if (null != deviceHeartbeatLatestTimeList && deviceHeartbeatLatestTimeList.size() == 1){
             //最后一条心跳信息的时间
@@ -102,7 +105,7 @@ public class DeviceStatusCheckUtil {
             //设备心跳在线状态检测任务
             String onlineStatus = deviceStatusChecking(deviceId);
             List<DeviceOnline> deviceOnlineList =  deviceOnlineMapper.selectByPrimaryKey(deviceId);
-            System.out.println("【deviceOnlineList】: "+ JSON.toJSONString(deviceOnlineList));
+//            System.out.println("【deviceOnlineList】: "+ JSON.toJSONString(deviceOnlineList));
             if (deviceOnlineList == null || deviceOnlineList.size() == 0){
                 DeviceOnline deviceOnline = new DeviceOnline();
                 deviceOnline.setDeviceId(deviceId);
@@ -113,18 +116,23 @@ public class DeviceStatusCheckUtil {
                 //查找这台设备在线状态时间区间的最大开始时间和结束时间
                 String maxStartTime = deviceOnlineMapper.selectMaxStartTimeByDeviceId(deviceId);
                 String maxEndTime = deviceOnlineMapper.selectMaxEndTimeByDeviceId(deviceId);
-                System.out.println("【maxStartTime】: "+maxStartTime);
-                System.out.println("【maxEndTime】: "+maxEndTime);
+//                System.out.println("【maxStartTime】: "+maxStartTime);
+//                System.out.println("【maxEndTime】: "+maxEndTime);
                 if (maxStartTime.equals(maxEndTime)){
-                    String isOnline = deviceOnlineMapper.selectByDeviceIdAndStartTime(deviceId, maxEndTime).getIsOnline();
+                    List<DeviceOnline> deviceOnlineListTemp = deviceOnlineMapper.selectByDeviceIdAndStartTime(deviceId, maxEndTime);
+                    //同一个时间同一个设备不允许出现两条一样的数据
+                    if (deviceOnlineListTemp.size() > 1){
+                        return;
+                    }
+                    String isOnline = deviceOnlineListTemp.get(0).getIsOnline();
                     if (!onlineStatus.equals(isOnline)){
-                        //最新时间的那一行，把当前时间存入end_time
+                        //最新时间的那一行，把最后一条心跳信息的时间存入end_time
                         DeviceOnline deviceOnline1 = new DeviceOnline();
                         deviceOnline1.setDeviceId(deviceId);
                         deviceOnline1.setStartTime(maxStartTime);
                         deviceOnline1.setEndTime(latestTime);
                         deviceOnlineMapper.updateByDeviceIdAndStartTimeSelective(deviceOnline1);
-                        //重新添加一行，把当前时间存入start_time
+                        //重新添加一行，把最后一条心跳信息的时间存入start_time
                         DeviceOnline deviceOnline2 = new DeviceOnline();
                         deviceOnline2.setDeviceId(deviceId);
                         deviceOnline2.setStartTime(latestTime);
@@ -132,18 +140,18 @@ public class DeviceStatusCheckUtil {
                         deviceOnlineMapper.insert(deviceOnline2);
                     }
                 }else {
-                    System.out.println("第二次检测");
+//                    System.out.println("第二次检测");
                     String isOnline = deviceOnlineList.get(0).getIsOnline();
                     String startTime = deviceOnlineList.get(0).getStartTime();
-                    System.out.println("【startTime】: "+startTime);
+//                    System.out.println("【startTime】: "+startTime);
                     if (!onlineStatus.equals(isOnline)){
-                        //刚开始只有一条时间区间记录时，把当前时间存入end_time
+                        //刚开始只有一条时间区间记录时，把最后一条心跳信息的时间存入end_time
                         DeviceOnline deviceOnline1 = new DeviceOnline();
                         deviceOnline1.setDeviceId(deviceId);
                         deviceOnline1.setStartTime(startTime);
                         deviceOnline1.setEndTime(latestTime);
                         deviceOnlineMapper.updateByDeviceIdAndStartTimeSelective(deviceOnline1);
-                        //重新添加一行，把当前时间存入start_time
+                        //重新添加一行，把最后一条心跳信息的时间存入start_time
                         DeviceOnline deviceOnline2 = new DeviceOnline();
                         deviceOnline2.setDeviceId(deviceId);
                         deviceOnline2.setStartTime(latestTime);

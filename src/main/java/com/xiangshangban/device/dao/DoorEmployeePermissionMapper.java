@@ -54,5 +54,10 @@ public interface DoorEmployeePermissionMapper {
 
     int updateByRangeFlagIdSelective(DoorEmployeePermission doorEmployeePermission);
 
+    int deleteByEmployeeIdAndDeviceId(@Param("employeeId") String employeeId,
+                                      @Param("deviceId") String deviceId);
+
     List<DoorEmployeePermission> temp();
+
+    List<DoorEmployeePermission> temp1(String deviceId);
 }

@@ -233,4 +233,32 @@
     </set>
     where range_flag_id = #{rangeFlagId,jdbcType=VARCHAR}
   </update>
+
+  <delete id="deleteByEmployeeIdAndDeviceId" parameterType="java.lang.String" >
+    delete from time_range_common_employee
+    where employee_id = #{employeeId,jdbcType=VARCHAR}
+    AND device_id = #{deviceId,jdbcType=VARCHAR}
+  </delete>
+
+  <select id="temp1" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    SELECT
+    *
+    FROM
+    time_range_common_employee
+    WHERE
+    range_flag_id NOT IN (
+    SELECT
+    range_flag_id
+    FROM
+    door_employee
+    WHERE
+    device_id = #{deviceId,jdbcType=VARCHAR}
+    )
+    AND device_id = #{deviceId,jdbcType=VARCHAR}
+  </select>
+
+  <delete id="deleteByRangeFlagId" parameterType="java.lang.String" >
+    delete from time_range_common_employee
+    where range_flag_id = #{rangeFlagId,jdbcType=VARCHAR}
+  </delete>
 </mapper>

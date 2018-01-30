@@ -2,10 +2,8 @@ package com.xiangshangban.device.timer;
 
 import com.xiangshangban.device.bean.Festival;
 import com.xiangshangban.device.common.utils.DateUtils;
-import com.xiangshangban.device.dao.TemplateMapper;
 import com.xiangshangban.device.service.ITemplateService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 /**
@@ -22,7 +20,7 @@ public class FestivalTemplateTimer {
     //定义定时器（每天早上3点触发）
    private static final String FESTIVAL_CHECK_TIME = "0 0 3 * * ?";
 
-    @Scheduled(cron = FESTIVAL_CHECK_TIME)
+//    @Scheduled(cron = FESTIVAL_CHECK_TIME)
     public void confirmFestival(){
         //判断今天是否是节日
         Festival festival = iTemplateService.verifyCurrentDate(DateUtils.getDate());

@@ -177,6 +177,12 @@
     where range_flag_id = #{rangeFlagId,jdbcType=VARCHAR}
   </update>
 
+  <delete id="deleteByEmployeeIdAndDeviceId" parameterType="java.lang.String" >
+    delete from door_employee_permission
+    where employee_id = #{employeeId,jdbcType=VARCHAR}
+    AND device_id = #{deviceId,jdbcType=VARCHAR}
+  </delete>
+
   <select id="temp" resultMap="BaseResultMap" parameterType="java.lang.String" >
     SELECT
     <include refid="Base_Column_List" />
@@ -185,5 +191,22 @@
     WHERE
     device_id IS NULL
     OR device_id = ''
+  </select>
+
+  <select id="temp1" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    SELECT
+	*
+    FROM
+	door_employee_permission
+    WHERE
+	range_flag_id NOT IN (
+		SELECT
+			range_flag_id
+		FROM
+			door_employee
+		WHERE
+			device_id = #{deviceId,jdbcType=VARCHAR}
+	)
+    AND device_id = #{deviceId,jdbcType=VARCHAR}
   </select>
 </mapper>

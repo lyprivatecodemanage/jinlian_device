@@ -78,6 +78,12 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
     @Autowired
     private CmdUtil cmdUtil;
 
+    @Autowired
+    private DoorEmployeePermissionMapper doorEmployeePermissionMapper;
+
+    @Autowired
+    private TimeRangeCommonEmployeeMapper timeRangeCommonEmployeeMapper;
+
     /**
      * 添加命令到命令表
      * @param doorCmd
@@ -516,6 +522,12 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
                             delMap.put("doorId",doorObj.getDoorId());
                             delMap.put("employeeId",key);
                             doorEmployeeMapper.deleteByDoorIdAndEmployeeId(delMap);
+                            //查询设备id根据门id
+                            String deviceId = doorMapper.selectByPrimaryKey(doorObj.getDoorId()).getDeviceId();
+                            //删除该人员在door_employee_permission表中的信息
+                            doorEmployeePermissionMapper.deleteByEmployeeIdAndDeviceId(key, deviceId);
+                            //删除该人员在time_range_common_employee表中的信息
+                            timeRangeCommonEmployeeMapper.deleteByEmployeeIdAndDeviceId(key, deviceId);
                         }
                     }
                 }
@@ -751,7 +763,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
     @Override
     public void handOutFirstCard(String doorId, String enableFirstCardKeepOpen, List<String> employeeIdList, List oneWeekTimeFirstCardList, String operatorEmployeeId) {
 
-        System.out.println("employeeIdList = "+JSON.toJSONString(employeeIdList));
+//        System.out.println("employeeIdList = "+JSON.toJSONString(employeeIdList));
         //获取设备id
         Door doorInfo = doorMapper.findAllByDoorId(doorId);
 
@@ -884,7 +896,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
         insertCommand(doorCmdEmployeeInformation);
         //立即下发数据到MQ
         rabbitMQSender.sendMessage(deviceId, userInformationAll);
-        System.out.println("userInformationAll"+JSON.toJSONString(userInformationAll));
+//        System.out.println("userInformationAll"+JSON.toJSONString(userInformationAll));
     }
 
     //门禁配置---功能配置（门禁日历）

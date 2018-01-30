@@ -33,8 +33,8 @@
 			<artifactId>spring-boot-starter</artifactId>
 			<exclusions>
 				<!--<exclusion>-->
-					<!--<groupId>org.springframework.boot</groupId>-->
-					<!--<artifactId>spring-boot-starter-logging</artifactId>-->
+					<!--<artifactId>org.springframework.boot</artifactId>-->
+					<!--<groupId>spring-boot-starter-logging</groupId>-->
 				<!--</exclusion>-->
 				<exclusion>
 					<groupId>ch.qos.logback</groupId>
@@ -55,13 +55,13 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 			<exclusions>
-				<!--<exclusion>-->
-					<!--<artifactId>log4j-over-slf4j</artifactId>-->
-					<!--<groupId>org.slf4j</groupId>-->
-				<!--</exclusion>-->
 				<exclusion>
-					<artifactId>org.springframework.boot</artifactId>
-					<groupId>spring-boot-starter-logging</groupId>
+					<artifactId>log4j-over-slf4j</artifactId>
+					<groupId>org.slf4j</groupId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-logging</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -114,12 +114,6 @@
 			<groupId>org.mybatis.spring.boot</groupId>
 			<artifactId>mybatis-spring-boot-starter</artifactId>
 			<version>1.3.0</version>
-		</dependency>
-
-		<!--log4j2日志依赖-->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-log4j2</artifactId>
 		</dependency>
 
 		<!--DateUtils工具类依赖的jar包-->
@@ -192,12 +186,18 @@
 			<!--<scope>provided</scope>-->
 		<!--</dependency>-->
 
-		<!--<dependency>-->
-			<!--<groupId>log4j</groupId>-->
-			<!--<artifactId>log4j</artifactId>-->
-			<!--<version>1.2.16</version>-->
-			<!--<scope>provided</scope>-->
-		<!--</dependency>-->
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.17</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<!--log4j2日志依赖-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-log4j2</artifactId>
+		</dependency>
 
 		<!--添加：导出数据到Excel的jar包-->
 		<dependency>

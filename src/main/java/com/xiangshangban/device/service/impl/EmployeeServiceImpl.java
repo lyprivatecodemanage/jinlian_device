@@ -539,8 +539,8 @@ public class EmployeeServiceImpl implements IEmployeeService {
     public void synchronizeEmployeePermissionForDevices(String jsonString, String employeeId) {
 
         System.out.println("已进入人脸同步方法..............................................");
-        System.out.println("jsonString = "+jsonString);
-        System.out.println("employeeId = "+employeeId);
+//        System.out.println("jsonString = "+jsonString);
+//        System.out.println("employeeId = "+employeeId);
 
         //提取数据
         Map<String, Object> allMap = JSONObject.fromObject(jsonString);
@@ -553,11 +553,11 @@ public class EmployeeServiceImpl implements IEmployeeService {
 
         try {
             if (StringUtils.isEmpty((String) userLabelMap.get("userFace"))) {
-                System.out.println("人脸信息为空1");
+//                System.out.println("人脸信息为空1");
                 employeeTemp.setEmployeeFace((String) userLabelMap.get("userFace"));
             }
         }catch (Exception e){
-            System.out.println("人脸信息不为空，值="+JSON.toJSONString(userLabelMap.get("userFace")));
+//            System.out.println("人脸信息不为空，值="+JSON.toJSONString(userLabelMap.get("userFace")));
             employeeTemp.setEmployeeFace(JSON.toJSONString(userLabelMap.get("userFace")));
         }
 
@@ -613,7 +613,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
             //查询该人员的有效时间是否过期
             Map<String, String> doorEmployeePermission = doorEmployeePermissionMapper.selectEmployeePressionByLeftJoin(employeeId, door.getDoorId());
 
-            System.out.println("doorEmployeePermission = "+JSON.toJSONString(doorEmployeePermission));
+//            System.out.println("doorEmployeePermission = "+JSON.toJSONString(doorEmployeePermission));
             //这个人有开门权限设置
             if (doorEmployeePermission != null){
                 String startTime = doorEmployeePermission.get("doorOpenStartTime");
@@ -622,10 +622,10 @@ public class EmployeeServiceImpl implements IEmployeeService {
 
                 //这个人的开门权限时间有效
                 Boolean timeEffective = DateUtils.isBetweenTwoTime(startTime, endTime, nowTime);
-                System.out.println("startTime = "+startTime);
-                System.out.println("endTime = "+endTime);
-                System.out.println("nowTime = "+nowTime);
-                System.out.println("timeEffective = "+timeEffective);
+//                System.out.println("startTime = "+startTime);
+//                System.out.println("endTime = "+endTime);
+//                System.out.println("nowTime = "+nowTime);
+//                System.out.println("timeEffective = "+timeEffective);
 
                 //这个人的最后一条下发的命令信息
                 List<DoorCmd> doorCmdList = doorCmdMapper.selectDoorCmdLatestByEmployeeId(employeeId);
@@ -693,9 +693,9 @@ public class EmployeeServiceImpl implements IEmployeeService {
                         userInformation.put("userNFC", userNFC);
                         userInformation.put("bluetoothId", blueboothId);
 
-                        System.out.println("userFace-------------: "+userFace);
-                        System.out.println("userFace+++++++++++++: "+userInformation.get("userFace"));
-                        System.out.println("userNfc==============: "+userNFC);
+//                        System.out.println("userFace-------------: "+userFace);
+//                        System.out.println("userFace+++++++++++++: "+userInformation.get("userFace"));
+//                        System.out.println("userNfc==============: "+userNFC);
 
                         //下发人员基本信息
                         //构造命令格式
@@ -955,9 +955,6 @@ public class EmployeeServiceImpl implements IEmployeeService {
                     List<Map<String, Object>> oneWeekTimeList = new ArrayList<Map<String, Object>>();
                     oneWeekTimeList = (List<Map<String, Object>>) employeePermissionMap.get("oneWeekTimeList");
 
-                    //获取统一的开门方式
-                    String rangeDoorOpenType = (String) employeePermissionMap.get("rangeDoorOpenType");
-
                     if (doorEmployeeExist != null){
 
                         //删除上一次下发的这个门的人员开门时间区间信息
@@ -975,8 +972,8 @@ public class EmployeeServiceImpl implements IEmployeeService {
                         String startTime = (String) timeRangeMap.get("startTime");
                         String endTime = (String) timeRangeMap.get("endTime");
                         String isDitto = (String) timeRangeMap.get("isDitto");
+                        String rangeDoorOpenType = (String) timeRangeMap.get("rangeDoorOpenType");
 
-                        //添加每个时间区间的开门类型
                         timeRangeMap.put("doorOpenType", rangeDoorOpenType);
 
                         //关联人员门禁权限之开门时间区间和开门方式
@@ -1057,7 +1054,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
                         Map userInformationAll = cmdUtil.handOutCmd(deviceId, "C", "UPDATE_USER_INFO", "2001", operatorEmployeeId,
                                 "userInfo", userInformation, "1", "", "", employeeId, "", sendTime);
 
-                        System.out.println("基本信息："+JSON.toJSONString(userInformationAll));
+//                        System.out.println("基本信息："+JSON.toJSONString(userInformationAll));
 
                         /**
                          * 人员开门权限立即下发
@@ -1065,7 +1062,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
                         Map userPermissionAll = cmdUtil.handOutCmd(deviceId, "C", "UPDATE_USER_ACCESS_CONTROL", "3001", operatorEmployeeId,
                                 "userPermission", userPermission, "1", "", "", employeeId, "", sendTime);
 
-                        System.out.println("开门权限信息："+JSON.toJSONString(userPermissionAll));
+//                        System.out.println("开门权限信息："+JSON.toJSONString(userPermissionAll));
                     }
                 }
             }

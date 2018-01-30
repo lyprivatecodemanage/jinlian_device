@@ -121,7 +121,7 @@ public class OSSController {
 	}
 
 	/**
-	 * 设备上传应用升级包、警报图片及其它未知文件专用接口
+	 * 设备上传警报图片及其它未知文件专用接口
 	 * @param file
 	 * @param fileType
 	 * @param appVersion

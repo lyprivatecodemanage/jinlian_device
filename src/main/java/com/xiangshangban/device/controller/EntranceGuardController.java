@@ -171,7 +171,7 @@ public class EntranceGuardController {
                     device.setIsUnbind("0");
                     deviceMapper.updateByPrimaryKeySelective(device);
 
-                    System.out.println("设备置0");
+//                    System.out.println("设备置0");
 
                     //(设备和门解绑成功)删除本地数据库中门和设备的关系
                     boolean delDoorResult = iEntranceGuardService.delDoorInfo(doorId.toString().trim());
@@ -273,7 +273,7 @@ public class EntranceGuardController {
                                     device.setIsUnbind("0");
                                     deviceMapper.updateByPrimaryKeySelective(device);
 
-                                    System.out.println("设备置0");
+//                                    System.out.println("设备置0");
 
                                     //设备和当前的门解绑成功（进行更换设备的操作）
                                     Door door = new Door();
@@ -284,7 +284,7 @@ public class EntranceGuardController {
                                     door.setBindDate(DateUtils.getDateTime());
                                     boolean result = iEntranceGuardService.updateDoorInfo(door);
 
-                                    System.out.println("door: "+JSON.toJSONString(door));
+//                                    System.out.println("door: "+JSON.toJSONString(door));
 
                                     resultMap = ReturnCodeUtil.addReturnCode(result);
 
@@ -391,12 +391,67 @@ public class EntranceGuardController {
 
             //查询门关联的数据
             List<Map> maps = iEntranceGuardService.authoQueryAllDoor(doorEmployeeMap);
+
             /**
              * 格式化数据的样式
              * {"一号门":{"relateNFC":1,"relateFace":1,"relatePhone":1,door_id=1},"二号门":{"relateNFC":2,"relateFace":1,"relatePhone":2,door_id=2}}
              */
             List<Map> outterList = new ArrayList<Map>();
             List<Map> newInfo = new ArrayList<Map>();
+
+            System.out.println("maps = "+JSON.toJSONString(maps));
+            List<Map> mapListTemp = new ArrayList<>();
+            //把门上没有人员关联的数据加上去
+            for (Map map : maps) {
+                System.out.println("door_id_temp = "+map.get("door_id_temp"));
+                if(null == map.get("door_id")){
+                    System.out.println("door_id = "+map.get("door_id_temp"));
+                    System.out.println("map = "+JSON.toJSONString(map));
+                    Door doorTemp = doorMapper.selectByPrimaryKey((String) map.get("door_id_temp"));
+                    Device deviceTemp = deviceMapper.selectByPrimaryKey(doorTemp.getDeviceId());
+                    if (null == deviceTemp){
+                        Map mapTemp = new HashedMap();
+                        mapTemp.put("doorId", doorTemp.getDoorId());
+                        mapTemp.put("deviceId", "");
+                        mapTemp.put("deviceStatus", "");
+                        mapTemp.put("deviceName", "");
+                        mapTemp.put("relatePhone", "0");
+                        mapTemp.put("relateFace", "0");
+                        mapTemp.put("relateNFC", "0");
+
+                        Map outterMap = new HashedMap();
+                        outterMap.put("doorName", doorTemp.getDoorName());
+                        outterMap.put("relateInfo", mapTemp);
+                        outterMap.put("sendTime", "");
+                        outterList.add(outterMap);
+
+                        mapListTemp.add(map);
+
+                        continue;
+                    }
+                    Map mapTemp = new HashedMap();
+                    mapTemp.put("doorId", doorTemp.getDoorId());
+                    mapTemp.put("deviceId", doorTemp.getDeviceId());
+                    mapTemp.put("deviceStatus", deviceTemp.getIsUnbind());
+                    mapTemp.put("deviceName", deviceTemp.getDeviceName());
+                    mapTemp.put("relatePhone", "0");
+                    mapTemp.put("relateFace", "0");
+                    mapTemp.put("relateNFC", "0");
+
+                    Map outterMap = new HashedMap();
+                    outterMap.put("doorName", doorTemp.getDoorName());
+                    outterMap.put("relateInfo", mapTemp);
+                    outterMap.put("sendTime", "");
+                    outterList.add(outterMap);
+
+                    mapListTemp.add(map);
+                }
+            }
+            for (Map map : mapListTemp) {
+                maps.remove(map);
+            }
+            System.out.println("maps = "+JSON.toJSONString(maps));
+            System.out.println("outterMap = "+JSON.toJSONString(outterList));
 
             if(maps!=null && maps.size()>0){
                 Map dataItem;
@@ -525,6 +580,7 @@ public class EntranceGuardController {
 
                     outterList.add(outterMap);
                 }
+
                 //进行分页操作
                 if(outterList!=null&&outterList.size()>0){
                     //进行分页操作
@@ -762,7 +818,7 @@ public class EntranceGuardController {
                       }
                   });
               }
-              System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++"+JSON.toJSONString(permissionEmps));
+//              System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++"+JSON.toJSONString(permissionEmps));
               result = PageUtils.doSplitPage(null, permissionEmps, page, rows, pageObj, 2);
               if (doorId != null) {
                   //根据门的id查询门的名称

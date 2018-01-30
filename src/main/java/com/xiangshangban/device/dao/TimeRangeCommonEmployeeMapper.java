@@ -40,4 +40,11 @@ public interface TimeRangeCommonEmployeeMapper {
     List<TimeRangeCommonEmployee> temp();
 
     int updateByRangeFlagIdSelective(TimeRangeCommonEmployee timeRangeCommonEmployee);
+
+    int deleteByEmployeeIdAndDeviceId(@Param("employeeId") String employeeId,
+                                      @Param("deviceId") String deviceId);
+
+    List<TimeRangeCommonEmployee> temp1(String deviceId);
+
+    int deleteByRangeFlagId(String rangeFlagId);
 }

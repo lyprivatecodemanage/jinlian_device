@@ -25,8 +25,8 @@
                 targetProject="D:\设备项目备份文件\解绑+真实的代码\device\src\main\java"
                 type="XMLMAPPER" />
         <!-- 要生成哪些表,生成的接口中包含哪些方法，设置为false表示不生成-->
-        <table tableName="device_online"
-               domainObjectName="DeviceOnline"
+        <table tableName="device_heartbeat_simple"
+               domainObjectName="DeviceHeartbeatSimple"
                enableCountByExample="false"
                enableUpdateByExample="false"
                enableDeleteByExample="false"

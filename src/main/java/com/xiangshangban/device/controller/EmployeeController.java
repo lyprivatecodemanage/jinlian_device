@@ -120,7 +120,6 @@ public class EmployeeController {
          "doorName": "小鲤鱼跃龙门",
          "doorOpenStartTime": "2017-10-24",
          "doorOpenEndTime": "2017-12-29",
-         "rangeDoorOpenType": "045",
          "employeeList": [
          {
          "employeeId": "9C305EC5587745FF9F0D8198512264D6",
@@ -133,49 +132,56 @@ public class EmployeeController {
          "weekType": "1",
          "startTime": "00:00",
          "endTime": "23:59",
-         "isDitto": "0"
+         "isDitto": "0",
+         "rangeDoorOpenType": "045"
          },
          {
          "isAllDay": "1",
          "weekType": "2",
          "startTime": "00:00",
          "endTime": "23:59",
-         "isDitto": "1"
+         "isDitto": "1",
+         "rangeDoorOpenType": "045"
          },
          {
          "isAllDay": "1",
          "weekType": "3",
          "startTime": "00:00",
          "endTime": "23:59",
-         "isDitto": "1"
+         "isDitto": "1",
+         "rangeDoorOpenType": "045"
          },
          {
          "isAllDay": "1",
          "weekType": "4",
          "startTime": "00:00",
          "endTime": "23:59",
-         "isDitto": "1"
+         "isDitto": "1",
+         "rangeDoorOpenType": "045"
          },
          {
          "isAllDay": "1",
          "weekType": "5",
          "startTime": "00:00",
          "endTime": "23:59",
-         "isDitto": "1"
+         "isDitto": "1",
+         "rangeDoorOpenType": "045"
          },
          {
          "isAllDay": "1",
          "weekType": "6",
          "startTime": "00:00",
          "endTime": "23:59",
-         "isDitto": "1"
+         "isDitto": "1",
+         "rangeDoorOpenType": "045"
          },
          {
          "isAllDay": "1",
          "weekType": "7",
          "startTime": "00:00",
          "endTime": "23:59",
-         "isDitto": "1"
+         "isDitto": "1",
+         "rangeDoorOpenType": "045"
          }
          ]
          }
@@ -912,6 +918,27 @@ public class EmployeeController {
 ////            sum ++;
 //        }
 
+//        List<Device> deviceList = deviceMapper.selectAllDeviceInfoByNone();
+//        for (Device device : deviceList) {
+//            List<DoorEmployeePermission> doorEmployeePermissionList = doorEmployeePermissionMapper.temp1(device.getDeviceId());
+//            for (DoorEmployeePermission doorEmployeePermission : doorEmployeePermissionList) {
+////                System.out.println("无效的rangeFlagId = " + doorEmployeePermission.getRangeFlagId());
+//                System.out.println(JSON.toJSONString(doorEmployeePermission));
+//
+//                doorEmployeePermissionMapper.deleteByRangeFlagId(doorEmployeePermission.getRangeFlagId());
+//            }
+//        }
+
+        List<Device> deviceList = deviceMapper.selectAllDeviceInfoByNone();
+        for (Device device : deviceList) {
+            List<TimeRangeCommonEmployee> timeRangeCommonEmployeeList = timeRangeCommonEmployeeMapper.temp1(device.getDeviceId());
+            for (TimeRangeCommonEmployee timeRangeCommonEmployee : timeRangeCommonEmployeeList) {
+//                System.out.println("无效的rangeFlagId = " + timeRangeCommonEmployee.getRangeFlagId());
+                System.out.println(JSON.toJSONString(timeRangeCommonEmployee));
+
+                timeRangeCommonEmployeeMapper.deleteByRangeFlagId(timeRangeCommonEmployee.getRangeFlagId());
+            }
+        }
 
     }
 }

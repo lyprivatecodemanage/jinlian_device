@@ -39,10 +39,11 @@ public class DeviceOnlineStatusTimer {
 
     //每两分钟检查一次
     public final static String DEVICE_ONLINE_CHECK_TIME = "0 0/2 * * * ?";
+    public final static String DEVICE_ONLINE_CHECK_TIME_INTERVAL = "0 0/1 * * * ?";
 //    public final static String DEVICE_ONLINE_CHECK_TIME = "5 * * * * ?";
 
     @Scheduled(cron = DEVICE_ONLINE_CHECK_TIME)
-    public void check() {
+    public void DeviceHeartbeartStatusCheck() {
 
 //        System.out.println("hello!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 //        System.out.println("****************************开始检测所有设备的在线状态****************************");
@@ -52,10 +53,18 @@ public class DeviceOnlineStatusTimer {
         for (Device device : deviceList) {
             //检测心跳是否在线
             deviceStatusCheckUtil.deviceStatusChecking(device.getDeviceId());
+        }
+//        System.out.println("****************************设备在线状态检测结束****************************");
+    }
+
+    @Scheduled(cron = DEVICE_ONLINE_CHECK_TIME_INTERVAL)
+    public void DeviceHeartbeartTimeIntervalCheck(){
+        //检查所有设备在线时间区间
+        List<Device> deviceList = deviceMapper.selectAllDeviceInfoByNone();
+        for (Device device : deviceList) {
             //设备心跳在线状态检测任务（输出到独立的心跳时间区间表，以便前端渲染在线状态波形图）
             deviceStatusCheckUtil.deviceOnlineChecking(device.getDeviceId());
         }
-//        System.out.println("****************************设备在线状态检测结束****************************");
     }
 
 }
