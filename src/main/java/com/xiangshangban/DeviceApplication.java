@@ -13,7 +13,6 @@ import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
@@ -26,7 +25,7 @@ import java.util.Properties;
  * 应用程序入口(开启事务)
  */
 @SpringBootApplication
-@EnableScheduling
+//@EnableScheduling
 @EnableTransactionManagement
 @MapperScan("com.xiangshangban.device.dao")
 @Configuration

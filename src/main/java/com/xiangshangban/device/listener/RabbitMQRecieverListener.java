@@ -1,13 +1,8 @@
 package com.xiangshangban.device.listener;
 
-import com.xiangshangban.device.common.rmq.RabbitMQReciever;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
-
-import java.io.IOException;
-import java.util.concurrent.TimeoutException;
 
 /**
  * Created by liuguanglong on 2017/10/27.
@@ -17,21 +12,21 @@ import java.util.concurrent.TimeoutException;
 @Component
 public class RabbitMQRecieverListener implements ApplicationListener<ApplicationReadyEvent>{
 
-    @Autowired
-    private RabbitMQReciever rabbitMQReciever;
+//    @Autowired
+//    private RabbitMQReciever rabbitMQReciever;
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent applicationReadyEvent) {
-      try {
-
-            rabbitMQReciever.startRabbitMqReceiver();
-
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (TimeoutException e) {
-            e.printStackTrace();
-        }
+//      try {
+//
+//            rabbitMQReciever.startRabbitMqReceiver();
+//
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        } catch (TimeoutException e) {
+//            e.printStackTrace();
+//        }
     }
 }

@@ -34,4 +34,6 @@ public interface DeviceHeartbeatMapper {
 
     //查询最新的一条心跳信息的时间根据设备id
     List<Map<String, String>> selectLatestTimeByDeviceId(String deviceId);
+
+    Map<String, String> temp(String deviceId);
 }

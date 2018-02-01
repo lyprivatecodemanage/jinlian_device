@@ -382,4 +382,24 @@
 		device_heartbeat.device_id = #{deviceId,jdbcType=VARCHAR}
     )
   </select>
+
+  <select id="temp" resultType="java.util.Map" parameterType="java.lang.String" >
+    SELECT
+	d.company_name,
+	d.device_name,
+	dh.*
+    FROM
+	device_heartbeat dh
+    LEFT JOIN device_ d ON (d.device_id = dh.device_id)
+    WHERE
+	dh.device_id = #{deviceId,jdbcType=VARCHAR}
+    AND dh."time" = (
+	SELECT
+		MAX ("time")
+	FROM
+		device_heartbeat
+	WHERE
+		device_heartbeat.device_id = #{deviceId,jdbcType=VARCHAR}
+    )
+  </select>
 </mapper>

@@ -83,6 +83,9 @@ public class EmployeeController {
     @Autowired
     private DoorRecordMapper doorRecordMapper;
 
+    @Autowired
+    private DeviceHeartbeatMapper deviceHeartbeatMapper;
+
     /**
      * 人员模块人员信息同步（之所以是这个名字，是因为之前打算用协议包成命令记录下来同步的操作日志）
      * @param userInformation
@@ -929,15 +932,169 @@ public class EmployeeController {
 //            }
 //        }
 
+//        List<Device> deviceList = deviceMapper.selectAllDeviceInfoByNone();
+//        for (Device device : deviceList) {
+//            List<TimeRangeCommonEmployee> timeRangeCommonEmployeeList = timeRangeCommonEmployeeMapper.temp1(device.getDeviceId());
+//            for (TimeRangeCommonEmployee timeRangeCommonEmployee : timeRangeCommonEmployeeList) {
+////                System.out.println("无效的rangeFlagId = " + timeRangeCommonEmployee.getRangeFlagId());
+//                System.out.println(JSON.toJSONString(timeRangeCommonEmployee));
+//
+//                timeRangeCommonEmployeeMapper.deleteByRangeFlagId(timeRangeCommonEmployee.getRangeFlagId());
+//            }
+//        }
+
+//        //所有设备的apk版本号信息收集
+//        System.out.println("所有设备的最新版本号信息如下：");
+//        List<Device> deviceList = deviceMapper.selectAllDeviceInfoByNone();
+//        for (Device device : deviceList) {
+//            String deviceId = device.getDeviceId();
+//
+//            Map<String, String> heartbeatMap = deviceHeartbeatMapper.temp(deviceId);
+//
+//            if (null != heartbeatMap && heartbeatMap.size()>0){
+//                String companyName = "";
+//                if (null != heartbeatMap.get("company_name")){
+//                    companyName = heartbeatMap.get("company_name");
+//                }
+//                String deviceName = heartbeatMap.get("device_name");
+//                String CPUserialport = "";
+//                String CPUheart = "";
+//                String CPUsetting = "";
+//                String CPUmqdownload = "";
+//                String CPUmqupload = "";
+//                String CPUdevice = "";
+//                String CPUupdateApp = "";
+//
+//                String versionJson = heartbeatMap.get("app_used");
+//                List versionList = (List) JSON.parseArray(versionJson);
+//                for (Map<String, String> version : (List<Map<String, String>>) versionList) {
+//                    String appName = version.get("appName");
+//                    if ("CPUserialport".equals(appName)){
+//                        CPUserialport = version.get("version");
+//                    }else if ("CPUheart".equals(appName)){
+//                        CPUheart = version.get("version");
+//                    }
+//                    else if ("CPUsetting".equals(appName)){
+//                        CPUsetting = version.get("version");
+//                    }
+//                    else if ("CPUmqdownload".equals(appName)){
+//                        CPUmqdownload = version.get("version");
+//                    }
+//                    else if ("CPUmqupload".equals(appName)){
+//                        CPUmqupload = version.get("version");
+//                    }
+//                    else if ("CPUdevice".equals(appName)){
+//                        CPUdevice = version.get("version");
+//                    }
+//                    else if ("CPUupdateApp".equals(appName)){
+//                        CPUupdateApp = version.get("version");
+//                    }
+//                }
+//
+//                System.out.println("公司名称："+companyName
+//                        +"                      设备编码："+deviceId
+//                        +"                      设备名称："+deviceName
+//                        +"          CQDEVICEset："+CPUsetting
+//                        +"          DEVICE："+CPUdevice
+//                        +"          FunctionsHeartbeat："+CPUheart
+//                        +"          FunctionsMQDownload："+CPUmqdownload
+//                        +"          FunctionsMQUpload："+CPUmqupload
+//                        +"          FunctionsSerialport："+CPUserialport
+//                        +"          update："+CPUupdateApp
+//                );
+//            }
+//        }
+
+        //apk升级包是否升级成功
+        System.out.println("请稍等......");
+        Set<String> updateSuccess = new TreeSet<>();
+        Set<String> updateFault = new TreeSet<>();
         List<Device> deviceList = deviceMapper.selectAllDeviceInfoByNone();
         for (Device device : deviceList) {
-            List<TimeRangeCommonEmployee> timeRangeCommonEmployeeList = timeRangeCommonEmployeeMapper.temp1(device.getDeviceId());
-            for (TimeRangeCommonEmployee timeRangeCommonEmployee : timeRangeCommonEmployeeList) {
-//                System.out.println("无效的rangeFlagId = " + timeRangeCommonEmployee.getRangeFlagId());
-                System.out.println(JSON.toJSONString(timeRangeCommonEmployee));
+            String deviceId = device.getDeviceId();
 
-                timeRangeCommonEmployeeMapper.deleteByRangeFlagId(timeRangeCommonEmployee.getRangeFlagId());
+            Map<String, String> heartbeatMap = deviceHeartbeatMapper.temp(deviceId);
+
+            if (null != heartbeatMap && heartbeatMap.size()>0){
+                String companyName = "";
+                if (null != heartbeatMap.get("company_name")){
+                    companyName = heartbeatMap.get("company_name");
+                }
+                String deviceName = heartbeatMap.get("device_name");
+                String CPUserialport = "";
+                String CPUheart = "";
+                String CPUsetting = "";
+                String CPUmqdownload = "";
+                String CPUmqupload = "";
+                String CPUdevice = "";
+                String CPUupdateApp = "";
+
+                String versionJson = heartbeatMap.get("app_used");
+                List versionList = (List) JSON.parseArray(versionJson);
+                for (Map<String, String> version : (List<Map<String, String>>) versionList) {
+                    String appName = version.get("appName");
+                    if ("CPUserialport".equals(appName)){
+                        CPUserialport = version.get("version");
+                    }else if ("CPUheart".equals(appName)){
+                        CPUheart = version.get("version");
+                    }
+                    else if ("CPUsetting".equals(appName)){
+                        CPUsetting = version.get("version");
+                    }
+                    else if ("CPUmqdownload".equals(appName)){
+                        CPUmqdownload = version.get("version");
+                    }
+                    else if ("CPUmqupload".equals(appName)){
+                        CPUmqupload = version.get("version");
+                    }
+                    else if ("CPUdevice".equals(appName)){
+                        CPUdevice = version.get("version");
+                    }
+                    else if ("CPUupdateApp".equals(appName)){
+                        CPUupdateApp = version.get("version");
+                    }
+                }
+
+                int success = 0;
+                //判断是否升级成功
+                if ("2.3".equals(CPUserialport)){
+                    success++;
+                }
+                if ("2.2".equals(CPUheart)){
+                    success++;
+                }
+                if ("2.2".equals(CPUsetting)){
+                    success++;
+                }
+                if ("2.2".equals(CPUmqdownload)){
+                    success++;
+                }
+                if ("2.2".equals(CPUmqupload)){
+                    success++;
+                }
+                if ("2.3".equals(CPUdevice)){
+                    success++;
+                }
+                if ("2.2".equals(CPUupdateApp)){
+                    success++;
+                }
+
+                if (success==7){
+                    updateSuccess.add(deviceId);
+                }else {
+                    updateFault.add(deviceId);
+                }
             }
+        }
+
+        System.out.println("升级成功的设备有：");
+        for (String deviceId : updateSuccess) {
+            System.out.println(deviceId+"   "+("1".equals(deviceMapper.selectByPrimaryKey(deviceId).getIsOnline())? "" : "离线"));
+        }
+
+        System.out.println("\n未升级的设备有：");
+        for (String deviceId : updateFault) {
+            System.out.println(deviceId+"   "+("1".equals(deviceMapper.selectByPrimaryKey(deviceId).getIsOnline())? "" : "离线"));
         }
 
     }

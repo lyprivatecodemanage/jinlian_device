@@ -338,7 +338,7 @@
 
   <!--查出所有的设备的信息-->
   <select id="selectAllDeviceInfoByNone" resultMap="BaseResultMap">
-    SELECT * FROM device_
+    SELECT * FROM device_ ORDER BY device_id
   </select>
 
   <!--查询跟当前公司已经解绑的设备列表-->
