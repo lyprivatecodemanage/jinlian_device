@@ -1017,14 +1017,14 @@ public class EntranceGuardController {
                 firstCardOpenFlag = doorSetting.get(0).get("enable_first_card_keep_open").toString();
             }
 
-            //开启定时常开的时候再进行查询
-            if (!keepOpenFlag.isEmpty() && Integer.parseInt(keepOpenFlag) == 1) {
+            //不开启定时常开的时候也进行查询，页面再次启用时，好控制
+            if (!keepOpenFlag.isEmpty() ) {//&& Integer.parseInt(keepOpenFlag) == 1
                 //查询门定时常开信息(每一天分为四个时间段)
                 doorTimingKeepOpens = iEntranceGuardService.queryKeepOpenInfo(doorId != null ? doorId.toString() : null);
             }
 
-            //开启首开常开的时候再进行查询
-            if (!firstCardOpenFlag.isEmpty() && Integer.parseInt(firstCardOpenFlag) == 1) {
+            //不开启首卡常开的时候也进行查询，页面再次启用时，好控制
+            if (!firstCardOpenFlag.isEmpty()) {//&& Integer.parseInt(firstCardOpenFlag) == 1
                 /**
                  * （查询人员的时候要根据门所在公司的ID进行人员信息的查询）
                  *获取该门首卡常开信息
