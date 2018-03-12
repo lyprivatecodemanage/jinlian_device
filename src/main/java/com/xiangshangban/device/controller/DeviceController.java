@@ -1952,4 +1952,45 @@ public class DeviceController {
             return returnData;
         }
     }
+    /**
+     * 获取该公司的离线设备
+     * @param jsonString
+     * @return
+     */
+    @ResponseBody
+    @RequestMapping(value = "/getDeviceOffLine", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    public ReturnData getDeviceOffLine(HttpServletRequest request) {
+        String companyId = request.getHeader("companyId");
+        //返回给前端的数据
+        ReturnData returnData = new ReturnData();
+
+        if (StringUtils.isEmpty(companyId)) {
+            LOGGER.info("必传参数字段不存在");
+            returnData.setMessage("必传参数为空");
+            returnData.setReturnCode("3006");
+            return returnData;
+        }
+
+        try {
+            List<String> deviceNameList = deviceMapper.getDeviceNameOffLine(companyId);
+            String offLineDevice = "";
+            int index=1;
+            for(String dname:deviceNameList){
+            	offLineDevice=offLineDevice+dname;
+            	if(index<(deviceNameList.size()-1)){
+            		offLineDevice=offLineDevice+",";
+            	}
+            	index++;
+            }
+            returnData.setData(offLineDevice);
+            returnData.setMessage("请求数据成功");
+            returnData.setReturnCode("3000");
+            return returnData;
+        } catch (Exception e) {
+            e.printStackTrace();
+            returnData.setMessage("服务器错误");
+            returnData.setReturnCode("3001");
+            return returnData;
+        }
+    }
 }

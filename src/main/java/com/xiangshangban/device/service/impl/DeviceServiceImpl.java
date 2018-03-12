@@ -1276,4 +1276,9 @@ public class DeviceServiceImpl implements IDeviceService {
         System.out.println("十六进制："+String.format("%04x", CRC16.calcCrc16(deviceIdAhead.getBytes())));
     }
 
+	@Override
+	public List<String> getDeviceNameOffLine(String companyId) {
+		return deviceMapper.getDeviceNameOffLine(companyId);
+	}
+
 }

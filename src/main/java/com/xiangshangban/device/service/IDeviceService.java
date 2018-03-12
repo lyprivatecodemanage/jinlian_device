@@ -125,4 +125,10 @@ public interface IDeviceService {
      * @return
      */
     ReturnData handOutDeviceSetting(String jsonString);
+    /**
+     * 获取某个公司离线设备设备名称
+     * @param companyId 
+     * @return
+     */
+	List<String> getDeviceNameOffLine(String companyId);
 }

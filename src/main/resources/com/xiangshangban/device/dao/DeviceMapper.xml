@@ -345,5 +345,12 @@
   <select id="selectUnBindDeviceByCompanyId" parameterType="String" resultType="String">
     select device_id from device_ where is_unbind = '1' and company_id = ''
   </select>
+  <!-- 查询某个公司离线设备 -->
+  <select id="getDeviceNameOffLine" parameterType="String" resultType="String">
+  	SELECT door_name 
+  	FROM door_ a
+	LEFT JOIN device_ b ON a.device_id=b.device_id
+  	WHERE a.company_id=#{companyId} AND b.is_online='0' AND b.is_unbind='0'
+  </select>
 </mapper>
 

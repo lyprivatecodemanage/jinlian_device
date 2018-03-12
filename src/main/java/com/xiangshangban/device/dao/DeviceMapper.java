@@ -70,4 +70,10 @@ public interface DeviceMapper {
      * 更改设备的绑定状态
      */
     int updateDeviceBindState(@Param("deviceId") String deviceId);
+    /**
+     * 获取某个公司离线设备设备名称
+     * @param companyId
+     * @return
+     */
+	List<String> getDeviceNameOffLine(@Param("companyId")String companyId);
 }
