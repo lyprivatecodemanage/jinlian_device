@@ -142,11 +142,13 @@
   </delete>
   <delete id="deletePrivilege">
 		delete from time_range_privilege_employee
-	    	where door_id=#{doorId} 
-	    	and employee_id NOT IN
-		    <foreach collection="employeeIdList" index="index" item="employeeId" separator="," open="(" close=")">
-		    	#{employeeId}
-		    </foreach>
+	    	where door_id=#{doorId}
+	    	<if test="employeeIdList!=null and employeeIdList.size()>0">
+	    		and employee_id NOT IN
+			    <foreach collection="employeeIdList" index="index" item="employeeId" separator="," open="(" close=")">
+			    	#{employeeId}
+			    </foreach>
+	    	</if>
 	</delete>
   <!--根据门id查询首卡常开(开始结束星期、首卡常开人员ID以及开门时间段)-->
   <select id="selectFirstCardKeepOpenInfo" parameterType="Map" resultType="map">
