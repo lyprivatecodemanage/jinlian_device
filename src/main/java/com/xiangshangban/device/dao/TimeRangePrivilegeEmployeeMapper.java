@@ -41,4 +41,6 @@ public interface TimeRangePrivilegeEmployeeMapper {
      * 根据门来查询该门上有首卡权限的所有人
      */
     List<TimeRangePrivilegeEmployee> selectByDoorId(@Param("doorId") String doorId);
+
+	int deletePrivilege(@Param("doorId")String doorId, @Param("employeeIdList")List<String> employeeIdList);
 }

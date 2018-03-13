@@ -783,7 +783,8 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
             //更新门禁配置到门禁配置表
             doorSettingMapper.updateByPrimaryKeySelective(doorSetting);
         }
-
+        //删除不在新列表中的人员权限
+        int deleteNum = timeRangePrivilegeEmployeeMapper.deletePrivilege(doorId,employeeIdList);
         //遍历人员
         for (String employeeId : employeeIdList) {
 
