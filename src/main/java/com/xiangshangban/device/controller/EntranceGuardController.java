@@ -1507,7 +1507,7 @@ public class EntranceGuardController {
         if(companyId!=null && !companyId.isEmpty()){
             if(empId!=null && !empId.toString().isEmpty()){
                 //定义打卡方式
-                String[] punchCardType = {"", "", "", "卡", "", "指纹", "人脸", "蓝牙", "NFC"};
+                String[] punchCardType = {"", "", "", "卡", "", "指纹", "人脸", "蓝牙", "NFC", "二维码","外勤"};
                 List<Map> empPunchCardRecord = iEntranceGuardService.queryEmpPunchCardRecord(requestParam,companyId);
                 //将数据封装成对象，方便进行排序
                 List<PersonalRecordForApp> personalRecordForAppsList = new ArrayList<>();
