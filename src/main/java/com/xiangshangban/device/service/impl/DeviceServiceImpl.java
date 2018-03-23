@@ -1,17 +1,16 @@
 package com.xiangshangban.device.service.impl;
 
-import com.alibaba.fastjson.JSON;
-import com.xiangshangban.device.bean.*;
-import com.xiangshangban.device.common.command.CmdUtil;
-import com.xiangshangban.device.common.encode.CRC16;
-import com.xiangshangban.device.common.rmq.RabbitMQSender;
-import com.xiangshangban.device.common.utils.CalendarUtil;
-import com.xiangshangban.device.common.utils.DateUtils;
-import com.xiangshangban.device.common.utils.FormatUtil;
-import com.xiangshangban.device.dao.*;
-import com.xiangshangban.device.service.IDeviceService;
-import com.xiangshangban.device.service.IEntranceGuardService;
-import net.sf.json.JSONObject;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +18,56 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.*;
+import com.alibaba.fastjson.JSON;
+import com.xiangshangban.device.bean.Device;
+import com.xiangshangban.device.bean.DeviceKey;
+import com.xiangshangban.device.bean.DeviceRebootRecord;
+import com.xiangshangban.device.bean.DeviceRebootRecordVersion;
+import com.xiangshangban.device.bean.DeviceRunningLog;
+import com.xiangshangban.device.bean.DeviceSetting;
+import com.xiangshangban.device.bean.DeviceSettingUpdate;
+import com.xiangshangban.device.bean.DeviceUpdatePackSys;
+import com.xiangshangban.device.bean.Door;
+import com.xiangshangban.device.bean.DoorCalendar;
+import com.xiangshangban.device.bean.DoorCmd;
+import com.xiangshangban.device.bean.DoorEmployee;
+import com.xiangshangban.device.bean.DoorEmployeePermission;
+import com.xiangshangban.device.bean.DoorSetting;
+import com.xiangshangban.device.bean.Employee;
+import com.xiangshangban.device.bean.ReturnData;
+import com.xiangshangban.device.bean.TimeRangeCommonEmployee;
+import com.xiangshangban.device.bean.TimeRangeLcdBrightness;
+import com.xiangshangban.device.bean.TimeRangeLcdOff;
+import com.xiangshangban.device.bean.TimeRangePrivilegeEmployee;
+import com.xiangshangban.device.common.command.CmdUtil;
+import com.xiangshangban.device.common.encode.CRC16;
+import com.xiangshangban.device.common.rmq.RabbitMQSender;
+import com.xiangshangban.device.common.utils.CalendarUtil;
+import com.xiangshangban.device.common.utils.DateUtils;
+import com.xiangshangban.device.common.utils.FormatUtil;
+import com.xiangshangban.device.dao.DeviceKeyMapper;
+import com.xiangshangban.device.dao.DeviceMapper;
+import com.xiangshangban.device.dao.DeviceRebootRecordMapper;
+import com.xiangshangban.device.dao.DeviceRebootRecordVersionMapper;
+import com.xiangshangban.device.dao.DeviceRunningLogMapper;
+import com.xiangshangban.device.dao.DeviceSettingMapper;
+import com.xiangshangban.device.dao.DeviceSettingUpdateMapper;
+import com.xiangshangban.device.dao.DeviceUpdatePackSysMapper;
+import com.xiangshangban.device.dao.DoorCalendarMapper;
+import com.xiangshangban.device.dao.DoorEmployeeMapper;
+import com.xiangshangban.device.dao.DoorEmployeePermissionMapper;
+import com.xiangshangban.device.dao.DoorMapper;
+import com.xiangshangban.device.dao.DoorSettingMapper;
+import com.xiangshangban.device.dao.DoorTimingKeepOpenMapper;
+import com.xiangshangban.device.dao.EmployeeMapper;
+import com.xiangshangban.device.dao.TimeRangeCommonEmployeeMapper;
+import com.xiangshangban.device.dao.TimeRangeLcdBrightnessMapper;
+import com.xiangshangban.device.dao.TimeRangeLcdOffMapper;
+import com.xiangshangban.device.dao.TimeRangePrivilegeEmployeeMapper;
+import com.xiangshangban.device.service.IDeviceService;
+import com.xiangshangban.device.service.IEntranceGuardService;
+
+import net.sf.json.JSONObject;
 
 /**
  * author : Administrator
@@ -102,6 +149,8 @@ public class DeviceServiceImpl implements IDeviceService {
     @Autowired
     private CmdUtil cmdUtil;
 
+    @Autowired
+    private DeviceKeyMapper deviceKeyMapper;
     @Transactional
     @Override
     public String addDevice(String deviceId) {
@@ -1146,7 +1195,28 @@ public class DeviceServiceImpl implements IDeviceService {
             deviceSetting.setEnableTimedReboot(enableTimedReboot);
             deviceSetting.setTimedRebootPeriod(timedRebootPeriod);
             deviceSetting.setTimedRebootTime(timedRebootTime);
-
+           /* //生成rsa秘钥对,生成des秘钥
+            Map<String, String> keyMap = RSAUtils.createKeys(512);
+            String  publicKey = keyMap.get("publicKey");//公钥
+            String  privateKey = keyMap.get("privateKey");//私钥
+            String symmetricKey = DESEncode.getSecretKey();//des秘钥
+            deviceSetting.setSymmetricKey(symmetricKey);
+            deviceSetting.setPrivateKey(privateKey);
+            deviceSetting.setPublicKey(publicKey);
+            mapJson.put("symmetricKey", symmetricKey);
+            mapJson.put("privateKey", privateKey);*/
+            DeviceKey deviceKey = deviceKeyMapper.selectDeviceKey();
+            if(deviceKey==null||StringUtils.isEmpty(deviceKey.getPrivateKey())
+            		||StringUtils.isEmpty(deviceKey.getPublicKey())
+            		||StringUtils.isEmpty(deviceKey.getSymmetricKey())){
+            	returnData.setMessage("密钥缺失");
+                returnData.setReturnCode("9999");
+                return returnData;
+            }else{
+            	mapJson.put("symmetricKey", deviceKey.getSymmetricKey());
+                mapJson.put("privateKey", deviceKey.getPrivateKey());
+            }
+            
             //遍历设备集合，批量下发设置
             for (String deviceId : deviceIdList) {
 

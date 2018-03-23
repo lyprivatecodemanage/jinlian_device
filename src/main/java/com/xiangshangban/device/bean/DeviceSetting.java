@@ -24,6 +24,12 @@ public class DeviceSetting {
     private String timedRebootPeriod;
 
     private String timedRebootTime;
+    
+  /*  private String symmetricKey;
+    
+    private String privateKey;
+    
+    private String publicKey;*/
 
     public String getDeviceId() {
         return deviceId;
@@ -120,4 +126,29 @@ public class DeviceSetting {
     public void setTimedRebootTime(String timedRebootTime) {
         this.timedRebootTime = timedRebootTime;
     }
+
+	/*public String getSymmetricKey() {
+		return symmetricKey;
+	}
+
+	public void setSymmetricKey(String symmetricKey) {
+		this.symmetricKey = symmetricKey;
+	}
+
+	public String getPrivateKey() {
+		return privateKey;
+	}
+
+	public void setPrivateKey(String privateKey) {
+		this.privateKey = privateKey;
+	}
+
+	public String getPublicKey() {
+		return publicKey;
+	}
+
+	public void setPublicKey(String publicKey) {
+		this.publicKey = publicKey;
+	}
+    */
 }

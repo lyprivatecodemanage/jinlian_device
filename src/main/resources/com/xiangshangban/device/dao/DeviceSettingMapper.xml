@@ -2,45 +2,54 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.xiangshangban.device.dao.DeviceSettingMapper" >
   <resultMap id="BaseResultMap" type="com.xiangshangban.device.bean.DeviceSetting" >
-    <id column="device_id" property="deviceId" jdbcType="VARCHAR" />
-    <result column="heartbeat_period" property="heartbeatPeriod" jdbcType="VARCHAR" />
-    <result column="face_threshold" property="faceThreshold" jdbcType="VARCHAR" />
-    <result column="finger_threshold" property="fingerThreshold" jdbcType="VARCHAR" />
-    <result column="face_detec_time" property="faceDetecTime" jdbcType="VARCHAR" />
-    <result column="fan_on_temp" property="fanOnTemp" jdbcType="VARCHAR" />
-    <result column="fan_off_temp" property="fanOffTemp" jdbcType="VARCHAR" />
-    <result column="enable_self_help_bio_register" property="enableSelfHelpBioRegister" jdbcType="VARCHAR" />
-    <result column="enable_self_help_card_register" property="enableSelfHelpCardRegister" jdbcType="VARCHAR" />
-    <result column="enable_timed_reboot" property="enableTimedReboot" jdbcType="VARCHAR" />
-    <result column="timed_reboot_period" property="timedRebootPeriod" jdbcType="VARCHAR" />
-    <result column="timed_reboot_time" property="timedRebootTime" jdbcType="VARCHAR" />
+    <id column="device_id" property="deviceId" />
+    <result column="heartbeat_period" property="heartbeatPeriod" />
+    <result column="face_threshold" property="faceThreshold" />
+    <result column="finger_threshold" property="fingerThreshold" />
+    <result column="face_detec_time" property="faceDetecTime" />
+    <result column="fan_on_temp" property="fanOnTemp" />
+    <result column="fan_off_temp" property="fanOffTemp" />
+    <result column="enable_self_help_bio_register" property="enableSelfHelpBioRegister" />
+    <result column="enable_self_help_card_register" property="enableSelfHelpCardRegister" />
+    <result column="enable_timed_reboot" property="enableTimedReboot" />
+    <result column="timed_reboot_period" property="timedRebootPeriod" />
+    <result column="timed_reboot_time" property="timedRebootTime" />
+<!--     <result column="symmetric_key" property="symmetricKey" />
+    <result column="private_key" property="privateKey" />
+    <result column="public_key" property="publicKey" /> -->
   </resultMap>
   <sql id="Base_Column_List" >
     device_id, heartbeat_period, face_threshold, finger_threshold, face_detec_time, fan_on_temp, 
     fan_off_temp, enable_self_help_bio_register, enable_self_help_card_register, enable_timed_reboot, 
-    timed_reboot_period, timed_reboot_time
+    timed_reboot_period, timed_reboot_time<!-- , symmetric_key, private_key, public_key -->
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
     select 
     <include refid="Base_Column_List" />
     from device_setting
-    where device_id = #{deviceId,jdbcType=VARCHAR}
+    where device_id = #{deviceId}
   </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
     delete from device_setting
-    where device_id = #{deviceId,jdbcType=VARCHAR}
+    where device_id = #{deviceId}
   </delete>
   <insert id="insert" parameterType="com.xiangshangban.device.bean.DeviceSetting" >
-    insert into device_setting (device_id, heartbeat_period, face_threshold, 
+    insert into device_setting 
+    ( 
+      device_id, heartbeat_period, face_threshold, 
       finger_threshold, face_detec_time, fan_on_temp, 
       fan_off_temp, enable_self_help_bio_register, 
       enable_self_help_card_register, enable_timed_reboot, 
-      timed_reboot_period, timed_reboot_time)
-    values (#{deviceId,jdbcType=VARCHAR}, #{heartbeatPeriod,jdbcType=VARCHAR}, #{faceThreshold,jdbcType=VARCHAR}, 
-      #{fingerThreshold,jdbcType=VARCHAR}, #{faceDetecTime,jdbcType=VARCHAR}, #{fanOnTemp,jdbcType=VARCHAR}, 
-      #{fanOffTemp,jdbcType=VARCHAR}, #{enableSelfHelpBioRegister,jdbcType=VARCHAR}, 
-      #{enableSelfHelpCardRegister,jdbcType=VARCHAR}, #{enableTimedReboot,jdbcType=VARCHAR}, 
-      #{timedRebootPeriod,jdbcType=VARCHAR}, #{timedRebootTime,jdbcType=VARCHAR})
+      timed_reboot_period, timed_reboot_time
+    )
+    values 
+    ( 
+      #{deviceId}, #{heartbeatPeriod}, #{faceThreshold}, 
+      #{fingerThreshold}, #{faceDetecTime}, #{fanOnTemp}, 
+      #{fanOffTemp}, #{enableSelfHelpBioRegister}, 
+      #{enableSelfHelpCardRegister}, #{enableTimedReboot}, 
+      #{timedRebootPeriod}, #{timedRebootTime}
+     )
   </insert>
   <insert id="insertSelective" parameterType="com.xiangshangban.device.bean.DeviceSetting" >
     insert into device_setting
@@ -81,99 +90,126 @@
       <if test="timedRebootTime != null" >
         timed_reboot_time,
       </if>
+  <!--     <if test="symmetricKey != null" >
+        symmetric_key,
+      </if>
+      <if test="privateKey != null" >
+        private_key,
+      </if>
+      <if test="publicKey != null" >
+        public_key,
+      </if> -->
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="deviceId != null" >
-        #{deviceId,jdbcType=VARCHAR},
+        #{deviceId},
       </if>
       <if test="heartbeatPeriod != null" >
-        #{heartbeatPeriod,jdbcType=VARCHAR},
+        #{heartbeatPeriod},
       </if>
       <if test="faceThreshold != null" >
-        #{faceThreshold,jdbcType=VARCHAR},
+        #{faceThreshold},
       </if>
       <if test="fingerThreshold != null" >
-        #{fingerThreshold,jdbcType=VARCHAR},
+        #{fingerThreshold},
       </if>
       <if test="faceDetecTime != null" >
-        #{faceDetecTime,jdbcType=VARCHAR},
+        #{faceDetecTime},
       </if>
       <if test="fanOnTemp != null" >
-        #{fanOnTemp,jdbcType=VARCHAR},
+        #{fanOnTemp},
       </if>
       <if test="fanOffTemp != null" >
-        #{fanOffTemp,jdbcType=VARCHAR},
+        #{fanOffTemp},
       </if>
       <if test="enableSelfHelpBioRegister != null" >
-        #{enableSelfHelpBioRegister,jdbcType=VARCHAR},
+        #{enableSelfHelpBioRegister},
       </if>
       <if test="enableSelfHelpCardRegister != null" >
-        #{enableSelfHelpCardRegister,jdbcType=VARCHAR},
+        #{enableSelfHelpCardRegister},
       </if>
       <if test="enableTimedReboot != null" >
-        #{enableTimedReboot,jdbcType=VARCHAR},
+        #{enableTimedReboot},
       </if>
       <if test="timedRebootPeriod != null" >
-        #{timedRebootPeriod,jdbcType=VARCHAR},
+        #{timedRebootPeriod},
       </if>
       <if test="timedRebootTime != null" >
-        #{timedRebootTime,jdbcType=VARCHAR},
+        #{timedRebootTime},
       </if>
+ <!--      <if test="symmetricKey != null" >
+        #{symmetricKey},
+      </if>
+      <if test="privateKey != null" >
+        #{privateKey},
+      </if>
+      <if test="publicKey != null" >
+        #{publicKey},
+      </if> -->
     </trim>
   </insert>
   <update id="updateByPrimaryKeySelective" parameterType="com.xiangshangban.device.bean.DeviceSetting" >
     update device_setting
     <set >
       <if test="heartbeatPeriod != null" >
-        heartbeat_period = #{heartbeatPeriod,jdbcType=VARCHAR},
+        heartbeat_period = #{heartbeatPeriod},
       </if>
       <if test="faceThreshold != null" >
-        face_threshold = #{faceThreshold,jdbcType=VARCHAR},
+        face_threshold = #{faceThreshold},
       </if>
       <if test="fingerThreshold != null" >
-        finger_threshold = #{fingerThreshold,jdbcType=VARCHAR},
+        finger_threshold = #{fingerThreshold},
       </if>
       <if test="faceDetecTime != null" >
-        face_detec_time = #{faceDetecTime,jdbcType=VARCHAR},
+        face_detec_time = #{faceDetecTime},
       </if>
       <if test="fanOnTemp != null" >
-        fan_on_temp = #{fanOnTemp,jdbcType=VARCHAR},
+        fan_on_temp = #{fanOnTemp},
       </if>
       <if test="fanOffTemp != null" >
-        fan_off_temp = #{fanOffTemp,jdbcType=VARCHAR},
+        fan_off_temp = #{fanOffTemp},
       </if>
       <if test="enableSelfHelpBioRegister != null" >
-        enable_self_help_bio_register = #{enableSelfHelpBioRegister,jdbcType=VARCHAR},
+        enable_self_help_bio_register = #{enableSelfHelpBioRegister},
       </if>
       <if test="enableSelfHelpCardRegister != null" >
-        enable_self_help_card_register = #{enableSelfHelpCardRegister,jdbcType=VARCHAR},
+        enable_self_help_card_register = #{enableSelfHelpCardRegister},
       </if>
       <if test="enableTimedReboot != null" >
-        enable_timed_reboot = #{enableTimedReboot,jdbcType=VARCHAR},
+        enable_timed_reboot = #{enableTimedReboot},
       </if>
       <if test="timedRebootPeriod != null" >
-        timed_reboot_period = #{timedRebootPeriod,jdbcType=VARCHAR},
+        timed_reboot_period = #{timedRebootPeriod},
       </if>
       <if test="timedRebootTime != null" >
-        timed_reboot_time = #{timedRebootTime,jdbcType=VARCHAR},
+        timed_reboot_time = #{timedRebootTime},
       </if>
+<!--       <if test="symmetricKey != null" >
+        symmetric_key = #{symmetricKey},
+      </if>
+      <if test="privateKey != null" >
+        private_key = #{privateKey},
+      </if>
+      <if test="publicKey != null" >
+        public_key = #{publicKey},
+      </if> -->
     </set>
-    where device_id = #{deviceId,jdbcType=VARCHAR}
+    where device_id = #{deviceId}
   </update>
   <update id="updateByPrimaryKey" parameterType="com.xiangshangban.device.bean.DeviceSetting" >
     update device_setting
-    set heartbeat_period = #{heartbeatPeriod,jdbcType=VARCHAR},
-      face_threshold = #{faceThreshold,jdbcType=VARCHAR},
-      finger_threshold = #{fingerThreshold,jdbcType=VARCHAR},
-      face_detec_time = #{faceDetecTime,jdbcType=VARCHAR},
-      fan_on_temp = #{fanOnTemp,jdbcType=VARCHAR},
-      fan_off_temp = #{fanOffTemp,jdbcType=VARCHAR},
-      enable_self_help_bio_register = #{enableSelfHelpBioRegister,jdbcType=VARCHAR},
-      enable_self_help_card_register = #{enableSelfHelpCardRegister,jdbcType=VARCHAR},
-      enable_timed_reboot = #{enableTimedReboot,jdbcType=VARCHAR},
-      timed_reboot_period = #{timedRebootPeriod,jdbcType=VARCHAR},
-      timed_reboot_time = #{timedRebootTime,jdbcType=VARCHAR}
-    where device_id = #{deviceId,jdbcType=VARCHAR}
+    set heartbeat_period = #{heartbeatPeriod},
+      face_threshold = #{faceThreshold},
+      finger_threshold = #{fingerThreshold},
+      face_detec_time = #{faceDetecTime},
+      fan_on_temp = #{fanOnTemp},
+      fan_off_temp = #{fanOffTemp},
+      enable_self_help_bio_register = #{enableSelfHelpBioRegister},
+      enable_self_help_card_register = #{enableSelfHelpCardRegister},
+      enable_timed_reboot = #{enableTimedReboot},
+      timed_reboot_period = #{timedRebootPeriod},
+      timed_reboot_time = #{timedRebootTime}
+    where device_id = #{deviceId}
   </update>
 
   <!--非自动生成-->

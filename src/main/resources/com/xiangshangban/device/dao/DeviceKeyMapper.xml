@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xiangshangban.device.dao.DeviceKeyMapper"> 
+	<resultMap type="com.xiangshangban.device.bean.DeviceKey" id="BaseResultMap">
+		<result column="symmetric_key" property="symmetricKey"/>
+		<result column="private_key" property="privateKey"/>
+		<result column="public_key" property="publicKey"/>
+	</resultMap>
+	<select id="selectDeviceKey" resultMap="BaseResultMap">
+		select symmetric_key,private_key,public_key
+		from device.device_key
+	</select>
+</mapper>

@@ -697,6 +697,7 @@ public class EntranceGuardServiceImpl implements IEntranceGuardService {
 
         //下发的门禁配置DATA数据结构
         Map<String, Object> doorSetupMap = new LinkedHashMap<String, Object>();
+        doorSetupMap.put("doorId", doorId);
         doorSetupMap.put("doorName", doorInfo.getDoorName());
         doorSetupMap.put("timeLimitDoorOpen", "");
         doorSetupMap.put("timeLimitLockOpen", "");
