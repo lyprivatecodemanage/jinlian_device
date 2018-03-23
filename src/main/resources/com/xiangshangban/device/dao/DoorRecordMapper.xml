@@ -370,31 +370,39 @@
 
     <!--APP接口:查询指定员工的打卡记录-->
     <select id="selectEmpPunchRecord" parameterType="map" resultType="map">
-        SELECT
-        X.*, D.door_name
-        FROM
-        (
-        SELECT
-        door_id,
-        COALESCE (record_type, '') AS record_type,
-        COALESCE (record_date, '') AS record_date
-        FROM
-        door_record
-        WHERE
-        employee_id = #{empId}
-        AND record_type IN ('3', '5', '6', '7', '8')
-        AND record_date LIKE #{recordDate}
-        <if test="companyId!=null and companyId!=''">
-            AND door_id in(
-            select door_id from door_ where device_id in (
-            select device_id from device_ where company_id = #{companyId}
-            )
-            )
-        </if>
-        ORDER BY
-        record_date
-        ) X
-        LEFT JOIN door_ D ON X.door_id = D.door_id
+	     SELECT  door_id, record_type, record_date, door_name
+		FROM((
+			SELECT
+	        X.door_id, X.record_type, X.record_date, D.door_name
+	        FROM
+		        (
+		        SELECT
+		        door_id,
+		        COALESCE (record_type, '') AS record_type,
+		        COALESCE (record_date, '') AS record_date
+		        FROM
+		        door_record
+		        WHERE
+		        employee_id = #{empId}
+		        AND record_type IN ('3', '5', '6', '7', '8')
+		        AND record_date LIKE #{recordDate}
+		        <if test="companyId!=null and companyId!=''">
+		            AND door_id in(
+		            select door_id from door_ where device_id in (
+		            select device_id from device_ where company_id = #{companyId}
+		            )
+		            )
+		        </if>
+		        ORDER BY record_date
+		        ) AS X
+		        LEFT JOIN door_ AS D ON X.door_id = D.door_id
+		      )
+			UNION 
+				(SELECT '' AS door_id, '10' AS record_type, Y.att_time AS record_date, Y.place AS door_name
+				FROM att_simple.fill_card_record AS Y
+				WHERE Y.employee_id = #{empId} AND Y.company_id = #{companyId} AND Y.att_time LIKE #{recordDate}
+			)
+		)AS R
     </select>
 
     <!--查询指定公司员工的签到签退情况-->
